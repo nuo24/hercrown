@@ -6,3 +6,8 @@ DerivedData
 xcuserdata
 .DS_Store
 *.log
+
+# Apple keys and other private key files: never commit
+*.p8
+*.p12
+*.pem
