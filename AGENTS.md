@@ -16,7 +16,7 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 - Auth: Better Auth (`apps/api/src/auth.ts`): anonymous first, Sign in with Apple, bearer tokens for iOS
 - Scripture: KJV, BSB, WEB stored in D1 and bundled offline (`apps/api/seeds/`); other translations online via API.Bible (`apps/api/src/apibible.ts`)
 - Payments: Superwall (iOS); `entitlements` table is the source of truth, written only by verified webhooks
-- Analytics and errors: Tinybird via `POST /events` (not built yet)
+- Analytics and errors: Tinybird via `POST /events` → Queue (`apps/api/src/events.ts`, `tinybird/`, [docs/analytics.md](docs/analytics.md)); purchases counted only from verified webhooks
 - AI study tools (approved, not built): DeepSeek via OpenRouter behind AI Gateway, grounded in cited sources ([decision 0006](docs/decisions/0006-ai-study-tools.md))
 - iOS: SwiftUI (`starter-ios/` is an incomplete baseline; target `apps/ios`)
 

@@ -1,0 +1,27 @@
+DESCRIPTION >
+    Daily billing from verified store webhooks: trials, new and converted subscriptions, refunds, and USD
+    price / proceeds (refunds are negative, so the sums are net). Duplicate deliveries are merged (FINAL).
+
+NODE revenue
+SQL >
+    %
+    SELECT
+        toDate(timestamp) AS day,
+        JSONExtractString(props, 'product_id') AS product_id,
+        countIf(event = 'trial_started') AS trials,
+        countIf(event = 'subscription_started') AS new_paid,
+        countIf(event = 'trial_converted') AS trial_conversions,
+        countIf(event = 'subscription_renewed') AS renewals,
+        countIf(event = 'refunded') AS refunds,
+        round(sum(JSONExtractFloat(props, 'price')), 2) AS price_usd,
+        round(sum(JSONExtractFloat(props, 'proceeds')), 2) AS proceeds_usd
+    FROM events FINAL
+    WHERE event IN ('trial_started', 'subscription_started', 'trial_converted', 'subscription_renewed', 'refunded')
+      AND environment = {{ String(environment, 'production') }}
+      {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
+      AND timestamp >= {{ DateTime(start, '2026-01-01 00:00:00') }}
+      AND timestamp < {{ DateTime(end, '2100-01-01 00:00:00') }}
+    GROUP BY day, product_id
+    ORDER BY day DESC, product_id
+
+TYPE endpoint

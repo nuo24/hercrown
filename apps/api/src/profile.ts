@@ -1,5 +1,6 @@
 // Profile, avatar, preferences and onboarding completion.
 import { entitlementFor } from "./billing";
+import type { Tracker } from "./events";
 import { badRequest, HttpError, oneOf, optionalText, readJson } from "./http";
 import { APPEARANCES, FAMILIARITY, INTENTIONS, ONBOARDING_VERSION, ROUTINES, TOPICS } from "./options";
 
@@ -263,7 +264,7 @@ async function writePreferences(env: Env, userId: string, p: PreferencesRow) {
 // ── Onboarding ──────────────────────────────────────────────────────────────
 
 /** Marks onboarding complete. Idempotent: the first completion time is kept. There is no "uncomplete". */
-export async function completeOnboarding(env: Env, user: SessionUser) {
+export async function completeOnboarding(env: Env, user: SessionUser, tracker?: Tracker) {
   const t = Date.now();
   await env.DB.prepare(
     `INSERT INTO preferences (user_id, onboarding_version, onboarding_completed_at, updated_at) VALUES (?1, ?2, ?3, ?3)
@@ -272,5 +273,10 @@ export async function completeOnboarding(env: Env, user: SessionUser) {
        onboarding_completed_at = COALESCE(preferences.onboarding_completed_at, ?3),
        updated_at = ?3`,
   ).bind(user.id, ONBOARDING_VERSION, t).run();
-  return Response.json(onboardingJson(await preferencesRow(env, user.id)));
+  const row = await preferencesRow(env, user.id);
+  if (row.onboarding_completed_at === t) {
+    // First completion only; the id also makes it count once per person across a guest → account link.
+    tracker?.track("onboarding_completed", { version: ONBOARDING_VERSION }, { id: (person) => `onboarding_completed:${person}`, at: t });
+  }
+  return Response.json(onboardingJson(row));
 }

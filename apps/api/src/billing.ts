@@ -1,5 +1,6 @@
 // Membership: Superwall webhooks → `entitlements`, the only source of truth for Premium (ai-app-playbook chapter 07).
 // Reading is free; Premium unlocks plans and study tools (docs/decisions/0003).
+import { type Props, type ServerEvent, Tracker } from "./events";
 import { HttpError } from "./http";
 
 export const ENTITLEMENT = "plus";
@@ -49,6 +50,11 @@ export interface StoreEvent {
   originalTransactionId: string | null;
   expirationAt: number | null;
   willRenew: boolean | null; // V2 subscription snapshot, when present
+  storeEventId: string | null; // the same store event has the same id in V1 and V2 ("<uuid>:renewal")
+  transactionId: string | null;
+  isTrialConversion: boolean;
+  price: number | null; // USD, negative for refunds
+  proceeds: number | null; // USD after store commission and taxes
 }
 
 type Json = Record<string, any>;
@@ -78,6 +84,11 @@ export function normalizeEvent(payload: Json): StoreEvent | null {
       originalTransactionId: str(v2.original_transaction_id),
       expirationAt: num(v2.expiration_at) ?? num(sub.expires_at),
       willRenew: typeof sub.will_renew === "boolean" ? sub.will_renew : null,
+      storeEventId: str(v2.id),
+      transactionId: str(v2.transaction_id),
+      isTrialConversion: v2.is_trial_conversion === true,
+      price: num(v2.price),
+      proceeds: num(v2.proceeds),
     };
   }
   const d = payload.data;
@@ -94,6 +105,11 @@ export function normalizeEvent(payload: Json): StoreEvent | null {
     originalTransactionId: str(d.originalTransactionId),
     expirationAt: num(d.expirationAt),
     willRenew: null,
+    storeEventId: str(d.id),
+    transactionId: str(d.transactionId),
+    isTrialConversion: d.isTrialConversion === true,
+    price: num(d.price),
+    proceeds: num(d.proceeds),
   };
 }
 
@@ -141,7 +157,40 @@ async function resolveUser(env: Env, e: StoreEvent): Promise<string | null> {
   return null;
 }
 
-export async function handleSuperwallWebhook(request: Request, env: Env): Promise<Response> {
+/**
+ * The analytics event for a verified store event. Milestones get ids that make them count once per subscription
+ * (trial_started:<original transaction>), whichever webhook version or retry delivered them. Only product and money
+ * fields: nothing from the person's profile or reading.
+ */
+export function billingEvent(e: StoreEvent, deliveryId: string): { name: ServerEvent; id: string; props: Props } | null {
+  const props: Props = {
+    product_id: e.productId, period_type: e.periodType, store: e.store, price: e.price, proceeds: e.proceeds,
+  };
+  const once = (name: ServerEvent, key: string | null) => ({ name, id: `${name}:${key ?? e.storeEventId ?? deliveryId}`, props });
+  const each = (name: ServerEvent) => ({ name, id: `${name}:${e.storeEventId ?? deliveryId}`, props });
+  if (e.isRefund) return once("refunded", e.transactionId);
+  switch (e.type) {
+    case "initial_purchase":
+      return e.periodType === "TRIAL"
+        ? once("trial_started", e.originalTransactionId)
+        : once("subscription_started", e.originalTransactionId);
+    case "renewal":
+      return e.isTrialConversion ? once("trial_converted", e.originalTransactionId) : once("subscription_renewed", e.transactionId);
+    case "cancellation":
+      return each("subscription_cancelled");
+    case "uncancellation":
+      return each("subscription_uncancelled");
+    case "billing_issue":
+      return each("billing_issue");
+    case "expiration":
+      return each("subscription_expired");
+    case "product_change":
+      return each("subscription_product_changed");
+  }
+  return null;
+}
+
+export async function handleSuperwallWebhook(request: Request, env: Env, ctx?: Pick<ExecutionContext, "waitUntil">): Promise<Response> {
   const body = await request.text();
   if (!(await verifyWebhook(env.SUPERWALL_WEBHOOK_SECRET, request.headers, body))) {
     return Response.json({ error: "invalid_signature" }, { status: 401 });
@@ -201,6 +250,13 @@ export async function handleSuperwallWebhook(request: Request, env: Env): Promis
   } catch (err) {
     if (String(err).includes("UNIQUE constraint failed: webhook_events.id")) return Response.json({ ok: true, duplicate: true });
     throw err; // 500 → Superwall retries
+  }
+
+  const analytics = billingEvent(event, deliveryId);
+  if (analytics) {
+    new Tracker(env, ctx).track(analytics.name, analytics.props, {
+      id: analytics.id, at: event.occurredAt, userId, sandbox: event.environment === "SANDBOX",
+    });
   }
   return Response.json({ ok: true, applied: Boolean(change && userId), matched: Boolean(userId) });
 }

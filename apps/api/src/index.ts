@@ -1,6 +1,7 @@
 // The whole API as one fetch handler. No router framework (ai-app-playbook chapter 02).
 import { getAuth } from "./auth";
 import { entitlementFor, handleSuperwallWebhook } from "./billing";
+import { deliverEvents, type EventRow, receiveEvents, requestContext, type ServerEvent, Tracker } from "./events";
 import { errorResponse, HttpError } from "./http";
 import { completePlanStep, getPlan, listPlans, startPlan } from "./plans";
 import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, updatePreferences, updateProfile } from "./profile";
@@ -19,18 +20,32 @@ const chapterPath = new URLPattern({ pathname: "/scripture/:translation/:book/:c
 export default {
   async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
+    const tracker = new Tracker(env, ctx, requestContext(request));
     try {
-      return await route(request, env, url); // await so rejected handlers land in this catch
+      return await route(request, env, ctx, url, tracker); // await so rejected handlers land in this catch
     } catch (err) {
       if (err instanceof HttpError) return errorResponse(err);
-      // Tinybird `error` events come with the analytics step; Workers Observability logs this meanwhile.
+      // Errors go to Tinybird with every other event (no separate error tracker); Workers Observability keeps the log.
       console.error(`${request.method} ${url.pathname}`, err);
+      tracker.error(request, url, err);
       return Response.json({ error: "internal" }, { status: 500 });
     }
   },
+
+  // Analytics queue → Tinybird.
+  async queue(batch, env): Promise<void> {
+    await deliverEvents(batch as MessageBatch<EventRow>, env);
+  },
 } satisfies ExportedHandler<Env>;
 
-async function route(request: Request, env: Env, url: URL): Promise<Response> {
+/** Emits a feature event when the handler succeeded. */
+async function tracked(response: Promise<Response>, tracker: Tracker, event: ServerEvent, props = {}): Promise<Response> {
+  const res = await response;
+  if (res.ok) tracker.track(event, props);
+  return res;
+}
+
+async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL, tracker: Tracker): Promise<Response> {
   if (url.pathname.startsWith("/api/auth/")) {
     const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
     const { success } = await env.AUTH_LIMITER.limit({ key: ip });
@@ -42,10 +57,13 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     case "GET /health":
       return Response.json({ ok: true, env: env.APP_ENV });
     case "POST /webhooks/superwall":
-      return handleSuperwallWebhook(request, env); // verified by signature, not by session
+      return handleSuperwallWebhook(request, env, ctx); // verified by signature, not by session
   }
 
   const session = await getAuth().api.getSession({ headers: request.headers });
+  if (session) tracker.userId = session.user.id;
+  // Analytics also accepts events from before guest sign-in (app_opened).
+  if (request.method === "POST" && url.pathname === "/events") return receiveEvents(request, tracker);
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   const user = session.user;
 
@@ -55,13 +73,13 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     case "GET /me/entitlements":
       return Response.json(await entitlementFor(env, user.id));
     case "POST /me/restore":
-      return restorePurchases(request, env, user);
+      return restorePurchases(request, env, user, tracker);
     case "PATCH /me/profile":
       return updateProfile(request, env, user);
     case "PATCH /me/preferences":
       return updatePreferences(request, env, user);
     case "POST /me/onboarding/complete":
-      return completeOnboarding(env, user);
+      return completeOnboarding(env, user, tracker);
     case "GET /me/avatar":
       return getAvatar(env, user);
     case "PUT /me/avatar":
@@ -71,7 +89,7 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     case "GET /me/saved":
       return listSaved(env, user);
     case "POST /me/reading-events":
-      return recordReading(request, env, user);
+      return tracked(recordReading(request, env, user), tracker, "passage_read");
     case "GET /me/streak":
       return getStreak(url, env, user);
     case "GET /plans":
@@ -87,15 +105,18 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   const saved = savedPath.exec(url);
   if (saved) {
     const ref = decodeURIComponent(saved.pathname.groups.ref!);
-    if (request.method === "PUT") return savePassage(env, user, ref);
+    if (request.method === "PUT") return tracked(savePassage(env, user, ref), tracker, "passage_saved");
     if (request.method === "DELETE") return unsavePassage(env, user, ref);
   }
   const step = planStepPath.exec(url);
   if (step && request.method === "POST") {
-    return completePlanStep(env, user, step.pathname.groups.id!, Number(step.pathname.groups.position));
+    const { id, position } = step.pathname.groups;
+    return tracked(completePlanStep(env, user, id!, Number(position)), tracker, "plan_step_completed", { plan_id: id, position: Number(position) });
   }
   const start = planStartPath.exec(url);
-  if (start && request.method === "POST") return startPlan(env, user, start.pathname.groups.id!);
+  if (start && request.method === "POST") {
+    return tracked(startPlan(env, user, start.pathname.groups.id!), tracker, "plan_started", { plan_id: start.pathname.groups.id });
+  }
   const passage = request.method === "GET" && passagePath.exec(url);
   if (passage) return getPassage(env, passage.pathname.groups.translation!, decodeURIComponent(passage.pathname.groups.ref!));
   const chapter = request.method === "GET" && chapterPath.exec(url);

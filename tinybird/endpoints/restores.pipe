@@ -1,0 +1,27 @@
+DESCRIPTION >
+    Restore Purchases outcomes between `start` and `end` (server-verified with Apple). `outcome` is
+    restored, transferred, already_active, a reason (not_found, expired, billing_retry, revoked,
+    no_plus_subscription, wrong_app), or failed:<error> when Apple couldn't be reached.
+
+NODE restores
+SQL >
+    %
+    SELECT
+        multiIf(
+            event = 'restore_failed', concat('failed:', JSONExtractString(props, 'error')),
+            JSONExtractBool(props, 'already_active'), 'already_active',
+            JSONExtractBool(props, 'transferred'), 'transferred',
+            JSONExtractBool(props, 'restored'), 'restored',
+            JSONExtractString(props, 'reason')
+        ) AS outcome,
+        count() AS attempts,
+        uniqExact(person_id) AS people
+    FROM events
+    WHERE event IN ('restore_completed', 'restore_failed')
+      AND environment = {{ String(environment, 'production') }}
+      AND timestamp >= {{ DateTime(start, '2026-01-01 00:00:00') }}
+      AND timestamp < {{ DateTime(end, '2100-01-01 00:00:00') }}
+    GROUP BY outcome
+    ORDER BY attempts DESC
+
+TYPE endpoint

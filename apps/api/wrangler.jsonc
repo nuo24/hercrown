@@ -4,6 +4,7 @@
 //   npx wrangler d1 create bible-scroll-db-staging
 //   npx wrangler kv namespace create bible-scroll-kv-staging
 //   npx wrangler r2 bucket create bible-scroll-files-staging
+//   npx wrangler queues create bible-scroll-events-staging
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bible-scroll-api",
@@ -17,8 +18,11 @@
   "kv_namespaces": [{ "binding": "KV", "id": "local-dev" }],
   "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files-dev" }],
   "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } },
-                   { "name": "RESTORE_LIMITER", "namespace_id": "2001", "simple": { "limit": 10, "period": 60 } }],
-  "vars": { "APP_ENV": "dev", "BETTER_AUTH_URL": "http://localhost:8787", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true" },
+                   { "name": "RESTORE_LIMITER", "namespace_id": "2001", "simple": { "limit": 10, "period": 60 } },
+                   { "name": "EVENTS_LIMITER", "namespace_id": "3001", "simple": { "limit": 60, "period": 60 } }],
+  // Analytics: POST /events and server events → this queue → Tinybird (src/events.ts).
+  "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events-dev" }], "consumers": [{ "queue": "bible-scroll-events-dev", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
+  "vars": { "APP_ENV": "dev", "BETTER_AUTH_URL": "http://localhost:8787", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co" },
 
   "env": {
     "staging": {
@@ -27,8 +31,10 @@
       "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_STAGING_KV_ID" }],
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files-staging" }],
       "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } },
-                       { "name": "RESTORE_LIMITER", "namespace_id": "2002", "simple": { "limit": 10, "period": 60 } }],
-      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.REPLACE_WITH_SUBDOMAIN.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true" }
+                       { "name": "RESTORE_LIMITER", "namespace_id": "2002", "simple": { "limit": 10, "period": 60 } },
+                       { "name": "EVENTS_LIMITER", "namespace_id": "3002", "simple": { "limit": 60, "period": 60 } }],
+      "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events-staging" }], "consumers": [{ "queue": "bible-scroll-events-staging", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
+      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.REPLACE_WITH_SUBDOMAIN.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co" }
     },
     "production": {
       "name": "bible-scroll-api",
@@ -36,10 +42,12 @@
       "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_PRODUCTION_KV_ID" }],
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files" }],
       "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } },
-                       { "name": "RESTORE_LIMITER", "namespace_id": "2003", "simple": { "limit": 10, "period": 60 } }],
-      "vars": { "APP_ENV": "production", "BETTER_AUTH_URL": "https://REPLACE_WITH_API_DOMAIN", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true" }
+                       { "name": "RESTORE_LIMITER", "namespace_id": "2003", "simple": { "limit": 10, "period": 60 } },
+                       { "name": "EVENTS_LIMITER", "namespace_id": "3003", "simple": { "limit": 60, "period": 60 } }],
+      "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events" }], "consumers": [{ "queue": "bible-scroll-events", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
+      "vars": { "APP_ENV": "production", "BETTER_AUTH_URL": "https://REPLACE_WITH_API_DOMAIN", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co" }
     }
   }
   // Secrets (never in this file): npx wrangler secret put BETTER_AUTH_SECRET --env staging
-  //   APPLE_CLIENT_ID, APPLE_CLIENT_SECRET, APP_STORE_ISSUER_ID, APP_STORE_KEY_ID, APP_STORE_PRIVATE_KEY, API_BIBLE_KEY, SUPERWALL_WEBHOOK_SECRET, TINYBIRD_TOKEN, OPENROUTER_API_KEY
+  //   TINYBIRD_HOST is per Tinybird region (shown next to your token). APPLE_CLIENT_ID, APPLE_CLIENT_SECRET, APP_STORE_ISSUER_ID, APP_STORE_KEY_ID, APP_STORE_PRIVATE_KEY, API_BIBLE_KEY, SUPERWALL_WEBHOOK_SECRET, TINYBIRD_TOKEN, OPENROUTER_API_KEY
 }

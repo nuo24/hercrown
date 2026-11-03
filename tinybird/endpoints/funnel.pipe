@@ -1,0 +1,69 @@
+DESCRIPTION >
+    Onboarding → paywall → decline → offer → trial → paid, for the people who finished onboarding between
+    `start` and `end`. Every rate names its denominator (docs/analytics.md). Production App Store traffic only
+    unless `environment` or `include_sandbox` say otherwise.
+
+NODE people
+DESCRIPTION >
+    The cohort: each person's first onboarding completion in the window.
+SQL >
+    %
+    SELECT person_id, min(timestamp) AS onboarded_at
+    FROM events
+    WHERE event = 'onboarding_completed'
+      AND person_id IS NOT NULL
+      AND environment = {{ String(environment, 'production') }}
+      {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
+    GROUP BY person_id
+    HAVING onboarded_at >= {{ DateTime(start, '2026-01-01 00:00:00') }}
+       AND onboarded_at < {{ DateTime(end, '2100-01-01 00:00:00') }}
+
+NODE journeys
+DESCRIPTION >
+    What each person in the cohort did afterwards. Purchases come only from verified store webhooks.
+SQL >
+    %
+    SELECT
+        person_id,
+        countIf(event = 'paywall_viewed') > 0 AS has_paywall,
+        countIf(event = 'paywall_declined') > 0 AS has_declined,
+        countIf(event = 'decline_offer_viewed') > 0 AS has_offer_view,
+        countIf(event = 'decline_offer_declined') > 0 AS has_offer_declined,
+        countIf(event = 'subscription_started'
+                AND JSONExtractString(props, 'product_id') = {{ String(offer_product, 'biblescroll.plus.yearly.offer') }}) > 0 AS has_offer,
+        countIf(event = 'trial_started') > 0 AS has_trial,
+        minIf(timestamp, event = 'trial_started') AS trial_started_at,
+        countIf(event = 'trial_converted') > 0 AS has_converted,
+        countIf(event IN ('trial_converted', 'subscription_started')) > 0 AS has_paid,
+        countIf(event = 'refunded') > 0 AS has_refund
+    FROM events
+    WHERE person_id IN (SELECT person_id FROM people)
+      AND environment = {{ String(environment, 'production') }}
+      {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
+    GROUP BY person_id
+
+NODE funnel
+SQL >
+    %
+    SELECT
+        count() AS onboarded,
+        countIf(j.has_paywall) AS saw_paywall,
+        round(saw_paywall / nullIf(onboarded, 0), 4) AS paywall_view_rate,            -- ÷ onboarded
+        countIf(j.has_trial) AS trials,
+        round(trials / nullIf(saw_paywall, 0), 4) AS trial_start_rate,                -- ÷ saw paywall (playbook ~0.30, hard paywall)
+        countIf(j.has_declined) AS declined_paywall,
+        round(declined_paywall / nullIf(saw_paywall, 0), 4) AS decline_rate,          -- ÷ saw paywall
+        countIf(j.has_offer_view) AS saw_offer,
+        round(saw_offer / nullIf(declined_paywall, 0), 4) AS offer_view_rate,         -- ÷ declined paywall
+        countIf(j.has_offer) AS took_offer,
+        round(took_offer / nullIf(saw_offer, 0), 4) AS offer_take_rate,               -- ÷ saw offer
+        countIf(j.has_trial AND j.trial_started_at <= now() - toIntervalDay({{ Int32(trial_days, 7) }} + 1)) AS trials_ended,
+        countIf(j.has_converted AND j.trial_started_at <= now() - toIntervalDay({{ Int32(trial_days, 7) }} + 1)) AS trials_converted,
+        round(trials_converted / nullIf(trials_ended, 0), 4) AS trial_to_paid_rate,   -- ÷ trials that have ended (playbook ~0.30)
+        countIf(j.has_paid) AS paid,
+        round(paid / nullIf(onboarded, 0), 4) AS paid_rate,                           -- ÷ onboarded
+        countIf(j.has_refund) AS refunded
+    FROM people AS p
+    LEFT JOIN journeys AS j USING person_id
+
+TYPE endpoint

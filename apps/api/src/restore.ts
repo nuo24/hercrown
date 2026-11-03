@@ -2,6 +2,7 @@
 // (after a reinstall, on a new device, or after signing in). See docs/restore-purchases.md.
 import { APPLE_STATUS, subscriptionStatuses, type AppleSubscription } from "./appstore";
 import { ENTITLEMENT, entitlementFor, isPremium, type EntitlementRow } from "./billing";
+import type { Tracker } from "./events";
 import { badRequest, HttpError, readJson } from "./http";
 import type { SessionUser } from "./profile";
 
@@ -37,7 +38,7 @@ const rank = (s: Status) => ({ active: 4, trialing: 4, grace: 3, expired: 1, ref
  * 200 → { restored, reason?, transferred, alreadyActive?, membership }   (business outcomes, including "nothing to restore")
  * 400 bad id · 429 too many attempts · 503 App Store unreachable or restore not configured (safe to retry)
  */
-export async function restorePurchases(request: Request, env: Env, user: SessionUser) {
+export async function restorePurchases(request: Request, env: Env, user: SessionUser, tracker?: Tracker) {
   const { success } = await env.RESTORE_LIMITER.limit({ key: user.id });
   if (!success) throw new HttpError(429, "rate_limited", "Too many restore attempts. Try again in a minute.");
 
@@ -45,10 +46,17 @@ export async function restorePurchases(request: Request, env: Env, user: Session
   const transactionId = typeof body.transactionId === "string" ? body.transactionId.trim() : "";
   if (!TRANSACTION_ID.test(transactionId)) throw badRequest("transactionId must be an App Store transaction id");
 
-  const outcome = (restored: boolean, extra: { reason?: RestoreReason; transferred?: boolean; alreadyActive?: boolean } = {}) =>
-    entitlementFor(env, user.id).then((membership) => Response.json({ restored, transferred: false, ...extra, membership }));
+  const outcome = (restored: boolean, extra: { reason?: RestoreReason; transferred?: boolean; alreadyActive?: boolean } = {}) => {
+    tracker?.track("restore_completed", {
+      restored, reason: extra.reason ?? null, transferred: extra.transferred ?? false, already_active: extra.alreadyActive ?? false,
+    });
+    return entitlementFor(env, user.id).then((membership) => Response.json({ restored, transferred: false, ...extra, membership }));
+  };
 
-  const result = await subscriptionStatuses(env, transactionId);
+  const result = await subscriptionStatuses(env, transactionId).catch((err) => {
+    if (err instanceof HttpError) tracker?.track("restore_failed", { error: err.code });
+    throw err;
+  });
   if (!result) return outcome(false, { reason: "not_found" });
   if (result.bundleId !== env.APPLE_APP_BUNDLE_IDENTIFIER) {
     console.error("Restore for another app's transaction", result.bundleId);

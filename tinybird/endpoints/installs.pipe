@@ -1,0 +1,32 @@
+DESCRIPTION >
+    Top of the funnel: app installs first opened between `start` and `end`, and how many finished onboarding.
+    An install is one X-Install-Id (a reinstall is a new install). The server's onboarding_completed event
+    carries the install id of the request that completed it.
+
+NODE installs
+SQL >
+    %
+    SELECT install_id, min(timestamp) AS first_opened
+    FROM events
+    WHERE event = 'app_opened'
+      AND install_id IS NOT NULL
+      AND environment = {{ String(environment, 'production') }}
+      {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
+    GROUP BY install_id
+    HAVING first_opened >= {{ DateTime(start, '2026-01-01 00:00:00') }}
+       AND first_opened < {{ DateTime(end, '2100-01-01 00:00:00') }}
+
+NODE install_funnel
+SQL >
+    %
+    SELECT
+        count() AS installs,
+        countIf(install_id IN (
+            SELECT install_id FROM events
+            WHERE event = 'onboarding_completed' AND install_id IS NOT NULL
+              AND environment = {{ String(environment, 'production') }}
+        )) AS onboarded,
+        round(onboarded / nullIf(installs, 0), 4) AS onboarding_rate  -- ÷ installs
+    FROM installs
+
+TYPE endpoint

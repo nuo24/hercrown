@@ -21,7 +21,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Core API: profile, avatar, preferences, onboarding, saved passages, reading events + streak, plans
 - [x] Scripture: KJV, BSB, WEB offline (verified builds), chapters, passages, per-translation search, API.Bible connector
 - [x] Words of Jesus (red letters) for KJV and WEB; psalm titles kept separate from verse 1
-- [ ] Error events to Tinybird (Phase 9)
+- [x] Error events to Tinybird (Phase 9)
 - [ ] **[HUMAN]** Cloudflare account → staging D1/KV/R2 → deploy → `curl https://<staging>/health` returns 200
 
 ## Phase 4: Auth — ⚠️ built locally
@@ -52,13 +52,19 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] iOS: `Superwall.shared.identify(userId:)` with our user id right after guest sign-in; paywall placements; decline offer
 - [ ] Trial-ending reminder (push, Phase 11)
 
-## Phase 9: Analytics & errors — not started
-- [ ] `POST /events` → Queue → Tinybird; funnel: download → onboarding → paywall → trial → paid
+## Phase 9: Analytics & errors — ⚠️ built locally ([docs/analytics.md](analytics.md))
+- [x] `POST /events` → Queue → Tinybird Events API; server events for onboarding, verified billing, restore outcomes, features, errors
+- [x] Dedup ids (one trial per subscription, V1 = V2), sandbox flag, person id kept across guest → account link, no profile or reading data
+- [x] Tinybird data source + endpoints: funnel (with denominators), installs, revenue, restores, errors
+- [ ] **[HUMAN]** Tinybird workspace → `tb --cloud deploy --check` → append-only token → `wrangler secret put TINYBIRD_TOKEN`; region host in `TINYBIRD_HOST`; `wrangler queues create bible-scroll-events-staging`
+- [ ] Staging run-through: every funnel event and a thrown test error appear in Tinybird
+- [ ] Cron alert on error / webhook-failure spikes
+- [ ] iOS: headers, on-disk event queue, Superwall delegate → paywall events
 
 ## Next, in order
 1. ~~Restore Purchases~~ ✅ (local)
 2. ~~Offline BSB and WEB~~ ✅ (local; words of Jesus + psalm titles too). CPDV pending a decision ([0005](decisions/0005-offline-translations.md))
-3. Tinybird analytics (onboarding → paywall → decline → offer → trial → paid; restore outcomes)
+3. ~~Tinybird analytics~~ ✅ (local; needs a Tinybird workspace to deploy)
 4. **Trial-ending reminder** — Scroll the Bible's #2 complaint is being charged without the promised reminder. Server knows each trial's end; push + in-app notice 2 days before, visible in Settings → Subscription.
 5. **AI study tools** (Phase 5 above)
 

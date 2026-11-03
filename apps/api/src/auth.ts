@@ -3,6 +3,7 @@
 import { betterAuth } from "better-auth";
 import { anonymous, bearer } from "better-auth/plugins";
 import { env } from "cloudflare:workers";
+import { linkPerson } from "./events";
 import { deleteUserData, moveUserData } from "./users";
 
 // Created on first use, not at module load: Better Auth validates the schema when it starts and caches
@@ -49,6 +50,8 @@ const createAuth = () => betterAuth({
       // Runs when a guest signs in with Apple; Better Auth deletes the guest user afterwards.
       onLinkAccount: async ({ anonymousUser, newUser }) => {
         await moveUserData(env, anonymousUser.user.id, newUser.user.id);
+        const accountIsNew = new Date(newUser.user.createdAt) >= new Date(anonymousUser.user.createdAt);
+        await linkPerson(env, anonymousUser.user.id, newUser.user.id, accountIsNew);
       },
     }),
     // Native clients read the `set-auth-token` header and send `Authorization: Bearer <token>`.

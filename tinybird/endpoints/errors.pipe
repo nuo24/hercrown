@@ -1,0 +1,22 @@
+DESCRIPTION >
+    Errors by hour, source (api or ios), app version and route/screen, for alerts and the health dashboard.
+
+NODE errors
+SQL >
+    %
+    SELECT
+        toStartOfHour(timestamp) AS hour,
+        if(source = 'api', 'api', 'ios') AS origin,
+        app_version,
+        if(source = 'api', JSONExtractString(props, 'route'), JSONExtractString(props, 'screen')) AS location,
+        any(JSONExtractString(props, 'message')) AS example_message,
+        count() AS errors
+    FROM events
+    WHERE event = 'error'
+      AND environment = {{ String(environment, 'production') }}
+      AND timestamp >= {{ DateTime(start, '2026-01-01 00:00:00') }}
+      AND timestamp < {{ DateTime(end, '2100-01-01 00:00:00') }}
+    GROUP BY hour, origin, app_version, location
+    ORDER BY hour DESC, errors DESC
+
+TYPE endpoint

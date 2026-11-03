@@ -1,0 +1,25 @@
+DESCRIPTION >
+    Every product, billing and error event from Bible Scroll, written by the API's queue consumer
+    (apps/api/src/events.ts). Rows with the same (event, event_id) are the same fact delivered twice
+    (a webhook retry, V1 and V2 of one store event) and are merged; query with FINAL or count distinct people.
+    No names, emails, onboarding answers, notes or verse references. See docs/analytics.md.
+
+SCHEMA >
+    `event_id` String `json:$.event_id`,
+    `event` LowCardinality(String) `json:$.event`,
+    `timestamp` DateTime64(3) `json:$.timestamp`,
+    `received_at` DateTime64(3) `json:$.received_at`,
+    `environment` LowCardinality(String) `json:$.environment`,
+    `sandbox` UInt8 `json:$.sandbox`,
+    `source` LowCardinality(String) `json:$.source`,
+    `person_id` Nullable(String) `json:$.person_id`,
+    `install_id` Nullable(String) `json:$.install_id`,
+    `app_version` Nullable(String) `json:$.app_version`,
+    `platform` LowCardinality(Nullable(String)) `json:$.platform`,
+    `country` LowCardinality(Nullable(String)) `json:$.country`,
+    `props` String `json:$.props`
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(timestamp)"
+ENGINE_SORTING_KEY "event, event_id"
+ENGINE_VER "received_at"
