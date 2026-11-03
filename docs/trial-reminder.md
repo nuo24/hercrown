@@ -26,7 +26,7 @@ From the screen recording, the trial paywall reads, top to bottom:
 | When | What | Where |
 |---|---|---|
 | Trial starts | The app asks: *"Want a reminder before your trial ends?"* → iOS notification permission | App, right after purchase |
-| 2 days before the trial converts (day 5 of 7) | **Push:** "Your free trial ends in 2 days" / "Bible Scroll Plus becomes a yearly plan on Friday, Nov 7. To avoid being charged, cancel before then in Settings → Subscriptions." | Server, Cron Trigger every 15 min |
+| 2 days before the trial converts (day 5 of 7) | **Push:** "Your free trial ends in 2 days" / "Her Crown Plus becomes a yearly plan on Friday, Nov 7. To avoid being charged, cancel before then in Settings → Subscriptions." | Server, Cron Trigger every 15 min |
 | Day 5 until it ends | **In-app notice** on Home, with Cancel / Manage | App, from `subscription.trial` |
 | Always during a trial | Settings → Subscription: "Free trial · ends Fri, Nov 7 · then $29.99/year · Manage" | App |
 
@@ -53,7 +53,7 @@ Rules:
   - `environment` is `sandbox` for Xcode builds and `production` for TestFlight and the App Store.
   - `timeZone` is `TimeZone.current.identifier`.
 - `DELETE /me/devices/{token}`: when notifications are turned off, or the user signs out.
-- Tapping the push opens `biblescroll://settings/subscription`.
+- Tapping the push opens `hercrown://settings/subscription`.
 - Events:
   - From the server: `trial_reminder_sent`.
   - From the app: `push_permission {granted}`, `trial_notice_viewed`, `manage_subscription_tapped`.

@@ -20,3 +20,5 @@ OPENROUTER_API_KEY=
 APNS_KEY_ID=
 APNS_PRIVATE_KEY=
 APPLE_TEAM_ID=
+# Tinybird read-only token (hourly error alerts; optional)
+TINYBIRD_READ_TOKEN=

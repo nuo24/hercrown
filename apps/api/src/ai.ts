@@ -54,7 +54,7 @@ export async function* streamChat(
         headers: {
           authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
           "content-type": "application/json",
-          "x-title": "Bible Scroll",
+          "x-title": "Her Crown",
         },
         body: JSON.stringify({
           model: models[0], models, messages, stream: true, max_tokens: opts.maxTokens,

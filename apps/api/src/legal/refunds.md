@@ -4,7 +4,7 @@ _Draft, last updated November 3, 2026. Have it reviewed before launch._
 
 ## Cancelling
 
-Bible Scroll Plus is sold through the App Store. To cancel, go to iPhone **Settings → [your name] → Subscriptions → Bible Scroll**, or **Settings → Subscription → Manage** in the app. Cancel at least 24 hours before your trial or current period ends to avoid the next charge. You keep Plus until the end of the period you paid for.
+Her Crown Plus is sold through the App Store. To cancel, go to iPhone **Settings → [your name] → Subscriptions → Her Crown**, or **Settings → Subscription → Manage** in the app. Cancel at least 24 hours before your trial or current period ends to avoid the next charge. You keep Plus until the end of the period you paid for.
 
 ## Free trials
 
@@ -12,9 +12,9 @@ We send a reminder before a free trial converts to a paid subscription, if notif
 
 ## Refunds
 
-Apple processes all App Store payments, so **refunds are requested from Apple**, not from us. Go to [reportaproblem.apple.com](https://reportaproblem.apple.com), sign in, choose the Bible Scroll charge and select "Request a refund". Apple decides refund requests under its policies.
+Apple processes all App Store payments, so **refunds are requested from Apple**, not from us. Go to [reportaproblem.apple.com](https://reportaproblem.apple.com), sign in, choose the Her Crown charge and select "Request a refund". Apple decides refund requests under its policies.
 
-If something went wrong, for example you were charged after cancelling or charged twice, contact us at [support email] with your reference from Settings → Contact & Support and we'll help you with Apple.
+If something went wrong, for example you were charged after cancelling or charged twice, contact us at macnatephil@gmail.com with your reference from Settings → Contact & Support and we'll help you with Apple.
 
 ## Restoring a purchase
 

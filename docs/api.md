@@ -1,4 +1,4 @@
-# Bible Scroll API: reference for the iOS app
+# Her Crown API: reference for the iOS app
 
 Every endpoint the SwiftUI app calls, grouped by screen. Staging: `https://bible-scroll-api-staging.bible-scroll-api.workers.dev`. Code: [apps/api/src/index.ts](../apps/api/src/index.ts). Tests in `apps/api/test/` show exact requests and responses.
 
@@ -106,7 +106,7 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 |---|---|
 | `GET /me/entitlements` | Subscription row (`trial` details while trialing) |
 | `POST /me/restore` `{ transactionId }` | Restore Purchases ([restore-purchases.md](restore-purchases.md)) |
-| `GET /me/support` · `POST /me/support` `{ category, message, contactEmail?, contactPreference? }` | Contact & Support. Returns reference `BS-XXXXXXXX`. 5 per day |
+| `GET /me/support` · `POST /me/support` `{ category, message, contactEmail?, contactPreference? }` | Contact & Support. Returns reference `HC-XXXXXXXX`. 5 per day |
 | `GET /legal/{privacy\|terms\|refunds\|credits}` | In-app reading pages (`?format=md` for Markdown) and the App Store URLs |
 
 ## Analytics

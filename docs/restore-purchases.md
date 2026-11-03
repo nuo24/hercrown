@@ -1,6 +1,6 @@
 # Restore Purchases
 
-How a Bible Scroll Plus subscription gets back to a person after a reinstall, on a new phone, or after signing in.
+How a Her Crown Plus subscription gets back to a person after a reinstall, on a new phone, or after signing in.
 
 ## Why the server must verify it
 

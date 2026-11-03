@@ -41,8 +41,8 @@ export function reminderAlert(endsAt: number, productId: string | null, timeZone
   const plan = PLAN[productId ?? ""] ?? "a paid plan";
   return {
     title: `Your free trial ends ${when}`,
-    body: `Bible Scroll Plus becomes ${plan} on ${date}. To avoid being charged, cancel before then in Settings → Subscriptions.`,
-    link: "biblescroll://settings/subscription",
+    body: `Her Crown Plus becomes ${plan} on ${date}. To avoid being charged, cancel before then in Settings → Subscriptions.`,
+    link: "hercrown://settings/subscription",
     collapseId: `trial-${endsAt}`,
   };
 }

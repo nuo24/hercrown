@@ -1,6 +1,6 @@
 # Credits and Licenses
 
-Bible Scroll is built on the work of translators, scholars and open-data projects. Thank you.
+Her Crown is built on the work of translators, scholars and open-data projects. Thank you.
 
 ## Bible translations
 
@@ -21,4 +21,4 @@ Bible Scroll is built on the work of translators, scholars and open-data project
 
 ## Devotionals and reflections
 
-Reflection prompts and devotionals are written for Bible Scroll. Devotionals drafted with AI assistance are reviewed and approved by our team before they appear.
+Reflection prompts and devotionals are written for Her Crown. Devotionals drafted with AI assistance are reviewed and approved by our team before they appear.

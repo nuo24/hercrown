@@ -10,11 +10,11 @@ const CONTACT = ["email", "in_app"] as const;
 const DAILY_LIMIT = 5;
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
 
-/** "BS-7K2QH9XA": easy to read out loud (no 0/O, 1/I). */
+/** "HC-7K2QH9XA": easy to read out loud (no 0/O, 1/I). */
 function reference(): string {
   const alphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
   const bytes = crypto.getRandomValues(new Uint8Array(8));
-  return `BS-${[...bytes].map((b) => alphabet[b % alphabet.length]).join("")}`;
+  return `HC-${[...bytes].map((b) => alphabet[b % alphabet.length]).join("")}`;
 }
 
 /** POST /me/support { category, message, contactEmail?, contactPreference?, appVersion? } → 201 { id, status } */

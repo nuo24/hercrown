@@ -17,7 +17,7 @@ export interface OutgoingEmail {
 export async function sendEmail(env: Env, message: OutgoingEmail): Promise<string> {
   if (!emailConfigured(env)) throw new Error("Email isn't configured (EMAIL_FROM / send_email binding)");
   const result = await env.EMAIL.send({
-    from: { email: env.EMAIL_FROM, name: "Bible Scroll" },
+    from: { email: env.EMAIL_FROM, name: "Her Crown" },
     to: message.to,
     subject: message.subject,
     text: message.text,

@@ -307,6 +307,6 @@ export async function entitlementFor(env: Env, userId: string) {
 /** The only Premium check. Clients show the paywall when they get `premium_required`. */
 export async function requirePremium(env: Env, userId: string) {
   if (!(await entitlementFor(env, userId)).premium) {
-    throw new HttpError(403, "premium_required", "This needs Bible Scroll Plus");
+    throw new HttpError(403, "premium_required", "This needs Her Crown Plus");
   }
 }

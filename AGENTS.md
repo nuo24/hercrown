@@ -1,10 +1,10 @@
-# Bible Scroll: agent guide
+# Her Crown: agent guide
 
 > Built on the [ai-app-playbook](https://github.com/blakeandersonw/ai-app-playbook) stack. `CLAUDE.md` points here.
 
 ## App
 
-For women who want to scroll less and read more, Bible Scroll turns spare phone minutes into a calm, swipeable Scripture reading habit.
+**Her Crown** (App Store name: "Her Crown: Scroll the Bible", [decision 0009](docs/decisions/0009-name-her-crown.md); code and repo still say bible-scroll). For women who want to scroll less and read more, it turns spare phone minutes into a calm, swipeable Scripture reading habit.
 Design authority: [IMPLEMENTATION.md](IMPLEMENTATION.md) → [specs/](specs/) → [reference-web/dist/](reference-web/dist/) (the working mockup). Copy what already works; don't reinvent screens. API for the app: [docs/api.md](docs/api.md).
 Domain watch-outs: never alter or fabricate Scripture text; keep reflections and insights clearly separate from Scripture; translation licenses are per publisher.
 Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $29.99/year with a free trial or $2.99/week; on decline, a one-time ~$19.99 yearly offer; declining again opens the free reader ([decision 0003](docs/decisions/0003-trial-hard-paywall-decline-offer.md)). Playbook benchmarks (rough, assume a hard paywall): ~30% trial start, ~30% trial → paid. Measure our own.

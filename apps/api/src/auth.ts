@@ -66,9 +66,9 @@ const createAuth = () => betterAuth({
       async sendVerificationOTP({ email, otp }) {
         await sendEmail(env, {
           to: email,
-          subject: `${otp} is your Bible Scroll code`,
-          text: `Your Bible Scroll sign-in code is ${otp}.\n\nIt expires in 10 minutes. If you didn't ask for it, you can ignore this email.`,
-          html: `<div style="font: 16px/1.5 -apple-system, sans-serif; color: #2a2230"><p>Your Bible Scroll sign-in code is</p>`
+          subject: `${otp} is your Her Crown code`,
+          text: `Your Her Crown sign-in code is ${otp}.\n\nIt expires in 10 minutes. If you didn't ask for it, you can ignore this email.`,
+          html: `<div style="font: 16px/1.5 -apple-system, sans-serif; color: #2a2230"><p>Your Her Crown sign-in code is</p>`
             + `<p style="font-size: 32px; letter-spacing: 6px; font-weight: 600">${otp}</p>`
             + `<p style="color: #6e6375">It expires in 10 minutes. If you didn't ask for it, you can ignore this email.</p></div>`,
         });

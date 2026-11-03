@@ -77,12 +77,14 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Notes per verse (auto-saved, newest wins across devices) and "Your library" (saved verses, notes, saved studies, studied)
 - [x] Bible progress: chapters completed of 1,189; days opened vs days read; weeks in a row; days this year; devotionals read
 - [x] Verse of the Day (122-verse rotation), random verse, widget verse; Discover by theme / For you / plan (72 cards + reflections)
-- [x] Today's Devotional: 29 AI drafts in `content/devotionals.json` — **none approved yet** ([docs/content.md](content.md))
+- [x] Today's Devotional: 29 approved by owner + cofounder and live on staging; Luke 1:45 awaits review ([docs/content.md](content.md))
 - [x] Preferences: font size (4 steps), Words of Jesus in red, system theme, reading translation, bookmark (position)
 - [x] Email sign-in (6-digit code via Cloudflare Email Service) — off until the domain is set up
 - [x] Contact & Support: stored with a reference, emailed to the team inbox; legal pages served at /legal/*
 - [x] API reference for the iOS app: [docs/api.md](api.md)
-- [ ] **[HUMAN]** Domain → Cloudflare Email Service → set `EMAIL_FROM`, `SUPPORT_INBOX`; review devotionals, reflections, legal drafts
+- [x] Name: Her Crown ([decision 0009](decisions/0009-name-her-crown.md)); support/alerts inbox macnatephil@gmail.com
+- [x] Hourly alerts: error spikes, AI spend, unmatched purchases → email
+- [ ] **[HUMAN]** Domain → Cloudflare Email Service → set `EMAIL_FROM`; fill company name/address/governing law in legal drafts + legal review; optional AI Gateway + `TINYBIRD_READ_TOKEN`
 - [ ] App Tracking Transparency prompt for ad attribution (marketing decision, iOS)
 
 ## Phases 10–14 — not started

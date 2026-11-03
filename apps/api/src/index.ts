@@ -13,6 +13,7 @@ import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, savePosi
 import { getStreak, recordReading } from "./reading";
 import { listSaved, savePassage, unsavePassage } from "./saved";
 import { registerDevice, unregisterDevice } from "./push";
+import { sendHealthAlerts } from "./alerts";
 import { sendTrialReminders } from "./reminders";
 import { type AiTool, getAiStudy, getOriginal, getRelated, reportStudy, TOOLS } from "./study";
 import { restorePurchases } from "./restore";
@@ -54,9 +55,10 @@ export default {
     await deliverEvents(batch as MessageBatch<EventRow>, env);
   },
 
-  // Cron Trigger (every 15 minutes): trial-ending reminders.
+  // Cron Trigger (every 15 minutes): trial-ending reminders; health alerts on the first run of each hour.
   async scheduled(controller, env, ctx): Promise<void> {
     await sendTrialReminders(env, controller.scheduledTime, ctx);
+    if (new Date(controller.scheduledTime).getUTCMinutes() < 15) await sendHealthAlerts(env, controller.scheduledTime);
   },
 } satisfies ExportedHandler<Env>;
 

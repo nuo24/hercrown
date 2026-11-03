@@ -4,10 +4,10 @@ Scripture text always comes from our verified Bibles. Everything below is **our*
 
 | Content | File | Status | Who signs off |
 |---|---|---|---|
-| Discover cards + reflection questions (9 themes × 8) | `apps/api/src/content/verses.json` | The first card of each theme is from the design kit; **63 are drafts** | Owner |
-| Verse of the Day rotation (122 verses) | same file (`cards` + `verseOfTheDayExtra`) | Draft selection | Owner |
-| Devotionals (29 drafts) | `content/devotionals.json` | **Drafted by AI** from the passage and public-domain commentaries; **none approved, none in the app** | Owner (or a pastor/editor) |
-| Privacy policy, terms, refund policy | `apps/api/src/legal/*.md` | **Drafts**: fill in the [brackets], then legal review | Owner + lawyer |
+| Discover cards + reflection questions (9 themes × 8) | `apps/api/src/content/verses.json` | ✅ Approved by owner and cofounder (2026-11-03) | Done |
+| Verse of the Day rotation (122 verses) | same file (`cards` + `verseOfTheDayExtra`) | ✅ Approved (2026-11-03) | Done |
+| Devotionals (29 drafts) | `content/devotionals.json` | Drafted by AI from the passage and public-domain commentaries. **29 approved by owner and cofounder (2026-11-03) and live on staging.** The 30th (Luke 1:45) was drafted later and awaits review | Owner |
+| Privacy policy, terms, refund policy | `apps/api/src/legal/*.md` | Drafts with the name (Her Crown) and contact (macnatephil@gmail.com) filled in. Still to fill: company legal name, address, governing law. Then legal review | Owner + lawyer |
 | Credits (licenses) | `apps/api/src/legal/credits.md` | Complete; required by the CC BY sources | Done |
 
 ## Approving devotionals
@@ -23,7 +23,7 @@ Scripture text always comes from our verified Bibles. Everything below is **our*
    - Today's Devotional rotates through them in order, one per day, the same for everyone.
    - With none approved, the Home card hides.
 
-To draft more, add outlines to `OUTLINES` in `apps/api/scripts/draft-devotionals.mjs` and run `npm run draft:devotionals --prefix apps/api`. Existing entries are never overwritten. The Luke 1:45 outline failed twice; write it by hand or try again. The 29 drafts cost about $0.01.
+To draft more, add outlines to `OUTLINES` in `apps/api/scripts/draft-devotionals.mjs` and run `npm run draft:devotionals --prefix apps/api`. Existing entries are never overwritten. Luke 1:45 is drafted but not approved yet. The 30 drafts cost about $0.01.
 
 ## Editing Discover and Verse of the Day
 

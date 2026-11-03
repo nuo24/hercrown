@@ -1,6 +1,6 @@
 # Analytics
 
-How Bible Scroll measures its funnel (onboarding → paywall → decline → offer → trial → paid), restores and errors. Stack: [ai-app-playbook chapter 08](https://github.com/blakeandersonw/ai-app-playbook/blob/main/playbook/08-analytics-observability.md). Code: [apps/api/src/events.ts](../apps/api/src/events.ts). Tinybird project: [tinybird/](../tinybird/).
+How Her Crown measures its funnel (onboarding → paywall → decline → offer → trial → paid), restores and errors. Stack: [ai-app-playbook chapter 08](https://github.com/blakeandersonw/ai-app-playbook/blob/main/playbook/08-analytics-observability.md). Code: [apps/api/src/events.ts](../apps/api/src/events.ts). Tinybird project: [tinybird/](../tinybird/).
 
 ```
 iOS ──POST /events──▶ Worker ──▶ Queue (bible-scroll-events-*) ──▶ Tinybird Events API ──▶ events data source ──▶ endpoints

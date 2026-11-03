@@ -200,10 +200,10 @@ describe("support", () => {
     const res = await call("/me/support", "POST", { category: "Subscription & billing", message: "I was charged twice", contactEmail: "her@example.com" });
     expect(res.status).toBe(201);
     const { id } = await res.json<any>();
-    expect(id).toMatch(/^BS-[2-9A-HJ-NP-Z]{8}$/);
+    expect(id).toMatch(/^HC-[2-9A-HJ-NP-Z]{8}$/);
     await vi.waitFor(() => expect(sent).toHaveLength(1));
     expect(sent[0]).toMatchObject({ to: "team@biblescroll.test", subject: `[${id}] Subscription & billing`, replyTo: "her@example.com",
-      from: { email: "hello@biblescroll.test", name: "Bible Scroll" } });
+      from: { email: "hello@biblescroll.test", name: "Her Crown" } });
     expect(sent[0].text).toContain("I was charged twice");
     await vi.waitFor(async () => expect(await env.DB.prepare("SELECT delivered_at FROM support_requests WHERE id = ?1").bind(id).first()).toEqual({ delivered_at: expect.any(Number) }));
     const list = await json("/me/support");
@@ -229,7 +229,7 @@ describe("email sign-in", () => {
     const email = `reader-${crypto.randomUUID().slice(0, 8)}@example.com`;
     const send = await call("/api/auth/email-otp/send-verification-otp", "POST", { email, type: "sign-in" });
     expect(send.status).toBe(200);
-    expect(sent[0]).toMatchObject({ to: email, subject: expect.stringMatching(/^\d{6} is your Bible Scroll code$/) });
+    expect(sent[0]).toMatchObject({ to: email, subject: expect.stringMatching(/^\d{6} is your Her Crown code$/) });
     const otp = /^(\d{6})/.exec(sent[0].subject)![1]!;
 
     expect((await call("/api/auth/sign-in/email-otp", "POST", { email, otp: otp === "000000" ? "111111" : "000000" })).status).toBe(400);

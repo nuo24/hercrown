@@ -2,11 +2,11 @@
 
 _Draft, last updated November 3, 2026. Have it reviewed before launch, and fill in the bracketed details._
 
-These terms are an agreement between you and [Company legal name] ("we") for the Bible Scroll app. By using the app you agree to them. Apple's Licensed Application End User License Agreement also applies to apps from the App Store.
+These terms are an agreement between you and [Company legal name] ("we") for the Her Crown app. By using the app you agree to them. Apple's Licensed Application End User License Agreement also applies to apps from the App Store.
 
 ## The app
 
-Reading the Bible in Bible Scroll is free. **Bible Scroll Plus** is an optional subscription that unlocks reading plans and study tools.
+Reading the Bible in Her Crown is free. **Her Crown Plus** is an optional subscription that unlocks reading plans and study tools.
 
 ## Subscriptions
 
@@ -43,4 +43,4 @@ We may update these terms. We'll tell you in the app about significant changes. 
 
 ## Contact
 
-[support email] · [address]. These terms are governed by the laws of [State/Country].
+macnatephil@gmail.com · [address]. These terms are governed by the laws of [State/Country].

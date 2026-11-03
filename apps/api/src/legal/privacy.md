@@ -2,7 +2,7 @@
 
 _Draft, last updated November 3, 2026. Have it reviewed before launch, and fill in the bracketed details._
 
-Bible Scroll ("we", "us") is made by [Company legal name], [address]. This policy explains what we collect when you use the Bible Scroll app and why. Questions: [support email].
+Her Crown ("we", "us") is made by [Company legal name], [address]. This policy explains what we collect when you use the Her Crown app and why. Questions: macnatephil@gmail.com.
 
 ## The short version
 
@@ -48,15 +48,15 @@ They may only use the data to provide their service to us.
 
 ## Keeping and deleting data
 
-We keep your data while your account exists. Deleting your account permanently removes your profile, photo, preferences, saves, notes, reading history, plan progress, devices and support requests. Analytics events keep only the pseudonymous ID and are deleted after [retention period]. Apple keeps its own purchase records.
+We keep your data while your account exists. Deleting your account permanently removes your profile, photo, preferences, saves, notes, reading history, plan progress, devices and support requests. Analytics events keep only the pseudonymous ID and are deleted automatically after 13 months. Apple keeps its own purchase records.
 
 ## Your rights
 
-Depending on where you live, you can ask to access, correct, export or delete your data, or object to some uses. Contact [support email]. We'll respond within 30 days.
+Depending on where you live, you can ask to access, correct, export or delete your data, or object to some uses. Contact macnatephil@gmail.com. We'll respond within 30 days.
 
 ## Children
 
-Bible Scroll isn't directed at children under 13, and we don't knowingly collect their data.
+Her Crown isn't directed at children under 13, and we don't knowingly collect their data.
 
 ## Changes
 

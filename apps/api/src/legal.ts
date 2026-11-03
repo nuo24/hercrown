@@ -42,9 +42,9 @@ export function legalPage(page: string, url: URL): Response {
   const md = LEGAL_PAGES[page];
   if (!md) return Response.json({ error: "not_found" }, { status: 404 });
   if (url.searchParams.get("format") === "md") return new Response(md, { headers: { "content-type": "text/markdown; charset=utf-8" } });
-  const title = /^# (.*)$/m.exec(md)?.[1] ?? "Bible Scroll";
+  const title = /^# (.*)$/m.exec(md)?.[1] ?? "Her Crown";
   const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(title)} · Bible Scroll</title>
+<title>${escapeHtml(title)} · Her Crown</title>
 <style>:root{color-scheme:light dark;--fg:#2a2230;--muted:#6e6375;--bg:#fbf9fb;--accent:#8a4a73}
 @media (prefers-color-scheme:dark){:root{--fg:#eee7f0;--muted:#a99daf;--bg:#1b171d;--accent:#d79bc2}}
 body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}

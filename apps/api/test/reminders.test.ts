@@ -110,7 +110,7 @@ describe("the reminder push", () => {
     expect(push!.body.aps.alert.title).toBe("Your free trial ends in 2 days");
     expect(push!.body.aps.alert.body).toContain("becomes a yearly plan on");
     expect(push!.body.aps.alert.body).toContain("cancel before then in Settings");
-    expect(push!.body.link).toBe("biblescroll://settings/subscription");
+    expect(push!.body.link).toBe("hercrown://settings/subscription");
 
     const rows = (await reminded(user.userId)).results as any[];
     expect(rows).toEqual([expect.objectContaining({ trial_ends_at: endsAt, devices: 2 })]);
@@ -185,7 +185,7 @@ describe("the message", () => {
     const alert = reminderAlert(monday + 2 * DAY, "biblescroll.plus.weekly", "America/Los_Angeles", monday);
     expect(alert).toMatchObject({
       title: "Your free trial ends in 2 days",
-      body: "Bible Scroll Plus becomes a weekly plan on Wednesday, Jan 6. To avoid being charged, cancel before then in Settings → Subscriptions.",
+      body: "Her Crown Plus becomes a weekly plan on Wednesday, Jan 6. To avoid being charged, cancel before then in Settings → Subscriptions.",
     });
     expect(reminderAlert(monday + 20 * HOUR, null, "UTC", monday).title).toBe("Your free trial ends tomorrow");
     expect(reminderAlert(monday + 5 * HOUR, null, "UTC", monday).title).toBe("Your free trial ends today");

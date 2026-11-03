@@ -76,12 +76,15 @@ for (const [i, [id, ref, tag]] of OUTLINES.entries()) {
     method: "POST",
     headers: { authorization: `Bearer ${key}`, "content-type": "application/json", "x-title": "Bible Scroll devotional drafts" },
     body: JSON.stringify({ model, messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }], temperature: 0.6,
-      max_tokens: 700, reasoning: { enabled: false }, response_format: { type: "json_object" }, usage: { include: true } }),
+      max_tokens: 2000, reasoning: { enabled: false }, response_format: { type: "json_object" }, usage: { include: true } }),
   });
   const data = await res.json();
   cost += data.usage?.cost ?? 0;
   let draft;
-  try { draft = JSON.parse(data.choices[0].message.content.replace(/^```json\s*|\s*```$/g, "")); } catch { console.error(`✗ ${id}: unusable reply`); continue; }
+  try { draft = JSON.parse(data.choices[0].message.content.replace(/^```json\s*|\s*```$/g, "")); } catch {
+    console.error(`✗ ${id}: unusable reply`, JSON.stringify(data.error ?? data.choices?.[0]?.message?.content ?? data).slice(0, 300));
+    continue;
+  }
   const words = draft.body.split(/\s+/).length;
   existing.devotionals.push({
     id, position: i, title: draft.title, ref, tag, minutes: Math.max(1, Math.round(words / 200)), body: draft.body.trim(),
