@@ -2,7 +2,7 @@
 
 ## Included assets
 
-The asset inventory contains all 28 PNG files in the final reference: 25 illustration-pack assets, onboarding collage, meadow photo and sky scene. Each has its original pixel dimensions, SHA-256 and universal Xcode image-set path. Copy `asset-catalog/BibleScrollArtwork.xcassets` into the native target, then use the image IDs verbatim with original rendering and scaled-to-fit where appropriate. Confirm target membership in Xcode; the catalog is not automatically added to the older starter project.
+The asset inventory contains all 28 PNG files in the final reference: 25 illustration-pack assets, onboarding collage, meadow photo and sky scene. Each has its original pixel dimensions, SHA-256 and universal Xcode image-set path. Copy `apps/ios/HerCrown/Artwork.xcassets (moved from design/asset-catalog)` into the native target, then use the image IDs verbatim with original rendering and scaled-to-fit where appropriate. Confirm target membership in Xcode; the catalog is not automatically added to the older starter project.
 
 Source originals remain in `reference-web/dist/assets` and `reference-web/dist/illustration-pack`. Prompts/provenance are preserved where they exist. The meadow photo has no separate provenance file in the baseline; do not invent one or assume distribution rights beyond the supplied project. Confirm provenance/rights before release. Lucide ISC text is included with the icon pack and web assets.
 
