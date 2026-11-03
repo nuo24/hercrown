@@ -5,6 +5,7 @@
 //   npx wrangler kv namespace create bible-scroll-kv-staging
 //   npx wrangler r2 bucket create bible-scroll-files-staging
 //   npx wrangler queues create bible-scroll-events-staging
+// R2 must be enabled once in the Cloudflare dashboard (R2 Object Storage) before buckets can be created.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "bible-scroll-api",
@@ -27,14 +28,14 @@
   "env": {
     "staging": {
       "name": "bible-scroll-api-staging",
-      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db-staging", "database_id": "REPLACE_WITH_STAGING_D1_ID", "migrations_dir": "migrations" }],
-      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_STAGING_KV_ID" }],
+      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db-staging", "database_id": "147a2d66-7f1e-452e-9532-5274b678486d", "migrations_dir": "migrations" }],
+      "kv_namespaces": [{ "binding": "KV", "id": "c1a84a746eab47f18cdc4765f7f731e7" }],
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files-staging" }],
       "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } },
                        { "name": "RESTORE_LIMITER", "namespace_id": "2002", "simple": { "limit": 10, "period": 60 } },
                        { "name": "EVENTS_LIMITER", "namespace_id": "3002", "simple": { "limit": 60, "period": 60 } }],
       "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events-staging" }], "consumers": [{ "queue": "bible-scroll-events-staging", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
-      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.REPLACE_WITH_SUBDOMAIN.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co" }
+      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.bible-scroll-api.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co" }
     },
     "production": {
       "name": "bible-scroll-api",

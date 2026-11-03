@@ -5,24 +5,27 @@ Playbook phases ([ai-app-playbook AGENTS.md](https://github.com/blakeandersonw/a
 ## Phase 0–1: Niche & brief — ⏭️ skipped on purpose
 Product, design and mockup already exist (this kit). Pricing decided: see [decisions/0003](decisions/0003-trial-hard-paywall-decline-offer.md).
 
-## Phase 2: Accounts & repo — ⚠️ partly done
+## Phase 2: Accounts & repo — ⚠️ mostly done
 - [x] `apps/api` scaffolded from the playbook templates
 - [x] `AGENTS.md`, `CLAUDE.md`, `docs/progress.md`, `docs/decisions/`, `docs/later.md`
 - [x] Root scripts: `dev`, `check`, `test`, `deploy:staging`
 - [x] Local git repository and first commit
-- [ ] **[HUMAN]** Create an empty private repo on your GitHub and share its URL, then push
+- [x] GitHub: https://github.com/nuo24/new (pushed)
 - [x] Apple Developer account
-- [ ] **[HUMAN]** Create accounts: Cloudflare (Workers Paid, $5/mo), Apple Small Business Program, Superwall, Tinybird, API.Bible, OpenRouter
+- [x] Cloudflare (Workers Paid, R2 on), OpenRouter (key in staging)
+- [x] Apple: W-9 active; Paid Apps agreement + bank processing (submitted 2026-11-03)
+- [ ] **[HUMAN]** Apple Small Business Program, Superwall, Tinybird
+- API.Bible: not now ([decision 0008](decisions/0008-launch-translations.md))
 - [ ] `apps/ios` (port `starter-ios`)
 
-## Phase 3: Backend + database — ⚠️ built locally, not deployed
+## Phase 3: Backend + database — ✅ on staging
 - [x] D1 migrations: auth, app tables, Scripture catalog (`apps/api/migrations/`)
 - [x] `GET /health`, JSON errors, rate limits on auth
 - [x] Core API: profile, avatar, preferences, onboarding, saved passages, reading events + streak, plans
 - [x] Scripture: KJV, BSB, WEB offline (verified builds), chapters, passages, per-translation search, API.Bible connector
 - [x] Words of Jesus (red letters) for KJV and WEB; psalm titles kept separate from verse 1
 - [x] Error events to Tinybird (Phase 9)
-- [ ] **[HUMAN]** Cloudflare account → staging D1/KV/R2 → deploy → `curl https://<staging>/health` returns 200
+- [x] Staging: https://bible-scroll-api-staging.bible-scroll-api.workers.dev — D1 migrated + KJV/BSB/WEB seeded, KV, R2, queue, secrets (auth, OpenRouter); `/health` 200, guest sign-in, Scripture, search, plans, events checked 2026-11-03
 
 ## Phase 4: Auth — ⚠️ built locally
 - [x] Anonymous sign-in, bearer tokens, account deletion, guest → account merge (tested)
