@@ -40,6 +40,8 @@ Worker (onboarding, verified webhooks, restore, errors, features) ──┘
 | `restore_failed` | server | `error` | Apple unreachable (503) |
 | `account_linked` | server | `previous_person_id` | Guest linked to an account that already existed |
 | `passage_read`, `passage_saved`, `plan_started`, `plan_step_completed` | server | plan events: `plan_id`, `position` | The action succeeded |
+| `ai_call` | server | `feature`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `ok` | Every model call ([study-tools.md](study-tools.md)) |
+| `study_viewed` / `study_reported` | server | `tool`, `cached` / `tool`, `reason` | A study opened (stored or new) / reported |
 | `error` | both | `source`, `message`, `stack`, `route`/`method` (api) or `screen` (ios) | Unhandled server error (500); app crash or error |
 
 A purchase webhook that can't be matched to an account is still recorded (revenue stays complete) with `person_id` null, so it's left out of per-person funnel rates.

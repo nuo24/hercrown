@@ -33,12 +33,14 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] **[HUMAN]** Apple Services ID + key → `wrangler secret put APPLE_CLIENT_ID / APPLE_CLIENT_SECRET`
 - [ ] Verify Apple sign-in end to end on staging
 
-## Phase 5: AI study tools — approved ([decision 0006](decisions/0006-ai-study-tools.md))
-- [ ] Load sources: STEPBible lexicon/morphology, OpenBible cross-references, public-domain commentaries
-- [ ] `ai.ts`: DeepSeek via OpenRouter + AI Gateway, timeout + fallback, `ai_call` cost events, Plus quota
-- [ ] Explain Easier, Deeper Study, Original Language, Related Verses: generated once per verse, stored, cited, labeled
-- [ ] Evals: 20+ verses scored for accuracy (e.g. authorship, context) before launch
-- [ ] **[HUMAN]** OpenRouter account + key; Cloudflare AI Gateway
+## Phase 5: AI study tools — ✅ on staging ([docs/study-tools.md](study-tools.md))
+- [x] Sources loaded: STEPBible Greek/Hebrew + lexicons, OpenBible cross-references, JFB / Matthew Henry / Adam Clarke (verified build, checksums)
+- [x] `ai.ts`: DeepSeek v4.1 Flash via OpenRouter, fallback model, streaming, timeouts, `ai_call` cost events, daily limit
+- [x] Explain Easier, Deeper Study, Original Language, Related Verses: generated once per verse, stored, cited, labeled, reportable
+- [x] Evals: 26 verses × 2 tools, 51/52 automatic ([report](evals/study-2026-11-03.md)); ~$0.0003 per answer
+- [x] OpenRouter key on staging
+- [ ] **[HUMAN]** Read the eval report; decide on sensitive passages (hand-reviewed answers?) and Tyndale Open Study Notes (CC BY-SA)
+- [ ] Optional: Cloudflare AI Gateway (`AI_GATEWAY_URL`); complete Matthew Henry from CCEL
 
 ## Phase 7: iOS — not started
 
@@ -69,7 +71,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 2. ~~Offline BSB and WEB~~ ✅ (local; words of Jesus + psalm titles too). CPDV pending a decision ([0005](decisions/0005-offline-translations.md))
 3. ~~Tinybird analytics~~ ✅ (local; needs a Tinybird workspace to deploy)
 4. ~~Trial-ending reminder~~ ✅ (local; push needs the APNs key + a phone)
-5. **AI study tools** (Phase 5 above)
+5. ~~AI study tools~~ ✅ (staging; owner review of the eval report pending)
 
 ## Gaps found in the competitor recording ([walkthrough](research/scroll-the-bible-walkthrough.md))
 - [ ] Notes per verse (auto-saved) and a "library" (studies, studied, saved, notes)

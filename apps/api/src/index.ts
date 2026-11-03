@@ -9,11 +9,14 @@ import { getStreak, recordReading } from "./reading";
 import { listSaved, savePassage, unsavePassage } from "./saved";
 import { registerDevice, unregisterDevice } from "./push";
 import { sendTrialReminders } from "./reminders";
+import { type AiTool, getAiStudy, getOriginal, getRelated, reportStudy, TOOLS } from "./study";
 import { restorePurchases } from "./restore";
 import { getChapter, getPassage, listBooks, listTranslations, search } from "./scripture";
 
 const savedPath = new URLPattern({ pathname: "/me/saved/:ref" });
 const devicePath = new URLPattern({ pathname: "/me/devices/:token" });
+const studyPath = new URLPattern({ pathname: "/study/:ref/:tool" });
+const studyReportPath = new URLPattern({ pathname: "/study/:ref/:tool/report" });
 const planPath = new URLPattern({ pathname: "/plans/:id" });
 const planStartPath = new URLPattern({ pathname: "/plans/:id/start" });
 const planStepPath = new URLPattern({ pathname: "/plans/:id/steps/:position/complete" });
@@ -117,6 +120,18 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
     const ref = decodeURIComponent(saved.pathname.groups.ref!);
     if (request.method === "PUT") return tracked(savePassage(env, user, ref), tracker, "passage_saved");
     if (request.method === "DELETE") return unsavePassage(env, user, ref);
+  }
+  const study = request.method === "GET" && studyPath.exec(url);
+  if (study) {
+    const ref = decodeURIComponent(study.pathname.groups.ref!);
+    const tool = study.pathname.groups.tool!;
+    if (tool === "related") return getRelated(env, user, ref, url);
+    if (tool === "original") return getOriginal(env, user, ref);
+    if ((TOOLS as readonly string[]).includes(tool)) return getAiStudy(request, env, ctx, user, ref, tool as AiTool, tracker);
+  }
+  const studyReport = request.method === "POST" && studyReportPath.exec(url);
+  if (studyReport && (TOOLS as readonly string[]).includes(studyReport.pathname.groups.tool!)) {
+    return reportStudy(request, env, user, decodeURIComponent(studyReport.pathname.groups.ref!), studyReport.pathname.groups.tool as AiTool, tracker);
   }
   const device = devicePath.exec(url);
   if (device && request.method === "DELETE") return unregisterDevice(env, user, decodeURIComponent(device.pathname.groups.token!));

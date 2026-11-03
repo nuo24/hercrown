@@ -17,7 +17,7 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 - Scripture: KJV, BSB, WEB stored in D1 and bundled offline (`apps/api/seeds/`); other translations online via API.Bible (`apps/api/src/apibible.ts`)
 - Payments: Superwall (iOS); `entitlements` table is the source of truth, written only by verified webhooks
 - Analytics and errors: Tinybird via `POST /events` → Queue (`apps/api/src/events.ts`, `tinybird/`, [docs/analytics.md](docs/analytics.md)); purchases counted only from verified webhooks
-- AI study tools (approved, not built): DeepSeek via OpenRouter behind AI Gateway, grounded in cited sources ([decision 0006](docs/decisions/0006-ai-study-tools.md))
+- AI study tools: DeepSeek via OpenRouter (`apps/api/src/ai.ts`, `study.ts`), grounded only in cited free sources, generated once per verse and stored ([docs/study-tools.md](docs/study-tools.md), [decision 0006](docs/decisions/0006-ai-study-tools.md))
 - iOS: SwiftUI (`starter-ios/` is an incomplete baseline; target `apps/ios`)
 
 ## Commands (run from the repo root)
@@ -25,12 +25,13 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 | Do | Run |
 |---|---|
 | Install | `npm install --prefix apps/api` |
-| Local database | `npm run db:migrate` then `npm run seed:scripture` (KJV, BSB, WEB) |
+| Local database | `npm run db:migrate`, `npm run seed:scripture` (KJV, BSB, WEB), `npm run build:study && npm run seed:study` (study data) |
 | Dev server (http://localhost:8787) | `npm run dev` |
 | Typecheck | `npm run check` |
 | Tests | `npm test` |
 | New migration | `npx --prefix apps/api wrangler d1 migrations create DB <name>` (from `apps/api`) |
 | Rebuild Scripture seeds | `npm run build:kjv`, `npm run build:bsb`, `npm run build:web` (verified, pinned sources) |
+| Study-tool evals | `STUDY_EVAL_TOKEN=… node apps/api/scripts/eval-study.mjs [baseUrl]` → `docs/evals/` |
 | Deploy staging | `npm run deploy:staging` |
 | Deploy production | **humans only** |
 

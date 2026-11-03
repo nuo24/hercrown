@@ -11,3 +11,7 @@ xcuserdata
 *.p8
 *.p12
 *.pem
+
+# Study data: downloads and full seeds are rebuilt by scripts/build-study.mjs
+.cache/
+seeds/study/

@@ -1,0 +1,21 @@
+{
+ "built": "build-study.mjs",
+ "combinedSourceSha256": "dfab23dda989589192e824e66db807e80157413b6c355f636ba95ef2101b93d2",
+ "stepbibleCommit": "5de0a47f35f0fc13dfe1430d104e5db8a4285f9c",
+ "crossReferences": 307319,
+ "originalWordVerses": 31084,
+ "originalWords": 440927,
+ "lexiconEntries": 16702,
+ "lexiconMissing": 272,
+ "commentaryNotes": {
+  "jfb": 18213,
+  "henry": 5278,
+  "clarke": 14148
+ },
+ "sqlBytes": {
+  "cross_references.sql": 9432271,
+  "original_words.sql": 27080617,
+  "lexicon.sql": 4356428,
+  "commentary_notes.sql": 56447097
+ }
+}

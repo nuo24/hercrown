@@ -17,7 +17,10 @@
     "seed:bsb": "wrangler d1 execute DB --local --file seeds/bsb.sql",
     "seed:web": "wrangler d1 execute DB --local --file seeds/web.sql",
     "seed:scripture": "npm run seed:kjv && npm run seed:bsb && npm run seed:web",
-    "seed:scripture:staging": "wrangler d1 execute DB --env staging --remote --file seeds/kjv.sql && wrangler d1 execute DB --env staging --remote --file seeds/bsb.sql && wrangler d1 execute DB --env staging --remote --file seeds/web.sql"
+    "seed:scripture:staging": "wrangler d1 execute DB --env staging --remote --file seeds/kjv.sql && wrangler d1 execute DB --env staging --remote --file seeds/bsb.sql && wrangler d1 execute DB --env staging --remote --file seeds/web.sql",
+    "build:study": "node scripts/build-study.mjs",
+    "seed:study": "wrangler d1 execute DB --local --file seeds/study/lexicon.sql && wrangler d1 execute DB --local --file seeds/study/original_words.sql && wrangler d1 execute DB --local --file seeds/study/cross_references.sql && wrangler d1 execute DB --local --file seeds/study/commentary_notes.sql",
+    "seed:study:staging": "wrangler d1 execute DB --env staging --remote --file seeds/study/lexicon.sql && wrangler d1 execute DB --env staging --remote --file seeds/study/original_words.sql && wrangler d1 execute DB --env staging --remote --file seeds/study/cross_references.sql && wrangler d1 execute DB --env staging --remote --file seeds/study/commentary_notes.sql"
   },
   "dependencies": {
     "better-auth": "^1.7.15"

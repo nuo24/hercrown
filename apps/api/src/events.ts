@@ -37,6 +37,7 @@ export type ServerEvent =
   | "account_linked"
   | "passage_read" | "passage_saved" | "plan_started" | "plan_step_completed"
   | "trial_reminder_sent"
+  | "ai_call" | "study_viewed" | "study_reported"
   | "error";
 
 type Kind = "string" | "number" | "boolean";

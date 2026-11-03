@@ -10,6 +10,8 @@
     "deploy:staging": "npm run deploy:staging --prefix apps/api",
     "seed:scripture": "npm run seed:scripture --prefix apps/api",
     "build:bsb": "npm run build:bsb --prefix apps/api",
-    "build:web": "npm run build:web --prefix apps/api"
+    "build:web": "npm run build:web --prefix apps/api",
+    "build:study": "npm run build:study --prefix apps/api",
+    "seed:study": "npm run seed:study --prefix apps/api"
   }
 }

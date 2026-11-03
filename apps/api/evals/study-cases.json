@@ -1,0 +1,32 @@
+{
+  "about": "Accuracy evals for the AI study tools (decision 0006). Each verse is generated fresh with both tools. `include`: at least one pattern must appear (a fact the sources contain). `exclude`: none may appear (wrong or overconfident claims). Patterns are case-insensitive regular expressions. Automatic checks find obvious failures; a person still reads every answer in the report.",
+  "global_exclude": ["\\bas an ai\\b", "\\bi cannot\\b", "[\\u{1F300}-\\u{1FAFF}]", "\\bdear sister\\b"],
+  "cases": [
+    { "ref": "JHN.3.16", "include": ["Nicodemus|love"], "exclude": ["\\bPaul (wrote|writes|says)\\b"] },
+    { "ref": "PSA.23.1", "include": ["shepherd"], "exclude": ["Solomon (wrote|composed)"] },
+    { "ref": "HEB.11.1", "include": ["faith"], "exclude": ["\\bPaul (wrote|writes) (this|the letter|Hebrews)\\b", "\\bin his letter to the Hebrews, Paul\\b"] },
+    { "ref": "PRO.31.10", "include": ["wife|woman|virtu|worth"], "exclude": ["Solomon wrote (this|these|chapter 31)"] },
+    { "ref": "JER.29.11", "include": ["exile|Babylon|captiv"], "exclude": [] },
+    { "ref": "PHP.4.13", "include": ["content|circumstance|prison|need|want"], "exclude": [] },
+    { "ref": "MAT.7.1", "include": ["judg"], "exclude": [] },
+    { "ref": "ISA.40.31", "include": ["wait|hope|strength"], "exclude": [] },
+    { "ref": "ROM.8.28", "include": ["love God|purpose|good"], "exclude": [] },
+    { "ref": "GEN.1.1", "include": ["beginning|creat"], "exclude": ["\\bbillion|million years\\b"] },
+    { "ref": "EXO.14.14", "include": ["Egypt|Israel|Pharaoh|Moses"], "exclude": [] },
+    { "ref": "JOS.1.9", "include": ["Joshua"], "exclude": [] },
+    { "ref": "1CO.13.4", "include": ["love|charity"], "exclude": [] },
+    { "ref": "PRO.3.5", "include": ["trust"], "exclude": [] },
+    { "ref": "MAT.11.28", "include": ["rest|burden|weary"], "exclude": [] },
+    { "ref": "RUT.1.16", "include": ["Ruth|Naomi"], "exclude": ["\\bRuth said to Boaz\\b"] },
+    { "ref": "EST.4.14", "include": ["Esther|Mordecai"], "exclude": [] },
+    { "ref": "LUK.1.38", "include": ["Mary|handmaid|servant"], "exclude": [] },
+    { "ref": "JHN.11.35", "include": ["Lazarus|wept|tears"], "exclude": [] },
+    { "ref": "1PE.5.7", "include": ["care|anxi"], "exclude": [] },
+    { "ref": "PSA.46.10", "include": ["still|know"], "exclude": [] },
+    { "ref": "MIC.6.8", "include": ["just|merc|humbl|kind"], "exclude": [] },
+    { "ref": "EPH.5.22", "include": ["Christ|church"], "exclude": ["\\binferior\\b"] },
+    { "ref": "1TI.2.12", "include": ["differ|interpret|understood|read"], "exclude": [] },
+    { "ref": "JDG.4.4", "include": ["Deborah"], "exclude": [] },
+    { "ref": "GAL.3.28", "include": ["one in Christ|one"], "exclude": [] }
+  ]
+}

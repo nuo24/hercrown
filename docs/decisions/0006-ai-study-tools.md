@@ -1,6 +1,6 @@
 # 0006 · AI study tools
 
-**Date:** 2026-11-03 · **Status:** approved; design proposed
+**Date:** 2026-11-03 · **Status:** built (staging); see [docs/study-tools.md](../study-tools.md)
 
 **Decision:** Build the four Plus study tools — Explain Easier, Deeper Study, Original Language, Related Verses — using every appropriate source, to beat the "AI slop" complaints about Scroll the Bible (see `docs/research/`).
 
