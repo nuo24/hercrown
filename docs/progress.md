@@ -42,7 +42,14 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] **[HUMAN]** Read the eval report; decide on sensitive passages (hand-reviewed answers?) and Tyndale Open Study Notes (CC BY-SA)
 - [ ] Optional: Cloudflare AI Gateway (`AI_GATEWAY_URL`); complete Matthew Henry from CCEL
 
-## Phase 7: iOS — not started
+## Phase 7: iOS — in progress ([apps/ios](../apps/ios/README.md))
+- [x] Xcode project (iOS 17+, SwiftUI, Xcode 26.6), artwork catalog, offline KJV/BSB/WEB bundled from the verified seeds
+- [x] Foundation: API client (bearer + app headers), Keychain session, guest sign-in, `/me` sync, analytics queue → `/events`
+- [x] Design system: tokens, Baskerville, shared gradient (exact port of gradient-theme.js), floating neutral dock, capsule buttons
+- [x] Bible reader: verse-per-page paging, persistent verse rail (drag / VoiceOver adjustable), translation + chapter pickers, red letters, psalm titles, contextual art, save/share/reflect, bookmark position, reading days + chapter completion
+- [x] Onboarding: all 8 steps per the mockup, skip/back, guest path, daily reminder (local notification after opt-in), answers saved, completion
+- [ ] Study sheets · Home · Discover · Library · Settings · Superwall paywall + push · widget
+- Note: unit tests build; running them from the agent's terminal hangs (simulator test-runner connection) — run with ⌘U in Xcode
 
 ## Phase 8: Payments & entitlements — ⚠️ server side built locally
 - [x] `POST /webhooks/superwall`: Svix signature verified, processed once, out-of-order safe → `entitlements`
