@@ -10,9 +10,14 @@
     "deploy:staging": "wrangler deploy --env staging",
     "build:kjv": "node scripts/build-kjv.mjs",
     "seed:kjv": "wrangler d1 execute DB --local --file seeds/kjv.sql",
-    "seed:kjv:staging": "wrangler d1 execute DB --env staging --remote --file seeds/kjv.sql",
     "db:migrate": "wrangler d1 migrations apply DB --local",
-    "db:migrate:staging": "wrangler d1 migrations apply DB --env staging --remote"
+    "db:migrate:staging": "wrangler d1 migrations apply DB --env staging --remote",
+    "build:bsb": "node scripts/build-ebible.mjs bsb",
+    "build:web": "node scripts/build-ebible.mjs web",
+    "seed:bsb": "wrangler d1 execute DB --local --file seeds/bsb.sql",
+    "seed:web": "wrangler d1 execute DB --local --file seeds/web.sql",
+    "seed:scripture": "npm run seed:kjv && npm run seed:bsb && npm run seed:web",
+    "seed:scripture:staging": "wrangler d1 execute DB --env staging --remote --file seeds/kjv.sql && wrangler d1 execute DB --env staging --remote --file seeds/bsb.sql && wrangler d1 execute DB --env staging --remote --file seeds/web.sql"
   },
   "dependencies": {
     "better-auth": "^1.7.15"

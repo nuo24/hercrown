@@ -79,7 +79,7 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
     case "GET /scripture/translations":
       return listTranslations(env);
     case "GET /scripture/books":
-      return listBooks(env);
+      return listBooks(url, env);
     case "GET /scripture/search":
       return search(url, env);
   }

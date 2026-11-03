@@ -14,10 +14,10 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 - API: one Cloudflare Worker (`apps/api/src/index.ts`), plain `fetch` handler, no router framework
 - Data: D1 plain SQL (`apps/api/migrations/*.sql`) · R2 (private avatars) · KV · Rate Limiting binding
 - Auth: Better Auth (`apps/api/src/auth.ts`): anonymous first, Sign in with Apple, bearer tokens for iOS
-- Scripture: KJV stored in D1 and bundled offline (`apps/api/seeds/`); other translations online via API.Bible (`apps/api/src/apibible.ts`)
+- Scripture: KJV, BSB, WEB stored in D1 and bundled offline (`apps/api/seeds/`); other translations online via API.Bible (`apps/api/src/apibible.ts`)
 - Payments: Superwall (iOS); `entitlements` table is the source of truth, written only by verified webhooks
 - Analytics and errors: Tinybird via `POST /events` (not built yet)
-- AI: DeepSeek via OpenRouter behind AI Gateway, if insights use AI (undecided)
+- AI study tools (approved, not built): DeepSeek via OpenRouter behind AI Gateway, grounded in cited sources ([decision 0006](docs/decisions/0006-ai-study-tools.md))
 - iOS: SwiftUI (`starter-ios/` is an incomplete baseline; target `apps/ios`)
 
 ## Commands (run from the repo root)
@@ -25,12 +25,12 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 | Do | Run |
 |---|---|
 | Install | `npm install --prefix apps/api` |
-| Local database | `npm run db:migrate` then `npm run seed:kjv` |
+| Local database | `npm run db:migrate` then `npm run seed:scripture` (KJV, BSB, WEB) |
 | Dev server (http://localhost:8787) | `npm run dev` |
 | Typecheck | `npm run check` |
 | Tests | `npm test` |
 | New migration | `npx --prefix apps/api wrangler d1 migrations create DB <name>` (from `apps/api`) |
-| Rebuild KJV seeds | `npm run build:kjv` |
+| Rebuild Scripture seeds | `npm run build:kjv`, `npm run build:bsb`, `npm run build:web` (verified, pinned sources) |
 | Deploy staging | `npm run deploy:staging` |
 | Deploy production | **humans only** |
 

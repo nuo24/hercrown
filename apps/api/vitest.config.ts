@@ -7,9 +7,9 @@ export default defineConfig(async () => {
   const migrations = await readD1Migrations("./migrations");
   // Throwaway App Store Server API key so tests can check request signing (Apple itself is mocked).
   const appStoreKey = generateKeyPairSync("ec", { namedCurve: "P-256" });
-  // A few KJV chapters (seeds/kjv-test.sql), one SQL statement per entry.
-  const kjvTestSeed = readFileSync("./seeds/kjv-test.sql", "utf8")
-    .split(/;\n/).map((s) => s.replace(/^--.*$/gm, "").trim()).filter(Boolean);
+  // A few chapters of each offline translation (seeds/*-test.sql), one SQL statement per entry.
+  const kjvTestSeed = ["kjv", "bsb", "web"].flatMap((id) => readFileSync(`./seeds/${id}-test.sql`, "utf8")
+    .split(/;\n/).map((s) => s.replace(/^--.*$/gm, "").trim()).filter(Boolean));
   return {
     plugins: [
       cloudflareTest({

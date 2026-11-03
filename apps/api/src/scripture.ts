@@ -45,14 +45,27 @@ export async function listTranslations(env: Env) {
   return Response.json({ translations: rows.results.map((t) => translationJson(t, env)) });
 }
 
-export async function listBooks(env: Env) {
-  const counts = await env.DB.prepare("SELECT book_id, chapter, verse_count FROM chapter_verse_counts ORDER BY chapter")
-    .all<{ book_id: string; chapter: number; verse_count: number }>();
-  const byBook = Map.groupBy(counts.results, (r) => r.book_id);
+/** Books with per-chapter verse counts for the reader rail. `?translation=bsb` counts that translation's own verses
+ *  (BSB omits some verses); remote translations and the default use the canonical counts. */
+export async function listBooks(url: URL, env: Env) {
+  const requested = url.searchParams.get("translation");
+  const t = requested ? await translation(env, requested) : null;
+  const rows = t?.provider === "local"
+    ? await env.DB.prepare(
+        "SELECT book_id, chapter, count(*) AS verse_count FROM verses WHERE translation_id = ?1 GROUP BY book_id, chapter ORDER BY chapter",
+      ).bind(t.id).all<{ book_id: string; chapter: number; verse_count: number }>()
+    : await env.DB.prepare("SELECT book_id, chapter, verse_count FROM chapter_verse_counts ORDER BY chapter")
+        .all<{ book_id: string; chapter: number; verse_count: number }>();
+  if (t?.provider === "local" && rows.results.length === 0) {
+    throw new HttpError(503, "scripture_not_loaded", `${t.abbreviation ?? t.id} text isn't loaded on this server (run npm run seed:${t.id})`);
+  }
+  const counts = new Map(rows.results.map((r) => [`${r.book_id}.${r.chapter}`, r.verse_count]));
   return Response.json({
+    translation: t?.id ?? null,
     books: BOOKS.map(([id, name, testament, chapters]) => ({
       id, name, testament, chapters,
-      verseCounts: (byBook.get(id) ?? []).map((r) => r.verse_count), // drives the reader rail
+      // One entry per chapter, in order (0 if a chapter has no stored verses); drives the reader rail.
+      verseCounts: Array.from({ length: chapters }, (_, i) => counts.get(`${id}.${i + 1}`) ?? 0),
     })),
   });
 }
@@ -73,18 +86,30 @@ function neighbours(book: string, chapter: number) {
   return { previous, next };
 }
 
+interface ChapterVerse {
+  verse: number;
+  text: string;
+  wordsOfJesus?: [number, number][]; // [start, length] in UTF-16 units, for "Words of Jesus in red"
+}
+
 async function chapterVerses(env: Env, t: TranslationRow, book: string, chapter: number) {
   if (t.provider === "local") {
-    const rows = await env.DB.prepare(
-      "SELECT verse, text FROM verses WHERE translation_id = ?1 AND book_id = ?2 AND chapter = ?3 ORDER BY verse",
-    ).bind(t.id, book, chapter).all<{ verse: number; text: string }>();
-    if (rows.results.length === 0) {
-      throw new HttpError(503, "scripture_not_loaded", `${t.abbreviation ?? t.id} text isn't loaded on this server (run npm run seed:kjv)`);
+    const [rows, title] = await env.DB.batch([
+      env.DB.prepare("SELECT verse, text, words_of_jesus FROM verses WHERE translation_id = ?1 AND book_id = ?2 AND chapter = ?3 ORDER BY verse")
+        .bind(t.id, book, chapter),
+      env.DB.prepare("SELECT text FROM chapter_titles WHERE translation_id = ?1 AND book_id = ?2 AND chapter = ?3").bind(t.id, book, chapter),
+    ]);
+    const verses = (rows.results as { verse: number; text: string; words_of_jesus: string | null }[]).map((r): ChapterVerse =>
+      r.words_of_jesus ? { verse: r.verse, text: r.text, wordsOfJesus: JSON.parse(r.words_of_jesus) } : { verse: r.verse, text: r.text });
+    if (verses.length === 0) {
+      throw new HttpError(503, "scripture_not_loaded", `${t.abbreviation ?? t.id} text isn't loaded on this server (run npm run seed:${t.id})`);
     }
-    return { verses: rows.results, copyright: t.attribution, fumsToken: null };
+    const titleText = (title.results[0] as { text: string } | undefined)?.text ?? null;
+    return { verses, title: titleText, copyright: t.attribution, fumsToken: null };
   }
   if (!t.provider_bible_id) throw new HttpError(503, "translation_unavailable", "This translation isn't configured");
-  return fetchRemoteChapter(env, t.provider_bible_id, book, chapter);
+  const remote = await fetchRemoteChapter(env, t.provider_bible_id, book, chapter);
+  return { ...remote, verses: remote.verses as ChapterVerse[], title: null };
 }
 
 export async function getChapter(env: Env, translationId: string, bookInput: string, chapterInput: string) {
@@ -92,13 +117,15 @@ export async function getChapter(env: Env, translationId: string, bookInput: str
   const chapter = Number(chapterInput);
   if (!bookIndex.has(book)) throw notFound(`No book "${bookInput}"`);
   if (!Number.isInteger(chapter)) throw badRequest("chapter must be a number");
-  const [t, total] = await Promise.all([translation(env, translationId), verseCount(env, book, chapter)]);
+  const [t] = await Promise.all([translation(env, translationId), verseCount(env, book, chapter)]); // 404 if no such chapter
   const content = await chapterVerses(env, t, book, chapter);
   return Response.json({
     translation: translationJson(t, env),
     book: { id: book, name: BOOKS[bookIndex.get(book)!][1] },
     chapter,
-    verseCount: total,
+    title: content.title, // psalm superscription, shown above verse 1
+    // This translation's own verses: numbering can have gaps (e.g. BSB Matthew 17 has no verse 21).
+    verseCount: content.verses.length,
     verses: content.verses,
     ...neighbours(book, chapter),
     copyright: content.copyright,
@@ -112,11 +139,16 @@ export async function getPassage(env: Env, translationId: string, refInput: stri
   const [t, total] = await Promise.all([translation(env, translationId), verseCount(env, ref.book, ref.chapter)]);
   if (ref.end > total) throw badRequest(`${ref.book} ${ref.chapter} has ${total} verses`);
   const content = await chapterVerses(env, t, ref.book, ref.chapter);
+  const verses = content.verses.filter((v) => v.verse >= ref.start && v.verse <= ref.end);
+  if (verses.length === 0) {
+    throw new HttpError(404, "not_in_translation",
+      `${refLabel(ref.book, ref.chapter, ref.start, ref.end)} isn't in the ${t.abbreviation ?? t.name}. Some translations leave out verses that are missing from the earliest manuscripts.`);
+  }
   return Response.json({
     translation: translationJson(t, env),
     ref: ref.ref,
     label: refLabel(ref.book, ref.chapter, ref.start, ref.end),
-    verses: content.verses.filter((v) => v.verse >= ref.start && v.verse <= ref.end),
+    verses,
     copyright: content.copyright,
     fumsToken: content.fumsToken,
   });
@@ -167,26 +199,31 @@ async function referenceFromQuery(env: Env, q: string) {
   };
 }
 
-/** Passage search for Home: recognizes typed references, then searches KJV text (all words must match). */
+/** Passage search for Home: recognizes typed references, then searches an offline translation (all words must match). */
 export async function search(url: URL, env: Env) {
   const q = (url.searchParams.get("q") ?? "").trim();
   if (q.length < 2 || q.length > 100) throw badRequest("q must be 2-100 characters");
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit")) || 20, 1), 50);
 
+  // Word search covers the offline translations (online providers' search isn't connected yet).
+  const t = await translation(env, url.searchParams.get("translation") ?? "kjv");
+  if (t.provider !== "local") throw badRequest(`Search isn't available for ${t.abbreviation ?? t.name} yet; try KJV, BSB or WEB`);
+  const searchIn = t.id;
+
   // A typed reference ("Proverbs 31") is answered by the reference alone; word matches would only add noise.
   const reference = await referenceFromQuery(env, q);
   const words = q.toLowerCase().match(/[a-z']+/g)?.filter((w) => w.replace(/'/g, "").length > 1) ?? [];
-  if (reference || words.length === 0) return Response.json({ reference, translation: "kjv", results: [] });
+  if (reference || words.length === 0) return Response.json({ reference, translation: searchIn, results: [] });
 
   const match = words.map((w) => `"${w.replace(/"/g, "")}"`).join(" ");
   const rows = await env.DB.prepare(
     `SELECT v.book_id, v.chapter, v.verse, v.text FROM verses_fts f JOIN verses v ON v.rowid = f.rowid
-     WHERE verses_fts MATCH ?1 AND v.translation_id = 'kjv' ORDER BY f.rank LIMIT ?2`,
-  ).bind(match, limit).all<{ book_id: string; chapter: number; verse: number; text: string }>();
+     WHERE verses_fts MATCH ?1 AND v.translation_id = ?2 ORDER BY f.rank LIMIT ?3`,
+  ).bind(match, searchIn, limit).all<{ book_id: string; chapter: number; verse: number; text: string }>();
 
   return Response.json({
     reference,
-    translation: "kjv",
+    translation: searchIn,
     results: rows.results.map((r) => ({
       ref: `${r.book_id}.${r.chapter}.${r.verse}`,
       label: refLabel(r.book_id, r.chapter, r.verse),

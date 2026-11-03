@@ -12,11 +12,14 @@ const get = async (path: string) => {
 };
 
 describe("catalog", () => {
-  it("lists KJV as bundled and available offline", async () => {
+  it("lists KJV, BSB and WEB as bundled offline translations", async () => {
     const { body } = await get("/scripture/translations");
-    expect(body.translations).toEqual([
-      expect.objectContaining({ id: "kjv", abbreviation: "KJV", availability: "bundled", online: true, license: "Public Domain" }),
+    expect(body.translations.map((t: any) => [t.id, t.abbreviation, t.availability, t.license])).toEqual([
+      ["kjv", "KJV", "bundled", "Public Domain"],
+      ["bsb", "BSB", "bundled", "Public Domain"],
+      ["web", "WEB", "bundled", "Public Domain"],
     ]);
+    expect(body.translations[2].attribution).toMatch(/trademark of eBible\.org/);
   });
 
   it("lists 66 books with real verse counts for the reader rail", async () => {
@@ -29,8 +32,10 @@ describe("catalog", () => {
     expect(psa.verseCounts[22]).toBe(6); // Psalm 23
     expect(psa.verseCounts[116]).toBe(2); // Psalm 117, the shortest chapter
     expect(psa.verseCounts[118]).toBe(176); // Psalm 119, the longest
+    // Canonical upper bound across bundled translations: KJV's 31,102 + WEB's Romans 14:24–26.
     const total = body.books.reduce((n: number, b: any) => n + b.verseCounts.reduce((a: number, c: number) => a + c, 0), 0);
-    expect(total).toBe(31102);
+    expect(total).toBe(31105);
+    for (const b of body.books) expect(b.verseCounts).toHaveLength(b.chapters);
   });
 });
 
@@ -121,6 +126,58 @@ describe("search", () => {
   });
 });
 
+describe("offline BSB and WEB", () => {
+  it("serves each translation's own text with the psalm title kept apart", async () => {
+    const bsb = (await get("/scripture/bsb/PSA/23")).body;
+    expect(bsb).toMatchObject({ title: "A Psalm of David.", verseCount: 6, translation: { id: "bsb", availability: "bundled" } });
+    expect(bsb.verses[0]).toEqual({ verse: 1, text: "The LORD is my shepherd; I shall not want." });
+    const web = (await get("/scripture/web/PSA/23")).body;
+    expect(web.title).toBe("A Psalm by David.");
+    expect(web.verses[0].text).toBe("The LORD is my shepherd; I shall lack nothing.");
+    expect((await get("/scripture/kjv/PSA/23")).body.title).toBe("A Psalm of David.");
+    expect((await get("/scripture/web/GEN/1")).body.verses[0].text).toBe("In the beginning, God created the heavens and the earth.");
+  });
+
+  it("keeps BSB's gaps where it omits verses absent from early manuscripts", async () => {
+    const mat17 = (await get("/scripture/bsb/MAT/17")).body;
+    expect(mat17.verseCount).toBe(26);
+    expect(mat17.verses.map((v: any) => v.verse)).not.toContain(21);
+    expect(mat17.verses.at(-1).verse).toBe(27);
+    const missing = await get("/scripture/bsb/passages/MAT.17.21");
+    expect(missing).toMatchObject({ status: 404, body: { error: "not_in_translation" } });
+    expect(missing.body.message).toMatch(/Matthew 17:21 isn't in the BSB/);
+    expect((await get("/scripture/kjv/passages/MAT.17.21")).status).toBe(200);
+    expect((await get("/scripture/bsb/passages/MAT.17.20-22")).body.verses.map((v: any) => v.verse)).toEqual([20, 22]);
+  });
+
+  it("gives per-translation verse counts for the reader rail", async () => {
+    const mat = (body: any) => body.books.find((b: any) => b.id === "MAT").verseCounts[16];
+    expect(mat((await get("/scripture/books?translation=bsb")).body)).toBe(26);
+    expect(mat((await get("/scripture/books?translation=web")).body)).toBe(27);
+    expect(mat((await get("/scripture/books")).body)).toBe(27);
+    expect((await get("/scripture/books?translation=nope")).status).toBe(404);
+  });
+
+  it("marks the words of Jesus for red-letter display", async () => {
+    const check = async (path: string, verse: number, red: string) => {
+      const v = (await get(path)).body.verses.find((x: any) => x.verse === verse);
+      expect(v.wordsOfJesus.map(([s, l]: number[]) => v.text.slice(s, s + l))).toEqual([red]);
+    };
+    await check("/scripture/kjv/MAT/11", 28, "Come unto me, all ye that labour and are heavy laden, and I will give you rest.");
+    await check("/scripture/web/MAT/11", 28, "“Come to me, all you who labor and are heavily burdened, and I will give you rest.");
+    await check("/scripture/web/JHN/3", 16, "For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.");
+    const narration = (await get("/scripture/kjv/MAT/11")).body.verses.find((x: any) => x.verse === 1);
+    expect(narration.wordsOfJesus).toBeUndefined();
+  });
+
+  it("searches the chosen offline translation", async () => {
+    const bsb = (await get("/scripture/search?q=shepherd%20want&translation=bsb")).body;
+    expect(bsb).toMatchObject({ translation: "bsb", results: [{ ref: "PSA.23.1", text: "The LORD is my shepherd; I shall not want." }] });
+    expect((await get("/scripture/search?q=lack%20nothing&translation=web")).body.results[0].ref).toBe("PSA.23.1");
+    expect((await get("/scripture/search?q=shepherd&translation=nope")).status).toBe(404);
+  });
+});
+
 describe("online translations (API.Bible)", () => {
   afterEach(() => vi.restoreAllMocks());
 
@@ -168,7 +225,8 @@ describe("online translations (API.Bible)", () => {
        VALUES ('test', 'Test Version', 'TST', 'Licensed', 'remote', 'api_bible', 'bible-1', 2)`,
     ).run();
     const { body } = await get("/scripture/translations");
-    expect(body.translations[1]).toMatchObject({ id: "test", availability: "remote", online: false }); // no key in tests
+    expect(body.translations.find((t: any) => t.id === "test")).toMatchObject({ availability: "remote", online: false }); // no key in tests
     expect((await get("/scripture/test/PSA/23")).body.error).toBe("translation_unavailable");
+    expect((await get("/scripture/search?q=shepherd&translation=test")).status).toBe(400); // search is offline-only
   });
 });

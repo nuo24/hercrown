@@ -6,8 +6,10 @@
     "check": "npm run check --prefix apps/api",
     "test": "npm test --prefix apps/api",
     "db:migrate": "npm run db:migrate --prefix apps/api",
-    "seed:kjv": "npm run seed:kjv --prefix apps/api",
     "build:kjv": "npm run build:kjv --prefix apps/api",
-    "deploy:staging": "npm run deploy:staging --prefix apps/api"
+    "deploy:staging": "npm run deploy:staging --prefix apps/api",
+    "seed:scripture": "npm run seed:scripture --prefix apps/api",
+    "build:bsb": "npm run build:bsb --prefix apps/api",
+    "build:web": "npm run build:web --prefix apps/api"
   }
 }

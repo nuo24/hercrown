@@ -19,7 +19,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] D1 migrations: auth, app tables, Scripture catalog (`apps/api/migrations/`)
 - [x] `GET /health`, JSON errors, rate limits on auth
 - [x] Core API: profile, avatar, preferences, onboarding, saved passages, reading events + streak, plans
-- [x] Scripture: full KJV (31,102 verses, verified), chapters, passages, search, API.Bible connector
+- [x] Scripture: KJV, BSB, WEB offline (verified builds), chapters, passages, per-translation search, API.Bible connector
+- [x] Words of Jesus (red letters) for KJV and WEB; psalm titles kept separate from verse 1
 - [ ] Error events to Tinybird (Phase 9)
 - [ ] **[HUMAN]** Cloudflare account → staging D1/KV/R2 → deploy → `curl https://<staging>/health` returns 200
 
@@ -56,7 +57,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 ## Next, in order
 1. ~~Restore Purchases~~ ✅ (local)
-2. Offline BSB, WEB and CPDV (same verified pipeline as KJV)
+2. ~~Offline BSB and WEB~~ ✅ (local; words of Jesus + psalm titles too). CPDV pending a decision ([0005](decisions/0005-offline-translations.md))
 3. Tinybird analytics (onboarding → paywall → decline → offer → trial → paid; restore outcomes)
 4. **Trial-ending reminder** — Scroll the Bible's #2 complaint is being charged without the promised reminder. Server knows each trial's end; push + in-app notice 2 days before, visible in Settings → Subscription.
 5. **AI study tools** (Phase 5 above)
@@ -65,7 +66,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] Notes per verse (auto-saved) and a "library" (studies, studied, saved, notes)
 - [ ] Bible progress: chapters completed of 1,189; days opened vs days read; weeks in a row; days this year
 - [ ] Verse of the Day and Today's Devotional (+ devotionals-read count)
-- [ ] Preferences: font size (4 steps), Words of Jesus in red (needs red-letter data), system theme
+- [ ] Preferences: font size (4 steps), Words of Jesus in red toggle (data ✅ for KJV/WEB), system theme
 - [ ] Email sign-in (they use email only; we have Apple — add email OTP/magic link)
 - [ ] App Tracking Transparency prompt for ad attribution (marketing decision)
 
