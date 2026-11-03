@@ -87,13 +87,16 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
 
     db.prepare(
       `INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end,
-         original_transaction_id, updated_at)
-       SELECT ?2, entitlement, source, product_id, status, current_period_end, original_transaction_id, ?3
+         original_transaction_id, updated_at, will_renew, period_type, environment, last_event_at)
+       SELECT ?2, entitlement, source, product_id, status, current_period_end, original_transaction_id, ?3,
+         will_renew, period_type, environment, last_event_at
        FROM entitlements WHERE user_id = ?1
        ON CONFLICT (user_id, entitlement) DO UPDATE SET
          source = excluded.source, product_id = excluded.product_id, status = excluded.status,
          current_period_end = excluded.current_period_end,
-         original_transaction_id = excluded.original_transaction_id, updated_at = ?3
+         original_transaction_id = excluded.original_transaction_id, updated_at = ?3,
+         will_renew = excluded.will_renew, period_type = excluded.period_type,
+         environment = excluded.environment, last_event_at = excluded.last_event_at
        WHERE COALESCE(excluded.current_period_end, 0) > COALESCE(entitlements.current_period_end, 0)`,
     ).bind(from, to, t),
     db.prepare("DELETE FROM entitlements WHERE user_id = ?1").bind(from),

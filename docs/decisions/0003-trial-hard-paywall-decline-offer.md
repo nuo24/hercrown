@@ -1,11 +1,16 @@
-# 0003 · Free trial, hard paywall, decline offer
+# 0003 · Paywall: free scrolling, Premium trial, decline offer
 
 **Date:** 2026-11-02 · **Status:** accepted (implementation in Phase 8)
 
-**Decision:** Follow the playbook: annual ~$29.99 with a free trial and a hard paywall after onboarding. When a user declines, show a one-time special offer at ~$20 (App Store tier $19.99). A weekly option ($2.99) remains from the design.
+**Decision:** Copy what works for Scroll the Bible rather than the playbook's hard paywall:
 
-**Supersedes:** the kit spec's "no trial, dismissible paywall with free-reading exit" (specs/CURRENT-DESIGN.md).
+- Paywall after onboarding. Annual **$29.99 with a free trial** (Scroll the Bible uses 7 days on yearly) and **weekly $2.99**.
+- Declining shows a one-time **decline offer** (yearly ~$19.99). Declining again enters the app.
+- **Scrolling the Bible is free.** Premium unlocks reading plans and the study tools (Explain easier, Deeper study, Related verses, Original language).
+- The server's `entitlements` table is the only Premium check.
 
-**Why:** The playbook's 30% / 30% benchmarks assume a trial + hard paywall; matching the model makes the comparison meaningful.
+**Supersedes:** the earlier "hard paywall" choice (same day) and the kit spec's "no trial" (specs/CURRENT-DESIGN.md). The free-reading exit from the kit spec is kept.
 
-**Open:** trial length (3 or 7 days); whether $19.99 is first-year-only or permanent; which features are gated.
+**Why:** Scroll the Bible (1M+ downloads, 4.8★) gates study features, not reading. Note: the playbook's 30% / 30% benchmarks assume a hard paywall, so expect a different trial-start rate; compare against our own funnel.
+
+**Decided 2026-11-03:** 7-day free trial on both yearly and weekly; the ~$19.99 decline offer is a first-year introductory price (renews at $29.99). Keep trial length and offer price configurable (App Store Connect + Superwall), not hard-coded.

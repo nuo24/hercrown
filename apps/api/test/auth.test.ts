@@ -49,7 +49,7 @@ describe("account deletion", () => {
       env.DB.prepare("INSERT INTO preferences (user_id, updated_at) VALUES (?1, 1)").bind(userId),
       env.DB.prepare("INSERT INTO saved_passages VALUES (?1, 'PSA.23.1', 1)").bind(userId),
       env.DB.prepare("INSERT INTO reading_events VALUES ('ev-del', ?1, '2026-11-02', 'UTC', 1, NULL, NULL, NULL, 1)").bind(userId),
-      env.DB.prepare("INSERT INTO entitlements VALUES (?1, 'plus', 'app_store', 'p', 'active', 9, 'otx', 1)").bind(userId),
+      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'p', 'active', 9, 'otx', 1)").bind(userId),
       env.DB.prepare("INSERT INTO usage_ledger VALUES ('u-del', ?1, 'insight', 1, 10, 1)").bind(userId),
     ]);
 
@@ -83,7 +83,7 @@ describe("guest → account merge", () => {
                                                         ('g2', ?1, '2026-11-02', 'UTC', 2, NULL, NULL, NULL, 2)`).bind(guest),
       env.DB.prepare("INSERT INTO plan_progress VALUES (?1, 'quiet', 100, 3, NULL, 1)").bind(guest),
       env.DB.prepare("INSERT INTO plan_step_completions VALUES (?1, 'quiet', 0, 1), (?1, 'quiet', 1, 1), (?1, 'quiet', 2, 1)").bind(guest),
-      env.DB.prepare("INSERT INTO entitlements VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', 'trialing', 2000, 'otx-guest', 1)").bind(guest),
+      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', 'trialing', 2000, 'otx-guest', 1)").bind(guest),
       env.DB.prepare("INSERT INTO support_requests (id, user_id, category, message, created_at, updated_at) VALUES ('sr1', ?1, 'help', 'hi', 1, 1)").bind(guest),
 
       // Account: existing user from another device with their own name, avatar and settings.
@@ -136,8 +136,8 @@ describe("guest → account merge", () => {
     const guest = (await signInGuest()).userId;
     const account = (await signInGuest()).userId;
     await env.DB.batch([
-      env.DB.prepare("INSERT INTO entitlements VALUES (?1, 'plus', 'app_store', 'weekly', 'expired', 100, 'otx-g', 1)").bind(guest),
-      env.DB.prepare("INSERT INTO entitlements VALUES (?1, 'plus', 'app_store', 'yearly', 'active', 9000, 'otx-a', 1)").bind(account),
+      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'weekly', 'expired', 100, 'otx-g', 1)").bind(guest),
+      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'yearly', 'active', 9000, 'otx-a', 1)").bind(account),
     ]);
     await moveUserData(env, guest, account);
     const ent = await env.DB.prepare("SELECT * FROM entitlements WHERE user_id = ?1").bind(account).first();

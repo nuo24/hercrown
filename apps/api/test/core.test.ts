@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { BOOKS, normalizeRef } from "../src/refs";
-import { api, signInGuest } from "./helpers";
+import { api, grantPremium, signInGuest } from "./helpers";
 
 let token: string;
 let userId: string;
@@ -22,6 +22,7 @@ describe("GET /me", () => {
         reminderTime: "08:00", timeZone: null, appearance: "dark", gradient: null,
       },
       onboarding: { completed: false, completedAt: null, version: null },
+      membership: { premium: false, subscription: null },
     });
   });
 });
@@ -209,6 +210,8 @@ describe("reading events and streak", () => {
 });
 
 describe("reading plans", () => {
+  beforeEach(() => grantPremium(userId));
+
   it("lists the three plans with their passages", async () => {
     const { plans, activePlanId } = await (await api("/plans", { token })).json<any>();
     expect(plans.map((p: any) => [p.id, p.days])).toEqual([["quiet", 5], ["peace", 3], ["strength", 3]]);

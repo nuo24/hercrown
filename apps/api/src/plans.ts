@@ -1,4 +1,5 @@
 // Reading plans: definitions, start, step completion and resume position.
+import { entitlementFor, requirePremium } from "./billing";
 import { badRequest, notFound } from "./http";
 import type { SessionUser } from "./profile";
 
@@ -63,13 +64,14 @@ async function loadPlans(env: Env, userId: string, planId?: string) {
   });
 }
 
+/** Plans are Premium: anyone can browse them; starting and progressing needs Plus (`locked` tells the app). */
 export async function listPlans(env: Env, user: SessionUser) {
-  const plans = await loadPlans(env, user.id);
+  const [plans, { premium }] = await Promise.all([loadPlans(env, user.id), entitlementFor(env, user.id)]);
   // The plan shown as "Plan" in Discover: most recently touched plan that isn't finished.
   const active = plans
     .filter((p) => p.progress && !p.progress.completedAt)
     .sort((a, b) => b.progress!.updatedAt - a.progress!.updatedAt)[0];
-  return Response.json({ plans, activePlanId: active?.id ?? null });
+  return Response.json({ plans, activePlanId: active?.id ?? null, locked: !premium });
 }
 
 async function onePlan(env: Env, userId: string, planId: string) {
@@ -85,6 +87,7 @@ export async function getPlan(env: Env, user: SessionUser, planId: string) {
 /** Starting is idempotent; starting an in-progress plan just marks it as the active one. */
 export async function startPlan(env: Env, user: SessionUser, planId: string) {
   await onePlan(env, user.id, planId);
+  await requirePremium(env, user.id);
   const t = Date.now();
   await env.DB.prepare(
     `INSERT INTO plan_progress (user_id, plan_id, started_at, current_position, updated_at) VALUES (?1, ?2, ?3, 0, ?3)
@@ -99,6 +102,7 @@ export async function startPlan(env: Env, user: SessionUser, planId: string) {
  */
 export async function completePlanStep(env: Env, user: SessionUser, planId: string, position: number) {
   const plan = await onePlan(env, user.id, planId);
+  await requirePremium(env, user.id);
   if (!Number.isInteger(position) || position < 0 || position >= plan.days) {
     throw badRequest(`Step must be between 0 and ${plan.days - 1}`);
   }

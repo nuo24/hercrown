@@ -7,7 +7,7 @@
 For women who want to scroll less and read more, Bible Scroll turns spare phone minutes into a calm, swipeable Scripture reading habit.
 Design authority: [IMPLEMENTATION.md](IMPLEMENTATION.md) → [specs/](specs/) → [reference-web/dist/](reference-web/dist/) (the working mockup). Copy what already works; don't reinvent screens.
 Domain watch-outs: never alter or fabricate Scripture text; keep reflections and insights clearly separate from Scripture; translation licenses are per publisher.
-$29.99/year with a free trial and a hard paywall, plus a one-time decline offer (~$19.99). Benchmarks (estimates): ~30% trial start, ~30% trial → paid. See [docs/decisions/](docs/decisions/).
+Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $29.99/year with a free trial or $2.99/week; on decline, a one-time ~$19.99 yearly offer; declining again opens the free reader ([decision 0003](docs/decisions/0003-trial-hard-paywall-decline-offer.md)). Playbook benchmarks (rough, assume a hard paywall): ~30% trial start, ~30% trial → paid. Measure our own.
 
 ## Stack (nothing else)
 

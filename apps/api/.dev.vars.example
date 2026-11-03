@@ -5,3 +5,5 @@ APPLE_CLIENT_ID=
 APPLE_CLIENT_SECRET=
 # Online translations via API.Bible (leave empty to serve KJV only)
 API_BIBLE_KEY=
+# Superwall webhook signing secret (whsec_...)
+SUPERWALL_WEBHOOK_SECRET=

@@ -16,6 +16,7 @@ export default defineConfig(async () => {
             TEST_MIGRATIONS: migrations,
             TEST_KJV_SEED: kjvTestSeed,
             API_BIBLE_KEY: "",
+            SUPERWALL_WEBHOOK_SECRET: "whsec_dGVzdC13ZWJob29rLXNlY3JldC0xMjM0NTY3ODkw", // base64("test-webhook-secret-1234567890")
             BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-00",
             APPLE_CLIENT_ID: "",
             APPLE_CLIENT_SECRET: "",

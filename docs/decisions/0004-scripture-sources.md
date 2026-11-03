@@ -7,3 +7,5 @@
 **Online translations:** via [API.Bible](https://api.bible), fetched per request, not stored. Each translation is a row in `translations` (`provider = 'api_bible'`). Requires FUMS v3 reporting from the app (we pass `fumsToken` through). API.Bible is a vendor outside the playbook's list, added before the owner confirmed it.
 
 **Open:** which translations (NIV/ESV/NLT etc. need publisher licenses); API.Bible caching terms (caching is off until confirmed); API.Bible account + key.
+
+**Decided 2026-11-03 — online translations wanted (all from the recording):** NLT, NLTCE (Tyndale House), AMP, NASB 2020, NASB 1995 (Lockman Foundation), NKJV (Thomas Nelson / HarperCollins), CSB (Holman / Lifeway), CEV, GNT (American Bible Society), NIV (Biblica). Each publisher must grant permission for a paid app; some are on API.Bible, others have their own licensing/API. Track each license before enabling its row.

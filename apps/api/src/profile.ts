@@ -1,4 +1,5 @@
 // Profile, avatar, preferences and onboarding completion.
+import { entitlementFor } from "./billing";
 import { badRequest, HttpError, oneOf, optionalText, readJson } from "./http";
 import { APPEARANCES, FAMILIARITY, INTENTIONS, ONBOARDING_VERSION, ROUTINES, TOPICS } from "./options";
 
@@ -87,12 +88,15 @@ const onboardingJson = (row: PreferencesRow) => ({
 
 /** Everything the app needs at launch in one call. */
 export async function getMe(env: Env, user: SessionUser) {
-  const [profile, prefs] = await Promise.all([profileRow(env, user.id), preferencesRow(env, user.id)]);
+  const [profile, prefs, membership] = await Promise.all([
+    profileRow(env, user.id), preferencesRow(env, user.id), entitlementFor(env, user.id),
+  ]);
   return Response.json({
     user: { id: user.id, isAnonymous: Boolean(user.isAnonymous), email: user.isAnonymous ? null : user.email },
     profile: profileJson(profile),
     preferences: preferencesJson(prefs),
     onboarding: onboardingJson(prefs),
+    membership,
   });
 }
 

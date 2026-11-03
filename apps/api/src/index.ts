@@ -1,5 +1,6 @@
 // The whole API as one fetch handler. No router framework (ai-app-playbook chapter 02).
 import { getAuth } from "./auth";
+import { entitlementFor, handleSuperwallWebhook } from "./billing";
 import { errorResponse, HttpError } from "./http";
 import { completePlanStep, getPlan, listPlans, startPlan } from "./plans";
 import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, updatePreferences, updateProfile } from "./profile";
@@ -39,6 +40,8 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   switch (`${request.method} ${url.pathname}`) {
     case "GET /health":
       return Response.json({ ok: true, env: env.APP_ENV });
+    case "POST /webhooks/superwall":
+      return handleSuperwallWebhook(request, env); // verified by signature, not by session
   }
 
   const session = await getAuth().api.getSession({ headers: request.headers });
@@ -48,6 +51,8 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
   switch (`${request.method} ${url.pathname}`) {
     case "GET /me":
       return getMe(env, user);
+    case "GET /me/entitlements":
+      return Response.json(await entitlementFor(env, user.id));
     case "PATCH /me/profile":
       return updateProfile(request, env, user);
     case "PATCH /me/preferences":
