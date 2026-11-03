@@ -14,4 +14,4 @@ xcuserdata
 
 # Study data: downloads and full seeds are rebuilt by scripts/build-study.mjs
 .cache/
-seeds/study/
+apps/api/seeds/study/

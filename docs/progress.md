@@ -73,13 +73,17 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 4. ~~Trial-ending reminder~~ ✅ (local; push needs the APNs key + a phone)
 5. ~~AI study tools~~ ✅ (staging; owner review of the eval report pending)
 
-## Gaps found in the competitor recording ([walkthrough](research/scroll-the-bible-walkthrough.md))
-- [ ] Notes per verse (auto-saved) and a "library" (studies, studied, saved, notes)
-- [ ] Bible progress: chapters completed of 1,189; days opened vs days read; weeks in a row; days this year
-- [ ] Verse of the Day and Today's Devotional (+ devotionals-read count)
-- [ ] Preferences: font size (4 steps), Words of Jesus in red toggle (data ✅ for KJV/WEB), system theme
-- [ ] Email sign-in (they use email only; we have Apple — add email OTP/magic link)
-- [ ] App Tracking Transparency prompt for ad attribution (marketing decision)
+## Gaps found in the competitor recording ([walkthrough](research/scroll-the-bible-walkthrough.md)) — ✅ server side built (2026-11-03)
+- [x] Notes per verse (auto-saved, newest wins across devices) and "Your library" (saved verses, notes, saved studies, studied)
+- [x] Bible progress: chapters completed of 1,189; days opened vs days read; weeks in a row; days this year; devotionals read
+- [x] Verse of the Day (122-verse rotation), random verse, widget verse; Discover by theme / For you / plan (72 cards + reflections)
+- [x] Today's Devotional: 29 AI drafts in `content/devotionals.json` — **none approved yet** ([docs/content.md](content.md))
+- [x] Preferences: font size (4 steps), Words of Jesus in red, system theme, reading translation, bookmark (position)
+- [x] Email sign-in (6-digit code via Cloudflare Email Service) — off until the domain is set up
+- [x] Contact & Support: stored with a reference, emailed to the team inbox; legal pages served at /legal/*
+- [x] API reference for the iOS app: [docs/api.md](api.md)
+- [ ] **[HUMAN]** Domain → Cloudflare Email Service → set `EMAIL_FROM`, `SUPPORT_INBOX`; review devotionals, reflections, legal drafts
+- [ ] App Tracking Transparency prompt for ad attribution (marketing decision, iOS)
 
 ## Phases 10–14 — not started
 

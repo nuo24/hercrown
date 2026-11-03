@@ -3,8 +3,13 @@ import { getAuth } from "./auth";
 import { entitlementFor, handleSuperwallWebhook } from "./billing";
 import { deliverEvents, type EventRow, receiveEvents, requestContext, type ServerEvent, Tracker } from "./events";
 import { errorResponse, HttpError } from "./http";
+import { getDevotional, getDiscover, getRandomVerse, getTodaysDevotional, getVerseOfTheDay, getWidget, markDevotionalRead } from "./content";
+import { legalPage } from "./legal";
+import { deleteNote, getLibrary, getNote, listNotes, listSavedStudies, listStudied, saveNote, saveStudy } from "./library";
 import { completePlanStep, getPlan, listPlans, startPlan } from "./plans";
-import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, updatePreferences, updateProfile } from "./profile";
+import { completeChapter, getProgress, listCompletedChapters, recordOpened, uncompleteChapter } from "./progress";
+import { createSupportRequest, listSupportRequests } from "./support";
+import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, savePosition, updatePreferences, updateProfile } from "./profile";
 import { getStreak, recordReading } from "./reading";
 import { listSaved, savePassage, unsavePassage } from "./saved";
 import { registerDevice, unregisterDevice } from "./push";
@@ -16,6 +21,12 @@ import { getChapter, getPassage, listBooks, listTranslations, search } from "./s
 const savedPath = new URLPattern({ pathname: "/me/saved/:ref" });
 const devicePath = new URLPattern({ pathname: "/me/devices/:token" });
 const studyPath = new URLPattern({ pathname: "/study/:ref/:tool" });
+const notePath = new URLPattern({ pathname: "/me/notes/:ref" });
+const savedStudyPath = new URLPattern({ pathname: "/me/studies/:ref/:tool" });
+const chapterDonePath = new URLPattern({ pathname: "/me/chapters/:book/:chapter/complete" });
+const devotionalPath = new URLPattern({ pathname: "/devotionals/:id" });
+const devotionalReadPath = new URLPattern({ pathname: "/me/devotionals/:id/read" });
+const legalPath = new URLPattern({ pathname: "/legal/:page" });
 const studyReportPath = new URLPattern({ pathname: "/study/:ref/:tool/report" });
 const planPath = new URLPattern({ pathname: "/plans/:id" });
 const planStartPath = new URLPattern({ pathname: "/plans/:id/start" });
@@ -70,6 +81,8 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
     case "POST /webhooks/superwall":
       return handleSuperwallWebhook(request, env, ctx); // verified by signature, not by session
   }
+  const legal = request.method === "GET" && legalPath.exec(url);
+  if (legal) return legalPage(legal.pathname.groups.page!, url); // public: App Store privacy policy / terms URLs
 
   const session = await getAuth().api.getSession({ headers: request.headers });
   if (session) tracker.userId = session.user.id;
@@ -99,6 +112,36 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
       return deleteAvatar(env, user);
     case "PUT /me/devices":
       return registerDevice(request, env, user);
+    case "PUT /me/position":
+      return savePosition(request, env, user);
+    case "GET /me/library":
+      return getLibrary(env, user);
+    case "GET /me/notes":
+      return listNotes(url, env, user);
+    case "GET /me/studies":
+      return listSavedStudies(url, env, user);
+    case "GET /me/studied":
+      return listStudied(url, env, user);
+    case "POST /me/opened":
+      return recordOpened(request, env, user);
+    case "GET /me/progress":
+      return getProgress(url, env, user);
+    case "GET /me/chapters":
+      return listCompletedChapters(url, env, user);
+    case "GET /me/widget":
+      return getWidget(url, env, user);
+    case "GET /me/support":
+      return listSupportRequests(env, user);
+    case "POST /me/support":
+      return createSupportRequest(request, env, ctx, user, tracker);
+    case "GET /scripture/verse-of-the-day":
+      return getVerseOfTheDay(url, env, user);
+    case "GET /scripture/random":
+      return getRandomVerse(url, env, user);
+    case "GET /discover":
+      return getDiscover(url, env, user);
+    case "GET /devotionals/today":
+      return getTodaysDevotional(url, env, user);
     case "GET /me/saved":
       return listSaved(env, user);
     case "POST /me/reading-events":
@@ -133,6 +176,32 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
   if (studyReport && (TOOLS as readonly string[]).includes(studyReport.pathname.groups.tool!)) {
     return reportStudy(request, env, user, decodeURIComponent(studyReport.pathname.groups.ref!), studyReport.pathname.groups.tool as AiTool, tracker);
   }
+  const note = notePath.exec(url);
+  if (note) {
+    const ref = decodeURIComponent(note.pathname.groups.ref!);
+    if (request.method === "GET") return getNote(env, user, ref);
+    if (request.method === "PUT") return tracked(saveNote(request, env, user, ref), tracker, "note_saved"); // never the text
+    if (request.method === "DELETE") return deleteNote(env, user, ref);
+  }
+  const savedStudy = savedStudyPath.exec(url);
+  if (savedStudy && (request.method === "PUT" || request.method === "DELETE")) {
+    const { ref, tool } = savedStudy.pathname.groups;
+    const save = request.method === "PUT";
+    return tracked(saveStudy(env, user, decodeURIComponent(ref!), tool!, save), tracker, "study_saved", { tool, saved: save });
+  }
+  const chapterDone = chapterDonePath.exec(url);
+  if (chapterDone) {
+    const { book, chapter } = chapterDone.pathname.groups;
+    if (request.method === "POST") return tracked(completeChapter(request, env, user, book!, chapter!), tracker, "chapter_completed");
+    if (request.method === "DELETE") return uncompleteChapter(env, user, book!, chapter!);
+  }
+  const devotionalRead = request.method === "POST" && devotionalReadPath.exec(url);
+  if (devotionalRead) {
+    const id = devotionalRead.pathname.groups.id!;
+    return tracked(markDevotionalRead(request, env, user, id), tracker, "devotional_read", { devotional_id: id });
+  }
+  const devotional = request.method === "GET" && devotionalPath.exec(url);
+  if (devotional) return getDevotional(url, env, user, devotional.pathname.groups.id!);
   const device = devicePath.exec(url);
   if (device && request.method === "DELETE") return unregisterDevice(env, user, decodeURIComponent(device.pathname.groups.token!));
   const step = planStepPath.exec(url);

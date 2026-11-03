@@ -36,9 +36,11 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
 
     db.prepare(
       `INSERT INTO preferences (user_id, intention, familiarity, topics, routine, reminders_enabled, reminder_time,
-         time_zone, appearance, gradient, onboarding_version, onboarding_completed_at, updated_at)
+         time_zone, appearance, gradient, onboarding_version, onboarding_completed_at, updated_at,
+         font_size, words_of_jesus_red, translation, widget_ref, position_ref, position_updated_at)
        SELECT ?2, intention, familiarity, topics, routine, reminders_enabled, reminder_time,
-         time_zone, appearance, gradient, onboarding_version, onboarding_completed_at, ?3
+         time_zone, appearance, gradient, onboarding_version, onboarding_completed_at, ?3,
+         font_size, words_of_jesus_red, translation, widget_ref, position_ref, position_updated_at
        FROM preferences WHERE user_id = ?1
        ON CONFLICT (user_id) DO UPDATE SET
          intention   = COALESCE(preferences.intention, excluded.intention),
@@ -47,6 +49,10 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
          routine     = COALESCE(preferences.routine, excluded.routine),
          time_zone   = COALESCE(preferences.time_zone, excluded.time_zone),
          gradient    = COALESCE(preferences.gradient, excluded.gradient),
+         widget_ref  = COALESCE(preferences.widget_ref, excluded.widget_ref),
+         position_ref = CASE WHEN COALESCE(excluded.position_updated_at, 0) > COALESCE(preferences.position_updated_at, 0)
+           THEN excluded.position_ref ELSE preferences.position_ref END,
+         position_updated_at = MAX(COALESCE(preferences.position_updated_at, 0), COALESCE(excluded.position_updated_at, 0)),
          onboarding_version = MAX(COALESCE(preferences.onboarding_version, 0), COALESCE(excluded.onboarding_version, 0)),
          onboarding_completed_at = CASE
            WHEN preferences.onboarding_completed_at IS NULL THEN excluded.onboarding_completed_at
@@ -104,6 +110,32 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
     db.prepare("UPDATE support_requests SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
     db.prepare("UPDATE usage_ledger SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
     db.prepare("UPDATE push_devices SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
+    // Notes: the more recently edited one wins.
+    db.prepare(
+      `INSERT INTO verse_notes (user_id, ref, text, created_at, updated_at)
+       SELECT ?2, ref, text, created_at, updated_at FROM verse_notes WHERE user_id = ?1
+       ON CONFLICT (user_id, ref) DO UPDATE SET text = excluded.text, updated_at = excluded.updated_at,
+         created_at = MIN(verse_notes.created_at, excluded.created_at)
+       WHERE excluded.updated_at > verse_notes.updated_at`,
+    ).bind(from, to),
+    db.prepare(
+      `INSERT INTO study_history (user_id, ref, tool, first_viewed_at, last_viewed_at)
+       SELECT ?2, ref, tool, first_viewed_at, last_viewed_at FROM study_history WHERE user_id = ?1
+       ON CONFLICT (user_id, ref, tool) DO UPDATE SET first_viewed_at = MIN(study_history.first_viewed_at, excluded.first_viewed_at),
+         last_viewed_at = MAX(study_history.last_viewed_at, excluded.last_viewed_at)`,
+    ).bind(from, to),
+    db.prepare("INSERT OR IGNORE INTO saved_studies (user_id, ref, tool, saved_at) SELECT ?2, ref, tool, saved_at FROM saved_studies WHERE user_id = ?1").bind(from, to),
+    db.prepare(
+      `INSERT INTO chapter_completions (user_id, book_id, chapter, local_day, completed_at)
+       SELECT ?2, book_id, chapter, local_day, completed_at FROM chapter_completions WHERE user_id = ?1
+       ON CONFLICT (user_id, book_id, chapter) DO UPDATE SET completed_at = MIN(chapter_completions.completed_at, excluded.completed_at),
+         local_day = CASE WHEN excluded.completed_at < chapter_completions.completed_at THEN excluded.local_day ELSE chapter_completions.local_day END`,
+    ).bind(from, to),
+    db.prepare("INSERT OR IGNORE INTO app_open_days (user_id, local_day) SELECT ?2, local_day FROM app_open_days WHERE user_id = ?1").bind(from, to),
+    db.prepare(
+      `INSERT OR IGNORE INTO devotional_reads (user_id, devotional_id, local_day, read_at)
+       SELECT ?2, devotional_id, local_day, read_at FROM devotional_reads WHERE user_id = ?1`,
+    ).bind(from, to),
     db.prepare(
       `INSERT OR IGNORE INTO trial_reminders (user_id, trial_ends_at, original_transaction_id, devices, sent_at)
        SELECT ?2, trial_ends_at, original_transaction_id, devices, sent_at FROM trial_reminders WHERE user_id = ?1`,

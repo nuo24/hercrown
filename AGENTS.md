@@ -5,7 +5,7 @@
 ## App
 
 For women who want to scroll less and read more, Bible Scroll turns spare phone minutes into a calm, swipeable Scripture reading habit.
-Design authority: [IMPLEMENTATION.md](IMPLEMENTATION.md) → [specs/](specs/) → [reference-web/dist/](reference-web/dist/) (the working mockup). Copy what already works; don't reinvent screens.
+Design authority: [IMPLEMENTATION.md](IMPLEMENTATION.md) → [specs/](specs/) → [reference-web/dist/](reference-web/dist/) (the working mockup). Copy what already works; don't reinvent screens. API for the app: [docs/api.md](docs/api.md).
 Domain watch-outs: never alter or fabricate Scripture text; keep reflections and insights clearly separate from Scripture; translation licenses are per publisher.
 Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $29.99/year with a free trial or $2.99/week; on decline, a one-time ~$19.99 yearly offer; declining again opens the free reader ([decision 0003](docs/decisions/0003-trial-hard-paywall-decline-offer.md)). Playbook benchmarks (rough, assume a hard paywall): ~30% trial start, ~30% trial → paid. Measure our own.
 
@@ -31,6 +31,7 @@ Reading is free; Plus unlocks plans and study tools. Paywall after onboarding: $
 | Tests | `npm test` |
 | New migration | `npx --prefix apps/api wrangler d1 migrations create DB <name>` (from `apps/api`) |
 | Rebuild Scripture seeds | `npm run build:kjv`, `npm run build:bsb`, `npm run build:web` (verified, pinned sources) |
+| Devotionals | Review `content/devotionals.json` ([docs/content.md](docs/content.md)), then `npm run seed:devotionals --prefix apps/api` (approved only) |
 | Study-tool evals | `STUDY_EVAL_TOKEN=… node apps/api/scripts/eval-study.mjs [baseUrl]` → `docs/evals/` |
 | Deploy staging | `npm run deploy:staging` |
 | Deploy production | **humans only** |

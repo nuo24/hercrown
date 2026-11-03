@@ -1,0 +1,37 @@
+DESCRIPTION >
+    D1 / D7 / D30 retention by install cohort (day of first app_opened). An install is retained on day N if it opened
+    the app on that day after its first open. Cohorts too young to measure show NULL, not 0.
+
+NODE first_open
+SQL >
+    %
+    SELECT install_id, toDate(min(timestamp)) AS cohort
+    FROM events
+    WHERE event = 'app_opened' AND install_id IS NOT NULL
+      AND environment = {{ String(environment, 'production') }}
+      {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
+    GROUP BY install_id
+    HAVING cohort >= {{ Date(start, '2026-01-01') }} AND cohort < {{ Date(end, '2100-01-01') }}
+
+NODE opens
+SQL >
+    %
+    SELECT DISTINCT install_id, toDate(timestamp) AS day
+    FROM events
+    WHERE event = 'app_opened' AND install_id IN (SELECT install_id FROM first_open)
+      AND environment = {{ String(environment, 'production') }}
+
+NODE retention
+SQL >
+    SELECT
+        f.cohort,
+        count(DISTINCT f.install_id) AS installs,
+        if(today() - f.cohort >= 1, round(uniqExactIf(o.install_id, o.day = f.cohort + 1) / installs, 4), NULL) AS d1,
+        if(today() - f.cohort >= 7, round(uniqExactIf(o.install_id, o.day = f.cohort + 7) / installs, 4), NULL) AS d7,
+        if(today() - f.cohort >= 30, round(uniqExactIf(o.install_id, o.day = f.cohort + 30) / installs, 4), NULL) AS d30
+    FROM first_open AS f
+    LEFT JOIN opens AS o USING install_id
+    GROUP BY f.cohort
+    ORDER BY f.cohort DESC
+
+TYPE endpoint

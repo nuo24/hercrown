@@ -8,6 +8,7 @@
 import { type AiUsage, logAiCall, streamChat, type ChatMessage } from "./ai";
 import { requirePremium } from "./billing";
 import type { Tracker } from "./events";
+import { recordStudied } from "./library";
 import { badRequest, HttpError, readJson } from "./http";
 import { parsing } from "./morph";
 import type { SessionUser } from "./profile";
@@ -58,6 +59,7 @@ export async function getRelated(env: Env, user: SessionUser, refInput: string, 
     const text = await passageText(env, translation, target);
     if (text) related.push({ ref: target, label: refLabel(p.book, p.chapter, p.start, p.end), text, votes });
   }
+  await recordStudied(env, user.id, v.ref, "related");
   return Response.json({
     ref: v.ref, label: v.label, translation, related,
     source: { name: "OpenBible.info cross-references", license: "CC BY", url: "https://www.openbible.info/labs/cross-references/" },
@@ -102,6 +104,7 @@ export async function getOriginal(env: Env, user: SessionUser, refInput: string)
   const v = await verseFor(env, refInput);
   const original = await originalWords(env, v);
   if (!original) throw new HttpError(404, "not_found", `No original-language data for ${v.label}`);
+  await recordStudied(env, user.id, v.ref, "original");
   return Response.json({
     ref: v.ref, label: v.label, ...original,
     source: {
@@ -325,6 +328,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
   ).bind(v.ref, tool, PROMPT_VERSION).first<AnswerRow>();
   if (stored?.status === "published") {
     tracker.track("study_viewed", { tool, cached: true });
+    await recordStudied(env, user.id, v.ref, tool);
     return Response.json(answerJson(v, tool, JSON.parse(stored.sections), JSON.parse(stored.sources), stored.created_at, true));
   }
 
@@ -380,6 +384,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
     ).bind(v.ref, tool, PROMPT_VERSION, JSON.stringify(checked.sections), JSON.stringify(checked.cited), usage!.model,
       usage!.promptTokens, usage!.completionTokens, Math.round(usage!.costUsd * 1_000_000), t).run();
     tracker.track("study_viewed", { tool, cached: false });
+    await recordStudied(env, user.id, v.ref, tool);
     return answerJson(v, tool, checked.sections, checked.cited, t, false);
   };
 

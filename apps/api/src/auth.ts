@@ -1,8 +1,9 @@
 // Better Auth inside the Worker, storing users in D1 (ai-app-playbook chapter 04).
-// Anonymous first; Sign in with Apple links the guest to a real account. Native clients use bearer tokens.
+// Anonymous first; Sign in with Apple or a 6-digit email code links the guest to a real account. Native clients use bearer tokens.
 import { betterAuth } from "better-auth";
-import { anonymous, bearer } from "better-auth/plugins";
+import { anonymous, bearer, emailOTP } from "better-auth/plugins";
 import { env } from "cloudflare:workers";
+import { emailConfigured, sendEmail } from "./email";
 import { linkPerson } from "./events";
 import { deleteUserData, moveUserData } from "./users";
 
@@ -56,5 +57,22 @@ const createAuth = () => betterAuth({
     }),
     // Native clients read the `set-auth-token` header and send `Authorization: Bearer <token>`.
     bearer(),
+    // "Continue with Email": POST /api/auth/email-otp/send-verification-otp { email, type: "sign-in" }, then
+    // POST /api/auth/sign-in/email-otp { email, otp }. Signing in as a guest links the guest's data, like Apple.
+    ...(emailConfigured(env) ? [emailOTP({
+      otpLength: 6,
+      expiresIn: 10 * 60,
+      allowedAttempts: 5,
+      async sendVerificationOTP({ email, otp }) {
+        await sendEmail(env, {
+          to: email,
+          subject: `${otp} is your Bible Scroll code`,
+          text: `Your Bible Scroll sign-in code is ${otp}.\n\nIt expires in 10 minutes. If you didn't ask for it, you can ignore this email.`,
+          html: `<div style="font: 16px/1.5 -apple-system, sans-serif; color: #2a2230"><p>Your Bible Scroll sign-in code is</p>`
+            + `<p style="font-size: 32px; letter-spacing: 6px; font-weight: 600">${otp}</p>`
+            + `<p style="color: #6e6375">It expires in 10 minutes. If you didn't ask for it, you can ignore this email.</p></div>`,
+        });
+      },
+    })] : []),
   ],
 });

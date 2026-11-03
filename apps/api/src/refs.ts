@@ -50,3 +50,10 @@ export async function resolveRef(db: D1Database, input: string): Promise<string>
   }
   return parsed.ref;
 }
+
+/** resolveRef for exactly one verse ("Choose a single verse" otherwise). */
+export async function resolveVerse(db: D1Database, input: string): Promise<string> {
+  const ref = await resolveRef(db, input);
+  if (parseRef(ref)!.start !== parseRef(ref)!.end) throw badRequest("Choose a single verse");
+  return ref;
+}

@@ -25,6 +25,7 @@ export const TOPICS = [
 export const ROUTINES = ["2 minutes", "5 minutes", "10 minutes", "No time goal"] as const;
 
 export const APPEARANCES = ["light", "dark", "system"] as const;
+export const FONT_SIZES = ["default", "large", "larger", "largest"] as const;
 
 /** Current onboarding flow version (prototype `flowVersion`). */
 export const ONBOARDING_VERSION = 2;

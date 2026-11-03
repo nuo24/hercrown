@@ -2,7 +2,8 @@
 import { entitlementFor } from "./billing";
 import type { Tracker } from "./events";
 import { badRequest, HttpError, oneOf, optionalText, readJson } from "./http";
-import { APPEARANCES, FAMILIARITY, INTENTIONS, ONBOARDING_VERSION, ROUTINES, TOPICS } from "./options";
+import { APPEARANCES, FAMILIARITY, FONT_SIZES, INTENTIONS, ONBOARDING_VERSION, ROUTINES, TOPICS } from "./options";
+import { resolveVerse } from "./refs";
 
 export interface SessionUser {
   id: string;
@@ -29,6 +30,12 @@ interface PreferencesRow {
   gradient: string | null;
   onboarding_version: number | null;
   onboarding_completed_at: number | null;
+  font_size: string;
+  words_of_jesus_red: number;
+  translation: string;
+  widget_ref: string | null;
+  position_ref: string | null;
+  position_updated_at: number | null;
 }
 
 const DEFAULT_PREFERENCES: PreferencesRow = {
@@ -43,6 +50,12 @@ const DEFAULT_PREFERENCES: PreferencesRow = {
   gradient: null,
   onboarding_version: null,
   onboarding_completed_at: null,
+  font_size: "default",
+  words_of_jesus_red: 1,
+  translation: "kjv",
+  widget_ref: null,
+  position_ref: null,
+  position_updated_at: null,
 };
 
 // ── Reads ───────────────────────────────────────────────────────────────────
@@ -56,7 +69,8 @@ async function profileRow(env: Env, userId: string) {
 export async function preferencesRow(env: Env, userId: string): Promise<PreferencesRow> {
   const row = await env.DB.prepare(
     `SELECT intention, familiarity, topics, routine, reminders_enabled, reminder_time, time_zone, appearance,
-            gradient, onboarding_version, onboarding_completed_at
+            gradient, onboarding_version, onboarding_completed_at, font_size, words_of_jesus_red, translation, widget_ref,
+            position_ref, position_updated_at
      FROM preferences WHERE user_id = ?1`,
   ).bind(userId).first<PreferencesRow>();
   return row ?? DEFAULT_PREFERENCES;
@@ -79,6 +93,11 @@ const preferencesJson = (row: PreferencesRow) => ({
   timeZone: row.time_zone,
   appearance: row.appearance,
   gradient: row.gradient ? JSON.parse(row.gradient) : null,
+  fontSize: row.font_size,
+  wordsOfJesusInRed: row.words_of_jesus_red === 1,
+  translation: row.translation,
+  widgetRef: row.widget_ref,
+  position: row.position_ref ? { ref: row.position_ref, updatedAt: row.position_updated_at } : null,
 });
 
 const onboardingJson = (row: PreferencesRow) => ({
@@ -242,6 +261,24 @@ export async function updatePreferences(request: Request, env: Env, user: Sessio
     next.time_zone = body.timeZone;
   }
   if (body.gradient !== undefined) next.gradient = parseGradient(body.gradient);
+  const fontSize = oneOf(body, "fontSize", FONT_SIZES);
+  if (fontSize) next.font_size = fontSize;
+  if (body.wordsOfJesusInRed !== undefined) {
+    if (typeof body.wordsOfJesusInRed !== "boolean") throw badRequest("wordsOfJesusInRed must be a boolean");
+    next.words_of_jesus_red = body.wordsOfJesusInRed ? 1 : 0;
+  }
+  if (body.translation !== undefined) {
+    const known = typeof body.translation === "string"
+      ? await env.DB.prepare("SELECT id FROM translations WHERE id = ?1 AND enabled = 1").bind(body.translation).first()
+      : null;
+    if (!known) throw badRequest("translation must be an available translation id (see /scripture/translations)");
+    next.translation = body.translation as string;
+  }
+  if (body.widgetRef !== undefined) {
+    if (body.widgetRef === null) next.widget_ref = null;
+    else if (typeof body.widgetRef !== "string") throw badRequest("widgetRef must be a verse reference or null");
+    else next.widget_ref = await resolveVerse(env.DB, body.widgetRef);
+  }
 
   await writePreferences(env, user.id, next);
   return Response.json(preferencesJson(next));
@@ -259,6 +296,28 @@ async function writePreferences(env: Env, userId: string, p: PreferencesRow) {
     userId, p.intention, p.familiarity, p.topics, p.routine, p.reminders_enabled, p.reminder_time,
     p.time_zone, p.appearance, p.gradient, p.onboarding_version, p.onboarding_completed_at, Date.now(),
   ).run();
+  await env.DB.prepare(
+    "UPDATE preferences SET font_size = ?2, words_of_jesus_red = ?3, translation = ?4, widget_ref = ?5 WHERE user_id = ?1",
+  ).bind(userId, p.font_size, p.words_of_jesus_red, p.translation, p.widget_ref).run();
+}
+
+
+/**
+ * PUT /me/position { ref }: the reader's bookmark (where she left off). A chapter ("JHN.3.1") or verse. Last write wins,
+ * but an older position from a slower device never overwrites a newer one (`at`, client ms).
+ */
+export async function savePosition(request: Request, env: Env, user: SessionUser) {
+  const body = await readJson(request);
+  if (typeof body.ref !== "string") throw badRequest("ref is required");
+  const ref = await resolveVerse(env.DB, body.ref);
+  const at = typeof body.at === "number" && Number.isFinite(body.at) ? Math.min(body.at, Date.now()) : Date.now();
+  await env.DB.prepare(
+    `INSERT INTO preferences (user_id, position_ref, position_updated_at, updated_at) VALUES (?1, ?2, ?3, ?3)
+     ON CONFLICT (user_id) DO UPDATE SET position_ref = ?2, position_updated_at = ?3, updated_at = ?3
+     WHERE COALESCE(preferences.position_updated_at, 0) <= ?3`,
+  ).bind(user.id, ref, at).run();
+  const row = await preferencesRow(env, user.id);
+  return Response.json({ position: { ref: row.position_ref, updatedAt: row.position_updated_at } });
 }
 
 // ── Onboarding ──────────────────────────────────────────────────────────────

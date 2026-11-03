@@ -30,6 +30,8 @@ export default defineConfig(async () => {
             APNS_PRIVATE_KEY: appStoreKey.privateKey.export({ type: "pkcs8", format: "pem" }).toString(), // Apple is mocked
             APPLE_TEAM_ID: "TEAM123456",
             OPENROUTER_API_KEY: "sk-or-test", // OpenRouter is mocked; never the real key from .dev.vars
+            EMAIL_FROM: "hello@biblescroll.test", // email is captured by spying on env.EMAIL.send
+            SUPPORT_INBOX: "team@biblescroll.test",
             SUPERWALL_WEBHOOK_SECRET: "whsec_dGVzdC13ZWJob29rLXNlY3JldC0xMjM0NTY3ODkw", // base64("test-webhook-secret-1234567890")
             BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-00",
             APPLE_CLIENT_ID: "",

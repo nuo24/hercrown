@@ -1,0 +1,30 @@
+DESCRIPTION >
+    AI spend: per day and feature (calls, failures, tokens, cost, p95 latency), plus cost per paying subscriber over the
+    window. Study answers are generated once per verse and stored, so cost should flatten as coverage grows.
+
+NODE by_day
+SQL >
+    %
+    SELECT
+        toDate(timestamp) AS day,
+        JSONExtractString(props, 'feature') AS feature,
+        JSONExtractString(props, 'model') AS model,
+        count() AS calls,
+        countIf(NOT JSONExtractBool(props, 'ok')) AS failed,
+        sum(JSONExtractInt(props, 'tokens_in') + JSONExtractInt(props, 'tokens_out')) AS tokens,
+        round(sum(JSONExtractFloat(props, 'cost_usd')), 4) AS cost_usd,
+        quantile(0.95)(JSONExtractInt(props, 'latency_ms')) AS p95_latency_ms,
+        round(cost_usd / nullIf(
+            (SELECT uniqExact(person_id) FROM events FINAL
+             WHERE event IN ('trial_converted', 'subscription_started', 'subscription_renewed')
+               AND environment = {{ String(environment, 'production') }} AND sandbox = 0
+               AND timestamp >= {{ DateTime(start, '2026-01-01 00:00:00') }} AND timestamp < {{ DateTime(end, '2100-01-01 00:00:00') }}), 0), 4)
+          AS cost_per_paying_subscriber_usd
+    FROM events
+    WHERE event = 'ai_call'
+      AND environment = {{ String(environment, 'production') }}
+      AND timestamp >= {{ DateTime(start, '2026-01-01 00:00:00') }} AND timestamp < {{ DateTime(end, '2100-01-01 00:00:00') }}
+    GROUP BY day, feature, model
+    ORDER BY day DESC, cost_usd DESC
+
+TYPE endpoint

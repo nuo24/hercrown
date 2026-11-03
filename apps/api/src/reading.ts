@@ -7,7 +7,7 @@ import { dayOrdinal, isValidDay, localDayIn, streakSummary } from "./streak";
 const MAX_EVENTS = 100;
 const ID = /^[A-Za-z0-9_-]{8,64}$/;
 
-async function readingDays(env: Env, userId: string) {
+export async function readingDays(env: Env, userId: string) {
   const rows = await env.DB.prepare("SELECT DISTINCT local_day FROM reading_events WHERE user_id = ?1")
     .bind(userId)
     .all<{ local_day: string }>();
@@ -15,7 +15,7 @@ async function readingDays(env: Env, userId: string) {
 }
 
 /** The user's "today": an explicit client day if given, else today in their saved time zone, else UTC. */
-async function resolveToday(env: Env, userId: string, requested: string | null) {
+export async function resolveToday(env: Env, userId: string, requested: string | null) {
   if (requested) {
     if (!isValidDay(requested)) throw badRequest("today must be a real date in YYYY-MM-DD form");
     return requested;
