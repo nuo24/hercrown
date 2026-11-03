@@ -29,6 +29,9 @@ Worker (onboarding, verified webhooks, restore, errors, features) ──┘
 | `decline_offer_declined` | app | same | `paywallDecline` on the offer; the free reader opens |
 | `purchase_started` / `purchase_failed` | app | paywall props + `product_id` (+ `reason`) | Buy tapped / StoreKit error or cancel |
 | `restore_tapped` | app | | Restore button tapped |
+| `push_permission` | app | `granted`, `placement` | After the iOS notification prompt |
+| `trial_notice_viewed` / `manage_subscription_tapped` | app | `placement` | In-app trial-ending notice shown / Manage tapped |
+| `trial_reminder_sent` | server | `product_id`, `devices`, `hours_left` | Trial-ending push delivered to Apple ([trial-reminder.md](trial-reminder.md)) |
 | `trial_started` | webhook | `product_id`, `period_type`, `store`, `price`, `proceeds` | `initial_purchase` with period TRIAL |
 | `subscription_started` | webhook | same | `initial_purchase` without a trial (INTRO = the $19.99 offer) |
 | `trial_converted` | webhook | same | `renewal` with `is_trial_conversion` |

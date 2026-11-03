@@ -16,3 +16,7 @@ APP_STORE_PRIVATE_KEY=
 TINYBIRD_TOKEN=
 # OpenRouter key for AI study tools (staging/production: wrangler secret put OPENROUTER_API_KEY)
 OPENROUTER_API_KEY=
+# Push notifications (trial reminders): Apple Developer > Keys > APNs key; Team ID from Membership details
+APNS_KEY_ID=
+APNS_PRIVATE_KEY=
+APPLE_TEAM_ID=

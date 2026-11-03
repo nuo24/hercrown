@@ -7,10 +7,13 @@ import { completePlanStep, getPlan, listPlans, startPlan } from "./plans";
 import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, updatePreferences, updateProfile } from "./profile";
 import { getStreak, recordReading } from "./reading";
 import { listSaved, savePassage, unsavePassage } from "./saved";
+import { registerDevice, unregisterDevice } from "./push";
+import { sendTrialReminders } from "./reminders";
 import { restorePurchases } from "./restore";
 import { getChapter, getPassage, listBooks, listTranslations, search } from "./scripture";
 
 const savedPath = new URLPattern({ pathname: "/me/saved/:ref" });
+const devicePath = new URLPattern({ pathname: "/me/devices/:token" });
 const planPath = new URLPattern({ pathname: "/plans/:id" });
 const planStartPath = new URLPattern({ pathname: "/plans/:id/start" });
 const planStepPath = new URLPattern({ pathname: "/plans/:id/steps/:position/complete" });
@@ -35,6 +38,11 @@ export default {
   // Analytics queue → Tinybird.
   async queue(batch, env): Promise<void> {
     await deliverEvents(batch as MessageBatch<EventRow>, env);
+  },
+
+  // Cron Trigger (every 15 minutes): trial-ending reminders.
+  async scheduled(controller, env, ctx): Promise<void> {
+    await sendTrialReminders(env, controller.scheduledTime, ctx);
   },
 } satisfies ExportedHandler<Env>;
 
@@ -86,6 +94,8 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
       return putAvatar(request, env, user);
     case "DELETE /me/avatar":
       return deleteAvatar(env, user);
+    case "PUT /me/devices":
+      return registerDevice(request, env, user);
     case "GET /me/saved":
       return listSaved(env, user);
     case "POST /me/reading-events":
@@ -108,6 +118,8 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
     if (request.method === "PUT") return tracked(savePassage(env, user, ref), tracker, "passage_saved");
     if (request.method === "DELETE") return unsavePassage(env, user, ref);
   }
+  const device = devicePath.exec(url);
+  if (device && request.method === "DELETE") return unregisterDevice(env, user, decodeURIComponent(device.pathname.groups.token!));
   const step = planStepPath.exec(url);
   if (step && request.method === "POST") {
     const { id, position } = step.pathname.groups;

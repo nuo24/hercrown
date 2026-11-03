@@ -3,6 +3,7 @@
 // Responses come straight from Apple over TLS with that authorization, so their signed payloads are
 // decoded without re-verifying Apple's certificate chain (hardening option: verify x5c against Apple Root CA G3).
 import { HttpError } from "./http";
+import { es256Jwt } from "./jwt";
 
 const BASE = { production: "https://api.storekit.apple.com", sandbox: "https://api.storekit-sandbox.apple.com" } as const;
 export type AppleEnvironment = keyof typeof BASE;
@@ -44,24 +45,15 @@ export interface AppleStatusResult {
 
 const unavailable = (message: string) => new HttpError(503, "restore_unavailable", message);
 
-const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const b64urlJson = (value: unknown) => b64url(new TextEncoder().encode(JSON.stringify(value)));
-
 export function appStoreConfigured(env: Env) {
   return Boolean(env.APP_STORE_ISSUER_ID && env.APP_STORE_KEY_ID && env.APP_STORE_PRIVATE_KEY);
 }
 
 /** ES256 JWT for the App Store Server API: kid, iss, aud "appstoreconnect-v1", bid, ≤ 60 min lifetime. */
 export async function appStoreJwt(env: Env, now = Date.now()): Promise<string> {
-  const pem = env.APP_STORE_PRIVATE_KEY.replace(/\\n/g, "\n");
-  const der = Uint8Array.from(atob(pem.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "")), (c) => c.charCodeAt(0));
-  const key = await crypto.subtle.importKey("pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
   const iat = Math.floor(now / 1000);
-  const header = b64urlJson({ alg: "ES256", kid: env.APP_STORE_KEY_ID, typ: "JWT" });
-  const payload = b64urlJson({ iss: env.APP_STORE_ISSUER_ID, iat, exp: iat + 20 * 60, aud: "appstoreconnect-v1", bid: env.APPLE_APP_BUNDLE_IDENTIFIER });
-  // WebCrypto returns the raw r||s signature that JWS ES256 expects.
-  const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(`${header}.${payload}`));
-  return `${header}.${payload}.${b64url(new Uint8Array(signature))}`;
+  return es256Jwt(env.APP_STORE_PRIVATE_KEY, { kid: env.APP_STORE_KEY_ID },
+    { iss: env.APP_STORE_ISSUER_ID, iat, exp: iat + 20 * 60, aud: "appstoreconnect-v1", bid: env.APPLE_APP_BUNDLE_IDENTIFIER });
 }
 
 /** Decodes the payload of a JWS returned by Apple (see note at the top of this file). */

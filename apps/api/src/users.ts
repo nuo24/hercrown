@@ -103,6 +103,11 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
 
     db.prepare("UPDATE support_requests SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
     db.prepare("UPDATE usage_ledger SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
+    db.prepare("UPDATE push_devices SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
+    db.prepare(
+      `INSERT OR IGNORE INTO trial_reminders (user_id, trial_ends_at, original_transaction_id, devices, sent_at)
+       SELECT ?2, trial_ends_at, original_transaction_id, devices, sent_at FROM trial_reminders WHERE user_id = ?1`,
+    ).bind(from, to),
   ]);
 
   if (fromAvatar && toAvatar && fromAvatar !== toAvatar) await env.FILES.delete(fromAvatar);

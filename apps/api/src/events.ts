@@ -36,6 +36,7 @@ export type ServerEvent =
   | "restore_completed" | "restore_failed"
   | "account_linked"
   | "passage_read" | "passage_saved" | "plan_started" | "plan_step_completed"
+  | "trial_reminder_sent"
   | "error";
 
 type Kind = "string" | "number" | "boolean";
@@ -52,6 +53,9 @@ export const CLIENT_EVENTS: Record<string, Record<string, Kind>> = {
   purchase_started: { ...PAYWALL, product_id: "string" }, // the tap; the purchase itself comes from the store webhook
   purchase_failed: { ...PAYWALL, product_id: "string", reason: "string" },
   restore_tapped: {},
+  push_permission: { granted: "boolean", placement: "string" },
+  trial_notice_viewed: { placement: "string" }, // the in-app "trial ends soon" notice (home or settings)
+  manage_subscription_tapped: { placement: "string" },
   error: { message: "string", stack: "string", screen: "string" },
 };
 

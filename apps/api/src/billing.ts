@@ -2,6 +2,7 @@
 // Reading is free; Premium unlocks plans and study tools (docs/decisions/0003).
 import { type Props, type ServerEvent, Tracker } from "./events";
 import { HttpError } from "./http";
+import { trialInfo } from "./reminders";
 
 export const ENTITLEMENT = "plus";
 const GRACE_MS = 16 * 86_400_000; // App Store billing grace period, at most 16 days
@@ -297,6 +298,7 @@ export async function entitlementFor(env: Env, userId: string) {
           isTrial: row.status === "trialing",
           store: row.source,
           sandbox: row.environment === "SANDBOX",
+          trial: row.status === "trialing" ? trialInfo(env, row.current_period_end, row.will_renew === 1) : null,
         }
       : null,
   };

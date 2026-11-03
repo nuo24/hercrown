@@ -53,7 +53,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] Sandbox test: purchase → reinstall → Restore → Plus returns (needs the key + products)
 - [ ] **[HUMAN]** App Store Connect products (see restore doc): yearly $29.99 + 7-day trial, weekly $2.99 + 7-day trial, yearly.offer with $19.99 first-year intro price; Family Sharing on; Superwall project + **V2** webhook → `wrangler secret put SUPERWALL_WEBHOOK_SECRET`
 - [ ] iOS: `Superwall.shared.identify(userId:)` with our user id right after guest sign-in; paywall placements; decline offer
-- [ ] Trial-ending reminder (push, Phase 11)
+- [x] Trial-ending reminder: push 2 days before + in-app notice + Settings line ([docs/trial-reminder.md](trial-reminder.md)); needs the APNs key to send
 
 ## Phase 9: Analytics & errors — ⚠️ built locally ([docs/analytics.md](analytics.md))
 - [x] `POST /events` → Queue → Tinybird Events API; server events for onboarding, verified billing, restore outcomes, features, errors
@@ -68,7 +68,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 1. ~~Restore Purchases~~ ✅ (local)
 2. ~~Offline BSB and WEB~~ ✅ (local; words of Jesus + psalm titles too). CPDV pending a decision ([0005](decisions/0005-offline-translations.md))
 3. ~~Tinybird analytics~~ ✅ (local; needs a Tinybird workspace to deploy)
-4. **Trial-ending reminder** — Scroll the Bible's #2 complaint is being charged without the promised reminder. Server knows each trial's end; push + in-app notice 2 days before, visible in Settings → Subscription.
+4. ~~Trial-ending reminder~~ ✅ (local; push needs the APNs key + a phone)
 5. **AI study tools** (Phase 5 above)
 
 ## Gaps found in the competitor recording ([walkthrough](research/scroll-the-bible-walkthrough.md))

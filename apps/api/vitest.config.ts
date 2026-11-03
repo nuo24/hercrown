@@ -23,6 +23,9 @@ export default defineConfig(async () => {
             APP_STORE_KEY_ID: "TESTKEY123",
             APP_STORE_PRIVATE_KEY: appStoreKey.privateKey.export({ type: "pkcs8", format: "pem" }).toString(),
             TEST_APP_STORE_PUBLIC_KEY: appStoreKey.publicKey.export({ type: "spki", format: "pem" }).toString(),
+            APNS_KEY_ID: "APNSKEY123",
+            APNS_PRIVATE_KEY: appStoreKey.privateKey.export({ type: "pkcs8", format: "pem" }).toString(), // Apple is mocked
+            APPLE_TEAM_ID: "TEAM123456",
             SUPERWALL_WEBHOOK_SECRET: "whsec_dGVzdC13ZWJob29rLXNlY3JldC0xMjM0NTY3ODkw", // base64("test-webhook-secret-1234567890")
             BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-00",
             APPLE_CLIENT_ID: "",
