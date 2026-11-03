@@ -1,0 +1,6 @@
+{
+  "asset": "quiet-sky.png",
+  "origin": "Generated with built-in image_gen on 2026-10-31",
+  "prompt": "Create a photographic UI background asset for Bible Scroll, a quiet iOS Scripture app. Landscape 3:2 composition, only open daylight pale blue sky with airy soft white cumulus clouds, natural realistic atmospheric depth, gentle light from upper left, pale cyan upper sky, cloud banks along lower left and right corners leaving a broad clear luminous center. Fine film-quality photographic detail, no grain overlay, restrained saturation, no violet, no orange, no sunset. It will sit BEHIND a floating white Scripture panel, so it must be quiet and spacious and not contain any interface, cards, typography, symbols, crosses, birds, mountains, buildings or people. Not an illustration or vector. Opaque full-bleed image.",
+  "role": "Bible Scroll scene backdrop, not copied Altitude imagery"
+}

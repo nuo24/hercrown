@@ -1,0 +1,242 @@
+{
+  "note": "Raw global declarations in CSS source order; per-component overrides and inherited variables still apply. This is not a complete computed-style dump.",
+  "cssOrder": [
+    "style.css",
+    "main-layout.css",
+    "brand-refresh.css",
+    "origin-design.css",
+    "design-tokens.css",
+    "origin-refinement.css",
+    "discover.css",
+    "altitude-ios.css",
+    "welcome-photo.css",
+    "onboarding-white.css",
+    "expressive-topics.css",
+    "liquid-dock.css",
+    "verse-sidebar.css",
+    "onboarding-intro.css",
+    "paywall.css",
+    "settings.css",
+    "native-pickers.css"
+  ],
+  "lightGlobalDeclarations": {
+    "--paper": "#f7f4ee",
+    "--ink": "#392e37",
+    "--muted": "#7b7076",
+    "--accent": "#70536c",
+    "--tint": "#eee6ed",
+    "--line": "#e5dedf",
+    "--white": "#fffdfa",
+    "--serif": "'Libre Caslon Display',Georgia,serif",
+    "--device-height": "min(900px, calc(100svh - 32px))"
+  },
+  "darkOverrides": {
+    "--paper": "#08090b",
+    "--ink": "#f7f8fa",
+    "--muted": "#a4aab2",
+    "--accent": "#85b6e7",
+    "--tint": "#202a35",
+    "--line": "#30343a",
+    "--white": "#15171a",
+    "--app-bg": "#08090b",
+    "--app-card": "#15171a",
+    "--app-ink": "#f7f8fa",
+    "--app-muted": "#a4aab2",
+    "--app-line": "#30343a",
+    "--app-chip": "#20242a",
+    "--card-shadow": "none",
+    "--canvas": "#080809",
+    "--surface-primary": "#141416",
+    "--surface-secondary": "#1d1d20",
+    "--text-primary": "#f5f5f5",
+    "--text-muted": "#acacb2",
+    "--border-subtle": "#2e2e32",
+    "--accent-blue": "#f5f5f5",
+    "--accent-soft": "#222",
+    "--depth-card": "0 0 0 1px #ffffff12,0 2px 4px -2px #0004,0 8px 16px -8px #0006",
+    "--depth-float": "0 0 0 1px #ffffff1c,0 24px 40px -12px #0007,0 12px 24px -6px #0005,0 4px 8px -2px #0004",
+    "--depth-control": "inset 0 0 0 1px #ffffff20,0 2px 4px #0004",
+    "--bible-gradient": "var(--bible-gradient-dark,linear-gradient(165deg,#141b16,#101315,#151d22))"
+  },
+  "blocks": [
+    {
+      "file": "style.css",
+      "selector": ":root",
+      "declarations": {
+        "--paper": "#f7f4ee",
+        "--ink": "#392e37",
+        "--muted": "#7b7076",
+        "--accent": "#70536c",
+        "--tint": "#eee6ed",
+        "--line": "#e5dedf",
+        "--white": "#fffdfa",
+        "--serif": "'Libre Caslon Display',Georgia,serif"
+      }
+    },
+    {
+      "file": "style.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--paper": "#282328",
+        "--ink": "#f0e7ed",
+        "--muted": "#b8aab4",
+        "--accent": "#b794ae",
+        "--tint": "#40323e",
+        "--line": "#4a3e47",
+        "--white": "#211e22"
+      }
+    },
+    {
+      "file": "main-layout.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--app-bg": "#1c1c1f",
+        "--app-card": "#29292d",
+        "--app-ink": "#f3f3f5",
+        "--app-muted": "#b3b3bc",
+        "--app-line": "#3c3c42",
+        "--app-chip": "#36363c",
+        "--card-shadow": "0 12px 28px #0002"
+      }
+    },
+    {
+      "file": "brand-refresh.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--paper": "#1a1916",
+        "--white": "#24231f",
+        "--ink": "#f6f4ee",
+        "--muted": "#b9b6ad",
+        "--accent": "#b4c0aa",
+        "--tint": "#343b30",
+        "--line": "#3e3d35",
+        "--app-bg": "#1a1916",
+        "--app-card": "#24231f",
+        "--app-ink": "#f6f4ee",
+        "--app-muted": "#b9b6ad",
+        "--app-line": "#3e3d35",
+        "--app-chip": "#33322c"
+      }
+    },
+    {
+      "file": "brand-refresh.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--accent": "#d1c6ba",
+        "--tint": "#34312e",
+        "--line": "#403b36",
+        "--app-line": "#403b36",
+        "--app-chip": "#302d29"
+      }
+    },
+    {
+      "file": "brand-refresh.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--paper": "#19191c",
+        "--white": "#242428",
+        "--ink": "#f4f4f5",
+        "--muted": "#b7b7bc",
+        "--accent": "#d0d0d5",
+        "--tint": "#37373c",
+        "--line": "#3d3d42",
+        "--app-bg": "#19191c",
+        "--app-card": "#26262a",
+        "--app-ink": "#f4f4f5",
+        "--app-muted": "#b7b7bc",
+        "--app-line": "#3d3d42",
+        "--app-chip": "#38383d",
+        "--card-shadow": "0 10px 30px rgba(0,0,0,.16)"
+      }
+    },
+    {
+      "file": "brand-refresh.css",
+      "selector": ":root",
+      "declarations": {
+        "--device-height": "min(900px, calc(100svh - 32px))"
+      }
+    },
+    {
+      "file": "origin-design.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--paper": "#08090b",
+        "--white": "#15171a",
+        "--ink": "#f7f8fa",
+        "--muted": "#a4aab2",
+        "--accent": "#85b6e7",
+        "--tint": "#202a35",
+        "--line": "#30343a",
+        "--app-bg": "#08090b",
+        "--app-card": "#15171a",
+        "--app-ink": "#f7f8fa",
+        "--app-muted": "#a4aab2",
+        "--app-line": "#30343a",
+        "--app-chip": "#20242a",
+        "--card-shadow": "none"
+      }
+    },
+    {
+      "file": "design-tokens.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--canvas": "#000",
+        "--surface-primary": "#131313",
+        "--surface-secondary": "#2b2b2c",
+        "--text-primary": "#fff",
+        "--text-muted": "#cacaca",
+        "--border-subtle": "#2e2e2e",
+        "--accent-blue": "#90b8f0",
+        "--accent-soft": "#1b2a39"
+      }
+    },
+    {
+      "file": "altitude-ios.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--canvas": "#000",
+        "--surface-primary": "#111",
+        "--surface-secondary": "#191919",
+        "--text-primary": "#f5f5f5",
+        "--text-muted": "#aaa",
+        "--border-subtle": "#303030",
+        "--accent-blue": "#f5f5f5",
+        "--accent-soft": "#222"
+      }
+    },
+    {
+      "file": "altitude-ios.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--depth-card": "0 0 0 1px #ffffff14,0 4px 8px -2px #0004,0 12px 24px -6px #0005",
+        "--depth-float": "0 0 0 1px #ffffff1c,0 24px 40px -12px #0007,0 12px 24px -6px #0005,0 4px 8px -2px #0004",
+        "--depth-control": "inset 0 0 0 1px #ffffff20,0 2px 4px #0004"
+      }
+    },
+    {
+      "file": "altitude-ios.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--canvas": "#080809",
+        "--surface-primary": "#141416",
+        "--surface-secondary": "#1d1d20",
+        "--border-subtle": "#2e2e32",
+        "--text-muted": "#acacb2"
+      }
+    },
+    {
+      "file": "altitude-ios.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--depth-card": "0 0 0 1px #ffffff12,0 2px 4px -2px #0004,0 8px 16px -8px #0006"
+      }
+    },
+    {
+      "file": "onboarding-white.css",
+      "selector": "[data-theme=dark]",
+      "declarations": {
+        "--bible-gradient": "var(--bible-gradient-dark,linear-gradient(165deg,#141b16,#101315,#151d22))"
+      }
+    }
+  ]
+}

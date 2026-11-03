@@ -1,0 +1,128 @@
+/* Altitude neutral hierarchy, translated to Bible Scroll. User-pinned serif accent. */
+:root{--font-ui:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;--font-display:Baskerville,'Times New Roman',serif;--font-mono:var(--font-ui);--canvas:#fff;--surface-primary:#fff;--surface-secondary:#fafafa;--text-primary:#111;--text-muted:#737373;--border-subtle:#e5e5e5;--accent-blue:#111;--accent-soft:#f0f0f0;--radius-control:999px;--radius-card:14px;--radius-feature:14px}
+[data-theme=dark]{--canvas:#000;--surface-primary:#111;--surface-secondary:#191919;--text-primary:#f5f5f5;--text-muted:#aaa;--border-subtle:#303030;--accent-blue:#f5f5f5;--accent-soft:#222}
+body.in-app{background:var(--canvas)}.in-app #app{width:100%;max-width:600px;min-height:100svh;border:0!important;border-radius:0!important;box-shadow:none!important;margin:0 auto!important;height:auto!important;max-height:none!important;overflow:visible!important}
+.in-app .feed{min-height:100svh;padding-bottom:90px;background:var(--canvas)}
+.in-app .app-header,.in-app .discover-view .app-header{padding:20px 24px 16px;min-height:82px;gap:4px}
+.in-app .app-header h1,.in-app .discover-view .app-header h1{font:400 28px/1.05 var(--font-ui);letter-spacing:-.8px}
+.in-app .app-header .iconbtn{min-width:44px;width:44px;min-height:44px}
+.in-app .home-stack,.in-app .discovery-stack{padding-inline:24px;gap:24px}
+.in-app .surface,.in-app .verse-card,.in-app .verse-card:nth-child(even),[data-theme=dark] .in-app .verse-card:nth-child(even){border:1px solid var(--border-subtle);border-radius:14px;background:var(--surface-primary);box-shadow:none}
+.reference-home .daily-card{padding:24px 22px 12px;min-height:0}
+.reference-home .daily-card blockquote{font:400 30px/1.2 var(--font-display);letter-spacing:-.45px;margin:30px 0 24px;text-align:left}
+.reference-home .daily-card blockquote em{font-weight:400}
+.in-app .overline,.in-app .kicker,.reference-home .overline{font:400 11px/1.4 var(--font-ui);letter-spacing:0;text-transform:none}
+.in-app .version-badge,.in-app .topic-tag{font:400 11px/1.4 var(--font-ui);background:var(--surface-secondary);color:var(--text-muted);border:1px solid var(--border-subtle);padding:4px 8px;border-radius:6px}
+.reference-home .card-heading h2{font:500 13px/1.4 var(--font-ui);margin-top:4px}
+.reference-home .search-card,.reference-home .devotional-card{padding:24px 22px}
+.reference-home .search-card h2,.reference-home .reading-card strong{font:400 22px/1.15 var(--font-ui);letter-spacing:-.5px}
+.reference-home .devotional-card h2{font:400 30px/1.12 var(--font-display);letter-spacing:-.4px;margin:24px 0 14px}
+.reference-home .devotional-card p,.reference-home .search-card p{font:400 14px/1.5 var(--font-ui);color:var(--text-muted)}
+.in-app .primary,.screen .primary,.in-app .discover-view .verse-card>.inline-action{border-radius:999px;min-height:48px;font:400 14px/1.3 var(--font-ui);background:var(--text-primary);color:var(--canvas)!important;padding:12px 20px;letter-spacing:0}
+.in-app .secondary,.in-app .filterbar button{border-radius:999px;min-height:44px;font:400 13px/1.3 var(--font-ui)}
+.reference-home .search-card select{background:var(--surface-secondary);border:1px solid var(--border-subtle);border-radius:8px;min-height:48px;text-align:left;font-size:16px}
+.in-app nav,.in-app .discover-view nav{position:fixed!important;bottom:0!important;left:50%!important;transform:translateX(-50%);width:min(100%,600px)!important;min-height:65px!important;padding:6px 12px max(8px,env(safe-area-inset-bottom))!important;border:0;border-top:1px solid var(--border-subtle)!important;border-radius:0!important;background:var(--canvas)!important;box-shadow:none;backdrop-filter:none;z-index:20}
+.in-app nav button,.in-app .discover-view nav button{min-height:48px;font:400 11px/1.1 var(--font-ui);color:var(--text-muted);border-radius:8px}
+.in-app nav button.active,.in-app .discover-view nav button.active{color:var(--text-primary);background:var(--surface-secondary);font-weight:500}
+.in-app nav svg{width:21px;height:21px}
+.in-app .section-intro,.in-app .discover-view .section-intro{padding-inline:24px}.in-app .filterbar,.in-app .discover-view .filterbar{padding-inline:24px;gap:8px}
+.in-app .discover-view .filterbar button{border:1px solid var(--border-subtle);background:var(--canvas);border-radius:999px;font-size:13px}
+.in-app .discover-view .filterbar button.selected{background:var(--text-primary);color:var(--canvas)}
+.in-app .discover-view .verse-card{padding:24px 22px 14px}
+.in-app .discover-view .verse-card blockquote{font:400 29px/1.24 var(--font-display);letter-spacing:-.4px;margin:26px 0 16px}
+.in-app .reflection-block p{font:400 15px/1.5 var(--font-ui)}
+.in-app .reflection-block small,.in-app .library-note,.in-app .verse-translation,.in-app .reading-meta{font-size:11px}
+.in-app .reading-card{padding:20px;grid-template-columns:72px 1fr;gap:16px}.reference-home .reading-photo{border-radius:10px}
+.in-app .reader-view{height:100svh!important;min-height:0!important;padding:0!important;position:relative;overflow:hidden}
+.in-app .reader-pages{height:calc(100svh - 66px)!important}.in-app .reader-page{min-height:0;height:100%;padding-inline:40px}
+.in-app .reader-toolbar{top:12px;left:16px;right:16px;gap:3px}.in-app .reader-toolbar .iconbtn{min-width:44px;min-height:44px}
+.in-app .reader-verse blockquote{font:400 31px/1.25 var(--font-display);letter-spacing:-.4px}
+.in-app .reader-side-actions{bottom:70px}.in-app .reader-hint{bottom:30px}.in-app .verse-rail{top:90px;bottom:100px}
+.in-app .reader-verse p{font:400 13px/1.5 var(--font-ui);letter-spacing:0}
+.in-app dialog{width:min(100%,600px);border-radius:24px 24px 0 0;border:0;background:var(--canvas);color:var(--text-primary)}
+.in-app .dialog-inner{padding:26px 24px max(30px,env(safe-area-inset-bottom))}.in-app .study-sheet blockquote{font:400 28px/1.3 var(--font-display);text-align:left}
+.in-app .close-dialog{background:var(--surface-secondary)}
+body.embedded-ios .editorial{display:none!important}body.embedded-ios{display:block!important;padding:0!important;background:var(--canvas)!important}body.embedded-ios #app{width:100%!important;min-height:100svh!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;height:auto!important;max-height:none!important}
+body.embedded-ios .screen{min-height:100svh;padding-top:16px;padding-bottom:24px}.screen .kicker{font:400 12px/1.4 var(--font-ui);letter-spacing:0}
+@media(max-width:359px){.in-app .app-header{padding-inline:16px}.in-app .app-header h1{font-size:25px}.in-app .home-stack,.in-app .discovery-stack{padding-inline:16px}.in-app .app-header .iconbtn{min-width:40px;width:40px}.in-app .reader-toolbar{left:4px;right:4px}.in-app .reader-toolbar .iconbtn{min-width:40px}.in-app .reader-verse blockquote{font-size:27px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+html:has(body.embedded-ios),body.embedded-ios,body.embedded-ios *{scrollbar-width:none}body.embedded-ios ::-webkit-scrollbar{display:none}
+
+/* Depth correction: lifted scene panels, quiet raised controls, source fill motion. */
+:root{--depth-card:0 0 0 1px #0000000c,0 1px 3px -1px #00000008,0 4px 8px -2px #0000000a,0 12px 24px -6px #0000000d;--depth-float:0 0 0 1px #00000014,0 24px 40px -12px #0000000f,0 12px 24px -6px #0000000d,0 4px 8px -2px #0000000a,0 1px 3px -1px #00000008;--depth-control:inset 0 0 0 1px #0000000f,0 2px 4px -1px #00000008,0 1px 2px #0000000a;--motion-spring:280ms;--ease-spring:cubic-bezier(.34,1.56,.64,1)}
+[data-theme=dark]{--depth-card:0 0 0 1px #ffffff14,0 4px 8px -2px #0004,0 12px 24px -6px #0005;--depth-float:0 0 0 1px #ffffff1c,0 24px 40px -12px #0007,0 12px 24px -6px #0005,0 4px 8px -2px #0004;--depth-control:inset 0 0 0 1px #ffffff20,0 2px 4px #0004}
+.in-app .surface,.in-app .verse-card,.in-app .verse-card:nth-child(even),[data-theme=dark] .in-app .verse-card:nth-child(even){border:0;box-shadow:var(--depth-card)}
+.verse-stage{padding:20px 18px 24px;border-radius:20px;background-color:#b6dcf0;background-image:linear-gradient(180deg,#c6e7f240,#ffffff0d 55%,#eaf4fa99),url('assets/quiet-sky.png');background-position:center;background-size:cover;isolation:isolate}
+.reference-home .verse-stage .daily-card{box-shadow:var(--depth-float);border-radius:14px;padding:22px 20px 12px;background:var(--surface-primary)}
+.reference-home .verse-stage .daily-card blockquote{font-size:29px;margin:28px 0 24px}
+.in-app .home-stack{padding-bottom:16px}.in-app .search-card{background:var(--surface-secondary)}
+.utility-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:11px;background:var(--surface-primary);box-shadow:var(--depth-control);flex-shrink:0}.reference-home .search-card h2{gap:10px}.utility-icon svg{width:20px!important;height:20px!important}
+.in-app .primary,.screen .primary,.in-app .secondary,.in-app .discover-view .verse-card>.inline-action{position:relative;isolation:isolate;background:transparent;box-shadow:none;overflow:visible}
+.in-app .primary:before,.screen .primary:before,.in-app .secondary:before,.in-app .discover-view .verse-card>.inline-action:before{content:'';position:absolute;inset:0;z-index:-1;background:var(--text-primary);border-radius:inherit;box-shadow:0 1px 2px #00000012;transition:transform var(--motion-spring) var(--ease-spring),background-color 170ms ease-out}
+.in-app .secondary:before{background:var(--surface-primary);box-shadow:inset 0 0 0 1px var(--text-primary),0 1px 2px #00000008}
+.button-label{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;pointer-events:none}
+.in-app .primary:active,.screen .primary:active,.in-app .secondary:active,.in-app .discover-view .verse-card>.inline-action:active{opacity:1;transform:none}
+.in-app .primary:active:before,.screen .primary:active:before,.in-app .secondary:active:before,.in-app .discover-view .verse-card>.inline-action:active:before{transform:scale(.96);transition-duration:170ms;transition-timing-function:ease-out}
+@media(hover:hover){.in-app .primary:hover:before,.screen .primary:hover:before,.in-app .secondary:hover:before,.in-app .discover-view .verse-card>.inline-action:hover:before{transform:scale(1.04)}}
+.in-app .primary:focus-visible,.in-app .secondary:focus-visible{outline:none;box-shadow:0 0 0 2px var(--canvas),0 0 0 4px var(--text-primary)}
+.in-app .filterbar button,.in-app .discover-view .filterbar button{box-shadow:inset 0 0 0 1px var(--border-subtle),0 1px 2px #0a0d1408;border:0}
+.in-app .filterbar button.selected{box-shadow:0 2px 4px #00000014}
+.reference-home .search-card select{background:var(--surface-primary);border:0;box-shadow:var(--depth-control)}
+.in-app .version-badge,.in-app .topic-tag{border:0;box-shadow:inset 0 0 0 1px var(--border-subtle)}
+.in-app .app-header .iconbtn{border-radius:50%;background:var(--surface-primary);box-shadow:var(--depth-control);width:40px;height:40px;margin-inline:2px;min-width:44px;min-height:44px}
+.in-app .reader-toolbar .toolbar-group,.in-app .reader-toolbar .pill-control,.in-app .reader-toolbar .floating-control{background:var(--surface-primary);box-shadow:var(--depth-control);border:0}
+.in-app .reading-photo{box-shadow:inset 0 0 0 1px #0000000d,0 3px 6px -2px #0002;overflow:hidden}
+.in-app .devotional-card{position:relative;overflow:hidden;background:linear-gradient(150deg,var(--surface-primary) 50%,var(--surface-secondary));border:0}
+.in-app nav,.in-app .discover-view nav{box-shadow:0 -4px 12px -6px #00000012}
+.in-app nav button.active,.in-app .discover-view nav button.active{box-shadow:inset 0 0 0 1px var(--border-subtle),0 1px 2px #00000008}
+.in-app dialog{box-shadow:var(--depth-float)}
+[data-theme=dark] .verse-stage{background-image:linear-gradient(180deg,#0b17245e,#07101d90),url('assets/quiet-sky.png');background-color:#172633}
+@media(prefers-reduced-motion:reduce){.in-app button:before,.screen button:before{transition:none!important;transform:none!important}}
+
+/* Screenshot-led neutral canvas and segmented right-side reader navigation. */
+:root{--canvas:#f7f7f9;--surface-primary:#fff;--surface-secondary:#f2f2f4;--border-subtle:#e5e5e8;--text-muted:#717177;--depth-card:0 0 0 1px #15151b0c,0 2px 4px -2px #15151b08,0 8px 16px -8px #15151b0a}
+[data-theme=dark]{--canvas:#080809;--surface-primary:#141416;--surface-secondary:#1d1d20;--border-subtle:#2e2e32;--text-muted:#acacb2}
+.in-app .home-stack,.in-app .discovery-stack{padding-inline:20px;gap:16px}
+.in-app .app-header,.in-app .discover-view .app-header{padding-inline:20px;padding-bottom:16px}
+.in-app .surface,.in-app .verse-card,.in-app .verse-card:nth-child(even),[data-theme=dark] .in-app .verse-card:nth-child(even){border-radius:16px;box-shadow:var(--depth-card)}
+.reference-home .search-card,.reference-home .devotional-card,.in-app .discover-view .verse-card{padding:20px}
+.reference-home .reading-card{padding:16px;gap:14px}
+.verse-stage{padding:16px;border-radius:20px}.reference-home .verse-stage .daily-card{padding:20px 20px 12px}
+.in-app .section-intro,.in-app .discover-view .section-intro,.in-app .filterbar,.in-app .discover-view .filterbar{padding-inline:20px}
+.in-app .reader-view{background:#fdfdfd}.in-app .reader-pages{position:relative;width:calc(100% - 46px);height:calc(100svh - 66px)!important;scroll-snap-type:y proximity;overscroll-behavior-y:contain;touch-action:pan-y;scroll-behavior:smooth;background:#fdfdfd}
+.in-app .reader-page{height:auto;min-height:100%;padding:100px 28px 116px;scroll-snap-align:start;scroll-snap-stop:normal}
+.in-app .reader-verse{transform:none;max-width:350px}.in-app .reader-verse blockquote{font-size:30px;line-height:1.32}
+.in-app .reader-toolbar{right:58px;left:12px;gap:2px;z-index:4}.in-app .reader-toolbar .iconbtn{min-width:40px;width:40px}.in-app .reader-toolbar .pill-control{padding-inline:9px}
+.in-app .reader-side-actions{right:12px;bottom:62px;gap:8px}.in-app .reader-hint{left:28px;bottom:22px;max-width:calc(100% - 70px);font-size:11px}
+.in-app .verse-rail{position:absolute;left:auto;right:0;top:0;bottom:66px;width:46px;padding:80px 7px 24px 10px;display:flex;gap:8px;align-items:stretch;background:linear-gradient(90deg,#f4f4f6,#f8f8fa);border-left:1px solid #e5e5e8;touch-action:none;cursor:ns-resize;z-index:3;user-select:none}
+.rail-track{display:flex;flex:1;min-height:0;flex-direction:column;gap:5px}.rail-segment{position:relative;flex:1;min-height:10px;display:flex;align-items:flex-start;gap:6px}.rail-segment i{height:100%;width:5px;border-radius:5px;background:#dedee2;flex:none;transition:background-color 120ms ease}.rail-segment.active i{background:#111}.rail-number{font:500 11px/1.2 var(--font-ui)!important;color:#111!important;padding-top:1px;font-variant-numeric:tabular-nums}.rail-total{font:400 11px/1 var(--font-ui)!important;text-align:center;color:#929298!important}
+.verse-rail:focus-visible{outline:2px solid var(--text-primary);outline-offset:-3px}
+[data-theme=dark] .in-app .reader-view,[data-theme=dark] .in-app .reader-pages{background:#101012}[data-theme=dark] .in-app .verse-rail{background:linear-gradient(90deg,#161618,#1b1b1e);border-color:#303034}[data-theme=dark] .rail-segment i{background:#39393e}[data-theme=dark] .rail-segment.active i{background:#f5f5f5}[data-theme=dark] .rail-number{color:#f5f5f5!important}
+@media(max-width:359px){.in-app .home-stack,.in-app .discovery-stack{padding-inline:16px}.in-app .reader-toolbar{left:6px;right:52px;gap:0}.in-app .reader-toolbar .iconbtn{min-width:36px;width:36px}.in-app .reader-toolbar .pill-control{padding-inline:6px;font-size:11px}.in-app .reader-page{padding-inline:22px}.in-app .reader-verse blockquote{font-size:27px}}
+.in-app .reader-page{background:transparent}
+[data-theme=dark]{--depth-card:0 0 0 1px #ffffff12,0 2px 4px -2px #0004,0 8px 16px -8px #0006}
+.reference-home .search-card{background:var(--surface-primary)}
+
+/* Left-edge contextual dock: absent at rest, revealed by scroll/focus/interaction. */
+.in-app .reader-pages{width:100%}.in-app .reader-page{padding-inline:44px}.in-app .reader-toolbar{left:12px;right:12px}
+.in-app .verse-rail,[data-theme=dark] .in-app .verse-rail{left:0;right:auto;width:44px;border:0;background:transparent;padding:80px 9px 24px 10px;opacity:0;transform:translateX(-5px);transition:opacity 240ms ease,transform 240ms cubic-bezier(.22,1,.36,1)}
+.in-app .verse-rail.is-visible,.in-app .verse-rail:hover,.in-app .verse-rail:focus-visible{opacity:1;transform:translateX(0)}
+.in-app .rail-track{gap:5px}.in-app .rail-segment{gap:7px}.in-app .rail-segment i{width:4px;background:#d8d8de;transform-origin:left center;transform:scale(var(--dock-scale,1),var(--dock-y,1));transition:transform 180ms cubic-bezier(.22,1,.36,1),background-color 120ms ease;will-change:transform}
+.in-app .rail-segment.active i{background:#111}.in-app .rail-number{opacity:.8}.in-app .rail-total{opacity:.65}
+[data-theme=dark] .in-app .rail-segment i{background:#48484e}[data-theme=dark] .in-app .rail-segment.active i{background:#f5f5f5}
+.in-app .reader-hint{left:44px}.verse-rail:focus-visible{outline:1px solid var(--border-subtle);outline-offset:-2px;border-radius:8px}
+@media(max-width:359px){.in-app .reader-page{padding-inline:38px}.in-app .reader-toolbar{left:8px;right:8px}.in-app .reader-hint{left:38px}}
+@media(prefers-reduced-motion:reduce){.in-app .verse-rail,.in-app .rail-segment i{transition:none!important;transform:none!important}}
+
+/* Browser approximation of a floating iOS Liquid Glass tab bar. */
+.in-app nav,.in-app .discover-view nav{width:calc(100% - 32px)!important;max-width:408px;bottom:max(12px,env(safe-area-inset-bottom))!important;min-height:68px!important;padding:6px!important;border:1px solid #ffffffb3!important;border-radius:38px!important;background:rgba(250,250,252,.64)!important;-webkit-backdrop-filter:blur(28px) saturate(1.65);backdrop-filter:blur(28px) saturate(1.65);box-shadow:0 10px 28px -8px #15151b30,0 2px 6px -2px #15151b18,inset 0 1px 0 #ffffffeb;isolation:isolate;overflow:hidden}
+.in-app nav:before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(160deg,#ffffff5c,#ffffff05 45%,#ffffff24);z-index:-1}
+.in-app nav button,.in-app .discover-view nav button{min-height:54px;border-radius:30px!important;background:transparent;color:#626269;font-size:11px;position:relative;transition:background-color 180ms ease,box-shadow 180ms ease,color 180ms ease}
+.in-app nav button.active,.in-app .discover-view nav button.active{background:rgba(255,255,255,.7)!important;color:#111;box-shadow:inset 0 1px 0 #fff,0 1px 5px #00000010;font-weight:600}
+.in-app nav button:active{background:#ffffff66}.in-app nav button:focus-visible{outline:2px solid var(--text-primary);outline-offset:-3px}
+[data-theme=dark] .in-app nav,[data-theme=dark] .in-app .discover-view nav{background:rgba(33,33,37,.67)!important;border-color:#ffffff29!important;box-shadow:0 10px 28px -8px #0009,0 2px 6px -2px #0005,inset 0 1px 0 #ffffff24}
+[data-theme=dark] .in-app nav:before{background:linear-gradient(160deg,#ffffff12,#ffffff00 45%,#ffffff08)}
+[data-theme=dark] .in-app nav button{color:#b6b6be}[data-theme=dark] .in-app nav button.active,[data-theme=dark] .in-app .discover-view nav button.active{background:#ffffff1f!important;color:#fff;box-shadow:inset 0 1px 0 #ffffff24,0 1px 4px #0003}
+.in-app .feed{padding-bottom:108px}.in-app .reader-pages{height:calc(100svh - 96px)!important}.in-app .verse-rail{bottom:96px}.in-app .reader-hint{bottom:24px}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.in-app nav,.in-app .discover-view nav{background:#f7f7f9!important;backdrop-filter:none;-webkit-backdrop-filter:none;border-color:#888!important}[data-theme=dark] .in-app nav,[data-theme=dark] .in-app .discover-view nav{background:#202023!important}.in-app nav button.active{outline:1px solid var(--text-muted);outline-offset:-1px}}

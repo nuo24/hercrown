@@ -1,0 +1,399 @@
+/* Lassie language translated into Bible Scroll. No orange.
+ * Marist-like serif accents use locally available Baskerville with fallbacks;
+ * exact ABC Marist files require a license and are not bundled.
+ * Radius: control 12 / wrapper 16 / surface 24 / editorial media 32–40.
+ */
+:root {
+  --paper:#f9f8f5; --white:#ffffff; --ink:#120c08; --muted:#6c6962;
+  --accent:#52624e; --tint:#e8ece3; --line:#e7e3da;
+  --app-bg:#f9f8f5; --app-card:#fff; --app-ink:#120c08;
+  --app-muted:#6c6962; --app-line:#e7e3da; --app-chip:#efede7;
+  --card-shadow:none; --app-radius:24px;
+  --display:'Baskerville','Iowan Old Style','Palatino Linotype',Georgia,serif;
+}
+[data-theme=dark] {
+  --paper:#1a1916; --white:#24231f; --ink:#f6f4ee; --muted:#b9b6ad;
+  --accent:#b4c0aa; --tint:#343b30; --line:#3e3d35;
+  --app-bg:#1a1916; --app-card:#24231f; --app-ink:#f6f4ee;
+  --app-muted:#b9b6ad; --app-line:#3e3d35; --app-chip:#33322c;
+}
+body {background:var(--paper)}
+.editorial {background:var(--paper)}
+.editorial h1 {font-family:var(--display);font-weight:400;letter-spacing:-.035em}
+.editorial h1 em {color:var(--accent)}
+#app {box-shadow:none}
+.in-app #app {box-shadow:none}
+.brand-display {font-family:var(--display)!important;font-weight:400!important;letter-spacing:-.035em!important}
+.brand-display em {font-family:inherit;font-weight:400}
+.app-header {padding:22px 20px 18px;min-height:84px}
+.app-header h1 {font-size:22px;font-weight:500;letter-spacing:-.7px}
+.app-header>div {padding:3px;border-radius:16px;background:var(--app-chip);gap:2px}
+.app-header .iconbtn {background:var(--app-card);border-radius:12px}
+.app-header .iconbtn svg {width:18px;height:18px;stroke-width:1.4}
+.home-stack {padding:0 16px;gap:20px}
+.surface {border:1px solid var(--app-line);box-shadow:none}
+.overline {font-size:9px;font-weight:500;letter-spacing:1.5px}
+.version-badge,.topic-tag {border-radius:8px;font-size:10px;background:var(--app-chip);padding:5px 9px}
+.card-heading h2 {font-weight:500;font-size:15px}
+.daily-card {padding:22px 22px 12px}
+.daily-card blockquote {font-size:22px;line-height:1.48;margin:28px 0 22px;letter-spacing:-.45px}
+.verse-actions {border-top:1px solid var(--app-line);padding-top:9px}
+.verse-actions svg {width:19px;height:19px;stroke-width:1.3}
+.verse-actions .saved {color:var(--accent)}
+.ellipsis {font-weight:400}
+.quiet-hero {position:relative;min-height:284px;overflow:hidden;border-radius:32px;background:#617062;isolation:isolate}
+.quiet-hero>img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 49%;z-index:-2}
+.quiet-hero-shade {position:absolute;inset:0;background:rgba(15,27,19,.49);z-index:-1}
+.quiet-hero-copy {padding:30px 28px;position:relative;color:white}
+.quiet-hero-copy .overline {color:#f7f7ef;letter-spacing:1.9px}
+.quiet-hero h2 {font-size:43px;line-height:.98;margin:23px 0 24px;color:#fff}
+.photo-action {min-height:44px;background:#fff;color:#120c08!important;border:0;border-radius:12px;padding:0 16px;display:inline-flex;align-items:center;gap:24px;font-size:12px}
+.photo-action svg {width:17px;height:17px}
+.primary,.in-app .primary {border-radius:12px;background:var(--app-ink);color:var(--app-card);font-weight:400;min-height:48px}
+.search-card {padding:22px}
+.search-card h2 {font:500 17px/1.3 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.4px}
+.search-card h2 svg {width:19px;height:19px}
+.search-card p {font-size:12px;margin-top:10px}
+.search-card select {border-radius:12px;background:var(--app-bg);border:1px solid var(--app-line);text-align:left;padding:12px 14px;font-size:14px}
+.reading-card {grid-template-columns:76px 1fr;padding:20px;gap:16px}
+.book-art {min-height:106px;border-radius:16px;background:var(--app-chip);color:var(--app-muted)}
+.book-art:before {display:none}
+.book-art svg {background:none;width:38px;height:38px}
+.reading-card strong {font-size:17px;font-weight:500;letter-spacing:-.4px}
+.reading-card b {font-size:12px;font-weight:400}
+.devotional-card h2 {font-family:var(--serif);font-size:24px;font-weight:400;letter-spacing:-.5px}
+.devotional-card p {font:13px/1.8 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.inline-action {font-size:12px}
+.in-app nav {border-radius:20px;padding:4px;background:var(--app-card);border:1px solid var(--app-line);box-shadow:0 4px 20px #120c0808;min-height:62px}
+.in-app nav button {border-radius:16px;min-height:52px;font-size:9px;font-weight:400;gap:5px}
+.in-app nav button.active {color:var(--accent);background:var(--tint);font-weight:500}
+.in-app nav button.active svg {stroke-width:1.6}
+.toolbar-group,.pill-control,.floating-control {border-radius:12px;box-shadow:none;background:var(--app-card);border-color:var(--app-line)}
+.toolbar-group {padding:2px;gap:2px;border-radius:16px}
+.toolbar-group .iconbtn {border-radius:12px}
+.reader-toolbar {gap:6px}
+.reader-emblem {box-shadow:none;background:none;border:1px solid var(--app-line);border-radius:24px;width:72px;height:72px;top:110px;color:var(--accent)}
+.reader-emblem svg {height:34px;width:34px}
+.reader-verse {max-width:330px}
+.reader-verse blockquote {font-family:var(--serif);line-height:1.5;font-size:25px;font-weight:400;letter-spacing:-.45px}
+.reader-verse p {font-size:11px;letter-spacing:1px}
+.reader-side-actions .iconbtn {border-radius:12px}
+.filterbar {gap:6px}
+.filterbar button {border-radius:12px;border-color:var(--app-line);min-height:40px}
+.filterbar button.selected {background:var(--tint);color:var(--accent);border-color:var(--tint)}
+.section-intro {padding-left:20px}
+.verse-card {border-radius:24px;padding:24px 22px 16px}
+.verse-card h2 {font-size:26px;font-weight:400;letter-spacing:-.5px}
+.verse-card blockquote {font-style:normal;font-size:20px;line-height:1.5}
+.reflection-block p {font:14px/1.8 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.plans-intro {padding:12px 24px 32px}
+.plans-intro h2 {font-size:42px;line-height:1.04;margin:17px 0}
+.plans-intro p {font-size:12px}
+.plan-card {border-radius:24px}
+.plan-cover {height:190px;position:relative;isolation:isolate;overflow:hidden}
+.plan-cover>span {font:400 25px/1.12 var(--serif)}
+.plan-cover.photographic-cover {background:#617062;color:#fff}
+.plan-cover.photographic-cover:after {content:'';position:absolute;inset:0;background:rgba(15,27,19,.4);z-index:-1}
+.plan-cover img {position:absolute;inset:0;object-fit:cover;width:100%;height:100%;z-index:-2}
+.plan-description {gap:10px;padding:20px}
+.plan-description strong {font-size:17px;font-weight:500;letter-spacing:-.3px}
+.plan-description b {font-weight:500;font-size:12px;color:var(--accent)}
+.sage {background:#e6eadd}.lavender {background:#e8e5ec}.sand {background:#ece7de}
+[data-theme=dark] .sage {background:#343c30;color:#dce5d5}
+[data-theme=dark] .lavender {background:#39333e;color:#e3dce9}
+[data-theme=dark] .sand {background:#3f392f;color:#e6dfd3}
+.screen {padding:24px 28px;background:var(--paper)}
+.screen h2 {font:500 32px/1.12 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-1px}
+.screen h2.brand-display {font-size:43px;line-height:1.03}
+.progress {gap:5px;margin:20px 0 36px}
+.progress i {height:2px}
+.screen .kicker {color:var(--accent);font-size:9px;font-weight:500;letter-spacing:1.6px}
+.screen .sub {font-size:13px;line-height:1.75}
+.wordmark {font-family:var(--display);font-size:26px;letter-spacing:-1px}
+.choice {border-radius:12px;border-color:var(--line);background:var(--white);padding:18px 16px;font-size:13px}
+.choice.selected {background:var(--tint);border-color:var(--accent)}
+.chip {border-radius:12px;background:var(--white)}
+.chip.selected {background:var(--accent);color:var(--white)}
+.welcome .content {justify-content:flex-start;padding-top:18px}
+.welcome-photo {position:relative;min-height:180px;flex:1;max-height:290px;border-radius:32px;overflow:hidden;margin-bottom:28px;background:#617062}
+.welcome-photo img {width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.photo-note {position:absolute;bottom:16px;left:16px;background:rgba(249,248,245,.9);color:#120c08;padding:8px 12px;border-radius:12px;font-size:10px}
+.welcome h2.brand-display {font-size:49px;line-height:.99;margin:3px 0 18px}
+.welcome h2 em {color:var(--accent)}
+.welcome .sub {margin-bottom:0}
+.welcome .actions {padding-top:24px}
+.welcome .footnote {font-size:10px}
+.ready blockquote {border-radius:24px;font-size:27px;border:1px solid var(--line);background:var(--white);padding:32px 24px}
+.settings h2 {font:500 28px/1.15 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.6px}
+.settings select {border-radius:12px;min-height:48px}
+.study-sheet h2 {font-family:var(--serif);font-weight:400}
+.study-sheet blockquote {font-style:normal;line-height:1.5}
+.chapter-row {min-height:64px}
+.close-dialog {border-radius:12px}
+.sheet-handle {background:var(--app-line)}
+dialog {border-radius:32px 32px 0 0;box-shadow:none}
+@media(min-width:801px) {.quiet-hero{border-radius:40px}.welcome-photo{border-radius:40px}.editorial{max-width:calc(100% - 480px)}}
+@media(max-height:740px) {.welcome-photo{min-height:145px;max-height:200px;margin-bottom:22px}.welcome h2.brand-display{font-size:42px}.screen h2.brand-display{font-size:37px}.screen{padding:18px 24px}.welcome .actions{padding-top:18px}.reader-emblem{top:85px;width:60px;height:60px}.reader-verse blockquote{font-size:22px}}
+@media(prefers-reduced-motion:reduce) {*{scroll-behavior:auto!important}}
+
+/* Reading-led editorial pass: open surfaces for Scripture; compact controls. */
+:root {
+  --accent:#665a51;
+  --tint:#ece9e2;
+  --line:#e8e4dc;
+  --app-line:#e8e4dc;
+  --app-chip:#eeece6;
+}
+[data-theme=dark] {
+  --accent:#d1c6ba;
+  --tint:#34312e;
+  --line:#403b36;
+  --app-line:#403b36;
+  --app-chip:#302d29;
+}
+.in-app #app {background:var(--app-bg)}
+.app-header {padding:20px 24px 8px;min-height:72px}
+.app-header h1 {font:400 17px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.2px}
+.app-header>div {background:transparent;padding:0;gap:4px}
+.app-header .iconbtn {background:transparent}
+.app-header .iconbtn svg {width:19px;height:19px}
+.home-stack.reading-home {display:block;padding:0 24px}
+.eyebrow-text {display:block;color:var(--app-muted);font:500 11px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:.02em}
+.daily-reading {text-align:center;padding:32px 0 42px}
+.daily-intro h2 {font:400 clamp(38px,9vw,48px)/1.03 var(--display);letter-spacing:-.035em;margin:15px 0 0}
+.daily-intro h2 em {font-weight:400}
+.daily-verse {margin:42px auto 24px;max-width:360px}
+.daily-verse blockquote {font:400 clamp(23px,5.7vw,29px)/1.45 var(--serif);letter-spacing:-.025em;margin:0}
+.daily-reference {color:var(--app-muted);font-size:12px;letter-spacing:.01em;margin:18px 0 8px}
+.daily-reference span {padding:0 4px}
+.daily-verse .verse-actions {max-width:245px;margin:18px auto 0;padding:0;border:0}
+.verse-actions {border:0;padding:0;gap:4px}
+.verse-actions button {min-height:44px;min-width:58px;gap:7px;font-size:12px;color:var(--app-muted)}
+.verse-actions button svg {width:18px;height:18px}
+.verse-actions button.saved {color:var(--app-ink)}
+.read-action {display:inline-flex;align-items:center;justify-content:center;gap:18px;min-height:48px;border:0;border-radius:12px;background:var(--app-ink);color:var(--app-card)!important;padding:0 18px;font-size:14px}
+.read-action svg {width:17px;height:17px}
+.home-explore {padding:32px 0 30px;border-top:1px solid var(--app-line)}
+.section-heading {display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:20px}
+.section-heading h2 {font:400 29px/1.2 var(--display);letter-spacing:-.025em;margin:7px 0 0}
+.subtle-link {display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0;border:0;background:none;color:var(--app-ink);font-size:12px}
+.subtle-link svg {width:15px;height:15px}
+.reading-card {width:100%;display:grid;grid-template-columns:96px 1fr;gap:18px;text-align:left;padding:0;border:0;background:none;color:var(--app-ink)}
+.reading-photo {display:block;width:96px;height:112px;border-radius:18px;overflow:hidden;background:var(--app-chip)}
+.reading-photo img {width:100%;height:100%;object-fit:cover;object-position:center 58%}
+.reading-card>span:last-child {display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px}
+.reading-card strong {font:400 20px/1.2 var(--display);letter-spacing:-.015em}
+.reading-card small {font-size:13px;line-height:1.5;color:var(--app-muted)}
+.reading-meta {display:flex;gap:8px;align-items:center;font-size:12px;color:var(--app-ink);margin-top:4px}
+.reading-meta svg {width:15px;height:15px;margin:0!important}
+.search-disclosure {border-top:1px solid var(--app-line);border-bottom:1px solid var(--app-line)}
+.search-disclosure summary {list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;cursor:pointer;font-size:14px}
+.search-disclosure summary::-webkit-details-marker {display:none}
+.search-disclosure summary>span:first-child {display:flex;align-items:center;gap:12px}
+.search-disclosure summary svg {width:18px;height:18px}
+.search-disclosure summary .plus {font-size:23px;font-weight:300;line-height:1}
+.search-disclosure[open] summary .plus {transform:rotate(45deg)}
+.search-disclosure summary:focus-visible {outline:2px solid var(--accent);outline-offset:3px}
+.search-content {padding:2px 0 22px}
+.search-content p {color:var(--app-muted);font-size:13px;line-height:1.6;margin:0 0 16px}
+.search-content label {display:block;font-size:12px;margin:0 0 6px}
+.search-content select {width:100%;min-height:48px;padding:0 12px;background:var(--app-card);color:var(--app-ink);border:1px solid var(--app-line);border-radius:12px;font-size:14px;margin:0 0 12px}
+.search-content .primary {min-height:48px}
+.reading-home .library-note {margin:24px 0 8px;font-size:11px;color:var(--app-muted)}
+.in-app nav {background:var(--app-card);border-color:var(--app-line)}
+.in-app nav button {font-size:11px}
+.in-app nav button.active {color:var(--app-ink);background:var(--app-chip)}
+.section-intro p {font-size:14px;line-height:1.6;margin-bottom:20px}
+.filterbar button {min-height:44px;font-size:13px}
+.filterbar button.selected {color:var(--app-ink);background:var(--app-chip);border-color:var(--app-chip)}
+.discovery-stack {display:block;padding:0 24px}
+.verse-card,.verse-card:nth-child(even),[data-theme=dark] .verse-card:nth-child(even) {background:transparent;border:0;border-bottom:1px solid var(--app-line);border-radius:0;box-shadow:none;min-height:0;padding:38px 0 32px}
+.verse-card header {text-align:center}
+.verse-card h2 {font:400 30px/1.2 var(--display);letter-spacing:-.02em;margin:12px 0 5px}
+.topic-tag {font-size:12px;background:var(--app-chip);padding:5px 10px}
+.verse-translation {display:block;font-size:11px;color:var(--app-muted)}
+.verse-card blockquote {font:400 23px/1.5 var(--serif);letter-spacing:-.02em;margin:28px 0 30px;text-align:center}
+.reflection-block {max-width:360px;margin:0 auto;width:100%;padding:0}
+.reflection-block p {font:14px/1.65 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:8px 0}
+.reflection-block small {font-size:11px;color:var(--app-muted)}
+.verse-card .verse-actions {max-width:260px;width:100%;margin:24px auto 0;padding:0}
+.reader-emblem {border:0;background:transparent}
+.reader-toolbar {top:max(16px,env(safe-area-inset-top))}
+.pill-control {min-height:44px;font-size:13px}
+.reader-verse blockquote {font-size:clamp(22px,5.8vw,27px);line-height:1.5}
+.reader-verse p {font-size:12px;letter-spacing:.04em}
+.reader-hint {font-size:12px}
+.verse-rail span {font-size:11px}
+.welcome .content {justify-content:center;padding-top:10px;flex:1}
+.welcome-intro {text-align:center;margin:auto 0 30px}
+.welcome h2.brand-display {font-size:clamp(43px,10vw,52px);margin:0 0 18px;line-height:1.02}
+.welcome h2 em {color:inherit}
+.welcome .sub {max-width:330px;margin:0 auto;line-height:1.7;font-size:14px}
+.welcome-photo {min-height:135px;max-height:220px;width:100%;flex:1;margin:0 0 auto;border-radius:24px;overflow:hidden}
+.welcome-photo img {object-position:center 56%}
+.welcome .actions {padding-top:28px}
+.welcome .footnote {font-size:11px}
+.screen .kicker {font-size:11px;letter-spacing:.04em;text-transform:none}
+.screen .sub {font-size:14px;line-height:1.65}
+.screen .footnote {font-size:11px}
+.screen .primary,.screen .secondary {font-size:14px}
+.choice {font-size:14px;min-height:60px}
+.chip {font-size:14px}
+.plans-intro p,.plan-description small,.plan-description b {font-size:13px}
+.plan-description>span {font-size:14px;line-height:1.55}
+.settings .small,.settings .sub {font-size:13px}
+@media(max-height:740px) {
+ .daily-reading {padding:18px 0 30px}
+ .daily-intro h2 {font-size:38px}
+ .daily-verse {margin:26px auto 18px}
+ .welcome-intro {margin:auto 0 20px}
+ .welcome-photo {min-height:110px;max-height:165px}
+ .welcome .actions {padding-top:20px}
+}
+.daily-intro h2 {font-size:clamp(34px,8vw,40px)}
+.daily-verse blockquote {font-size:clamp(27px,6.5vw,31px)}
+@media(max-height:740px) {.daily-intro h2{font-size:34px}}
+
+/* Reference layout and neutral light palette. */
+:root {
+  --paper:#ffffff; --white:#ffffff; --ink:#121214; --muted:#69696f;
+  --accent:#4c4c52; --tint:#ebebed; --line:#e5e5e8;
+  --app-bg:#f7f7f9; --app-card:#ffffff; --app-ink:#111113;
+  --app-muted:#717176; --app-line:#e7e7ea; --app-chip:#f0f0f2;
+  --card-shadow:0 10px 30px rgba(20,20,25,.07);
+}
+[data-theme=dark] {
+  --paper:#19191c; --white:#242428; --ink:#f4f4f5; --muted:#b7b7bc;
+  --accent:#d0d0d5; --tint:#37373c; --line:#3d3d42;
+  --app-bg:#19191c; --app-card:#26262a; --app-ink:#f4f4f5;
+  --app-muted:#b7b7bc; --app-line:#3d3d42; --app-chip:#38383d;
+  --card-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+body,.editorial {background:var(--paper)}
+.screen,.welcome,.ready {background:var(--paper)}
+.in-app,#app,.in-app #app {background:var(--app-bg)}
+.in-app #app {border-color:var(--app-line)}
+.screen .kicker,.welcome h2 em {color:var(--ink)}
+.welcome-photo,.quiet-hero,.reading-photo {background:var(--app-chip)}
+.welcome-photo {border-radius:24px}
+.choice {background:var(--white);border-color:var(--line)}
+.choice.selected {background:var(--tint);border-color:var(--accent)}
+.chip {background:var(--white);border-color:var(--line)}
+.chip.selected {background:var(--ink);border-color:var(--ink);color:var(--white)}
+.radio {border-color:var(--muted)}
+.selected .radio {background:var(--ink);border-color:var(--ink)}
+.progress i {background:var(--line)}
+.progress i.on {background:var(--ink)}
+.reminder,.notification {background:var(--app-bg);border-color:var(--line)}
+.switchrow input:checked {background:var(--ink)}
+.app-header {padding:24px 20px 18px;min-height:82px}
+.app-header h1 {font:700 25px/1.15 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.7px}
+.app-header .iconbtn {background:transparent}
+.home-stack.reference-home {display:grid;padding:0 16px;gap:16px}
+.surface {background:var(--app-card);border:0;border-radius:24px;box-shadow:var(--card-shadow)}
+.reference-home .daily-card {padding:22px 20px 12px}
+.reference-home .card-heading h2 {font:650 16px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:4px 0 0}
+.reference-home .overline {font:600 10px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:1.35px;color:var(--app-muted);text-transform:uppercase}
+.reference-home .daily-card blockquote {font:400 22px/1.45 var(--serif);letter-spacing:-.3px;margin:28px 0 22px}
+.reference-home .verse-actions {display:flex;justify-content:space-around;border:0;padding:0;margin:0;max-width:none}
+.reference-home .verse-actions button {min-width:48px;min-height:44px}
+.reference-home .verse-actions button span {display:none}
+.reference-home .verse-actions button svg {width:20px;height:20px}
+.reference-home .search-card {padding:22px 20px}
+.reference-home .search-card h2 {display:flex;align-items:center;gap:10px;font:400 24px/1.2 var(--serif);letter-spacing:-.4px;margin:0 0 10px}
+.reference-home .search-card p {font-size:13px;line-height:1.55;color:var(--app-muted);margin:0 0 18px}
+.reference-home .search-card select {appearance:auto;background:var(--app-chip);color:var(--app-ink);width:100%;min-height:50px;padding:12px;border:0;border-radius:14px;text-align:center;font-size:15px;margin:0 0 18px}
+.reference-home .primary {min-height:48px;border-radius:28px;font-size:14px;font-weight:500}
+.reference-home .reading-card {display:grid;grid-template-columns:104px minmax(0,1fr);gap:16px;padding:18px;border-radius:24px;text-align:left}
+.reference-home .reading-photo {width:104px;height:124px;border-radius:14px;background:var(--app-chip)}
+.reference-home .reading-photo img {width:100%;height:100%;object-fit:cover}
+.reference-home .reading-card>span:last-child {display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:6px}
+.reference-home .reading-card strong {font:700 19px/1.15 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;letter-spacing:-.5px}
+.reference-home .reading-card b {font-size:13px;font-weight:600}
+.reference-home .reading-card small {font-size:12px;line-height:1.5;color:var(--app-muted)}
+.reference-home .reading-meta {font-size:11px;color:var(--app-muted)}
+.reference-home .devotional-card {padding:22px 20px}
+.reference-home .devotional-card h2 {font:400 24px/1.2 var(--serif);margin:20px 0 10px}
+.reference-home .devotional-card p {font:13px/1.7 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--app-muted)}
+.reference-home .library-note {font-size:11px;color:var(--app-muted)}
+.in-app nav {border-radius:40px;background:var(--app-card);box-shadow:0 8px 35px rgba(20,20,25,.1);border:1px solid var(--app-line);padding:4px}
+.in-app nav button {border-radius:32px;font-size:10px;color:var(--app-muted)}
+.in-app nav button.active {background:var(--app-chip);color:var(--app-ink)}
+.section-intro p {color:var(--app-muted)}
+.filterbar button {background:var(--app-card);border-color:var(--app-line);border-radius:22px}
+.filterbar button.selected {background:var(--app-ink);border-color:var(--app-ink);color:var(--app-card)}
+.discovery-stack {display:grid;gap:20px;padding:0 16px}
+.verse-card,.verse-card:nth-child(even),[data-theme=dark] .verse-card:nth-child(even) {background:var(--app-card);border:0;border-radius:24px;box-shadow:var(--card-shadow);min-height:470px;padding:24px 20px 14px}
+.verse-card .topic-tag,.version-badge {background:var(--app-chip);color:var(--app-muted);border-radius:18px}
+.verse-card .reflection-block {background:var(--app-bg);border-radius:16px;padding:16px;margin:0 auto}
+.verse-card .reflection-block .overline {font-size:11px}
+.verse-card .reflection-block p {font:16px/1.55 var(--serif);color:var(--app-ink)}
+.verse-card .inline-action {margin:12px auto;color:var(--app-muted)!important}
+.verse-card .verse-actions {margin: auto auto 0;padding-top:24px}
+.verse-card .verse-actions button span {display:none}
+.reader-emblem {background:var(--app-card);box-shadow:var(--card-shadow);color:var(--app-ink);border:0}
+.reader-toolbar .toolbar-group,.reader-toolbar .pill-control,.reader-toolbar .floating-control {background:var(--app-card);border-color:var(--app-line);border-radius:24px;box-shadow:var(--card-shadow)}
+.reader-side-actions .saved svg {fill:var(--app-ink);stroke:var(--app-ink)}
+.plans-header h1 {font-size:18px}
+.plans-intro {padding:18px 20px 12px}
+.plans-intro h2 {font:400 28px/1.2 var(--serif)!important;letter-spacing:-.4px!important;margin:8px 0}
+.plans-intro p {font-size:13px;color:var(--app-muted);margin:0;line-height:1.5}
+.plans-section {padding-top:28px}
+.plans-list {display:flex;gap:12px;padding:8px 16px 20px;overflow-x:auto;scroll-snap-type:x mandatory}
+.plan-card {flex:0 0 64%;border-radius:20px;overflow:hidden;text-align:left;scroll-snap-align:start}
+.plan-cover {height:160px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--app-ink)}
+.plan-cover img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.plan-cover:has(img) {color:#fff;background:#555}
+.plan-cover:has(img):after {content:'';position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:-1}
+.plan-cover>span {font:400 24px/1.1 var(--serif);text-align:center}
+.plan-description {min-height:180px;padding:18px;gap:9px}
+.plan-description strong {font:650 17px/1.2 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.plan-description small {color:var(--app-muted);font-size:12px}
+.plan-description>span {font-size:13px;line-height:1.5}
+.plan-description b {color:var(--app-ink);font-size:12px;margin-top:auto}
+.sage,.lavender,.sand {background:#e9e9ed;color:#303036}
+[data-theme=dark] .sage,[data-theme=dark] .lavender,[data-theme=dark] .sand {background:#404046;color:#f4f4f5}
+.community-empty {min-height:55vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px 32px}
+.community-icon {width:72px;height:72px;border-radius:24px;display:grid;place-items:center;background:var(--app-card);box-shadow:var(--card-shadow)}
+.community-icon svg {width:34px;height:34px}
+.community-empty h2 {font:400 32px/1.2 var(--serif);margin:24px 0 8px}
+.community-empty p {font-size:14px;line-height:1.6;color:var(--app-muted);margin:0}
+.community-empty .community-note {font-size:12px;margin:12px 0 24px}
+.community-empty .primary {max-width:240px;border-radius:24px}
+.settings {background:var(--paper);min-height:calc(100svh - 82px)}
+
+/* A visible device boundary for the desktop preview. */
+@media (min-width: 560px) {
+  :root { --device-height: min(900px, calc(100svh - 32px)); }
+  body { align-items: center; background: #e9e9ed; }
+  body.in-app { min-height: 100svh; justify-content: center; }
+  #app, .in-app #app {
+    flex-shrink: 0;
+    width: 460px;
+    max-width: calc(100vw - 32px);
+    height: var(--device-height);
+    min-height: 0;
+    margin: 16px auto;
+    border: 10px solid #242427;
+    border-radius: 42px;
+    box-shadow: 0 16px 50px rgba(0, 0, 0, .16);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  #app::-webkit-scrollbar { display: none; }
+  .screen, .in-app #app .feed { min-height: 100%; }
+  .in-app #app .reader-view { height: 100%; min-height: 0; }
+  .in-app #app .reader-page { min-height: 0; }
+  .in-app #app .settings { min-height: calc(100% - 82px); }
+  .in-app nav {
+    bottom: calc((100svh - var(--device-height)) / 2 + 22px);
+    width: min(calc(100% - 72px), 412px);
+  }
+  dialog {
+    bottom: calc((100svh - var(--device-height)) / 2 + 10px);
+    width: min(calc(100% - 52px), 440px);
+    max-height: calc(var(--device-height) - 20px);
+  }
+}

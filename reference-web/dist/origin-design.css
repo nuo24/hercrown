@@ -1,0 +1,97 @@
+/* Origin-inspired mobile system. Lyon Display is not bundled; Georgia is the fallback. */
+:root {
+  --serif: Georgia, 'Times New Roman', serif;
+  --paper:#f7f8fa; --white:#fff; --ink:#111316; --muted:#626a74;
+  --accent:#3b6d9f; --tint:#e7edf4; --line:#dce0e6;
+  --app-bg:#f7f8fa; --app-card:#fff; --app-ink:#111316;
+  --app-muted:#626a74; --app-line:#dce0e6; --app-chip:#edf0f4;
+  --card-shadow:none; color-scheme:light;
+}
+[data-theme=dark] {
+  --paper:#08090b; --white:#15171a; --ink:#f7f8fa; --muted:#a4aab2;
+  --accent:#85b6e7; --tint:#202a35; --line:#30343a;
+  --app-bg:#08090b; --app-card:#15171a; --app-ink:#f7f8fa;
+  --app-muted:#a4aab2; --app-line:#30343a; --app-chip:#20242a;
+  --card-shadow:none; color-scheme:dark;
+}
+body,.in-app,#app,.in-app #app,.screen,.settings {background:var(--app-bg);color:var(--app-ink)}
+body,button,input,select {font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+button:focus-visible,input:focus-visible,select:focus-visible {outline:2px solid var(--accent);outline-offset:3px}
+.in-app .app-header {padding:20px 20px 18px;min-height:80px;align-items:center}
+.in-app .app-header h1 {font:400 29px/1.1 var(--serif);letter-spacing:-.8px}
+.in-app .app-header>div {gap:0}
+.in-app .app-header .iconbtn {width:40px;min-width:40px;height:44px;color:var(--app-ink)}
+.in-app .home-stack {padding:0 16px;gap:12px}
+.in-app .surface,.verse-card,.verse-card:nth-child(even),[data-theme=dark] .verse-card:nth-child(even) {background:var(--app-card);border:1px solid var(--app-line);border-radius:14px;box-shadow:none}
+.reference-home .daily-card {padding:22px 20px 12px;min-height:225px}
+.reference-home .overline,.overline,.kicker {font:500 10px/1.4 'Roboto Mono',ui-monospace,monospace;letter-spacing:1.1px;text-transform:uppercase;color:var(--app-muted)}
+.reference-home .daily-card .card-heading h2 {font:500 13px/1.4 Inter,-apple-system,sans-serif;letter-spacing:0;margin-top:6px}
+.reference-home .daily-card blockquote {font:400 30px/1.27 var(--serif);letter-spacing:-.6px;margin:30px 0 26px}
+.version-badge,.topic-tag {border-radius:6px!important;background:var(--app-chip)!important;color:var(--app-muted)!important;font:500 10px/1.3 ui-monospace,monospace;padding:5px 8px}
+.verse-actions {border-top:1px solid var(--app-line);padding-top:5px}
+.verse-actions button {color:var(--app-muted)!important}
+.verse-actions .saved {color:var(--accent)!important}
+.verse-actions .saved svg {fill:var(--accent);stroke:var(--accent)}
+.reference-home .search-card {padding:20px}
+.reference-home .search-card h2,.reference-home .devotional-card h2 {font:400 25px/1.15 var(--serif);letter-spacing:-.4px}
+.reference-home .search-card select {text-align:left;background:var(--app-chip);border:1px solid var(--app-line);border-radius:8px;margin-bottom:12px}
+.in-app .primary,.screen .primary {background:var(--app-ink);color:var(--app-bg);border-radius:8px;min-height:48px;font:600 11px/1.2 ui-monospace,monospace;letter-spacing:.3px;text-transform:uppercase}
+.reference-home .reading-card {padding:12px;grid-template-columns:82px 1fr;gap:15px}
+.reference-home .reading-photo {width:82px;height:100px;border-radius:8px;overflow:hidden}
+.reference-home .reading-photo img {filter:saturate(.55) hue-rotate(155deg);object-fit:cover}
+.reference-home .reading-card strong {font:400 22px/1.1 var(--serif);letter-spacing:-.3px}
+.reference-home .reading-card b {font-size:12px}
+.reference-home .devotional-card {padding:22px 20px}
+.reference-home .devotional-card h2 {margin:24px 0 10px}
+.in-app nav {background:var(--app-bg);border:1px solid var(--app-line);box-shadow:none;border-radius:14px;padding:4px;min-height:62px}
+.in-app nav button {border-radius:9px;color:var(--app-muted);font-size:10px}
+.in-app nav button.active {background:var(--app-chip);color:var(--app-ink)}
+.in-app nav button.active svg {stroke:var(--accent)}
+.in-app nav svg {width:20px;height:20px}
+.section-intro p {font-size:14px;line-height:1.5}
+.filterbar button {border-radius:8px;background:var(--app-card);font:500 11px ui-monospace,monospace}
+.filterbar button.selected {background:var(--app-ink);color:var(--app-bg);border-color:var(--app-ink)}
+.discovery-stack {gap:12px}
+.verse-card,.verse-card:nth-child(even),[data-theme=dark] .verse-card:nth-child(even) {padding:22px 20px 14px;min-height:0}
+.verse-card header {text-align:left}
+.verse-card h2 {font:400 24px/1.2 var(--serif);margin:12px 0 4px}
+.verse-card blockquote {font:400 25px/1.35 var(--serif);text-align:left;margin:28px 0}
+.verse-card .reflection-block {background:var(--app-bg);border:1px solid var(--app-line);border-radius:10px;padding:16px;width:100%}
+.verse-card .reflection-block p {font:15px/1.55 Inter,-apple-system,sans-serif}
+.verse-card .inline-action {margin:8px 0;color:var(--app-ink)!important;justify-content:flex-start}
+.reader-view,.reader-page {background:var(--app-bg)}
+.reader-emblem {background:var(--app-card);border:1px solid var(--app-line);border-radius:14px;box-shadow:none;width:68px;height:68px}
+.reader-emblem svg {width:34px;height:34px;color:var(--accent)}
+.reader-verse blockquote {font:400 clamp(25px,6vw,32px)/1.35 var(--serif);letter-spacing:-.6px}
+.reader-toolbar .toolbar-group,.reader-toolbar .pill-control,.reader-toolbar .floating-control {border-radius:9px;background:var(--app-card);border:1px solid var(--app-line);box-shadow:none}
+.reader-side-actions .saved svg {fill:var(--accent);stroke:var(--accent)}
+.verse-rail input {accent-color:var(--accent)}
+.settings h2,.community-empty h2,.plans-intro h2 {font:400 30px/1.15 var(--serif)}
+.settings section {border-color:var(--app-line)}
+.settings select {border-radius:8px}
+.theme-setting {text-align:left;color:var(--accent);width:auto}
+.community-icon {border:1px solid var(--app-line);border-radius:14px;box-shadow:none}
+.plan-card {border-radius:14px!important}.plan-cover {color:#f8faff!important;background:#345e83!important}
+.plan-cover img {filter:saturate(.5) hue-rotate(155deg) brightness(.65)}
+.plan-cover span {font:italic 27px/1.05 var(--serif)}
+dialog {background:var(--app-card);color:var(--app-ink);border:1px solid var(--app-line);border-radius:18px 18px 0 0}
+.dialog-inner .reflection-block {background:var(--app-bg);border:1px solid var(--app-line);border-radius:10px;padding:16px}
+.screen {color:var(--ink)}
+.screen h2,.welcome h2,.ready h2 {font-family:var(--serif);font-weight:400;letter-spacing:-1px}
+.screen .choice,.screen .chip,.screen .reminder,.screen .notification {border-radius:10px;background:var(--white);border-color:var(--line)}
+.screen .choice.selected {background:var(--tint);border-color:var(--accent)}
+.screen .chip.selected {background:var(--ink);color:var(--paper)}
+.welcome-photo {border-radius:16px;background:#477ca8}
+.welcome-photo img {filter:saturate(.6) hue-rotate(150deg)}
+.ready blockquote {border-radius:14px}
+@media (min-width:560px) {
+ body.in-app {background:#e1e4e8}
+ [data-theme=dark] body.in-app {background:#454a50}
+ .in-app #app {border-color:#242427}
+}
+@media (max-width:360px) {
+ .in-app .app-header h1 {font-size:24px}
+ .in-app .app-header {padding-left:16px;padding-right:12px}
+ .in-app .app-header .iconbtn {min-width:36px;width:36px}
+ .reference-home .daily-card blockquote {font-size:27px}
+}

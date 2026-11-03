@@ -1,0 +1,5 @@
+export const defaults=()=>({flowVersion:2,step:0,completed:false,guest:false,intention:'',familiarity:'',topics:[],routine:'',reminders:false,time:'08:00',saved:[],theme:'dark'});
+export function choose(state,key,value){return {...state,[key]:key==='topics'?state.topics.includes(value)?state.topics.filter(x=>x!==value):[...state.topics,value]:value};}
+export function advance(state,skip=false){const keys={2:'intention',3:'familiarity',4:'topics',5:'routine',6:'reminders'};let next={...state,step:Math.min(state.step+1,7)};if(skip&&keys[state.step])next[keys[state.step]]=state.step===4?[]:state.step===6?false:'';return next;}
+export function complete(state,guest=false){return {...state,flowVersion:2,completed:true,guest,step:7};}
+export function restore(raw){try{const data=JSON.parse(raw);if(!data||typeof data!=='object'||Array.isArray(data))return defaults();let step=Math.floor(Number(data.step)||0);if(data.flowVersion!==2&&step>0)step++;return {...defaults(),...data,flowVersion:2,step:Math.max(0,Math.min(7,step)),topics:Array.isArray(data.topics)?data.topics:[],saved:Array.isArray(data.saved)?data.saved:[]};}catch{return defaults();}}

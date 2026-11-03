@@ -1,0 +1,41 @@
+{
+  "version": 4,
+  "assets": [
+    {
+      "id": "faith-hands",
+      "file": "faith-hands.png",
+      "use": "Faith",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Two graceful feminine hands with warm brown skin gently held together in prayer, natural short nails, an ivory linen sleeve at the wrist. No jewelry. Meaning: Faith. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "purpose-compass",
+      "file": "purpose-compass.png",
+      "use": "Purpose",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. An elegant antique silver pocket compass with a pale ivory dial, a fine sky-blue silk cord loosely curled beside it. No readable lettering. Meaning: Purpose. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "relationship-hands",
+      "file": "relationship-hands.png",
+      "use": "Relationships",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Two feminine hands of different skin tones gently holding one another in a supportive clasp, short natural nails, one ivory cuff and one soft sage linen cuff. Complete graceful wrist silhouette. Meaning: Relationships. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "gratitude-basket",
+      "file": "gratitude-basket.png",
+      "use": "Gratitude",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. A petite handwoven basket holding two pale green pears, a few purple grapes and a small delicate white blossom, arranged as a refined abundant still life. Meaning: Gratitude. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "wisdom-pearl",
+      "file": "wisdom-pearl.png",
+      "use": "Wisdom",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. An open pale ivory oyster shell with one luminous pearl resting naturally inside, beautiful subtle nacre texture and very faint blush-sky iridescence. Meaning: Wisdom. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "rest-stones",
+      "file": "rest-stones.png",
+      "use": "Anxiety",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Three smooth pale river stones stacked beside one small sage leaf and a delicate blue water ripple cutout beneath them, a peaceful natural still life. Meaning: Anxiety. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "bible-scroll",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix apps/api",
+    "check": "npm run check --prefix apps/api",
+    "test": "npm test --prefix apps/api",
+    "db:migrate": "npm run db:migrate --prefix apps/api",
+    "seed:kjv": "npm run seed:kjv --prefix apps/api",
+    "build:kjv": "npm run build:kjv --prefix apps/api",
+    "deploy:staging": "npm run deploy:staging --prefix apps/api"
+  }
+}

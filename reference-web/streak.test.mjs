@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {streakSummary,recordDay,localDay} from './dist/streak.mjs';
+assert.equal(localDay(new Date(2026,9,31,23)), '2026-10-31');
+assert.equal(streakSummary([], '2026-11-02').current,0);
+const days=['2026-10-31','2026-11-01','2026-11-02'];
+assert.equal(streakSummary(days,'2026-11-02').current,3);
+assert.equal(streakSummary(days,'2026-11-03').current,3);
+assert.equal(streakSummary(days,'2026-11-04').current,0);
+assert.equal(streakSummary([...days,'2026-11-04'],'2026-11-04').best,3);
+assert.equal(recordDay(days,'2026-11-02').length,3);
+assert.equal(streakSummary(['bad','2026-02-30','2027-01-01'],'2026-11-02').best,0);
+assert.equal(streakSummary(days,'2026-11-02').week.filter(d=>d.read).length,3);
+console.log('PASS: calendar boundaries, DST dates, duplicates, missed days, best streak, invalid and future dates');

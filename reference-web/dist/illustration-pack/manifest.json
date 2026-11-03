@@ -1,0 +1,152 @@
+{
+  "version": 5,
+  "style": "Photographic paper cutouts; transparent PNG; white contour; soft shadow; muted sage, cream and sky",
+  "assets": [
+    {
+      "id": "cosmos",
+      "file": "cosmos.png",
+      "prompt": "Create one standalone premium photographic paper-cutout illustration for a women's Bible reading mobile app. Subject: A single elegant white cosmos flower with a golden center and two fine green leaves on a gracefully curved short stem. Match a calm editorial scrapbook aesthetic: photorealistic natural materials, muted cream/sage/sky palette, realistic soft light from upper left, narrow clean white paper sticker outline following the actual object contour, subtle soft offset contact shadow. Isolated centered complete object with generous transparent padding on all sides; square composition, object fills about 72 percent of canvas. True transparent background. No background scene, no circles, no panels, no lettering, no logos, no watermark, no extra decorative objects. Refined dimensional photograph, not vector, not cartoon, not emoji. This is a reusable UI asset accompanying SF-style controls."
+    },
+    {
+      "id": "olive",
+      "file": "olive.png",
+      "prompt": "Create one standalone premium photographic paper-cutout illustration for a women's Bible reading mobile app. Subject: A graceful small olive branch with natural muted sage leaves, no fruit. Match a calm editorial scrapbook aesthetic: photorealistic natural materials, muted cream/sage/sky palette, realistic soft light from upper left, narrow clean white paper sticker outline following the actual object contour, subtle soft offset contact shadow. Isolated centered complete object with generous transparent padding on all sides; square composition, object fills about 72 percent of canvas. True transparent background. No background scene, no circles, no panels, no lettering, no logos, no watermark, no extra decorative objects. Refined dimensional photograph, not vector, not cartoon, not emoji. This is a reusable UI asset accompanying SF-style controls."
+    },
+    {
+      "id": "journal",
+      "file": "journal.png",
+      "prompt": "Create one standalone premium photographic paper-cutout illustration for a women's Bible reading mobile app. Subject: A closed pale linen prayer journal with a blue ribbon bookmark and a simple cream pen resting diagonally on its cover. No text or lettering. Match a calm editorial scrapbook aesthetic: photorealistic natural materials, muted cream/sage/sky palette, realistic soft light from upper left, narrow clean white paper sticker outline following the actual object contour, subtle soft offset contact shadow. Isolated centered complete object with generous transparent padding on all sides; square composition, object fills about 72 percent of canvas. True transparent background. No background scene, no circles, no panels, no lettering, no logos, no watermark, no extra decorative objects. Refined dimensional photograph, not vector, not cartoon, not emoji. This is a reusable UI asset accompanying SF-style controls."
+    },
+    {
+      "id": "open-book",
+      "file": "open-book.png",
+      "prompt": "Create one standalone premium photographic paper-cutout illustration for a women's Bible reading mobile app. Subject: An open cream-colored Bible with realistic thin unlettered paper pages and a blue ribbon bookmark, viewed from a soft three-quarter angle. No visible words or lettering. Match a calm editorial scrapbook aesthetic: photorealistic natural materials, muted cream/sage/sky palette, realistic soft light from upper left, narrow clean white paper sticker outline following the actual object contour, subtle soft offset contact shadow. Isolated centered complete object with generous transparent padding on all sides; square composition, object fills about 72 percent of canvas. True transparent background. No background scene, no circles, no panels, no lettering, no logos, no watermark, no extra decorative objects. Refined dimensional photograph, not vector, not cartoon, not emoji. This is a reusable UI asset accompanying SF-style controls."
+    },
+    {
+      "id": "magnifier",
+      "file": "magnifier.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A refined handheld magnifying glass with a brushed silver rim, clear glass and a short pale sage handle. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Passage search.",
+      "use": "Passage search"
+    },
+    {
+      "id": "bookmark",
+      "file": "bookmark.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A single sky-blue woven ribbon bookmark with a small silver loop at its top, gently curved, with a clean swallowtail end. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Saved passages.",
+      "use": "Saved passages"
+    },
+    {
+      "id": "reflection",
+      "file": "reflection.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A simple ivory ceramic candle holder with a small warmly lit candle and realistic melted wax. A quiet reflection object. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Reflection.",
+      "use": "Reflection"
+    },
+    {
+      "id": "community",
+      "file": "community.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. Two small handmade ceramic tea cups, one pale sage and one ivory, gently angled toward one another, a little warm tea visible, arranged as one paired object. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Community.",
+      "use": "Community"
+    },
+    {
+      "id": "milestone",
+      "file": "milestone.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small botanical wreath made from delicate green laurel leaves, open center, with a modest sky-blue ribbon tied at its base. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Reading milestones.",
+      "use": "Reading milestones"
+    },
+    {
+      "id": "sunrise",
+      "file": "sunrise.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small photographic landscape cutout of a sun rising above muted green rolling hills and a pale blue sky, organic irregular paper silhouette. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Quiet beginning plan.",
+      "use": "Quiet beginning plan"
+    },
+    {
+      "id": "anchor",
+      "file": "anchor.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small elegant brushed silver boat anchor with a short natural linen cord loop, balanced and graceful. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Strength plan.",
+      "use": "Strength plan"
+    },
+    {
+      "id": "dove",
+      "file": "dove.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A delicate real white dove in a calm gliding pose, wings open, subtle warm feather detail, no branch in beak. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Peace plan.",
+      "use": "Peace plan"
+    },
+    {
+      "id": "intention-heart",
+      "file": "intention-heart.png",
+      "use": "Onboarding intention",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A small smooth ivory ceramic heart, softly dimensional and handmade. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Onboarding intention."
+    },
+    {
+      "id": "seedling",
+      "file": "seedling.png",
+      "use": "Bible familiarity",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A delicate young seedling with two fresh sage green leaves and a small natural root bulb, complete botanical specimen. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Bible familiarity."
+    },
+    {
+      "id": "hourglass",
+      "file": "hourglass.png",
+      "use": "Reading rhythm",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A delicate clear glass hourglass with pale ivory sand and a slim brushed silver frame. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Reading rhythm."
+    },
+    {
+      "id": "reminder-bell",
+      "file": "reminder-bell.png",
+      "use": "Optional reading reminder",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A small elegant silver handbell with a modest sky-blue silk ribbon tied around its handle. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Optional reading reminder."
+    },
+    {
+      "id": "butterfly",
+      "file": "butterfly.png",
+      "use": "Onboarding completion",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A graceful pale blue butterfly with subtle cream markings, wings open, realistic delicate detail. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Onboarding completion."
+    },
+    {
+      "id": "lantern",
+      "file": "lantern.png",
+      "use": "Discover guidance and selected topics",
+      "prompt": "Create one premium photographic paper-cutout illustration for a women's Bible reading app. A small refined ivory metal lantern with clear glass and a gently glowing candle inside. True transparent background, square composition, complete subject centered with 12 percent clear padding. Match the existing editorial cutout pack: photorealistic natural material, muted cream/sage/sky palette, soft daylight from upper left, narrow clean white sticker edge following the actual contour, subtle soft offset contact shadow. Refined tactile and graceful. No text, logo, watermark, background, extra symbols, glitter, people, vector or cartoon rendering. Use: Discover guidance and selected topics."
+    },
+    {
+      "id": "faith-hands",
+      "file": "faith-hands.png",
+      "use": "Faith",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Two graceful feminine hands with warm brown skin gently held together in prayer, natural short nails, an ivory linen sleeve at the wrist. No jewelry. Meaning: Faith. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "purpose-compass",
+      "file": "purpose-compass.png",
+      "use": "Purpose",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. An elegant antique silver pocket compass with a pale ivory dial, a fine sky-blue silk cord loosely curled beside it. No readable lettering. Meaning: Purpose. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "relationship-hands",
+      "file": "relationship-hands.png",
+      "use": "Relationships",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Two feminine hands of different skin tones gently holding one another in a supportive clasp, short natural nails, one ivory cuff and one soft sage linen cuff. Complete graceful wrist silhouette. Meaning: Relationships. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "gratitude-basket",
+      "file": "gratitude-basket.png",
+      "use": "Gratitude",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. A petite handwoven basket holding two pale green pears, a few purple grapes and a small delicate white blossom, arranged as a refined abundant still life. Meaning: Gratitude. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "wisdom-pearl",
+      "file": "wisdom-pearl.png",
+      "use": "Wisdom",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. An open pale ivory oyster shell with one luminous pearl resting naturally inside, beautiful subtle nacre texture and very faint blush-sky iridescence. Meaning: Wisdom. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "rest-stones",
+      "file": "rest-stones.png",
+      "use": "Anxiety",
+      "prompt": "One standalone photographic paper-cutout editorial illustration for a refined women's Bible reading app. Three smooth pale river stones stacked beside one small sage leaf and a delicate blue water ripple cutout beneath them, a peaceful natural still life. Meaning: Anxiety. Beautiful tactile material, graceful detailed silhouette, soft daylight from upper left, narrow white paper contour and soft offset shadow. True transparent background, square, complete subject centered with clear padding, object occupies 75% of frame. Muted ivory, sage, silver and sky palette, rich realistic detail. No text, logos, lettering, UI, panel, background, glitter, cartoon or vector rendering. Match premium photorealistic sticker collage art, calm and sophisticated."
+    },
+    {
+      "id": "cloud-bank",
+      "file": "cloud-bank.png",
+      "use": "Soft onboarding and membership background",
+      "prompt": "Create a reusable wide horizontal cloud illustration for the background of an elegant women's Bible reading app. A natural photographic cluster of soft luminous white cumulus clouds, with delicate pale sky-blue shadows and warm ivory highlights. Photorealistic cottony depth, sophisticated peaceful editorial feel. Wide landscape composition, cloud bank roughly along the bottom two-thirds, irregular organic cloud silhouette fully isolated on a true transparent background. Softly feathered semi-transparent edges, no hard rectangle or sticker outline. No sky background, no sun, no text, no sparkle, no people, no religious symbols, no watermark. Suitable as a subtle translucent background accent behind app copy; center has softly sparse cloud detail."
+    }
+  ]
+}

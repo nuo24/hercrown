@@ -1,0 +1,7 @@
+/* Keep selection UI owned by the OS/browser. Do not use custom option popovers. */
+#app select{appearance:auto!important;-webkit-appearance:menulist!important;background-image:none!important;font-family:var(--font-ui);font-size:16px!important;line-height:1.4;min-height:44px;color:var(--text-primary);color-scheme:light;cursor:pointer}
+[data-theme=dark] #app select{color-scheme:dark}
+#app select:focus-visible{outline:2px solid var(--text-primary);outline-offset:3px}
+.reader-toolbar select.pill-control{width:auto;max-width:147px;min-width:0;padding:10px 9px 10px 12px;border:0;border-radius:999px;background-color:var(--surface-primary);box-shadow:var(--depth-control);font-size:16px!important;flex:none}
+#reader-translation{max-width:69px!important}
+@media(max-width:359px){.reader-toolbar select.pill-control{max-width:125px;padding-inline:8px;font-size:16px!important}}

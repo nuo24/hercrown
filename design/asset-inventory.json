@@ -1,0 +1,226 @@
+[
+  {
+    "id": "onboarding-collage",
+    "source": "reference-web/dist/assets/onboarding-collage.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/onboarding-collage.imageset",
+    "width": 845,
+    "height": 1862,
+    "sha256": "53d012ded8e32a4a381d2c5aba356ad88750a1e2096450c2874dfb395a348842"
+  },
+  {
+    "id": "quiet-meadow",
+    "source": "reference-web/dist/assets/quiet-meadow.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-meadow.imageset",
+    "width": 1024,
+    "height": 1536,
+    "sha256": "11c8ee7f8a54bd2b535d9f91b25a741aa90977982df745941e5f4c6b3d6b60c2"
+  },
+  {
+    "id": "quiet-sky",
+    "source": "reference-web/dist/assets/quiet-sky.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-sky.imageset",
+    "width": 1536,
+    "height": 1024,
+    "sha256": "a5ef300cbf9549c3419432d8c90146fe1360e29f6542b39f56333a08f772d492"
+  },
+  {
+    "id": "anchor",
+    "source": "reference-web/dist/illustration-pack/anchor.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/anchor.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "c696f07898a7bc4861b1788700b6981a4b5ee602c78bc6761c1ab52e48e9f902"
+  },
+  {
+    "id": "bookmark",
+    "source": "reference-web/dist/illustration-pack/bookmark.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/bookmark.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "cbd0deeb916b089fe559445bbab0bbd6cff117d0948cd205968a86e5df7bb6ed"
+  },
+  {
+    "id": "butterfly",
+    "source": "reference-web/dist/illustration-pack/butterfly.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/butterfly.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "7f01b778da934cc8dcc59061031cee7b05fed68f364e19b50eeb1edf61e1a2b4"
+  },
+  {
+    "id": "cloud-bank",
+    "source": "reference-web/dist/illustration-pack/cloud-bank.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/cloud-bank.imageset",
+    "width": 1918,
+    "height": 820,
+    "sha256": "ad43a1a592ddca9d854a64f74ee329fcea97c94994835d33fa16ffdfb3117a94"
+  },
+  {
+    "id": "community",
+    "source": "reference-web/dist/illustration-pack/community.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/community.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "bed765777fc26340d61b3395d71b5b396090f27217b437846ef383b3e04b03a1"
+  },
+  {
+    "id": "cosmos",
+    "source": "reference-web/dist/illustration-pack/cosmos.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/cosmos.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "72dac5160ed36aeb401fabdce6f8b737da9ebfa01982acc155a285922fee5d99"
+  },
+  {
+    "id": "dove",
+    "source": "reference-web/dist/illustration-pack/dove.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/dove.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "80a8a344b134dfa2074508393e170aa903caf0a86e08c9a259760e3dd30aa1cb"
+  },
+  {
+    "id": "faith-hands",
+    "source": "reference-web/dist/illustration-pack/faith-hands.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/faith-hands.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "d258afc59b44962a9cd6c375823e31ba74827750762eb8f34db82b96f4f1ca0e"
+  },
+  {
+    "id": "gratitude-basket",
+    "source": "reference-web/dist/illustration-pack/gratitude-basket.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/gratitude-basket.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "0b8237bfa7f074ff47e82abeb521194b10adc51c9c53b7c4efe006bfb03c5976"
+  },
+  {
+    "id": "hourglass",
+    "source": "reference-web/dist/illustration-pack/hourglass.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/hourglass.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "9dbd56428f6eb1ee39268e49e5630131c81e72ac61f0b2e5cd06186dc357bd79"
+  },
+  {
+    "id": "intention-heart",
+    "source": "reference-web/dist/illustration-pack/intention-heart.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/intention-heart.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "0e9606d6dffe56a9eab800fe6496bb511580fb46b2837db5e1e7ced8561a74d7"
+  },
+  {
+    "id": "journal",
+    "source": "reference-web/dist/illustration-pack/journal.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/journal.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "a662f0d91d859d91b4136d442381a00e0608971df0a755b22c3af596e05a7e7d"
+  },
+  {
+    "id": "lantern",
+    "source": "reference-web/dist/illustration-pack/lantern.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/lantern.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "ab645daaa4e444d1058f62b534641903d272f5b205336e77091f844ef74dc7f0"
+  },
+  {
+    "id": "magnifier",
+    "source": "reference-web/dist/illustration-pack/magnifier.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/magnifier.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "6cd4011c25827759c81817084d173688971f8caf66c374e2324313e45b8231a8"
+  },
+  {
+    "id": "milestone",
+    "source": "reference-web/dist/illustration-pack/milestone.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/milestone.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "78dcc8ce86b417f6f7da92693e7157c997da40de3e1dbe027ac33a2f9b64a9b4"
+  },
+  {
+    "id": "olive",
+    "source": "reference-web/dist/illustration-pack/olive.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/olive.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "d88c73a59813e9b49534b06670e20eda3817889f55af3e531b94ebf22364033d"
+  },
+  {
+    "id": "open-book",
+    "source": "reference-web/dist/illustration-pack/open-book.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/open-book.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "8775b7e94b9493c69d608c9f04716d644ee3e48e3f42aeacafee3b6529d3c971"
+  },
+  {
+    "id": "purpose-compass",
+    "source": "reference-web/dist/illustration-pack/purpose-compass.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/purpose-compass.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "14106b07e23127e9fb59aa40e1bf7983a8d9dd6f707d156241cc85687f0ba7cf"
+  },
+  {
+    "id": "reflection",
+    "source": "reference-web/dist/illustration-pack/reflection.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/reflection.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "19dca21f2e5db6b4942cd409f8d2dbf4b8ba0e59394fefc723625dee6a02ee31"
+  },
+  {
+    "id": "relationship-hands",
+    "source": "reference-web/dist/illustration-pack/relationship-hands.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/relationship-hands.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "229ed04e89f9f7ca430f2a081e3bd00e95305b391f96afaf2efe3f8a0892fbd7"
+  },
+  {
+    "id": "reminder-bell",
+    "source": "reference-web/dist/illustration-pack/reminder-bell.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/reminder-bell.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "7996678d82a402d13c43874aeee918005a5e1542ebe67f359939e9045f1a4404"
+  },
+  {
+    "id": "rest-stones",
+    "source": "reference-web/dist/illustration-pack/rest-stones.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/rest-stones.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "638f6ca4649527af3f04281fff6c4685d7eb7512980bb2f3aff37dbac8b17564"
+  },
+  {
+    "id": "seedling",
+    "source": "reference-web/dist/illustration-pack/seedling.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/seedling.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "9b3fb8fb275edbe4b30f92e93223722fbf53d651f5f64c81bba0cab402e092f0"
+  },
+  {
+    "id": "sunrise",
+    "source": "reference-web/dist/illustration-pack/sunrise.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/sunrise.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "2681d68283cf38d21076e4ef222f14a9041e16dec4962e53bf9cf25d0e78a861"
+  },
+  {
+    "id": "wisdom-pearl",
+    "source": "reference-web/dist/illustration-pack/wisdom-pearl.png",
+    "nativeCatalog": "design/asset-catalog/BibleScrollArtwork.xcassets/wisdom-pearl.imageset",
+    "width": 1254,
+    "height": 1254,
+    "sha256": "a0206315daf2a639c85a1226d9552ba3b50a8dcad4fc41e1b06f57af7592a3b4"
+  }
+]

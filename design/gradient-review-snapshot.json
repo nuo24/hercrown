@@ -1,0 +1,12 @@
+{
+  "purpose": "Observed review appearance; does not override shipped defaults",
+  "colors": [
+    "#e4eddf",
+    "#e0edf5",
+    "#d0c9a4"
+  ],
+  "third": false,
+  "intensity": 29,
+  "spread": 59,
+  "angle": 165
+}

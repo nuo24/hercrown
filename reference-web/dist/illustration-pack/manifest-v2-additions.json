@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "assets": [
+    {
+      "id": "magnifier",
+      "file": "magnifier.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A refined handheld magnifying glass with a brushed silver rim, clear glass and a short pale sage handle. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Passage search.",
+      "use": "Passage search"
+    },
+    {
+      "id": "bookmark",
+      "file": "bookmark.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A single sky-blue woven ribbon bookmark with a small silver loop at its top, gently curved, with a clean swallowtail end. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Saved passages.",
+      "use": "Saved passages"
+    },
+    {
+      "id": "reflection",
+      "file": "reflection.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A simple ivory ceramic candle holder with a small warmly lit candle and realistic melted wax. A quiet reflection object. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Reflection.",
+      "use": "Reflection"
+    },
+    {
+      "id": "community",
+      "file": "community.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. Two small handmade ceramic tea cups, one pale sage and one ivory, gently angled toward one another, a little warm tea visible, arranged as one paired object. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Community.",
+      "use": "Community"
+    },
+    {
+      "id": "milestone",
+      "file": "milestone.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small botanical wreath made from delicate green laurel leaves, open center, with a modest sky-blue ribbon tied at its base. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Reading milestones.",
+      "use": "Reading milestones"
+    },
+    {
+      "id": "sunrise",
+      "file": "sunrise.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small photographic landscape cutout of a sun rising above muted green rolling hills and a pale blue sky, organic irregular paper silhouette. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Quiet beginning plan.",
+      "use": "Quiet beginning plan"
+    },
+    {
+      "id": "anchor",
+      "file": "anchor.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A small elegant brushed silver boat anchor with a short natural linen cord loop, balanced and graceful. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Strength plan.",
+      "use": "Strength plan"
+    },
+    {
+      "id": "dove",
+      "file": "dove.png",
+      "prompt": "One isolated premium photographic paper-cutout asset for a Bible reading app, square composition, transparent background. A delicate real white dove in a calm gliding pose, wings open, subtle warm feather detail, no branch in beak. Match a restrained editorial scrapbook illustration pack: photorealistic natural material, muted cream/sage/sky palette, upper-left soft daylight, narrow clean white paper edge following the object, subtle soft offset shadow, complete subject centered with 12% clear padding. No background, no text, no logo, no sparkle, no extra objects. Not vector or emoji. Intended role: Peace plan.",
+      "use": "Peace plan"
+    }
+  ]
+}

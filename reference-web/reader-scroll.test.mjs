@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import {indexFromPosition,nearestVerse} from './dist/reader-scroll.mjs';
+assert.equal(indexFromPosition(-20,10,600,6),0);
+assert.equal(indexFromPosition(900,10,600,6),5);
+assert.equal(indexFromPosition(310,10,600,6),3);
+assert.equal(indexFromPosition(100,0,0,6),0);
+assert.equal(nearestVerse([0,700,1530,2400],1600),2);
+assert.equal(nearestVerse([0,700,1530,2400],710),1);
+assert.equal(nearestVerse([0,700,1530,2400],0),0);
+assert.equal(nearestVerse([],300),0);
+console.log('PASS: rail bounds, drag mapping, variable-height verse positions and reverse navigation');
+const {chapters}=await import('./dist/chapters.mjs');
+assert.equal(chapters['Genesis 1'].length,31);
+assert.equal(chapters['Psalm 23'].length,6);
+assert.equal(chapters['Genesis 1'][30][1],'Genesis 1:31');
+assert.equal(indexFromPosition(599,0,600,31),30);
+assert.equal(indexFromPosition(0,0,600,31),0);
+assert.equal(indexFromPosition(300,0,600,31),15);
+assert.equal(new Set(chapters['Genesis 1'].map(v=>v[1])).size,31);
+console.log('PASS: complete chapter counts, unique verse references and 31-block rail mapping');
+const {dockScale}=await import('./dist/reader-scroll.mjs');
+assert.equal(dockScale(0),1.8);
+assert.equal(dockScale(-1),dockScale(1));
+assert.ok(dockScale(1)>dockScale(2));
+assert.ok(dockScale(2)>dockScale(5));
+assert.ok(dockScale(10)<1.001);
+console.log('PASS: dock peak, symmetric neighbors and gradual scale falloff');
+const {railLayout}=await import('./dist/reader-scroll.mjs');
+for(const height of [0,180,350,700])for(const count of [1,6,31,118,176,300]){
+ const {gap,segmentHeight}=railLayout(height,count);
+ assert.ok(gap>=0&&segmentHeight>=0);
+ assert.ok(Math.abs(segmentHeight*count+gap*(count-1)-height)<.00001);
+ if(height>0)assert.ok(segmentHeight>0);
+ assert.equal(indexFromPosition(height+1,0,height,count),height>0?count-1:0);
+}
+console.log('PASS: persistent rail fits short/tall viewports and 1–300 verse chapters without overflow');

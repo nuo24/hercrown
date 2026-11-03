@@ -1,0 +1,52 @@
+# Bible Scroll: agent guide
+
+> Built on the [ai-app-playbook](https://github.com/blakeandersonw/ai-app-playbook) stack. `CLAUDE.md` points here.
+
+## App
+
+For women who want to scroll less and read more, Bible Scroll turns spare phone minutes into a calm, swipeable Scripture reading habit.
+Design authority: [IMPLEMENTATION.md](IMPLEMENTATION.md) → [specs/](specs/) → [reference-web/dist/](reference-web/dist/) (the working mockup). Copy what already works; don't reinvent screens.
+Domain watch-outs: never alter or fabricate Scripture text; keep reflections and insights clearly separate from Scripture; translation licenses are per publisher.
+$29.99/year with a free trial and a hard paywall, plus a one-time decline offer (~$19.99). Benchmarks (estimates): ~30% trial start, ~30% trial → paid. See [docs/decisions/](docs/decisions/).
+
+## Stack (nothing else)
+
+- API: one Cloudflare Worker (`apps/api/src/index.ts`), plain `fetch` handler, no router framework
+- Data: D1 plain SQL (`apps/api/migrations/*.sql`) · R2 (private avatars) · KV · Rate Limiting binding
+- Auth: Better Auth (`apps/api/src/auth.ts`): anonymous first, Sign in with Apple, bearer tokens for iOS
+- Scripture: KJV stored in D1 and bundled offline (`apps/api/seeds/`); other translations online via API.Bible (`apps/api/src/apibible.ts`)
+- Payments: Superwall (iOS); `entitlements` table is the source of truth, written only by verified webhooks
+- Analytics and errors: Tinybird via `POST /events` (not built yet)
+- AI: DeepSeek via OpenRouter behind AI Gateway, if insights use AI (undecided)
+- iOS: SwiftUI (`starter-ios/` is an incomplete baseline; target `apps/ios`)
+
+## Commands (run from the repo root)
+
+| Do | Run |
+|---|---|
+| Install | `npm install --prefix apps/api` |
+| Local database | `npm run db:migrate` then `npm run seed:kjv` |
+| Dev server (http://localhost:8787) | `npm run dev` |
+| Typecheck | `npm run check` |
+| Tests | `npm test` |
+| New migration | `npx --prefix apps/api wrangler d1 migrations create DB <name>` (from `apps/api`) |
+| Rebuild KJV seeds | `npm run build:kjv` |
+| Deploy staging | `npm run deploy:staging` |
+| Deploy production | **humans only** |
+
+Local secrets live in `apps/api/.dev.vars` (copy `.dev.vars.example`). Node 22 / npm (bun not installed).
+
+## Rules
+
+1. Run `npm run check && npm test` before saying done. UI changes: run the app and look.
+2. Ask before adding dependencies or vendors. Never Vercel, Netlify, Lovable, Bolt, v0, Replit, Firebase, Supabase, Clerk, Auth0, Sentry, PostHog, Next.js, Hono, Drizzle, Prisma or any ORM.
+3. All server logic on Cloudflare. Keys never ship in the app.
+4. Every user-visible feature emits an event (once analytics exists). Stream AI and log every AI call with cost.
+5. Schema changes are SQL migrations, staging first. Never edit a migration that has been applied remotely.
+6. Never touch production data, deploy to production, or commit secrets.
+7. Decisions go in `docs/decisions/NNNN-title.md`; parked ideas in `docs/later.md`; progress in `docs/progress.md`.
+8. Settings edits never reset onboarding. Fixtures and mock data are never presented as real.
+
+## Done means
+
+Works in the running app, checks and tests pass, events fire, and the change says how it was verified.

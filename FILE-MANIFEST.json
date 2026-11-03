@@ -1,0 +1,1436 @@
+{
+  "snapshotDate": "2026-11-02",
+  "authority": "IMPLEMENTATION.md and current specs/reference",
+  "files": [
+    {
+      "path": "AGENT-PROMPT.txt",
+      "bytes": 1103,
+      "sha256": "6022926cb90400077b10df1570fd86181e46953416f4f7e6c3b8b41ff35ad1b7"
+    },
+    {
+      "path": "IMPLEMENTATION.md",
+      "bytes": 9916,
+      "sha256": "cbb60477e97a9019f1e3c6b12d4881c4ca25fc4f2e60a3fe95b715b7f03bef6c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 2531,
+      "sha256": "2b44e0397c399eadd04d47e739f5f45a66897aa60e6bf14c47c1294e0e7a0866"
+    },
+    {
+      "path": "design/BRAND-AND-ASSETS.md",
+      "bytes": 2964,
+      "sha256": "cbf31b8964a4c2abfd491bdba0d7245fcb0deab691db413ee0eca6b839a08c94"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/Contents.json",
+      "bytes": 40,
+      "sha256": "10e3b5dc202f1cd9fad1f688c8fc9fe9e9669bf3f8295e67d216b10fd99b6f49"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/anchor.imageset/Contents.json",
+      "bytes": 150,
+      "sha256": "99f863d0fcc87354511abdd12d9cfe2565a29a3e060d8463ea02abff6873ce5c"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/anchor.imageset/anchor.png",
+      "bytes": 1507016,
+      "sha256": "c696f07898a7bc4861b1788700b6981a4b5ee602c78bc6761c1ab52e48e9f902"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/bookmark.imageset/Contents.json",
+      "bytes": 152,
+      "sha256": "eed60477b1ff6c3d143c173a795759bc9e12cfca612979f38be0be4845445d50"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/bookmark.imageset/bookmark.png",
+      "bytes": 869362,
+      "sha256": "cbd0deeb916b089fe559445bbab0bbd6cff117d0948cd205968a86e5df7bb6ed"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/butterfly.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "7c64f20d4e2a63dd4ad40ad553f8feaa667a1626bd302e868b6c0eb6228b1ce7"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/butterfly.imageset/butterfly.png",
+      "bytes": 2340635,
+      "sha256": "7f01b778da934cc8dcc59061031cee7b05fed68f364e19b50eeb1edf61e1a2b4"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/cloud-bank.imageset/Contents.json",
+      "bytes": 154,
+      "sha256": "23a0966ffc5828570f844129ef92c128742636d958ef47e4e9ea144ed297583e"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/cloud-bank.imageset/cloud-bank.png",
+      "bytes": 1713086,
+      "sha256": "ad43a1a592ddca9d854a64f74ee329fcea97c94994835d33fa16ffdfb3117a94"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/community.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "194c0601e4cc02ea1e3fcbef9095103174f10d1ab818606138d4278996d15cd4"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/community.imageset/community.png",
+      "bytes": 1119186,
+      "sha256": "bed765777fc26340d61b3395d71b5b396090f27217b437846ef383b3e04b03a1"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/cosmos.imageset/Contents.json",
+      "bytes": 150,
+      "sha256": "a71abff005208fb9f22bdf7515c431aeb83988e0db1bffdd2dd69a31d0aa1fe0"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/cosmos.imageset/cosmos.png",
+      "bytes": 1364258,
+      "sha256": "72dac5160ed36aeb401fabdce6f8b737da9ebfa01982acc155a285922fee5d99"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/dove.imageset/Contents.json",
+      "bytes": 148,
+      "sha256": "6edfe5140027921df4fb0904ebda0a7567e3d9f4767ce29bd0744c576115d6b6"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/dove.imageset/dove.png",
+      "bytes": 1325059,
+      "sha256": "80a8a344b134dfa2074508393e170aa903caf0a86e08c9a259760e3dd30aa1cb"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/faith-hands.imageset/Contents.json",
+      "bytes": 155,
+      "sha256": "26c33858ea99888b2a20c20f7bbee6157dcb1668e544a7f697bc84f7d5d21264"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/faith-hands.imageset/faith-hands.png",
+      "bytes": 1636845,
+      "sha256": "d258afc59b44962a9cd6c375823e31ba74827750762eb8f34db82b96f4f1ca0e"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/gratitude-basket.imageset/Contents.json",
+      "bytes": 160,
+      "sha256": "9033593987de7bdbd5c9050bbc98908eac2bb0407d472f3957cde813b1afea0c"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/gratitude-basket.imageset/gratitude-basket.png",
+      "bytes": 2228425,
+      "sha256": "0b8237bfa7f074ff47e82abeb521194b10adc51c9c53b7c4efe006bfb03c5976"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/hourglass.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "c70b4ad5cd73e57bed0aa206d0006f285d9dc7c9921ae897dadfcbb35a407abc"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/hourglass.imageset/hourglass.png",
+      "bytes": 1128824,
+      "sha256": "9dbd56428f6eb1ee39268e49e5630131c81e72ac61f0b2e5cd06186dc357bd79"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/intention-heart.imageset/Contents.json",
+      "bytes": 159,
+      "sha256": "27e226064feeb3a454da7fd049715e5d8a963f6297436df488c7327e3c78c3cd"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/intention-heart.imageset/intention-heart.png",
+      "bytes": 1049869,
+      "sha256": "0e9606d6dffe56a9eab800fe6496bb511580fb46b2837db5e1e7ced8561a74d7"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/journal.imageset/Contents.json",
+      "bytes": 151,
+      "sha256": "a3ed52ab0a773ff4cd7be935c9b7a11fd020a4c41f83605ba5cc8592407da8ea"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/journal.imageset/journal.png",
+      "bytes": 1945272,
+      "sha256": "a662f0d91d859d91b4136d442381a00e0608971df0a755b22c3af596e05a7e7d"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/lantern.imageset/Contents.json",
+      "bytes": 151,
+      "sha256": "52f0754baeb3be279478a85d2599c11507ce521bb817dabbfdfb7a8254ba5354"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/lantern.imageset/lantern.png",
+      "bytes": 955367,
+      "sha256": "ab645daaa4e444d1058f62b534641903d272f5b205336e77091f844ef74dc7f0"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/magnifier.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "07dc2e928bbd660920ba2eeae1c6b2398fd9dec2c4a17c6d508553b1cb3ad252"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/magnifier.imageset/magnifier.png",
+      "bytes": 1148922,
+      "sha256": "6cd4011c25827759c81817084d173688971f8caf66c374e2324313e45b8231a8"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/milestone.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "8e9b45d22dbfb21d930032320a9cfbe0ff1ea711a7bdca9a3957a00dcc597a32"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/milestone.imageset/milestone.png",
+      "bytes": 1839710,
+      "sha256": "78dcc8ce86b417f6f7da92693e7157c997da40de3e1dbe027ac33a2f9b64a9b4"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/olive.imageset/Contents.json",
+      "bytes": 149,
+      "sha256": "793c42903dbce4cca7175415d7ff30dc02f897e5d9ca1580e85c5cac3891accc"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/olive.imageset/olive.png",
+      "bytes": 1370477,
+      "sha256": "d88c73a59813e9b49534b06670e20eda3817889f55af3e531b94ebf22364033d"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/onboarding-collage.imageset/Contents.json",
+      "bytes": 162,
+      "sha256": "b94bbfb0bbc17f7250b5a6d05befc382a8f7670fdab5226eecc5ab4b9d725468"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/onboarding-collage.imageset/onboarding-collage.png",
+      "bytes": 1073030,
+      "sha256": "53d012ded8e32a4a381d2c5aba356ad88750a1e2096450c2874dfb395a348842"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/open-book.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "01a2ecfa7a5d40cedb3878a6481701daf680df65d126d9ee5dd35637ba3e38d2"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/open-book.imageset/open-book.png",
+      "bytes": 1658802,
+      "sha256": "8775b7e94b9493c69d608c9f04716d644ee3e48e3f42aeacafee3b6529d3c971"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/purpose-compass.imageset/Contents.json",
+      "bytes": 159,
+      "sha256": "d0ce58665a18b370b1a65d3659c5c23885292f24ccb718dd18f985d96683577a"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/purpose-compass.imageset/purpose-compass.png",
+      "bytes": 2363136,
+      "sha256": "14106b07e23127e9fb59aa40e1bf7983a8d9dd6f707d156241cc85687f0ba7cf"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-meadow.imageset/Contents.json",
+      "bytes": 156,
+      "sha256": "ed3fcc8f9894eb41c9084cd3dcbcd02aec7e02731f13747dbfcde32b7abbc5b5"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-meadow.imageset/quiet-meadow.png",
+      "bytes": 2283987,
+      "sha256": "11c8ee7f8a54bd2b535d9f91b25a741aa90977982df745941e5f4c6b3d6b60c2"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-sky.imageset/Contents.json",
+      "bytes": 153,
+      "sha256": "47f2337534cb408b5a09a953d7762866a789b2cd0d054d859e2730e2bde9e412"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/quiet-sky.imageset/quiet-sky.png",
+      "bytes": 1733762,
+      "sha256": "a5ef300cbf9549c3419432d8c90146fe1360e29f6542b39f56333a08f772d492"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/reflection.imageset/Contents.json",
+      "bytes": 154,
+      "sha256": "d8a91216835c05a438ed45f5be199b496c067bd9c78e88849fcc2443a5d75aa7"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/reflection.imageset/reflection.png",
+      "bytes": 1080575,
+      "sha256": "19dca21f2e5db6b4942cd409f8d2dbf4b8ba0e59394fefc723625dee6a02ee31"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/relationship-hands.imageset/Contents.json",
+      "bytes": 162,
+      "sha256": "d419e543ae527a6812d63b048342c63138f15b3b48a87d219eb9292c5d0a1da8"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/relationship-hands.imageset/relationship-hands.png",
+      "bytes": 1758817,
+      "sha256": "229ed04e89f9f7ca430f2a081e3bd00e95305b391f96afaf2efe3f8a0892fbd7"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/reminder-bell.imageset/Contents.json",
+      "bytes": 157,
+      "sha256": "f6417a45a0cc729b08bd23146222363e6daa1a9e578e3d76ecf22052f6e89c69"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/reminder-bell.imageset/reminder-bell.png",
+      "bytes": 1410503,
+      "sha256": "7996678d82a402d13c43874aeee918005a5e1542ebe67f359939e9045f1a4404"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/rest-stones.imageset/Contents.json",
+      "bytes": 155,
+      "sha256": "b9d145c9a0376ace1ca3f15e4e99d7ae60c7f6af00209ee13f03a2c1546c6425"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/rest-stones.imageset/rest-stones.png",
+      "bytes": 1822453,
+      "sha256": "638f6ca4649527af3f04281fff6c4685d7eb7512980bb2f3aff37dbac8b17564"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/seedling.imageset/Contents.json",
+      "bytes": 152,
+      "sha256": "4915bb41aaf281861b89a8b281a6b06c5f5a5089ef539098cf620e8e601a5614"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/seedling.imageset/seedling.png",
+      "bytes": 897038,
+      "sha256": "9b3fb8fb275edbe4b30f92e93223722fbf53d651f5f64c81bba0cab402e092f0"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/sunrise.imageset/Contents.json",
+      "bytes": 151,
+      "sha256": "f27676970003ff6068d5fadd87594a4ecb5d0e9471705fa64785980d7db757b2"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/sunrise.imageset/sunrise.png",
+      "bytes": 1627116,
+      "sha256": "2681d68283cf38d21076e4ef222f14a9041e16dec4962e53bf9cf25d0e78a861"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/wisdom-pearl.imageset/Contents.json",
+      "bytes": 156,
+      "sha256": "633d2a4f5bb1fd0734d0c0b5fe569cf44e4a0c3a1181c6d897f4c0b0f4ddd271"
+    },
+    {
+      "path": "design/asset-catalog/BibleScrollArtwork.xcassets/wisdom-pearl.imageset/wisdom-pearl.png",
+      "bytes": 1915141,
+      "sha256": "a0206315daf2a639c85a1226d9552ba3b50a8dcad4fc41e1b06f57af7592a3b4"
+    },
+    {
+      "path": "design/asset-inventory.json",
+      "bytes": 8794,
+      "sha256": "65a1a6549711c3fae691aa5b44c20545131120f606fd1dc11a5b147b11fd4ba1"
+    },
+    {
+      "path": "design/gradient-review-snapshot.json",
+      "bytes": 214,
+      "sha256": "bb63f735c193abe14b9d9578a11c480f780d53069012e3ebc2b1106ec6005c09"
+    },
+    {
+      "path": "design/icon-pack/LUCIDE-LICENSE.txt",
+      "bytes": 3208,
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "path": "design/icon-pack/README.md",
+      "bytes": 1024,
+      "sha256": "94f583cd077fb475a9621d9da8325401dd24c5f7d49ae5595826351013a91e53"
+    },
+    {
+      "path": "design/icon-pack/arrow.svg",
+      "bytes": 238,
+      "sha256": "143e2724632d8d6fcfdf6676c01eee64cfb42ccdccec74e6e148b2be362ffe25"
+    },
+    {
+      "path": "design/icon-pack/back.svg",
+      "bytes": 238,
+      "sha256": "98db462f93ab2327c837d8922f9dde83d5ac2646dd6c18ca990891749b1e2d5a"
+    },
+    {
+      "path": "design/icon-pack/bell.svg",
+      "bytes": 254,
+      "sha256": "ee5a2671dea97b96c1d8a1a47ae0a6ab53e18852d3fc8a8e01505436f7e91b2e"
+    },
+    {
+      "path": "design/icon-pack/book.svg",
+      "bytes": 363,
+      "sha256": "1b4c60da5584cad638a3c79cfa38b18975654b204677dca91186186a55f7f630"
+    },
+    {
+      "path": "design/icon-pack/bookmark.svg",
+      "bytes": 322,
+      "sha256": "d876c7c846a30fab48c3566b7952e4bfeb1a0173b4c1bdcdb310503eb43b42d4"
+    },
+    {
+      "path": "design/icon-pack/bulb.svg",
+      "bytes": 260,
+      "sha256": "0e49e1975fab11e1597927743bc0ea5e7e471e73b3a87a5627241337775eadd0"
+    },
+    {
+      "path": "design/icon-pack/camera.svg",
+      "bytes": 259,
+      "sha256": "c97e034d42bca5eb538c4170b0a76407812caa2c5ddee7ecebdb5a5b0dfc23a5"
+    },
+    {
+      "path": "design/icon-pack/check.svg",
+      "bytes": 216,
+      "sha256": "66d6ff636e2a2f00123e889e5db96b46eee57b2dd8efa359b06f09f1f851890f"
+    },
+    {
+      "path": "design/icon-pack/chevron.svg",
+      "bytes": 216,
+      "sha256": "c44092e919326621ce3957ad69ec7e8e060b3f356f5561c4b7ff7c8236ea55ab"
+    },
+    {
+      "path": "design/icon-pack/close.svg",
+      "bytes": 237,
+      "sha256": "657ba9c50474b2f4bf67813e7577612bc410e04e3043f1a99ad006684aa9060e"
+    },
+    {
+      "path": "design/icon-pack/community.svg",
+      "bytes": 364,
+      "sha256": "ee87bd5e9ef12bf8aafc9f2c453d5b65f6f12ee17deaedde7b222e9abd18f5f6"
+    },
+    {
+      "path": "design/icon-pack/discover.svg",
+      "bytes": 331,
+      "sha256": "3c41ad409f710ed06eadd2543533e234262d98213dbde6b02684f7d45a47955a"
+    },
+    {
+      "path": "design/icon-pack/document.svg",
+      "bytes": 241,
+      "sha256": "7164a8a3b19eab8ec2a93cf00b761ece07c968ae0b11888aa5ae3ae776b6e201"
+    },
+    {
+      "path": "design/icon-pack/flame.svg",
+      "bytes": 285,
+      "sha256": "b179ecfee4d8a1f0b2c1aeec9e5397c4144dcc6e8a825ed6bc2f395605a0ed37"
+    },
+    {
+      "path": "design/icon-pack/gear.svg",
+      "bytes": 562,
+      "sha256": "562f5da0191859e0c83c77d12b9380aa77e9f943b6a728dd19be7b85fb75c865"
+    },
+    {
+      "path": "design/icon-pack/heart.svg",
+      "bytes": 350,
+      "sha256": "9e1c1e569835481ad4cfc64f04b769d347078c7726ee44e92ef192874ac5c05f"
+    },
+    {
+      "path": "design/icon-pack/home.svg",
+      "bytes": 359,
+      "sha256": "b842f489693e136ea7d1d8fe8ab501a3b26748113c2fdbb76d125bd4f618867d"
+    },
+    {
+      "path": "design/icon-pack/info.svg",
+      "bytes": 247,
+      "sha256": "4de181cac19dae4a251f6dee4e80cb50f080aa63832321fa1c8c004ddcc271ff"
+    },
+    {
+      "path": "design/icon-pack/insights.svg",
+      "bytes": 318,
+      "sha256": "48345b8016791d87e808517aa5b5037aae143f825f1c8fce4f1af90277d72ad9"
+    },
+    {
+      "path": "design/icon-pack/link.svg",
+      "bytes": 302,
+      "sha256": "5703396f5427daffd9086de9c4d2e936c4b5e1f9b8ee92624176c9f29832a5a8"
+    },
+    {
+      "path": "design/icon-pack/manifest.json",
+      "bytes": 654,
+      "sha256": "aeeb09775d45d18dd02c8303aebaf3836843cd8d599d671cbd5d3fe02f4cede7"
+    },
+    {
+      "path": "design/icon-pack/message.svg",
+      "bytes": 326,
+      "sha256": "4c23b72039fd3a00604ea599a1eaf1b8ff2ccba933901a2b11db39f0cd66d47b"
+    },
+    {
+      "path": "design/icon-pack/refresh.svg",
+      "bytes": 229,
+      "sha256": "60c56c39ce612913539ab7c38a45180d35cad7427a03e4998e611099e8ab3ca6"
+    },
+    {
+      "path": "design/icon-pack/search.svg",
+      "bytes": 253,
+      "sha256": "c7cccb6aa8947b1ef8dafb8be715c578769262604230897a727a8eacd43c8801"
+    },
+    {
+      "path": "design/icon-pack/settings.svg",
+      "bytes": 259,
+      "sha256": "0228388c3d41cf9f253d28be091a5c310a75a0ef082fc686881b84150d6f6cc4"
+    },
+    {
+      "path": "design/icon-pack/share.svg",
+      "bytes": 295,
+      "sha256": "9b9b807feb9b68f17f9ca5259868031b5b2c46f7e38472e0df98d1c693969de8"
+    },
+    {
+      "path": "design/icon-pack/shield.svg",
+      "bytes": 261,
+      "sha256": "e3c3a59cf3a8d35f2e8df435c391ce3bf80aa4bba7858864f7f00a9bf055db69"
+    },
+    {
+      "path": "design/icon-pack/shuffle.svg",
+      "bytes": 423,
+      "sha256": "c1f94e440e42518419c4e5347455fae5c81a726c083e0ba7038c5448a3ba57cd"
+    },
+    {
+      "path": "design/icon-pack/study.svg",
+      "bytes": 310,
+      "sha256": "fde8954fa38213a832b335e728b3a190f758a72a0e1ddbf4b3806a3693b85aa5"
+    },
+    {
+      "path": "design/icon-pack/sun.svg",
+      "bytes": 460,
+      "sha256": "c71348ba5f31f1a7bc319f64abae52578b32b85cf015c42cbbc87587ac3bbc99"
+    },
+    {
+      "path": "design/icon-pack/whatsapp.svg",
+      "bytes": 329,
+      "sha256": "5b44e6c6035d263a4115335b4d09ff52b96d8caf372ed34dbbe0ed6284b9cc9d"
+    },
+    {
+      "path": "design/logo-pack/README.md",
+      "bytes": 730,
+      "sha256": "3fb06db82245e759c1987a8203dc5bb14ea58063aa7932c97cb196e1ffe99096"
+    },
+    {
+      "path": "design/logo-pack/book-symbol.svg",
+      "bytes": 363,
+      "sha256": "1b4c60da5584cad638a3c79cfa38b18975654b204677dca91186186a55f7f630"
+    },
+    {
+      "path": "design/logo-pack/wordmark-dark.svg",
+      "bytes": 268,
+      "sha256": "a198fa2f2ee4fd02525905a03300a2dfe2a812931c8b2ca833fd3d1957ca4ff0"
+    },
+    {
+      "path": "design/logo-pack/wordmark-light.svg",
+      "bytes": 268,
+      "sha256": "2f958c5bcfb87b9ac94d3afd19c4241efa248ae2c39b59a2b2ad7ad40c7ee691"
+    },
+    {
+      "path": "design/tokens-source.json",
+      "bytes": 7047,
+      "sha256": "0192354478efde1175df93d0dc3bfbfe78f51593b0adfaac066567109d665af2"
+    },
+    {
+      "path": "history/docs/DEPTH-REVIEW.md",
+      "bytes": 2022,
+      "sha256": "3455cbc73e96cf27846a8b05680e16016cebbb6a0e6e8930183611e039d1c9bc"
+    },
+    {
+      "path": "history/docs/EXPRESSIVE-TOPICS.md",
+      "bytes": 826,
+      "sha256": "ed17ac599adbb4175d618996f17c77ccfee7c0c2e4eaa60528c38583d13d819f"
+    },
+    {
+      "path": "history/docs/FLORAL-WELCOME.md",
+      "bytes": 725,
+      "sha256": "d230a9f71e453ecc7b00176ac88257b9ca59fb35422e49824567685545312034"
+    },
+    {
+      "path": "history/docs/GRADIENT-EDITOR.md",
+      "bytes": 690,
+      "sha256": "1941e9c766db2c86bdab25e614a05a463327135da125a621768fc685d61f5da7"
+    },
+    {
+      "path": "history/docs/IOS-IMPLEMENTATION.md",
+      "bytes": 11189,
+      "sha256": "77a363ad8a4286df7362945b1e39e37bb9de6a714af59581bfa50f56bd72da03"
+    },
+    {
+      "path": "history/docs/LIQUID-DOCK.md",
+      "bytes": 1047,
+      "sha256": "5bb96ea768c665947289d05dfc1ccfaba5ca0d3067296a2731338726b249f1a3"
+    },
+    {
+      "path": "history/docs/MEMBERSHIP-PREVIEW.md",
+      "bytes": 2136,
+      "sha256": "f6d25605ff8ec06512113627ac62788e2436fbcaeb2b6233e4337fda8edd5e03"
+    },
+    {
+      "path": "history/docs/NATIVE-PICKERS.md",
+      "bytes": 989,
+      "sha256": "bc3445d1102039fef1eb4e41546caeed39ea0e2bf723c99ae2ef12154acd8d8a"
+    },
+    {
+      "path": "history/docs/ONBOARDING-INTRODUCTION.md",
+      "bytes": 1219,
+      "sha256": "6758b0793559e0ab2a59a5dfe60575cd376ca7d0a98a3feb26c9c3fb614f5273"
+    },
+    {
+      "path": "history/docs/PASSAGE-STUDY.md",
+      "bytes": 1522,
+      "sha256": "ce6388555211dabe34a30b94b6d253c6b7601696212b96d9403df7e81445a7e2"
+    },
+    {
+      "path": "history/docs/PERSISTENT-VERSE-SIDEBAR.md",
+      "bytes": 1032,
+      "sha256": "89ba77a085f3233ef8832f668c8609c15307032aacaaa6e8887f0ca06d728edf"
+    },
+    {
+      "path": "history/docs/PUBLISH-STATUS.md",
+      "bytes": 407,
+      "sha256": "0c8273e51b5dbd05960e491993748aebf847cfee0c8afa2e9f7da95bfa8ea10b"
+    },
+    {
+      "path": "history/docs/READER-ART-GLASS.md",
+      "bytes": 966,
+      "sha256": "f5d45250f1e480a49c3182acf299fabee87c1d002b9d0b403e5c5e37f18e39c5"
+    },
+    {
+      "path": "history/docs/READING-STREAK.md",
+      "bytes": 975,
+      "sha256": "0923e928a2d3932306c5f71dce3dabb078bff2340cde392b74bb1920fed7494e"
+    },
+    {
+      "path": "history/docs/SETTINGS-PREVIEW.md",
+      "bytes": 1850,
+      "sha256": "cffb1c79527c298c972203b17c61be897d43f75c1d46d95758f737058717bad0"
+    },
+    {
+      "path": "history/docs/WHITE-COLLAGE-ONBOARDING.md",
+      "bytes": 1706,
+      "sha256": "c031516462fbd4c16e08692752fa44fb6ebef49dc24779acc889f71936cbffd3"
+    },
+    {
+      "path": "history/docs/discover-fix.md",
+      "bytes": 1514,
+      "sha256": "803350ded51b7a6c484154831857061bb4bb05b0b8ce4de8c00bdd594d09ef48"
+    },
+    {
+      "path": "history/docs/origin-design-audit.md",
+      "bytes": 4094,
+      "sha256": "541f1682270339738b5dc168a5112f4b839a4e331da46a080c59e99a105eb0ec"
+    },
+    {
+      "path": "history/docs/origin-fidelity-review.md",
+      "bytes": 3954,
+      "sha256": "84ee3ea7ac37a34542492bd8e7eb2a938c10b01b88d3de9254cf657efe21a3b2"
+    },
+    {
+      "path": "history/docs/screenshots/baseline-ui-home.png",
+      "bytes": 54138,
+      "sha256": "7e79c93b5f1ad8de97eb4b9b63fdd6c8aaa0f4c540b5c736837c24fecfb23db8"
+    },
+    {
+      "path": "history/docs/screenshots/bible-contextual-illustration.png",
+      "bytes": 65611,
+      "sha256": "0baf4fc19268e2298671bd0d4bcdf442cc2989a8448a831a7d6250b3be353102"
+    },
+    {
+      "path": "history/docs/screenshots/bible-default-tab.png",
+      "bytes": 53518,
+      "sha256": "62dcfa0b16e380daee858301707c3b841a9f9669bc1f04241a11fe3cdd5e7b3c"
+    },
+    {
+      "path": "history/docs/screenshots/bible-scroll-discover-dark.png",
+      "bytes": 47656,
+      "sha256": "92e03def9ef303fa4eb0b260ce9b9fe3e4c0d74878478886ec373ce586824e79"
+    },
+    {
+      "path": "history/docs/screenshots/bible-scroll-home-dark.png",
+      "bytes": 54101,
+      "sha256": "256c9bfb3d21ff200bddfec54049ccda78b787723bce6b02847d6be8bbae646d"
+    },
+    {
+      "path": "history/docs/screenshots/bible-scroll-home-light.png",
+      "bytes": 56763,
+      "sha256": "fe808c69d62287544d20ab0ff05dd2a8850d3b2b45ac48b51bdd7960bd29e509"
+    },
+    {
+      "path": "history/docs/screenshots/bible-scroll-reader-dark.png",
+      "bytes": 33046,
+      "sha256": "e73e84d359866752e8b72432475fcd5048fceda84b37fda6f13334466696295f"
+    },
+    {
+      "path": "history/docs/screenshots/bible-scroll-sheet-dark.png",
+      "bytes": 43705,
+      "sha256": "ed2d5485876b96c1d764dea077efd33b7416c44dbebab41f6fd4b8253c27874f"
+    },
+    {
+      "path": "history/docs/screenshots/bottom-menu-reset.png",
+      "bytes": 65466,
+      "sha256": "720a1345536e9dce69846f9cc5044d87a3353a7bcb7e4551a0602824ae26993b"
+    },
+    {
+      "path": "history/docs/screenshots/contextual-home-illustrations.png",
+      "bytes": 64603,
+      "sha256": "adbd475083a7a5175a4ce3f0de5d6c196736669485ec1c9b5d54e9a9cddabe55"
+    },
+    {
+      "path": "history/docs/screenshots/deslop-home.png",
+      "bytes": 54138,
+      "sha256": "7e79c93b5f1ad8de97eb4b9b63fdd6c8aaa0f4c540b5c736837c24fecfb23db8"
+    },
+    {
+      "path": "history/docs/screenshots/discover-390x844.png",
+      "bytes": 32585,
+      "sha256": "7787c4a56ca28b720d544ae7f07ba11e1c3b78fbe135eb178500d4211f81a2ca"
+    },
+    {
+      "path": "history/docs/screenshots/discover-contextual-topic-latest.png",
+      "bytes": 85486,
+      "sha256": "dad9e6123463fcfe705e6247dd1041ff46e903c940ffe6199a80af34b35f4285"
+    },
+    {
+      "path": "history/docs/screenshots/discover-identity-illustration.png",
+      "bytes": 56006,
+      "sha256": "d7ee71a1ce67f03d23b89a0503052e8d5cda55d1a017aa956840c8974079d55b"
+    },
+    {
+      "path": "history/docs/screenshots/discover-liquid-glass-card.png",
+      "bytes": 81376,
+      "sha256": "faa301d3edb285cc99c130fb55edb0985dbec782e199a0ca11f7bafbbd2f7f90"
+    },
+    {
+      "path": "history/docs/screenshots/dock-restored.png",
+      "bytes": 66163,
+      "sha256": "9ac2a01f702f5e6807d21cf54fc17e53856e1b0c3a2160ca5e322deec0984f0c"
+    },
+    {
+      "path": "history/docs/screenshots/gradient-editor-app.png",
+      "bytes": 70777,
+      "sha256": "f8b9ef1a5faecfd211074b4fda0a03391a772f1715f672553910f9f90c6c71e9"
+    },
+    {
+      "path": "history/docs/screenshots/home-expressive-topics.png",
+      "bytes": 82992,
+      "sha256": "e39f6586f1f622fe5c69854a5e3daf420d470dcd816f24cfb15ef93718e52642"
+    },
+    {
+      "path": "history/docs/screenshots/home-nate-streak.png",
+      "bytes": 67590,
+      "sha256": "4d60902f45b50a0830d33a0861307ed853cc4c9b9b965590f57dfe2817de3700"
+    },
+    {
+      "path": "history/docs/screenshots/home-streak-flame.png",
+      "bytes": 67834,
+      "sha256": "635180a0baf3179e494e8c3a34b380ce4e6e5101e0e419e2d1af030e0772fa87"
+    },
+    {
+      "path": "history/docs/screenshots/illustrated-reading-plans.png",
+      "bytes": 67273,
+      "sha256": "b77f4a0ed4824f33dbf1e98cae47c4d6541d7ffd35bd51d2c3df5d7c727a7a89"
+    },
+    {
+      "path": "history/docs/screenshots/ios-31-verse-blocks.png",
+      "bytes": 40610,
+      "sha256": "2c6421a402dcad3ec739e26dea59b43241bba97915169e36f827942f7818ae86"
+    },
+    {
+      "path": "history/docs/screenshots/ios-depth-home-dark.png",
+      "bytes": 59769,
+      "sha256": "94c0e133cad560c19463fabe02161a7a7cdca91d03a561414e036d651dbfbab1"
+    },
+    {
+      "path": "history/docs/screenshots/ios-depth-home-light.png",
+      "bytes": 60652,
+      "sha256": "0b77c0e0d11c3ed68a274bb2ed3e6f8496ee425dccfc8d303bb68963ab311579"
+    },
+    {
+      "path": "history/docs/screenshots/ios-discover-dark.png",
+      "bytes": 61523,
+      "sha256": "f8bba801aca3b836e67417aa81513a8c3da6b54f9dd357edcdb550956a45edc2"
+    },
+    {
+      "path": "history/docs/screenshots/ios-floral-welcome-centered.png",
+      "bytes": 65775,
+      "sha256": "07e402980736a445dbfbfde9ec374f0d63c80d9b66ad8f74d4c9b8dd59fa75e2"
+    },
+    {
+      "path": "history/docs/screenshots/ios-floral-welcome-only.png",
+      "bytes": 67178,
+      "sha256": "7d9bdf83ef948c2ffe22ca99d23b19fe5b20105608460baf69cc8153372aa721"
+    },
+    {
+      "path": "history/docs/screenshots/ios-gradient-welcome.png",
+      "bytes": 65894,
+      "sha256": "1978d55e21642fe48fcf3b563e6ee06b03600a894fb722202c14406ce80e30a7"
+    },
+    {
+      "path": "history/docs/screenshots/ios-home-light.png",
+      "bytes": 56805,
+      "sha256": "d8ac5dcfa03ebd91f0e83828668b15aa958a27c2a58c64248d51e6c37a06392a"
+    },
+    {
+      "path": "history/docs/screenshots/ios-left-dock-active.png",
+      "bytes": 52207,
+      "sha256": "1837577ce59532ea16d9bb7802392146ecdff2d9d48fee76bef0b4fac26e455c"
+    },
+    {
+      "path": "history/docs/screenshots/ios-left-dock-drag.png",
+      "bytes": 49237,
+      "sha256": "e44e30c0593ca1bdc57586775bc1ad83310238d8672e69eec1300e5829dd40de"
+    },
+    {
+      "path": "history/docs/screenshots/ios-left-dock-idle.png",
+      "bytes": 50378,
+      "sha256": "198591f6a7bdfad46f48be2cca9061c2d2592dd9641eaa9f98baaed89befb40d"
+    },
+    {
+      "path": "history/docs/screenshots/ios-liquid-dock-dark.png",
+      "bytes": 63547,
+      "sha256": "16910d8414569d6cc26217d27434f7728463c97a37f30315390aaebc476be36e"
+    },
+    {
+      "path": "history/docs/screenshots/ios-liquid-dock-light.png",
+      "bytes": 64800,
+      "sha256": "5d7f3151a19d6e06a788732305d7f9a192da3766bebac1c60a47f1709c76eef9"
+    },
+    {
+      "path": "history/docs/screenshots/ios-onboarding-reset.png",
+      "bytes": 60582,
+      "sha256": "3828bdcfeee3dbecc612c7d8e99454cbbf35bd8d78bb2fe3ff4881c3a0633a8a"
+    },
+    {
+      "path": "history/docs/screenshots/ios-reader-light.png",
+      "bytes": 37275,
+      "sha256": "0cd4ae33fb2ccf054f76fe0d0fb7b07d3eff0cfc6d72f0a18e6c6dd0ffaee7f7"
+    },
+    {
+      "path": "history/docs/screenshots/ios-segmented-reader-dark.png",
+      "bytes": 39626,
+      "sha256": "50b4a64fed8ede90c7f682923eb6339f64017951816f4c4c2e51e0aa03cbf18e"
+    },
+    {
+      "path": "history/docs/screenshots/ios-segmented-reader-light.png",
+      "bytes": 52261,
+      "sha256": "8f516d2dc401967a74f5fa45aeac7ddaa3a6f2fc1795db4403893e8570b4de81"
+    },
+    {
+      "path": "history/docs/screenshots/ios-serif-variation.png",
+      "bytes": 53732,
+      "sha256": "37cf29654f7665e81ab4e02acbd08ed4084027145d8fbfa9c6faefb4a7f7b8cd"
+    },
+    {
+      "path": "history/docs/screenshots/ios-spacing-home.png",
+      "bytes": 61501,
+      "sha256": "f1fac555561f5ff44b35836e58a2d45f85463165f653c1a8742be838b64547b5"
+    },
+    {
+      "path": "history/docs/screenshots/ios-study-dark.png",
+      "bytes": 56907,
+      "sha256": "dd8121c50a6f59cb0ad23f83165f1948491f8909e02ee797d38a52ed6b7b1abc"
+    },
+    {
+      "path": "history/docs/screenshots/ios-white-collage-welcome.png",
+      "bytes": 64915,
+      "sha256": "e3c5904df451f693d29a6d04707ab46598417bbe7525ef868f7a45d492304e42"
+    },
+    {
+      "path": "history/docs/screenshots/lifted-dock-restored.png",
+      "bytes": 66845,
+      "sha256": "d74118284f0ad4e3d892b7c3a292dd4f4fa00ac5305ebc957a233351e61b2739"
+    },
+    {
+      "path": "history/docs/screenshots/liquid-glass-dock-dark.png",
+      "bytes": 81849,
+      "sha256": "221e20a771f89e67c61c530f43497869b1922b11bc7ac6789d5df439f59d2a96"
+    },
+    {
+      "path": "history/docs/screenshots/membership-paywall.png",
+      "bytes": 86987,
+      "sha256": "ddb29ea3ae8503d8554687f53c5195ff7f855ff9fbfae9f2c5eef75677fc2f68"
+    },
+    {
+      "path": "history/docs/screenshots/native-chapter-picker.png",
+      "bytes": 68734,
+      "sha256": "73176f431cb399df5ae8d43dd7b61dfdcc431d5f27a8df3a06ec731aee17df7f"
+    },
+    {
+      "path": "history/docs/screenshots/neutral-dock.png",
+      "bytes": 67745,
+      "sha256": "2e9c125ebe078c089d23447d31616fcbd6d0e0a0410a7d8983d4e31c7b65fac8"
+    },
+    {
+      "path": "history/docs/screenshots/onboarding-butterfly-completion.png",
+      "bytes": 52604,
+      "sha256": "1720fdf55da881d7921c7227120cb1b6a7c7f0e184346e518f164aa7df2240d4"
+    },
+    {
+      "path": "history/docs/screenshots/onboarding-ceramic-heart.png",
+      "bytes": 50806,
+      "sha256": "527a3b26f79d2f50e849fded0888ac87acf678e54ab62dfbb3276d7a3822e130"
+    },
+    {
+      "path": "history/docs/screenshots/onboarding-clouds.png",
+      "bytes": 76620,
+      "sha256": "c3a84a3c20ce9a16a887b783ca71d7018fe619a2296e9dfdb9981107b9a1b7c8"
+    },
+    {
+      "path": "history/docs/screenshots/onboarding-introduction.png",
+      "bytes": 70733,
+      "sha256": "0da2445d464d3002eab34e0cc3d8f74a5b9a822742b96627cdad4bc4144133e0"
+    },
+    {
+      "path": "history/docs/screenshots/onboarding-time-comparison.png",
+      "bytes": 71324,
+      "sha256": "c676c6552b268d4cc62d53ee95b7755ac3e17c0efaf6334cf5f1bcab83885b29"
+    },
+    {
+      "path": "history/docs/screenshots/origin-home-desktop.png",
+      "bytes": 66081,
+      "sha256": "7715548e8eccf5f53e107539c7a5f4123f2a80b3f6ea9c8ded38bf102c4bd0d3"
+    },
+    {
+      "path": "history/docs/screenshots/passage-insights-lens.png",
+      "bytes": 68214,
+      "sha256": "81c32c3f85da9c38d290afcf6e183ab83fc6abb68b1ae495d09eb8cf883cd4f6"
+    },
+    {
+      "path": "history/docs/screenshots/passage-study-menu.png",
+      "bytes": 54559,
+      "sha256": "c63106df3a3056c558aee91ad4f1ddfa4c3996ccdd27139b2dd1216698442a68"
+    },
+    {
+      "path": "history/docs/screenshots/persistent-sidebar-six-verses.png",
+      "bytes": 74528,
+      "sha256": "4f2eefce745771f556470b08a0ba2e4551f64690d3759b0e6e02ff6864c2c4e1"
+    },
+    {
+      "path": "history/docs/screenshots/persistent-verse-sidebar.png",
+      "bytes": 67675,
+      "sha256": "e72d8be23f004a281e464aab0d5a18c6b4102c2f7d7b8c706a844874281d0985"
+    },
+    {
+      "path": "history/docs/screenshots/restored-previous-design.png",
+      "bytes": 62307,
+      "sha256": "0a749dd2e00be831904ebfa9319e7e5add8f541762bcfaabe965e81499843943"
+    },
+    {
+      "path": "history/docs/screenshots/settings-account-editor.png",
+      "bytes": 71530,
+      "sha256": "da816fab7b9ea78e9513a5e9e220dffd6813927175c856a1d4a1be9897e95e88"
+    },
+    {
+      "path": "history/docs/screenshots/settings-continuous-background.png",
+      "bytes": 71742,
+      "sha256": "9158fbeea17ef31b25810fdf1482cd30973bfe1a1a14f21219b004298927b6fb"
+    },
+    {
+      "path": "history/docs/screenshots/settings-profile.png",
+      "bytes": 76408,
+      "sha256": "c34c531f1d987b72c1dce11804c101fc1e4f715c906a6a27f46e1fbbdd10ca19"
+    },
+    {
+      "path": "history/docs/screenshots/settings-support.png",
+      "bytes": 68686,
+      "sha256": "c6ab4226a00beb6f2d3b77593bb30a34cf8be2b406b02d0064d71eeb77ea2290"
+    },
+    {
+      "path": "history/docs/screenshots/social-feel-discover-dark.png",
+      "bytes": 62963,
+      "sha256": "abc6c2510ef9d1b954c0232d8e07670205512cb53b8e738e1fc2ecd1f4d068b6"
+    },
+    {
+      "path": "history/docs/screenshots/social-feel-discover-light.png",
+      "bytes": 64542,
+      "sha256": "687b428b8967440affefc0833cc61d5258d0bab4901b335c081ebb4ff941108b"
+    },
+    {
+      "path": "history/docs/screenshots/social-feel-home-light.png",
+      "bytes": 65587,
+      "sha256": "a4620fb5fed6babc25d08700d25781c34dfb47d0541c93002e8aa6ebf37a63ce"
+    },
+    {
+      "path": "history/docs/screenshots/social-feel-welcome.png",
+      "bytes": 66840,
+      "sha256": "6601cd84890d8a7ed2cfbcd85e311c137e3676b48002adfa9babc6118fffcc83"
+    },
+    {
+      "path": "history/docs/scripture-source.json",
+      "bytes": 269,
+      "sha256": "8d81170b53a47f59e958ecfb497843b1b4962f4947ba8bbd886b7e3cb9a0ce40"
+    },
+    {
+      "path": "reference-web/dist/altitude-ios.css",
+      "bytes": 19920,
+      "sha256": "72954fa4df7a5a83cc8c6b9fb360eaf182a51a46aceef63a0704de677064fc9e"
+    },
+    {
+      "path": "reference-web/dist/app.js",
+      "bytes": 44046,
+      "sha256": "bd03c7e00973879af9e86a39e35b09ffc5b3df40c0c6715e8a95b256c88711bc"
+    },
+    {
+      "path": "reference-web/dist/assets/LUCIDE-LICENSE.txt",
+      "bytes": 3208,
+      "sha256": "b495047bd93a9b06913511076f504daba17d5bbeb3e0650f3bb53a4220329c57"
+    },
+    {
+      "path": "reference-web/dist/assets/onboarding-collage.png",
+      "bytes": 1073030,
+      "sha256": "53d012ded8e32a4a381d2c5aba356ad88750a1e2096450c2874dfb395a348842"
+    },
+    {
+      "path": "reference-web/dist/assets/onboarding-collage.provenance.json",
+      "bytes": 585,
+      "sha256": "f8584f0117d542d17e54fc0f9f3b9b12809e2a5e574b7b2346d88ea96583444b"
+    },
+    {
+      "path": "reference-web/dist/assets/quiet-meadow.png",
+      "bytes": 2283987,
+      "sha256": "11c8ee7f8a54bd2b535d9f91b25a741aa90977982df745941e5f4c6b3d6b60c2"
+    },
+    {
+      "path": "reference-web/dist/assets/quiet-sky.png",
+      "bytes": 1733762,
+      "sha256": "a5ef300cbf9549c3419432d8c90146fe1360e29f6542b39f56333a08f772d492"
+    },
+    {
+      "path": "reference-web/dist/assets/quiet-sky.provenance.json",
+      "bytes": 899,
+      "sha256": "a7891b6fce8dedbf6afda39693a4b4d819976f4677bceb2ed941538aa374aa65"
+    },
+    {
+      "path": "reference-web/dist/bottom-menu.css",
+      "bytes": 1139,
+      "sha256": "33b8c7a1a53b44af0e88a33c89dc39009da2816deae01df2443bc3255afc57a4"
+    },
+    {
+      "path": "reference-web/dist/brand-refresh.css",
+      "bytes": 26665,
+      "sha256": "d4dd80cebc112a5e5fdf7ac191ef9bc8d5364708c40704c67c47aa0078cd6d76"
+    },
+    {
+      "path": "reference-web/dist/chapters.mjs",
+      "bytes": 6415,
+      "sha256": "23cbdca5b77faa418fbf210bf7303002f1c8c917ff92594472fae0cdae1784f7"
+    },
+    {
+      "path": "reference-web/dist/design-tokens.css",
+      "bytes": 1013,
+      "sha256": "5fb55d1612e3fbf6a3e52d08d2699974858076585324cdd5bacefc1296988729"
+    },
+    {
+      "path": "reference-web/dist/discover.css",
+      "bytes": 4030,
+      "sha256": "e8c3dc83186edfdcdf0ecdff734d133a9cf61da1d4b9affc193a2ceb23f51b1d"
+    },
+    {
+      "path": "reference-web/dist/expressive-topics.css",
+      "bytes": 5639,
+      "sha256": "4f1546b7af5e927e5e1fc9ee1a51f0514af2c615c30ee01cd268a425eebfa346"
+    },
+    {
+      "path": "reference-web/dist/gradient-editor.js",
+      "bytes": 1504,
+      "sha256": "80805a0a29f3e2904d7187e8ced44b64afea47188a1fed5f08423a548161a9ab"
+    },
+    {
+      "path": "reference-web/dist/gradient-theme.js",
+      "bytes": 1449,
+      "sha256": "07762141d5f25c466af8ba632d40ade650027e2b9cb64059efc028dc6aac5d02"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/README.md",
+      "bytes": 4624,
+      "sha256": "4d37bd27c51db6a795fd1031dbc3aa265068d247f2c745c06da1c460e4cbfdc5"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/anchor.png",
+      "bytes": 1507016,
+      "sha256": "c696f07898a7bc4861b1788700b6981a4b5ee602c78bc6761c1ab52e48e9f902"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/bookmark.png",
+      "bytes": 869362,
+      "sha256": "cbd0deeb916b089fe559445bbab0bbd6cff117d0948cd205968a86e5df7bb6ed"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/butterfly.png",
+      "bytes": 2340635,
+      "sha256": "7f01b778da934cc8dcc59061031cee7b05fed68f364e19b50eeb1edf61e1a2b4"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/cloud-bank.png",
+      "bytes": 1713086,
+      "sha256": "ad43a1a592ddca9d854a64f74ee329fcea97c94994835d33fa16ffdfb3117a94"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/cloud-bank.provenance.json",
+      "bytes": 878,
+      "sha256": "d58f66ee40616ad6513e85c38b9c3846edff6365692aaacff32d252a9dd76b69"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/community.png",
+      "bytes": 1119186,
+      "sha256": "bed765777fc26340d61b3395d71b5b396090f27217b437846ef383b3e04b03a1"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/cosmos.png",
+      "bytes": 1364258,
+      "sha256": "72dac5160ed36aeb401fabdce6f8b737da9ebfa01982acc155a285922fee5d99"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/dove.png",
+      "bytes": 1325059,
+      "sha256": "80a8a344b134dfa2074508393e170aa903caf0a86e08c9a259760e3dd30aa1cb"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/faith-hands.png",
+      "bytes": 1636845,
+      "sha256": "d258afc59b44962a9cd6c375823e31ba74827750762eb8f34db82b96f4f1ca0e"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/gratitude-basket.png",
+      "bytes": 2228425,
+      "sha256": "0b8237bfa7f074ff47e82abeb521194b10adc51c9c53b7c4efe006bfb03c5976"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/hourglass.png",
+      "bytes": 1128824,
+      "sha256": "9dbd56428f6eb1ee39268e49e5630131c81e72ac61f0b2e5cd06186dc357bd79"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/index.html",
+      "bytes": 7709,
+      "sha256": "ff37a5f5eb5c4e99088a5aff74abe56b1477eeb47fc75966f63a0d5e0cb3bd5c"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/intention-heart.png",
+      "bytes": 1049869,
+      "sha256": "0e9606d6dffe56a9eab800fe6496bb511580fb46b2837db5e1e7ced8561a74d7"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/journal.png",
+      "bytes": 1945272,
+      "sha256": "a662f0d91d859d91b4136d442381a00e0608971df0a755b22c3af596e05a7e7d"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/lantern.png",
+      "bytes": 955367,
+      "sha256": "ab645daaa4e444d1058f62b534641903d272f5b205336e77091f844ef74dc7f0"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/magnifier.png",
+      "bytes": 1148922,
+      "sha256": "6cd4011c25827759c81817084d173688971f8caf66c374e2324313e45b8231a8"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/manifest-v2-additions.json",
+      "bytes": 6046,
+      "sha256": "b832460b5a950244db25894eb647f7699d15df216e59e8ff404a9568c81e336e"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/manifest-v3-additions.json",
+      "bytes": 4892,
+      "sha256": "3db6f3e50d119979e791d725d4fc2196a4bd6490f375c3868d85c262ca0ccddb"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/manifest-v4-additions.json",
+      "bytes": 5337,
+      "sha256": "d7a81a80aa02da6b52bef622fa7c532064309f3c6e1311dc6ef62dd3f42d9bea"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/manifest.json",
+      "bytes": 21201,
+      "sha256": "92363e63084cd4289b9a423a87f454953e3782e08ae59afaee2a03167c532cb6"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/milestone.png",
+      "bytes": 1839710,
+      "sha256": "78dcc8ce86b417f6f7da92693e7157c997da40de3e1dbe027ac33a2f9b64a9b4"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/olive.png",
+      "bytes": 1370477,
+      "sha256": "d88c73a59813e9b49534b06670e20eda3817889f55af3e531b94ebf22364033d"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/open-book.png",
+      "bytes": 1658802,
+      "sha256": "8775b7e94b9493c69d608c9f04716d644ee3e48e3f42aeacafee3b6529d3c971"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/purpose-compass.png",
+      "bytes": 2363136,
+      "sha256": "14106b07e23127e9fb59aa40e1bf7983a8d9dd6f707d156241cc85687f0ba7cf"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/reflection.png",
+      "bytes": 1080575,
+      "sha256": "19dca21f2e5db6b4942cd409f8d2dbf4b8ba0e59394fefc723625dee6a02ee31"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/relationship-hands.png",
+      "bytes": 1758817,
+      "sha256": "229ed04e89f9f7ca430f2a081e3bd00e95305b391f96afaf2efe3f8a0892fbd7"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/reminder-bell.png",
+      "bytes": 1410503,
+      "sha256": "7996678d82a402d13c43874aeee918005a5e1542ebe67f359939e9045f1a4404"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/rest-stones.png",
+      "bytes": 1822453,
+      "sha256": "638f6ca4649527af3f04281fff6c4685d7eb7512980bb2f3aff37dbac8b17564"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/seedling.png",
+      "bytes": 897038,
+      "sha256": "9b3fb8fb275edbe4b30f92e93223722fbf53d651f5f64c81bba0cab402e092f0"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/sunrise.png",
+      "bytes": 1627116,
+      "sha256": "2681d68283cf38d21076e4ef222f14a9041e16dec4962e53bf9cf25d0e78a861"
+    },
+    {
+      "path": "reference-web/dist/illustration-pack/wisdom-pearl.png",
+      "bytes": 1915141,
+      "sha256": "a0206315daf2a639c85a1226d9552ba3b50a8dcad4fc41e1b06f57af7592a3b4"
+    },
+    {
+      "path": "reference-web/dist/index.html",
+      "bytes": 1980,
+      "sha256": "0540e41a3619696216cc101d4d9a73e3d16b7b94f30f8e0c2d4f4f13889773a4"
+    },
+    {
+      "path": "reference-web/dist/ios-preview.html",
+      "bytes": 12549,
+      "sha256": "38b0a169fdbdebdf1e87122c46ef91a1494b06f687c1a8d3312f8cbb84cd651e"
+    },
+    {
+      "path": "reference-web/dist/liquid-dock.css",
+      "bytes": 4079,
+      "sha256": "591a43b28bad71c89d778962a345550e5480f722e90868ef921ba9547518e3be"
+    },
+    {
+      "path": "reference-web/dist/main-layout.css",
+      "bytes": 13604,
+      "sha256": "9a7ce264444969a880de6c5e649b9342e6742c7f168f7dca830199aca075566d"
+    },
+    {
+      "path": "reference-web/dist/native-pickers.css",
+      "bytes": 877,
+      "sha256": "2d0c5a85db717b50a6a8491b2d1e24d072c81f679da65311cf486d598bf70c65"
+    },
+    {
+      "path": "reference-web/dist/onboarding-intro.css",
+      "bytes": 2739,
+      "sha256": "a384065bbc6a498822e06a63915d7835885dfe5b384ea7e3be625f904c1ebd3a"
+    },
+    {
+      "path": "reference-web/dist/onboarding-white.css",
+      "bytes": 11302,
+      "sha256": "d623e9d9162253a74b06b6d99383d39dc484a04d7c92dc3e785f79858d9bfc80"
+    },
+    {
+      "path": "reference-web/dist/origin-design.css",
+      "bytes": 7225,
+      "sha256": "5f36edc1f7d641c58d39480d9355858396fcc03359b591ef78fec5e6104d51de"
+    },
+    {
+      "path": "reference-web/dist/origin-refinement.css",
+      "bytes": 5398,
+      "sha256": "d89500c95c1820c56aeb15ece11c861f36b467b22ea435bf8fe531ec4d275f6a"
+    },
+    {
+      "path": "reference-web/dist/paywall.css",
+      "bytes": 8429,
+      "sha256": "56916b167c93b8c321091827f28876ea0aacd7d7071c13c6488d9a504900432f"
+    },
+    {
+      "path": "reference-web/dist/paywall.mjs",
+      "bytes": 4895,
+      "sha256": "ca29f27b372c0bb3ec6bb289786d0969a44ed1fbb454ffb4d0cc06d29b234306"
+    },
+    {
+      "path": "reference-web/dist/preview-mobile.html",
+      "bytes": 390,
+      "sha256": "e679b4e16a36e2b3f54b80d6e2cc64580e237f08717f3fe4e7ae5385a263bbb3"
+    },
+    {
+      "path": "reference-web/dist/reader-scroll.mjs",
+      "bytes": 804,
+      "sha256": "e216a2bf015669f0ed4343181b2159f53b9821091a43ead24cea336d3b438969"
+    },
+    {
+      "path": "reference-web/dist/settings.css",
+      "bytes": 9375,
+      "sha256": "a1c8281d2d7177df94c069682177b22692fd1cba31c44083287fc22777959454"
+    },
+    {
+      "path": "reference-web/dist/settings.mjs",
+      "bytes": 15399,
+      "sha256": "4eef2d9fbf20abc6c2c9ba2421446a84b3d045ec17515106a6c1d0d107b94534"
+    },
+    {
+      "path": "reference-web/dist/state.mjs",
+      "bytes": 1152,
+      "sha256": "f85ce412bc4234b4c5d48202b51c46accea83a818db4939ece00bc10ce4e4110"
+    },
+    {
+      "path": "reference-web/dist/streak.mjs",
+      "bytes": 1146,
+      "sha256": "f9d8ea218ac4a4c8299faafb59585cc7d2437040389c6bdc092cd3dbb1857b24"
+    },
+    {
+      "path": "reference-web/dist/style.css",
+      "bytes": 9721,
+      "sha256": "9fb6813b5c7de98464b5a7ecc6c30f9d2b7a2872e96e2f1681599ad737316d77"
+    },
+    {
+      "path": "reference-web/dist/verse-sidebar.css",
+      "bytes": 1892,
+      "sha256": "a2028a20c8a2dc6328441f5e3cbe62d72c1a69b20f46a2246154330d90b0d343"
+    },
+    {
+      "path": "reference-web/dist/welcome-photo.css",
+      "bytes": 3425,
+      "sha256": "ab367a4a212d009474523921c83248d7e39a8a326f93a6ea49035870c0d1f7a7"
+    },
+    {
+      "path": "reference-web/reader-scroll.test.mjs",
+      "bytes": 1974,
+      "sha256": "21f3c419ae26a3d79ff35da98b99b478f849543a10886335a90d8db8fa5de0e9"
+    },
+    {
+      "path": "reference-web/streak.test.mjs",
+      "bytes": 862,
+      "sha256": "618d9fd167c906ef86e9d6228354769edc1d31d2b11d810de9e076380da16a35"
+    },
+    {
+      "path": "reference-web/test.mjs",
+      "bytes": 1425,
+      "sha256": "e1123c507bb968ddd1e89b270e4e5016e1d52ac665f6476a882ad7a63fe47a76"
+    },
+    {
+      "path": "screenshots/README.md",
+      "bytes": 1828,
+      "sha256": "5f20f70421fb50a7128676c7c7d0a002fcc75fdc05f7e143b4e396163c31e4f7"
+    },
+    {
+      "path": "screenshots/current/final-community-light.png",
+      "bytes": 66815,
+      "sha256": "3eaeeb997243595ed9aa90db7248376c5798c4cd7b9ce0e4645adb5d240156d1"
+    },
+    {
+      "path": "screenshots/current/final-discover-light.png",
+      "bytes": 82865,
+      "sha256": "6fffdd5aee2fce7250b38e94bb09073e21b1b1e630db18ff2641a637af5564cb"
+    },
+    {
+      "path": "screenshots/current/final-home-light.png",
+      "bytes": 85194,
+      "sha256": "5cae662a4888029edffb4a91e80874a7b9fce159a5dcec01b7b5c2324eb33eee"
+    },
+    {
+      "path": "screenshots/current/final-paywall-dark.png",
+      "bytes": 86498,
+      "sha256": "855dab41121c3f09df05b74a2d64ff0b8654377dc77959844ae46f22889588d1"
+    },
+    {
+      "path": "screenshots/current/final-paywall-light.png",
+      "bytes": 87031,
+      "sha256": "cbe7751c128af9bbacdee2336dc7191ffd8f4e3217d79523f56ec61c52d040fa"
+    },
+    {
+      "path": "screenshots/current/final-reader-dark.png",
+      "bytes": 66637,
+      "sha256": "258b32cdb413a0bccc77beaa3aef952e132741ce1427286719bf651cc2a61ce9"
+    },
+    {
+      "path": "screenshots/current/final-reader-light.png",
+      "bytes": 68749,
+      "sha256": "43262c1e000f6410a0edbc60d918cb0b219f6e692a9cff39901602afa506586c"
+    },
+    {
+      "path": "screenshots/current/membership-paywall.png",
+      "bytes": 86987,
+      "sha256": "ddb29ea3ae8503d8554687f53c5195ff7f855ff9fbfae9f2c5eef75677fc2f68"
+    },
+    {
+      "path": "screenshots/current/native-chapter-picker.png",
+      "bytes": 68734,
+      "sha256": "73176f431cb399df5ae8d43dd7b61dfdcc431d5f27a8df3a06ec731aee17df7f"
+    },
+    {
+      "path": "screenshots/current/neutral-dock.png",
+      "bytes": 67745,
+      "sha256": "2e9c125ebe078c089d23447d31616fcbd6d0e0a0410a7d8983d4e31c7b65fac8"
+    },
+    {
+      "path": "screenshots/current/onboarding-clouds.png",
+      "bytes": 76620,
+      "sha256": "c3a84a3c20ce9a16a887b783ca71d7018fe619a2296e9dfdb9981107b9a1b7c8"
+    },
+    {
+      "path": "screenshots/current/settings-account-editor.png",
+      "bytes": 71530,
+      "sha256": "da816fab7b9ea78e9513a5e9e220dffd6813927175c856a1d4a1be9897e95e88"
+    },
+    {
+      "path": "screenshots/current/settings-continuous-background.png",
+      "bytes": 71742,
+      "sha256": "9158fbeea17ef31b25810fdf1482cd30973bfe1a1a14f21219b004298927b6fb"
+    },
+    {
+      "path": "scripts/validate-kit.py",
+      "bytes": 1626,
+      "sha256": "43d168a4b3798272fd4e6397d390c08aecec659f531b0875296a9c619a41f957"
+    },
+    {
+      "path": "specs/ACCEPTANCE.md",
+      "bytes": 5433,
+      "sha256": "cfd72be319577810e92646b16d79367ec2f500cb11dd79829790d59d3acc9626"
+    },
+    {
+      "path": "specs/CURRENT-DESIGN.md",
+      "bytes": 6939,
+      "sha256": "750ee451e74123ebd6e7479c55bcbffa10fed260e5909739d94870c0ab8f7c48"
+    },
+    {
+      "path": "specs/FULL-STACK.md",
+      "bytes": 7679,
+      "sha256": "e767774ece2e0cab0bdffa79713d7bbffb27c675d0b80b9b55fe02e0f7a94800"
+    },
+    {
+      "path": "specs/SCREEN-MAP.md",
+      "bytes": 9148,
+      "sha256": "8f003336af35e14dfe2d03b5f17ac5fef85896a479d45aa27a924b7c49788541"
+    },
+    {
+      "path": "specs/content-fixtures.json",
+      "bytes": 5697,
+      "sha256": "7ec6d4474d0804ac8b9894577a8ee5a66c38e78a0b97e0ab84fbd6a05bd60e26"
+    },
+    {
+      "path": "starter-ios/BibleScroll/BibleScrollApp.swift",
+      "bytes": 430,
+      "sha256": "69e6207195d03dddf3908047908ed92a5f88ee540207a9fb8cb4adac3cb4dd71"
+    },
+    {
+      "path": "starter-ios/BibleScroll/RootView.swift",
+      "bytes": 20451,
+      "sha256": "3ba3734b1a3509f56a6a17f972939f0fcc250cf35fed452c0d604862319e0898"
+    },
+    {
+      "path": "starter-ios/BibleScroll/ScriptureLibrary.swift",
+      "bytes": 3199,
+      "sha256": "50f8a71e0e3daf25a3d9e3da2a606ce4d68684ada541fc9a939ca22966d15a67"
+    },
+    {
+      "path": "starter-ios/BibleScroll/passages.json",
+      "bytes": 13295,
+      "sha256": "fbae0f8247cfce7258eb7b68de3897545d38e21cf386e47656d4ae386bb41a3c"
+    },
+    {
+      "path": "starter-ios/BibleScroll/quiet-sky.png",
+      "bytes": 1733762,
+      "sha256": "a5ef300cbf9549c3419432d8c90146fe1360e29f6542b39f56333a08f772d492"
+    },
+    {
+      "path": "starter-ios/BibleScroll.xcodeproj/project.pbxproj",
+      "bytes": 5602,
+      "sha256": "b47e8ffb906676493dba7c93a50545d654fdd961e30d8cc3b6e33637f8aa410d"
+    },
+    {
+      "path": "starter-ios/README.md",
+      "bytes": 3702,
+      "sha256": "cbd263cb7a643772c0cd77646e9e9d00304244106a1531a5db455d6da2a33e19"
+    },
+    {
+      "path": "validation/VERIFICATION.md",
+      "bytes": 1946,
+      "sha256": "bb00350cb7b4167085e9e353cd2ad3b3f76459dd46db3bd5f2e65e243a92b450"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "source": "https://bible-api.com/genesis%201?translation=kjv",
+  "reference": "Genesis 1",
+  "translation_id": "kjv",
+  "translation_name": "King James Version",
+  "translation_note": "Public Domain",
+  "verseCount": 31,
+  "transform": "Collapse whitespace only"
+}

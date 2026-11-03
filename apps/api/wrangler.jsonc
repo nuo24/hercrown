@@ -1,0 +1,42 @@
+// Bible Scroll API. Plain fetch handler on Cloudflare Workers (see ai-app-playbook chapter 02).
+// Local dev runs entirely on your machine; the ids below only matter once deployed.
+// Create remote resources first, then paste their ids into the matching env:
+//   npx wrangler d1 create bible-scroll-db-staging
+//   npx wrangler kv namespace create bible-scroll-kv-staging
+//   npx wrangler r2 bucket create bible-scroll-files-staging
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bible-scroll-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  // Local dev bindings (wrangler dev / tests). Deploys must pick --env staging or --env production.
+  "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db-dev", "database_id": "local-dev", "migrations_dir": "migrations" }],
+  "kv_namespaces": [{ "binding": "KV", "id": "local-dev" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files-dev" }],
+  "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1001", "simple": { "limit": 30, "period": 60 } }],
+  "vars": { "APP_ENV": "dev", "BETTER_AUTH_URL": "http://localhost:8787", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1" },
+
+  "env": {
+    "staging": {
+      "name": "bible-scroll-api-staging",
+      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db-staging", "database_id": "REPLACE_WITH_STAGING_D1_ID", "migrations_dir": "migrations" }],
+      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_STAGING_KV_ID" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files-staging" }],
+      "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1002", "simple": { "limit": 30, "period": 60 } }],
+      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.REPLACE_WITH_SUBDOMAIN.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1" }
+    },
+    "production": {
+      "name": "bible-scroll-api",
+      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db", "database_id": "REPLACE_WITH_PRODUCTION_D1_ID", "migrations_dir": "migrations" }],
+      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_PRODUCTION_KV_ID" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files" }],
+      "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } }],
+      "vars": { "APP_ENV": "production", "BETTER_AUTH_URL": "https://REPLACE_WITH_API_DOMAIN", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1" }
+    }
+  }
+  // Secrets (never in this file): npx wrangler secret put BETTER_AUTH_SECRET --env staging
+  //   APPLE_CLIENT_ID, APPLE_CLIENT_SECRET, API_BIBLE_KEY, SUPERWALL_WEBHOOK_SECRET, TINYBIRD_TOKEN, OPENROUTER_API_KEY
+}

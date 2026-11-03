@@ -1,0 +1,177 @@
+{
+  "questions": [
+    null,
+    null,
+    {
+      "label": "Your intention",
+      "title": "What brings<br>you here?",
+      "sub": "There is no wrong starting point.",
+      "key": "intention",
+      "options": [
+        "Grow closer to God",
+        "Build a reading habit",
+        "Explore the Bible for the first time",
+        "Find encouragement"
+      ]
+    },
+    {
+      "label": "Your starting point",
+      "title": "Every journey<br>begins somewhere.",
+      "sub": "How familiar are you with the Bible? We’ll adjust the reading guidance, not the words of Scripture.",
+      "key": "familiarity",
+      "options": [
+        "Just getting started",
+        "A little familiar",
+        "I read regularly"
+      ]
+    },
+    {
+      "label": "What matters to you",
+      "title": "What’s on your<br>heart lately?",
+      "sub": "Choose any topics you might like to explore.",
+      "key": "topics",
+      "options": [
+        "Peace",
+        "Purpose",
+        "Faith",
+        "Relationships",
+        "Identity",
+        "Anxiety",
+        "Gratitude",
+        "Hope",
+        "Wisdom"
+      ]
+    },
+    {
+      "label": "Your rhythm",
+      "title": "Make room<br>for the Word.",
+      "sub": "How much time would feel realistic on a typical day?",
+      "key": "routine",
+      "options": [
+        "2 minutes",
+        "5 minutes",
+        "10 minutes",
+        "No time goal"
+      ]
+    }
+  ],
+  "verses": [
+    {
+      "id": "ps23",
+      "ref": "Psalm 23:1",
+      "topic": "Peace",
+      "text": "The LORD is my shepherd; I shall not want.",
+      "reflection": "Where could you make a little room for rest today?"
+    },
+    {
+      "id": "pr31",
+      "ref": "Proverbs 31:25",
+      "topic": "Identity",
+      "text": "Strength and honour are her clothing; and she shall rejoice in time to come.",
+      "reflection": "What would it look like to meet this day with quiet confidence?"
+    },
+    {
+      "id": "mt11",
+      "ref": "Matthew 11:28",
+      "topic": "Anxiety",
+      "text": "Come unto me, all ye that labour and are heavy laden, and I will give you rest.",
+      "reflection": "What are you carrying that you could bring to God in prayer?"
+    },
+    {
+      "id": "jr29",
+      "ref": "Jeremiah 29:11",
+      "topic": "Hope",
+      "text": "For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.",
+      "reflection": "What helps you hold on to hope in a season of uncertainty?"
+    },
+    {
+      "id": "pr3",
+      "ref": "Proverbs 3:5",
+      "topic": "Faith",
+      "text": "Trust in the LORD with all thine heart; and lean not unto thine own understanding.",
+      "reflection": "Name one uncertainty you can bring to God today."
+    },
+    {
+      "id": "ps119",
+      "ref": "Psalm 119:105",
+      "topic": "Purpose",
+      "text": "Thy word is a lamp unto my feet, and a light unto my path.",
+      "reflection": "What is the next small, faithful step before you?"
+    },
+    {
+      "id": "ps107",
+      "ref": "Psalm 107:1",
+      "topic": "Gratitude",
+      "text": "O give thanks unto the LORD, for he is good: for his mercy endureth for ever.",
+      "reflection": "Pause and name one ordinary gift you are grateful for."
+    },
+    {
+      "id": "pr17",
+      "ref": "Proverbs 17:17",
+      "topic": "Relationships",
+      "text": "A friend loveth at all times, and a brother is born for adversity.",
+      "reflection": "Who could use a little care from you today?"
+    },
+    {
+      "id": "jm1",
+      "ref": "James 1:5",
+      "topic": "Wisdom",
+      "text": "If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.",
+      "reflection": "Where do you need wisdom in your life today?"
+    }
+  ],
+  "plans": [
+    {
+      "id": "quiet",
+      "title": "A quiet beginning",
+      "days": 5,
+      "sub": "Five passages to make room for God.",
+      "refs": [
+        "ps23",
+        "pr3",
+        "mt11",
+        "ps119",
+        "ps107"
+      ],
+      "tone": "sage"
+    },
+    {
+      "id": "peace",
+      "title": "Peace for anxious hearts",
+      "days": 3,
+      "sub": "A little room to rest and trust.",
+      "refs": [
+        "mt11",
+        "ps23",
+        "pr3"
+      ],
+      "tone": "lavender"
+    },
+    {
+      "id": "strength",
+      "title": "Rooted in strength",
+      "days": 3,
+      "sub": "Identity, hope, and quiet courage.",
+      "refs": [
+        "pr31",
+        "jr29",
+        "jm1"
+      ],
+      "tone": "sand"
+    }
+  ],
+  "plainReadings": {
+    "Genesis 1:1": "The opening verse says that God created the heavens and the earth.",
+    "Genesis 1:2": "The earth is described as unformed and empty, with darkness over the deep and God’s Spirit moving over the waters.",
+    "Genesis 1:3": "God speaks, calling for light, and light appears.",
+    "ps23": "The speaker trusts the Lord to care for and guide him, as a shepherd cares for a flock.",
+    "pr31": "She is described as strong and honourable, facing the future with joy.",
+    "mt11": "Jesus invites people who are weary and burdened to come to him for rest.",
+    "jr29": "The Lord speaks of peaceful intentions and a hopeful future for the people being addressed.",
+    "pr3": "Trust the Lord wholeheartedly rather than depending only on your own understanding.",
+    "ps119": "God’s word is compared to a lamp that helps someone see where to walk.",
+    "ps107": "Give thanks to the Lord for his goodness and enduring mercy.",
+    "pr17": "A friend continues to love, including during difficult times.",
+    "jm1": "Someone who lacks wisdom is invited to ask God, who gives generously."
+  }
+}
