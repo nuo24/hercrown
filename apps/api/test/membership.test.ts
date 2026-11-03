@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
 import { isPremium, verifyWebhook } from "../src/billing";
 import { moveUserData } from "../src/users";
-import { api, grantPremium, signInGuest } from "./helpers";
+import { api, deliverWebhook, grantPremium, signInGuest } from "./helpers";
 
 const SECRET = "whsec_dGVzdC13ZWJob29rLXNlY3JldC0xMjM0NTY3ODkw";
 const DAY = 86_400_000;
@@ -78,7 +78,7 @@ describe("subscription lifecycle", () => {
     await deliver(event("billing_issue", userId, { expirationAt: Date.now() - DAY }));
     expect(await membership()).toMatchObject({ premium: true, subscription: { status: "grace" } });
 
-    await deliver(event("cancellation", userId, { cancelReason: "CUSTOMER_SUPPORT" }));
+    await deliver(event("cancellation", userId, { cancelReason: "CUSTOMER_SUPPORT", isRefund: true }));
     expect(await membership()).toMatchObject({ premium: false, subscription: { status: "refunded" } });
   });
 
@@ -116,6 +116,43 @@ describe("subscription lifecycle", () => {
     await deliver(event("renewal", userId, { originalTransactionId: "otx-link", productId: "biblescroll.plus.weekly" }));
     const res = await (await api("/me/entitlements", { token: account.token })).json<any>();
     expect(res).toMatchObject({ premium: true, subscription: { productId: "biblescroll.plus.weekly" } });
+  });
+});
+
+describe("Superwall Webhooks V2 (current format)", () => {
+  const v2 = (type: string, appUserId: string, eventData: Record<string, unknown> = {}, subscription: Record<string, unknown> = {}) => ({
+    id: `evt_${crypto.randomUUID()}`, api_version: "2026-09-22", type, occurred_at: Date.now() + n++, project_id: "1",
+    app_user_id: appUserId, is_family_share: false,
+    event_data: {
+      name: type, store: "APP_STORE", environment: "PRODUCTION", transaction_id: "t1", original_transaction_id: `otx2-${appUserId}`,
+      product_id: "biblescroll.plus.yearly", period_type: "NORMAL", expiration_at: Date.now() + 365 * DAY, ...eventData,
+    },
+    subscription: { is_active: true, will_renew: true, ...subscription },
+    subscriber: { app_user_id: appUserId, aliases: [appUserId] },
+  });
+
+  it("handles a trial, auto-renew off, and a separate refund event", async () => {
+    expect((await deliverWebhook(v2("initial_purchase", userId, { period_type: "TRIAL", expiration_at: Date.now() + 7 * DAY }))).body.applied).toBe(true);
+    expect(await membership()).toMatchObject({ premium: true, subscription: { status: "trialing", willRenew: true } });
+
+    await deliverWebhook(v2("cancellation", userId, {}, { will_renew: false }));
+    expect(await membership()).toMatchObject({ premium: true, subscription: { willRenew: false } });
+
+    await deliverWebhook(v2("refund", userId, {}, { is_active: false, will_renew: false }));
+    expect(await membership()).toMatchObject({ premium: false, subscription: { status: "refunded" } });
+  });
+
+  it("finds the user through subscriber aliases", async () => {
+    const payload = v2("initial_purchase", "$SuperwallAlias:XYZ");
+    payload.subscriber.aliases = ["$SuperwallAlias:XYZ", userId];
+    expect((await deliverWebhook(payload)).body).toMatchObject({ applied: true, matched: true });
+    expect((await membership()).premium).toBe(true);
+  });
+
+  it("uses the new product on a plan change", async () => {
+    await deliverWebhook(v2("initial_purchase", userId));
+    await deliverWebhook(v2("product_change", userId, { new_product_id: "biblescroll.plus.weekly" }));
+    expect((await membership()).subscription.productId).toBe("biblescroll.plus.weekly");
   });
 });
 

@@ -43,8 +43,11 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] `GET /me/entitlements` (also in `GET /me`) is the only Premium check; trial / active / grace / expired / refunded
 - [x] Reading, saving and streaks free; reading plans need Plus (`premium_required`)
 - [x] Subscription follows a guest who links an account
-- [ ] **Restore on a new install / new account** (app sends the signed StoreKit transaction; server verifies it with Apple and reassigns the entitlement)
-- [ ] **[HUMAN]** App Store Connect products: yearly $29.99 + trial, weekly $2.99, decline offer ~$19.99; Superwall project + webhook → `wrangler secret put SUPERWALL_WEBHOOK_SECRET`
+- [x] **Restore Purchases** (`POST /me/restore`): verified with Apple's App Store Server API, ownership transfer + log, retry-safe — [docs/restore-purchases.md](restore-purchases.md)
+- [x] Webhooks accept Superwall V2 (current) and V1; refunds handled in both
+- [ ] **[HUMAN]** In-App Purchase key (App Store Connect → Integrations) → `APP_STORE_ISSUER_ID`, `APP_STORE_KEY_ID`, `APP_STORE_PRIVATE_KEY`
+- [ ] Sandbox test: purchase → reinstall → Restore → Plus returns (needs the key + products)
+- [ ] **[HUMAN]** App Store Connect products (see restore doc): yearly $29.99 + 7-day trial, weekly $2.99 + 7-day trial, yearly.offer with $19.99 first-year intro price; Family Sharing on; Superwall project + **V2** webhook → `wrangler secret put SUPERWALL_WEBHOOK_SECRET`
 - [ ] iOS: `Superwall.shared.identify(userId:)` with our user id right after guest sign-in; paywall placements; decline offer
 - [ ] Trial-ending reminder (push, Phase 11)
 
@@ -52,7 +55,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] `POST /events` → Queue → Tinybird; funnel: download → onboarding → paywall → trial → paid
 
 ## Next, in order
-1. Restore Purchases (verified App Store transaction → current user)
+1. ~~Restore Purchases~~ ✅ (local)
 2. Offline BSB, WEB and CPDV (same verified pipeline as KJV)
 3. Tinybird analytics (onboarding → paywall → decline → offer → trial → paid; restore outcomes)
 4. **Trial-ending reminder** — Scroll the Bible's #2 complaint is being charged without the promised reminder. Server knows each trial's end; push + in-app notice 2 days before, visible in Settings → Subscription.

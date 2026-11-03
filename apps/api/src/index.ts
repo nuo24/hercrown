@@ -6,6 +6,7 @@ import { completePlanStep, getPlan, listPlans, startPlan } from "./plans";
 import { completeOnboarding, deleteAvatar, getAvatar, getMe, putAvatar, updatePreferences, updateProfile } from "./profile";
 import { getStreak, recordReading } from "./reading";
 import { listSaved, savePassage, unsavePassage } from "./saved";
+import { restorePurchases } from "./restore";
 import { getChapter, getPassage, listBooks, listTranslations, search } from "./scripture";
 
 const savedPath = new URLPattern({ pathname: "/me/saved/:ref" });
@@ -53,6 +54,8 @@ async function route(request: Request, env: Env, url: URL): Promise<Response> {
       return getMe(env, user);
     case "GET /me/entitlements":
       return Response.json(await entitlementFor(env, user.id));
+    case "POST /me/restore":
+      return restorePurchases(request, env, user);
     case "PATCH /me/profile":
       return updateProfile(request, env, user);
     case "PATCH /me/preferences":

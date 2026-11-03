@@ -27,3 +27,20 @@ export async function grantPremium(userId: string, status = "active", periodEnd 
      VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', ?2, ?3, 1)`,
   ).bind(userId, status, periodEnd).run();
 }
+
+export const WEBHOOK_SECRET = "whsec_dGVzdC13ZWJob29rLXNlY3JldC0xMjM0NTY3ODkw";
+
+/** Signs a payload exactly like Superwall (Svix / Standard Webhooks). */
+export async function signedHeaders(body: string, id = crypto.randomUUID(), timestamp = Math.floor(Date.now() / 1000), secret = WEBHOOK_SECRET) {
+  const key = await crypto.subtle.importKey("raw", Uint8Array.from(atob(secret.slice(6)), (c) => c.charCodeAt(0)),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const mac = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${id}.${timestamp}.${body}`)));
+  return { "svix-id": id, "svix-timestamp": String(timestamp), "svix-signature": `v1,${btoa(String.fromCharCode(...mac))}` };
+}
+
+/** Delivers a signed webhook to /webhooks/superwall. */
+export async function deliverWebhook(payload: unknown) {
+  const body = JSON.stringify(payload);
+  const res = await api("/webhooks/superwall", { method: "POST", body, headers: await signedHeaders(body) });
+  return { status: res.status, body: await res.json<any>() };
+}

@@ -123,5 +123,6 @@ export async function deleteUserData(env: Env, userId: string): Promise<void> {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM entitlements WHERE user_id = ?1").bind(userId),
     env.DB.prepare("DELETE FROM usage_ledger WHERE user_id = ?1").bind(userId),
+    env.DB.prepare("DELETE FROM entitlement_transfers WHERE from_user_id = ?1 OR to_user_id = ?1").bind(userId),
   ]);
 }

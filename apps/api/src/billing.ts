@@ -36,40 +36,85 @@ export async function verifyWebhook(secret: string, headers: Headers, body: stri
 
 // ── Webhook ─────────────────────────────────────────────────────────────────
 
-interface SuperwallEvent {
+/** A Superwall event in one shape, whichever webhook format delivered it. */
+export interface StoreEvent {
   type: string;
-  timestamp: number;
-  data: {
-    id?: string;
-    name?: string;
-    appUserId?: string;
-    originalAppUserId?: string;
-    cancelReason?: string | null;
-    periodType?: "TRIAL" | "INTRO" | "NORMAL";
-    store?: "APP_STORE" | "PLAY_STORE" | "STRIPE";
-    environment?: "PRODUCTION" | "SANDBOX";
-    productId?: string;
-    originalTransactionId?: string;
-    expirationAt?: number | null;
+  occurredAt: number;
+  userIds: string[]; // app user id first, then original id and aliases
+  isRefund: boolean;
+  periodType: "TRIAL" | "INTRO" | "NORMAL" | null;
+  store: "APP_STORE" | "PLAY_STORE" | "STRIPE" | null;
+  environment: "PRODUCTION" | "SANDBOX" | null;
+  productId: string | null;
+  originalTransactionId: string | null;
+  expirationAt: number | null;
+  willRenew: boolean | null; // V2 subscription snapshot, when present
+}
+
+type Json = Record<string, any>;
+const str = (v: unknown) => (typeof v === "string" && v ? v : null);
+const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
+
+/**
+ * V2 (current default): `event_data` snake_case + `subscription`/`subscriber` snapshots, `occurred_at`, separate `refund` event.
+ * V1 (legacy): `data` camelCase, `timestamp`, refunds are `cancellation` with `isRefund: true`.
+ */
+export function normalizeEvent(payload: Json): StoreEvent | null {
+  if (!payload || typeof payload !== "object" || typeof payload.type !== "string") return null;
+  const v2 = payload.event_data && typeof payload.event_data === "object" ? (payload.event_data as Json) : null;
+  if (v2) {
+    const sub = (payload.subscription ?? {}) as Json;
+    const subscriber = (payload.subscriber ?? {}) as Json;
+    return {
+      type: payload.type,
+      occurredAt: num(payload.occurred_at) ?? Date.now(),
+      userIds: [payload.app_user_id, subscriber.app_user_id, subscriber.original_app_user_id, ...(subscriber.aliases ?? [])]
+        .map(str).filter((x): x is string => Boolean(x)),
+      isRefund: payload.type === "refund" || v2.is_refund === true,
+      periodType: str(v2.period_type) as StoreEvent["periodType"],
+      store: str(v2.store) as StoreEvent["store"],
+      environment: str(v2.environment) as StoreEvent["environment"],
+      productId: str(v2.new_product_id) ?? str(v2.product_id),
+      originalTransactionId: str(v2.original_transaction_id),
+      expirationAt: num(v2.expiration_at) ?? num(sub.expires_at),
+      willRenew: typeof sub.will_renew === "boolean" ? sub.will_renew : null,
+    };
+  }
+  const d = payload.data;
+  if (!d || typeof d !== "object") return null;
+  return {
+    type: payload.type,
+    occurredAt: num(payload.timestamp) ?? Date.now(),
+    userIds: [d.appUserId, d.originalAppUserId].map(str).filter((x): x is string => Boolean(x)),
+    isRefund: d.isRefund === true,
+    periodType: str(d.periodType) as StoreEvent["periodType"],
+    store: str(d.store) as StoreEvent["store"],
+    environment: str(d.environment) as StoreEvent["environment"],
+    productId: str(d.newProductId) ?? str(d.productId),
+    originalTransactionId: str(d.originalTransactionId),
+    expirationAt: num(d.expirationAt),
+    willRenew: null,
   };
 }
 
 type Status = "trialing" | "active" | "grace" | "expired" | "refunded";
 
-/** How each Superwall event changes the entitlement. `null` = record nothing (event doesn't affect access). */
-function transition(e: SuperwallEvent): { status?: Status; willRenew?: boolean } | null {
-  const live: Status = e.data.periodType === "TRIAL" ? "trialing" : "active";
+/** How each event changes the entitlement. `null` = record nothing (event doesn't affect access). */
+export function transition(e: StoreEvent): { status?: Status; willRenew?: boolean } | null {
+  if (e.isRefund) return { status: "refunded", willRenew: false };
+  const live: Status = e.periodType === "TRIAL" ? "trialing" : "active";
+  const renew = (fallback: boolean) => e.willRenew ?? fallback;
   switch (e.type) {
     case "initial_purchase":
     case "renewal":
     case "uncancellation":
+      return { status: live, willRenew: renew(true) };
     case "non_renewing_purchase":
-      return { status: live, willRenew: e.type !== "non_renewing_purchase" };
+      return { status: live, willRenew: false };
     case "product_change":
       return { status: live };
-    case "cancellation":
-      // Auto-renew turned off: access continues until expiry. A refund (customer support) ends it now.
-      return /CUSTOMER_SUPPORT|REFUND/i.test(e.data.cancelReason ?? "") ? { status: "refunded", willRenew: false } : { willRenew: false };
+    case "cancellation": // auto-renew turned off: access continues until expiry
+      return { willRenew: false };
     case "billing_issue":
       return { status: "grace" };
     case "expiration":
@@ -81,17 +126,15 @@ function transition(e: SuperwallEvent): { status?: Status; willRenew?: boolean }
 
 const SOURCES = { APP_STORE: "app_store", PLAY_STORE: "play", STRIPE: "stripe" } as const;
 
-/** The app identifies users to Superwall with our user id. After a guest links an account, the
- *  original transaction id finds the account the entitlement was moved to. */
-async function resolveUser(env: Env, e: SuperwallEvent): Promise<string | null> {
-  const otx = e.data.originalTransactionId;
-  if (otx) {
+/** Owner by original transaction first (follows guest links and restores), then the ids Superwall knows. */
+async function resolveUser(env: Env, e: StoreEvent): Promise<string | null> {
+  if (e.originalTransactionId) {
     const owner = await env.DB.prepare("SELECT user_id FROM entitlements WHERE original_transaction_id = ?1 ORDER BY updated_at DESC LIMIT 1")
-      .bind(otx).first<{ user_id: string }>();
+      .bind(e.originalTransactionId).first<{ user_id: string }>();
     if (owner) return owner.user_id;
   }
-  for (const candidate of [e.data.appUserId, e.data.originalAppUserId]) {
-    if (!candidate || candidate.startsWith("$SuperwallAlias:")) continue;
+  for (const candidate of e.userIds) {
+    if (candidate.startsWith("$SuperwallAlias:")) continue;
     const user = await env.DB.prepare('SELECT id FROM "user" WHERE id = ?1').bind(candidate).first();
     if (user) return candidate;
   }
@@ -107,13 +150,13 @@ export async function handleSuperwallWebhook(request: Request, env: Env): Promis
   const seen = await env.DB.prepare("SELECT 1 FROM webhook_events WHERE id = ?1").bind(deliveryId).first();
   if (seen) return Response.json({ ok: true, duplicate: true });
 
-  let event: SuperwallEvent;
+  let event: StoreEvent | null = null;
   try {
-    event = JSON.parse(body);
-    if (typeof event.type !== "string" || !event.data || typeof event.data !== "object") throw new Error();
+    event = normalizeEvent(JSON.parse(body));
   } catch {
-    return Response.json({ error: "invalid_payload" }, { status: 400 });
+    // fall through
   }
+  if (!event) return Response.json({ error: "invalid_payload" }, { status: 400 });
 
   const t = Date.now();
   const markSeen = env.DB.prepare("INSERT INTO webhook_events (id, source, type, received_at) VALUES (?1, 'superwall', ?2, ?3)")
@@ -126,9 +169,8 @@ export async function handleSuperwallWebhook(request: Request, env: Env): Promis
     writes.push(env.DB.prepare(
       `INSERT OR IGNORE INTO unmatched_store_events (id, app_user_id, original_transaction_id, type, payload, received_at)
        VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
-    ).bind(deliveryId, event.data.appUserId ?? event.data.originalAppUserId ?? null, event.data.originalTransactionId ?? null, event.type, body, t));
+    ).bind(deliveryId, event.userIds[0] ?? null, event.originalTransactionId, event.type, body, t));
   } else if (change && userId) {
-    const eventAt = Number(event.timestamp) || t;
     // Insert, or update only if this event is not older than the last one applied.
     writes.push(env.DB.prepare(
       `INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id,
@@ -147,10 +189,10 @@ export async function handleSuperwallWebhook(request: Request, env: Env): Promis
          last_event_at = excluded.last_event_at
        WHERE excluded.last_event_at >= entitlements.last_event_at`,
     ).bind(
-      userId, ENTITLEMENT, SOURCES[event.data.store ?? "APP_STORE"] ?? "app_store", event.data.productId ?? null,
-      change.status ?? null, event.data.expirationAt ?? null, event.data.originalTransactionId ?? null, t,
-      change.willRenew === undefined ? null : change.willRenew ? 1 : 0, event.data.periodType ?? null,
-      event.data.environment ?? null, eventAt,
+      userId, ENTITLEMENT, SOURCES[event.store ?? "APP_STORE"] ?? "app_store", event.productId,
+      change.status ?? null, event.expirationAt, event.originalTransactionId, t,
+      change.willRenew === undefined ? null : change.willRenew ? 1 : 0, event.periodType,
+      event.environment, event.occurredAt,
     ));
   }
 
@@ -165,7 +207,7 @@ export async function handleSuperwallWebhook(request: Request, env: Env): Promis
 
 // ── Reading entitlements ────────────────────────────────────────────────────
 
-interface EntitlementRow {
+export interface EntitlementRow {
   status: Status;
   product_id: string | null;
   current_period_end: number | null;
