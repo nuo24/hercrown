@@ -17,66 +17,93 @@ struct SettingsView: View {
         NavigationStack {
             ZStack {
                 AppGradient()
-                List {
-                    Section {
-                        NavigationLink { AccountView() } label: { profileHeader }
-                        membershipCard
-                    }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-
-                    Section("Account & reading") {
-                        NavigationLink { AccountView() } label: { row("person", "Your account", accountSubtitle) }
-                        NavigationLink { SubscriptionView() } label: { row("bookmark", "Subscription", app.membership.premium ? "Her Crown Plus" : "Free plan · explore Plus") }
-                        Picker(selection: pref(\.appearance, key: "appearance")) {
-                            Text("System").tag("system"); Text("Light").tag("light"); Text("Dark").tag("dark")
-                        } label: { row("sun.max", "Appearance", nil) }
-                        NavigationLink { TopicsView() } label: { row("heart", "On your heart", app.preferences.topics.isEmpty ? "Choose topics" : app.preferences.topics.joined(separator: " · ")) }
-                        Picker(selection: Binding(get: { app.preferences.routine ?? "No time goal" }, set: { v in app.updatePreferences(["routine": v]) { $0.routine = v } })) {
-                            ForEach(OnboardingView.routines, id: \.self) { Text($0).tag($0) }
-                        } label: { row("book", "Reading pace", nil) }
-                        Toggle(isOn: Binding(get: { app.preferences.remindersEnabled }, set: setReminders)) { row("bell", "Daily reminder", reminderDenied ? "Turn on notifications for Her Crown in iPhone Settings" : nil) }
-                        if app.preferences.remindersEnabled {
-                            DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                                .onChange(of: reminderTime) { _, t in saveReminderTime(t) }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        header
+                        VStack(alignment: .leading, spacing: 0) {
+                            NavigationLink { AccountView() } label: { profile }.buttonStyle(.plain)
+                            membershipCard
+                            sectionTitle("Account & reading")
+                            group {
+                                NavigationLink { AccountView() } label: { row("person", "Your account", accountSubtitle) }.buttonStyle(.plain)
+                                divider
+                                NavigationLink { SubscriptionView() } label: { row("bookmark", "Subscription", app.membership.premium ? "Her Crown Plus" : "Free plan · explore Plus") }.buttonStyle(.plain)
+                                divider
+                                Button { toggleAppearance() } label: { row("sun.max", "Appearance", appearanceSubtitle, chevron: false) }.buttonStyle(.plain)
+                                divider
+                                NavigationLink { TopicsView() } label: { row("heart", "On your heart", app.preferences.topics.isEmpty ? "Choose topics" : app.preferences.topics.joined(separator: " · ")) }.buttonStyle(.plain)
+                                divider
+                                formRow("book", "Reading pace") {
+                                    selectMenu(app.preferences.routine ?? "No time goal", OnboardingView.routines) { v in app.updatePreferences(["routine": v]) { $0.routine = v } }
+                                }
+                                divider
+                                VStack(alignment: .leading, spacing: 0) {
+                                    formRow("bell", nil) {
+                                        Toggle(isOn: Binding(get: { app.preferences.remindersEnabled }, set: setReminders)) { Text("Daily reminder").font(.system(size: 12, weight: .medium)) }
+                                            .tint(Theme.text(scheme)).frame(minHeight: 44)
+                                        if app.preferences.remindersEnabled {
+                                            DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                                                .font(.system(size: 12, weight: .medium))
+                                                .onChange(of: reminderTime) { _, t in saveReminderTime(t) }
+                                        }
+                                    }
+                                    Text(reminderDenied ? "Turn on notifications for Her Crown in iPhone Settings to get reminders." : "One gentle reminder a day, at the time you choose.")
+                                        .font(.system(size: 10)).lineSpacing(3).foregroundStyle(Theme.muted(scheme))
+                                        .padding(EdgeInsets(top: 0, leading: 53, bottom: 14, trailing: 16))
+                                }
+                            }
+                            sectionTitle("Bible text")
+                            group {
+                                formRow("character.book.closed", "Translation") {
+                                    selectMenu(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][app.preferences.translation] ?? "King James Version",
+                                               ["King James Version", "Berean Standard Bible", "World English Bible"]) { v in
+                                        let id = ["King James Version": "kjv", "Berean Standard Bible": "bsb", "World English Bible": "web"][v] ?? "kjv"
+                                        app.updatePreferences(["translation": id]) { $0.translation = id }
+                                    }
+                                }
+                                divider
+                                formRow("textformat.size", "Font size") {
+                                    selectMenu(ReaderFontSize(rawValue: app.preferences.fontSize)?.title ?? "Default", ReaderFontSize.allCases.map(\.title)) { v in
+                                        let id = ReaderFontSize.allCases.first { $0.title == v }?.rawValue ?? "default"
+                                        app.updatePreferences(["fontSize": id]) { $0.fontSize = id }
+                                    }
+                                }
+                                divider
+                                formRow("quote.opening", nil) {
+                                    Toggle(isOn: Binding(get: { app.preferences.wordsOfJesusInRed }, set: { v in app.updatePreferences(["wordsOfJesusInRed": v]) { $0.wordsOfJesusInRed = v } })) {
+                                        Text("Words of Jesus in red").font(.system(size: 12, weight: .medium))
+                                    }
+                                    .tint(Theme.text(scheme)).frame(minHeight: 44)
+                                }
+                            }
+                            sectionTitle("Here for you")
+                            group {
+                                Button { contactSupport() } label: { row("envelope", "Contact & Support", "Questions, ideas or a little help") }.buttonStyle(.plain)
+                                divider
+                                Button { legal = .support } label: { row("questionmark.circle", "Help & FAQs", "Let’s work it out together") }.buttonStyle(.plain)
+                            }
+                            sectionTitle("About & legal")
+                            group {
+                                ForEach(Array([LegalPage.privacy, .terms, .refunds, .credits].enumerated()), id: \.element) { i, page in
+                                    if i > 0 { divider }
+                                    Button { legal = page } label: { row(page.symbol, page.title, nil) }.buttonStyle(.plain)
+                                }
+                            }
+                            VStack(spacing: 8) {
+                                Text("Rooted in Scripture. Made for real life.").font(.system(size: 12))
+                                Text("Her Crown \(AppConfig.appVersion)").font(.system(size: 10))
+                            }
+                            .foregroundStyle(Theme.muted(scheme))
+                            .frame(maxWidth: .infinity)
+                            .padding(EdgeInsets(top: 36, leading: 0, bottom: 10, trailing: 0))
                         }
+                        .padding(EdgeInsets(top: 8, leading: 22, bottom: 32, trailing: 22))
                     }
-
-                    Section("Bible text") {
-                        Picker(selection: pref(\.translation, key: "translation")) {
-                            Text("King James Version").tag("kjv"); Text("Berean Standard Bible").tag("bsb"); Text("World English Bible").tag("web")
-                        } label: { row("character.book.closed", "Translation", nil) }
-                        Picker(selection: pref(\.fontSize, key: "fontSize")) {
-                            ForEach(ReaderFontSize.allCases, id: \.rawValue) { Text($0.title).tag($0.rawValue) }
-                        } label: { row("textformat.size", "Font size", nil) }
-                        Toggle(isOn: Binding(get: { app.preferences.wordsOfJesusInRed }, set: { v in app.updatePreferences(["wordsOfJesusInRed": v]) { $0.wordsOfJesusInRed = v } })) {
-                            row("quote.opening", "Words of Jesus in red", nil)
-                        }
-                    }
-
-                    Section("Here for you") {
-                        Button { contactSupport() } label: { row("envelope", "Contact & Support", "We usually reply within two business days") }
-                        Button { legal = .support } label: { row("questionmark.circle", "Help & FAQs", nil) }
-                    }
-
-                    Section("About & legal") {
-                        ForEach([LegalPage.privacy, .terms, .refunds, .credits]) { page in
-                            Button { legal = page } label: { row(page.symbol, page.title, nil) }
-                        }
-                    }
-
-                    Section {
-                        Text("Her Crown \(AppConfig.appVersion)").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: .infinity)
-                    }
-                    .listRowBackground(Color.clear)
+                    .foregroundStyle(Theme.text(scheme))
                 }
-                .scrollContentBackground(.hidden)
-                .tint(Theme.text(scheme))
-                .foregroundStyle(Theme.text(scheme))
+                .clipped()
             }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .onAppear {
@@ -85,35 +112,61 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: Header
+    // MARK: Header (back · "Settings" · appearance), 20/20/16
 
-    private var profileHeader: some View {
-        HStack(spacing: 16) {
-            Avatar(size: 72)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(app.displayName.flatMap { $0 == "Guest" ? nil : "Hi, \($0)." } ?? "Hi there.").font(.serif(28, relativeTo: .title))
-                Text("A little space, just for you.").font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
-            }
+    private var header: some View {
+        HStack {
+            IconButton(systemName: "arrow.left", label: "Close Settings") { dismiss() }
+            Spacer()
+            Text("Settings").font(.system(size: 16))
+            Spacer()
+            IconButton(systemName: scheme == .dark ? "moon" : "sun.max", label: "Switch appearance") { toggleAppearance() }
         }
-        .padding(.vertical, 6)
+        .padding(EdgeInsets(top: 20, leading: 22, bottom: 16, trailing: 22))
     }
+
+    private var appearanceSubtitle: String { scheme == .dark ? "Dark · switch to light" : "Light · switch to dark" }
+
+    private func toggleAppearance() {
+        let next = scheme == .dark ? "light" : "dark"
+        app.updatePreferences(["appearance": next]) { $0.appearance = next }
+        Task { await Analytics.shared.track("setting_changed", ["setting": "appearance", "value": .string(next)]) }
+    }
+
+    // MARK: Profile (.settings-profile: 76 pt avatar, 30 pt serif greeting)
+
+    private var profile: some View {
+        HStack(spacing: 15) {
+            Avatar(size: 76).shadow(color: Color(red: 16 / 255, green: 25 / 255, blue: 31 / 255, opacity: 0.333), radius: 4, y: 8)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(app.displayName.flatMap { $0 == "Guest" ? nil : "Hi, \($0.split(separator: " ").first.map(String.init) ?? $0)." } ?? "Hi there.")
+                    .font(.serif(30, relativeTo: .title)).tracking(-0.5)
+                Text("A little space, just for you.").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.system(size: 15)).foregroundStyle(Theme.text(scheme)).frame(width: 36, height: 44)
+        }
+        .padding(EdgeInsets(top: 18, leading: 0, bottom: 26, trailing: 0))
+    }
+
+    // MARK: Membership (.settings-membership: 75% surface, 20 radius, 20/18 padding)
 
     private var membershipCard: some View {
         Button { if !app.membership.premium { app.presentPaywall(placement: "settings") } } label: {
-            HStack(spacing: 16) {
-                Image("butterfly").resizable().scaledToFit().frame(width: 76).accessibilityHidden(true)
+            HStack(alignment: .center, spacing: 16) {
+                Image("butterfly").resizable().scaledToFit().frame(width: 76, height: 70).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(app.membership.premium ? "You’re growing with Plus." : "Grow in your own time.").font(.serif(23, relativeTo: .title3))
-                    Text(app.membership.premium ? "Plans and every study tool are yours." : "Explore Her Crown Plus.").font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
+                    Text(app.membership.premium ? "You’re growing with Plus." : "Grow in your own time.").font(.serif(23, relativeTo: .title3)).lineLimit(1).minimumScaleFactor(0.8)
+                    Text(app.membership.premium ? "Plans and every study tool are yours." : "Explore Her Crown Plus.").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
                     if !app.membership.premium {
-                        HStack(spacing: 6) { Text("View membership"); Image(systemName: "arrow.right") }.font(.system(size: 15, weight: .semibold)).padding(.top, 4)
+                        HStack(spacing: 6) { Text("View membership"); Image(systemName: "arrow.right") }.font(.system(size: 12, weight: .semibold)).frame(height: 30)
                     }
                 }
                 Spacer(minLength: 0)
             }
-            .padding(18)
-            .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Theme.surface(scheme)))
-            .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Theme.border(scheme), lineWidth: 0.6))
+            .padding(EdgeInsets(top: 20, leading: 18, bottom: 20, trailing: 18))
+            .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Theme.surface(scheme).opacity(0.75)))
+            .shadow(color: Color(red: 21 / 255, green: 35 / 255, blue: 42 / 255, opacity: 0.12), radius: 5, y: 6)
         }
         .buttonStyle(.plain)
     }
@@ -123,17 +176,63 @@ struct SettingsView: View {
         return [app.displayName, app.me?.user.email.flatMap { $0.hasSuffix(".invalid") ? nil : $0 }].compactMap { $0 }.joined(separator: " · ")
     }
 
-    // MARK: Rows and preferences
+    // MARK: Groups and rows (.settings-group: 88% surface, 18 radius; rows 14/15 padding, hairline between)
 
-    private func row(_ symbol: String, _ title: String, _ subtitle: String?) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: symbol).font(.system(size: 17)).frame(width: 24)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.system(size: 16))
-                if let subtitle, !subtitle.isEmpty { Text(subtitle).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).lineLimit(2) }
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text).font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
+            .padding(EdgeInsets(top: 29, leading: 4, bottom: 11, trailing: 4))
+    }
+
+    private func group<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 0) { content() }
+            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.surface(scheme).opacity(0.88)))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .shadow(color: Color(red: 21 / 255, green: 35 / 255, blue: 42 / 255, opacity: 0.12), radius: 5, y: 5)
+    }
+
+    private var divider: some View { Rectangle().fill(Theme.border(scheme)).frame(height: 1) }
+
+    private func row(_ symbol: String, _ title: String, _ subtitle: String?, chevron: Bool = true) -> some View {
+        HStack(spacing: 13) {
+            Image(systemName: symbol).font(.system(size: 19, weight: .light)).frame(width: 25, height: 21)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.system(size: 14, weight: .medium))
+                if let subtitle, !subtitle.isEmpty { Text(subtitle).font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).lineLimit(2) }
+            }
+            Spacer(minLength: 0)
+            if chevron { Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)) }
+        }
+        .padding(EdgeInsets(top: 14, leading: 15, bottom: 14, trailing: 15))
+        .frame(minHeight: 67)
+        .contentShape(Rectangle())
+    }
+
+    /// .settings-form-row: icon column, then a 12 pt label above its control.
+    private func formRow<Control: View>(_ symbol: String, _ label: String?, @ViewBuilder control: () -> Control) -> some View {
+        HStack(alignment: .top, spacing: 13) {
+            Image(systemName: symbol).font(.system(size: 19, weight: .light)).frame(width: 25, height: 21).padding(.top, label == nil ? 12 : 4)
+            VStack(alignment: .leading, spacing: 8) {
+                if let label { Text(label).font(.system(size: 12, weight: .medium)) }
+                control()
             }
         }
-        .foregroundStyle(Theme.text(scheme))
+        .padding(15)
+    }
+
+    /// The mockup's native select: 44 pt, #f2f2f4, 9 radius, 16 pt value.
+    private func selectMenu(_ value: String, _ options: [String], onPick: @escaping (String) -> Void) -> some View {
+        Menu {
+            ForEach(options, id: \.self) { o in Button(o) { onPick(o) } }
+        } label: {
+            HStack {
+                Text(value).font(.system(size: 16))
+                Spacer()
+                Image(systemName: "chevron.down").font(.system(size: 12, weight: .semibold))
+            }
+            .foregroundStyle(Theme.text(scheme))
+            .padding(.horizontal, 12).frame(height: 44)
+            .background(RoundedRectangle(cornerRadius: 9, style: .continuous).fill(Theme.supporting(scheme)))
+        }
     }
 
     private func pref(_ keyPath: WritableKeyPath<Preferences, String>, key: String) -> Binding<String> {

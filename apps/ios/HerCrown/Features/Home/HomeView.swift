@@ -57,7 +57,7 @@ struct HomeView: View {
         .task(id: app.me?.user.id) { await model.load(translation: translation) }
         .sheet(isPresented: $showingStreak) { StreakSheet(model: model).presentationDetents([.large]) }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
-        .sheet(isPresented: $showingSettings) { SettingsView() }
+        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingPlans) { PlansListSheet(model: model) { plan in showingPlans = false; openPlan = plan }.presentationDetents([.large]) }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])

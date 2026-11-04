@@ -67,7 +67,7 @@ struct DiscoverView: View {
         .task(id: "\(filter)|\(app.me?.user.id ?? "")") { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
-        .sheet(isPresented: $showingSettings) { SettingsView() }
+        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
         }
