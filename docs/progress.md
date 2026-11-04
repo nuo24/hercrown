@@ -63,7 +63,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Push key CBVUDK44G6 on staging; APNs sandbox + production accept it (checked 2026-11-03)
 - [x] App Store Connect: app 6830437910, group Plus, products `hercrown.plus.yearly` / `.weekly` / `.yearly.offer`
 - [ ] Sandbox test: purchase → reinstall → Restore → Plus returns (needs the key + products)
-- [ ] **[HUMAN]** App Store Connect products (see restore doc): yearly $29.99 + 7-day trial, weekly $2.99 + 7-day trial, yearly.offer with $19.99 first-year intro price; Family Sharing on; Superwall project + **V2** webhook → `wrangler secret put SUPERWALL_WEBHOOK_SECRET`
+- [x] Superwall: app 59373 (Indie plan), public key in the iOS app; webhook "Her Crown – Staging" (V2) → staging, signature verified (signed 200, forged 401) 2026-11-03
+- [ ] App Store Server Notifications URL from Superwall → App Store Connect (Production + Sandbox, V2)
 - [ ] iOS: `Superwall.shared.identify(userId:)` with our user id right after guest sign-in; paywall placements; decline offer
 - [x] Trial-ending reminder: push 2 days before + in-app notice + Settings line ([docs/trial-reminder.md](trial-reminder.md)); needs the APNs key to send
 
