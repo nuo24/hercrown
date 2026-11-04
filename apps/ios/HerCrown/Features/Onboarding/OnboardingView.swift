@@ -29,7 +29,7 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             AppGradient().environment(\.colorScheme, .light)
-            if step > 0 { OnboardingClouds() }
+            if step > 0 { OnboardingClouds(isIntro: step == 1) }
             switch step {
             case 0: welcome
             case 1: time
@@ -137,29 +137,43 @@ struct OnboardingView: View {
     private var time: some View {
         VStack(spacing: 0) {
             HStack { backButton; Spacer() }.frame(height: 44)
-            ZStack(alignment: .topLeading) {
-                Image("cosmos").resizable().scaledToFit().frame(width: 78, height: 83).offset(x: -9, y: -8)
-                Image("open-book").resizable().scaledToFit().frame(width: 181, height: 169).offset(x: 53, y: -1)
-                Image("hourglass").resizable().scaledToFit().frame(width: 101, height: 115).offset(x: 16, y: 66)
-                Image("intention-heart").resizable().scaledToFit().frame(width: 65, height: 65).offset(x: 200, y: 100)
+            ScrollView {
+                VStack(spacing: 0) {
+                    ZStack(alignment: .topLeading) {
+                        Image("cosmos").resizable().scaledToFit().frame(width: 60, height: 68)
+                            .rotationEffect(.degrees(-18))
+                        Image("open-book").resizable().scaledToFit().frame(width: 164, height: 150)
+                            .rotationEffect(.degrees(7)).offset(x: 62, y: 9)
+                        Image("hourglass").resizable().scaledToFit().frame(width: 82, height: 100)
+                            .rotationEffect(.degrees(-12)).offset(x: 25, y: 74)
+                        Image("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54)
+                            .rotationEffect(.degrees(14)).offset(x: 206, y: 106)
+                    }
+                    .frame(width: 260, height: 174, alignment: .topLeading)
+                    .accessibilityHidden(true)
+
+                    VStack(spacing: 0) {
+                        Text("If you scroll for")
+                        Text("2 hours a day,").font(.serif(37, weight: .semibold, relativeTo: .largeTitle))
+                        (Text("that’s ") + Text("14 hours a\nweek.")
+                            .font(.serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle))
+                            .foregroundColor(Color(hex: 0x334B3E)))
+                    }
+                    .font(.serif(37, relativeTo: .largeTitle)).tracking(-0.7)
+                    .multilineTextAlignment(.center).foregroundStyle(Self.ink)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 30)
+
+                    Text("For the woman with a full day and a full heart: make a few of those minutes just you, God, and His Word.")
+                        .font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Color(hex: 0x59645E))
+                        .multilineTextAlignment(.center).frame(maxWidth: 325).padding(.top, 24)
+                }
+                .padding(.top, 61)
+                .padding(.bottom, 16)
             }
-            .frame(width: 260, height: 174, alignment: .topLeading)
-            .padding(.top, 61)
-            .accessibilityHidden(true)
-            VStack(spacing: 0) {
-                Text("If you scroll for")
-                Text("2 hours a day,").fontWeight(.semibold)
-                (Text("that’s ") + Text("14 hours a week.").font(.serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle)).foregroundColor(Color(hex: 0x334B3E)))
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .font(.serif(37, relativeTo: .largeTitle)).tracking(-0.7)
-            .multilineTextAlignment(.center).foregroundStyle(Self.ink)
-            .padding(.top, 30)
-            Text("For the woman with a full day and a full heart: make a few of those minutes just you, God, and His Word.")
-                .font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Color(hex: 0x59645E))
-                .multilineTextAlignment(.center).frame(width: 325).padding(.top, 23)
-            Spacer(minLength: 0)
-            footer(button: "Continue", caption: "One passage. A little breathing room.", height: 54) { step = 2 }
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
+            footer(button: "Continue", caption: "One passage. A little breathing room.", height: 54, captionSpacing: 14) { step = 2 }
         }
         .padding(EdgeInsets(top: 78, leading: 28, bottom: 0, trailing: 28))
     }
@@ -354,8 +368,8 @@ struct OnboardingView: View {
     }
 
     /// Primary 48 pt (54 on the intro), then the 11 pt footnote; the footnote sits 68 pt above the screen bottom.
-    private func footer(button: String, caption: String?, height: CGFloat = 48, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 10) {
+    private func footer(button: String, caption: String?, height: CGFloat = 48, captionSpacing: CGFloat = 10, action: @escaping () -> Void) -> some View {
+        VStack(spacing: captionSpacing) {
             Button(action: action) {
                 HStack(spacing: 8) { Text(button); Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
                     .font(.system(size: 14)).foregroundStyle(.white)
@@ -480,20 +494,28 @@ private extension View {
     }
 }
 
-/// The mockup's onboarding clouds: cloud-bank at the top (150% wide) and bottom (170% wide), 22% opacity.
+/// The mockup's onboarding clouds: cloud-bank at the top (150% wide) and bottom (170% wide), 16% opacity.
 struct OnboardingClouds: View {
+    var isIntro = false
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.04 + geo.size.width * 0.25)
+                    .position(x: geo.size.width / 2, y: isIntro ? cloudCenter(in: geo.size, scale: 1.5, alignment: 0.03) : geo.size.height * 0.04 + geo.size.width * 0.25)
                 Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
-                    .position(x: geo.size.width / 2, y: geo.size.height * 0.92 - geo.size.width * 0.1)
+                    .position(x: geo.size.width / 2, y: isIntro ? cloudCenter(in: geo.size, scale: 1.7, alignment: 0.94) : geo.size.height * 0.92 - geo.size.width * 0.1)
             }
-            .opacity(0.22)
+            .opacity(isIntro ? 0.36 : 0.16)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }
+
+    private func cloudCenter(in size: CGSize, scale: CGFloat, alignment: CGFloat) -> CGFloat {
+        let height = size.width * scale * 820 / 1918
+        return (size.height - height) * alignment + height / 2
+    }
+
 }
