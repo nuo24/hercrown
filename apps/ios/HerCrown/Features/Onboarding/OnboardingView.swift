@@ -28,14 +28,15 @@ struct OnboardingView: View {
 
     var body: some View {
         ZStack {
-            AppGradient()
-            if step > 0 { CloudAtmosphere().opacity(0.8) }
+            AppGradient().environment(\.colorScheme, .light)
+            if step > 0 { OnboardingClouds() }
             switch step {
             case 0: welcome
             case 1: time
             default: question
             }
         }
+        .ignoresSafeArea()
         .environment(\.colorScheme, .light) // onboarding is designed in the light palette
         .preferredColorScheme(.light)        // dark status bar text on the light background
         .animation(.easeInOut(duration: 0.25), value: step)
@@ -45,227 +46,291 @@ struct OnboardingView: View {
 
     static let stepNames = ["welcome", "time", "intention", "familiarity", "topics", "rhythm", "reminder", "ready"]
 
-    // MARK: 0 · Welcome
+    // Colours from the mockup's onboarding cascade.
+    private static let ink = Color(hex: 0x111111)
+    private static let body = Color(hex: 0x68686E)
+    private static let kicker = Color(hex: 0x777777)
+    private static let line = Color(hex: 0xE4E4E7)
+
+    // MARK: 0 · Welcome (.screen.welcome: 86/24/58 padding; 48 pt serif; 52 + 44 pt buttons)
 
     private var welcome: some View {
-        VStack(spacing: 18) {
-                Spacer()
-                VStack(spacing: 2) {
-                    Text("Less scrolling.").font(.serif(44, relativeTo: .largeTitle))
-                    Text("More Scripture.").font(.serif(44, italic: true, relativeTo: .largeTitle))
+        VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                Text("Less scrolling.").font(.serif(48, relativeTo: .largeTitle)).tracking(-1.2)
+                Text("More Scripture.").font(.serif(48, italic: true, relativeTo: .largeTitle)).tracking(-1.2).foregroundStyle(Color(hex: 0x263B32))
+            }
+            .foregroundStyle(Self.ink)
+            Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
+                .font(.system(size: 15)).lineSpacing(5.4).foregroundStyle(Color(hex: 0x65686A))
+                .multilineTextAlignment(.center).frame(width: 265).padding(.top, 20)
+            Spacer(minLength: 0)
+            VStack(spacing: 0) {
+                Button { step = 1 } label: {
+                    HStack(spacing: 8) { Text("Get started"); Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
+                        .font(.system(size: 14, weight: .medium)).foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, minHeight: 52)
+                        .background(Capsule().fill(Self.ink))
+                        .shadow(color: .black.opacity(0.267), radius: 4, y: 3)
                 }
-                .foregroundStyle(Color(hex: 0x111111))
-                Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
-                    .font(.system(size: 16)).foregroundStyle(Color(hex: 0x3A3A3F)).multilineTextAlignment(.center).frame(maxWidth: 290)
-                Spacer()
-                VStack(spacing: 10) {
-                    Button { step = 1 } label: { Label("Get started", systemImage: "arrow.right").labelStyle(TrailingIcon()) }
-                        .buttonStyle(CapsuleButtonStyle())
-                    Button("Explore as a guest") { Task { await finish(guest: true) } }
-                        .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                    Text("Come as you are. No account needed.").font(.system(size: 12)).foregroundStyle(Color(hex: 0x6B6B70))
+                Button { Task { await finish(guest: true) } } label: {
+                    Text("Explore as a guest").font(.system(size: 14, weight: .medium)).foregroundStyle(Color(hex: 0x333333))
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                        .background(Capsule().fill(Color.white.opacity(0.78)))
+                        .overlay(Capsule().strokeBorder(Color(hex: 0xDCDDE0), lineWidth: 1))
                 }
-                .padding(.horizontal, 24).padding(.bottom, 12)
+                .padding(.top, 10)
+                Text("Come as you are. No account needed.").font(.system(size: 11)).foregroundStyle(Self.kicker).padding(.top, 16)
+            }
+            .buttonStyle(.plain)
         }
-        .background { Image("onboarding-collage").resizable().scaledToFill().ignoresSafeArea().accessibilityHidden(true) }
+        .padding(EdgeInsets(top: 332, leading: 24, bottom: 57, trailing: 24)) // title at 332 pt, as in the mockup
+        .background(alignment: .top) {
+            GeometryReader { geo in
+                Image("onboarding-collage").resizable().scaledToFill()
+                    .frame(width: geo.size.width + 8, height: geo.size.height - 35).clipped()
+            }
+            .accessibilityHidden(true)
+        }
     }
 
-    // MARK: 1 · Time
+    // MARK: 1 · Time (.scroll-intro: 78/28/58; 260×174 art; 37 pt serif)
 
     private var time: some View {
         VStack(spacing: 0) {
-            HStack { backButton; Spacer() }.padding(.horizontal, 20).frame(height: 52)
-            Spacer()
-            ZStack {
-                Image("open-book").resizable().scaledToFit().frame(width: 150).offset(x: 10)
-                Image("hourglass").resizable().scaledToFit().frame(width: 46).offset(x: -70, y: 30)
-                Image("intention-heart").resizable().scaledToFit().frame(width: 52).offset(x: 88, y: 40)
-                Image("cosmos").resizable().scaledToFit().frame(width: 52).offset(x: -60, y: -60)
+            HStack { backButton; Spacer() }.frame(height: 44)
+            ZStack(alignment: .topLeading) {
+                Image("cosmos").resizable().scaledToFit().frame(width: 78, height: 83).offset(x: -9, y: -8)
+                Image("open-book").resizable().scaledToFit().frame(width: 181, height: 169).offset(x: 53, y: -1)
+                Image("hourglass").resizable().scaledToFit().frame(width: 101, height: 115).offset(x: 16, y: 66)
+                Image("intention-heart").resizable().scaledToFit().frame(width: 65, height: 65).offset(x: 200, y: 100)
             }
-            .frame(height: 170).accessibilityHidden(true)
-            VStack(spacing: 4) {
-                Text("If you scroll for").font(.serif(36, relativeTo: .largeTitle))
-                Text("2 hours a day,").font(.serif(36, weight: .semibold, relativeTo: .largeTitle))
-                (Text("that’s ").font(.serif(36, relativeTo: .largeTitle)) + Text("14 hours a week.").font(.serif(36, italic: true, relativeTo: .largeTitle)).foregroundColor(Color(hex: 0x3D5A47)))
+            .frame(width: 260, height: 174, alignment: .topLeading)
+            .padding(.top, 61)
+            .accessibilityHidden(true)
+            VStack(spacing: 0) {
+                Text("If you scroll for")
+                Text("2 hours a day,").fontWeight(.semibold)
+                (Text("that’s ") + Text("14 hours a week.").font(.serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle)).foregroundColor(Color(hex: 0x334B3E)))
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .multilineTextAlignment(.center).foregroundStyle(Color(hex: 0x111111)).padding(.top, 28)
+            .font(.serif(37, relativeTo: .largeTitle)).tracking(-0.7)
+            .multilineTextAlignment(.center).foregroundStyle(Self.ink)
+            .padding(.top, 30)
             Text("For the woman with a full day and a full heart: make a few of those minutes just you, God, and His Word.")
-                .font(.system(size: 15)).foregroundStyle(Color(hex: 0x4A4A50)).multilineTextAlignment(.center).frame(maxWidth: 320).padding(.top, 20)
-            Spacer()
-            footer(button: "Continue", caption: "One passage. A little breathing room.") { step = 2 }
+                .font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Color(hex: 0x59645E))
+                .multilineTextAlignment(.center).frame(width: 325).padding(.top, 23)
+            Spacer(minLength: 0)
+            footer(button: "Continue", caption: "One passage. A little breathing room.", height: 54) { step = 2 }
         }
+        .padding(EdgeInsets(top: 78, leading: 28, bottom: 0, trailing: 28))
     }
 
-    // MARK: 2–7 · Questions and ready
+    // MARK: 2–7 · Questions and ready (.screen: 78/28/58; 32 pt serif heading with 82×90 art; 60 pt choices)
 
     private var question: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(spacing: 0) {
                 backButton
                 Spacer()
-                Text("A moment for you").font(.system(size: 13)).foregroundStyle(Color(hex: 0x6B6B70))
+                Text("A moment for you").font(.system(size: 12)).foregroundStyle(Self.kicker)
                 Spacer()
-                if step < 7 { Button("Skip") { skip() }.font(.system(size: 13)).foregroundStyle(Color(hex: 0x6B6B70)) } else { Color.clear.frame(width: 30) }
+                if step < 7 { Button("Skip") { skip() }.font(.system(size: 12)).foregroundStyle(Self.body).frame(width: 44, height: 44) }
+                else { Color.clear.frame(width: 44, height: 44) }
             }
-            .padding(.horizontal, 20).frame(height: 52)
-            progress.padding(.horizontal, 28).padding(.top, 8)
+            .frame(height: 48)
+            progress.padding(.top, 20)
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     switch step {
-                    case 2: choice(title: ["What brings", "you here?"], art: "intention-heart", sub: "There is no wrong starting point.", options: Self.intentions, selection: $intention)
-                    case 3: choice(title: ["Every journey", "begins somewhere."], art: "seedling", sub: "How familiar are you with the Bible? We’ll adjust the reading guidance, not the words of Scripture.", options: Self.familiarities, selection: $familiarity)
+                    case 2: choice(title: "What brings\nyou here?", art: "intention-heart", sub: "There is no wrong starting point.", options: Self.intentions, selection: $intention)
+                    case 3: choice(title: "Every journey\nbegins somewhere.", art: "seedling", sub: "How familiar are you with the Bible? We’ll adjust the reading guidance, not the words of Scripture.", options: Self.familiarities, selection: $familiarity)
                     case 4: topicsStep
-                    case 5: choice(title: ["Make room", "for the Word."], art: "hourglass", sub: "How much time would feel realistic on a typical day?", options: Self.routines, selection: $routine,
+                    case 5: choice(title: "Make room\nfor the Word.", art: "hourglass", sub: "How much time would feel realistic on a typical day?", options: Self.routines, selection: $routine,
                                    details: ["5 minutes": "A little breathing room in your day"],
                                    note: "A gentle rhythm, at your own pace.\nYou’re welcome here, however long you have.")
                     case 6: reminderStep
                     default: readyStep
                     }
                 }
-                .padding(.horizontal, 28).padding(.top, 36)
+                .padding(.top, 39)
             }
             .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
             switch step {
             case 4: footer(button: "Continue", caption: "Your interests guide discovery. Scripture stays unchanged.") { step += 1 }
             case 6:
-                VStack(spacing: 6) {
+                VStack(spacing: 0) {
                     footer(button: "Continue", caption: nil) { Task { await continueFromReminder() } }
-                    Button("Not now") { reminders = false; step = 7 }.font(.system(size: 14, weight: .medium)).foregroundStyle(Color(hex: 0x111111)).padding(.bottom, 8)
+                    Button("Not now") { reminders = false; step = 7 }
+                        .font(.system(size: 14)).foregroundStyle(Color(hex: 0x333333)).frame(maxWidth: .infinity, minHeight: 48)
                 }
+                .padding(.bottom, 9)
             case 7: footer(button: finishing ? "Getting ready…" : "Start reading", caption: "A little space. An open heart.") { Task { await finish(guest: false) } }
             default: footer(button: "Continue", caption: "Your pace. Your starting point.") { step += 1 }
             }
         }
+        .padding(EdgeInsets(top: 78, leading: 28, bottom: 0, trailing: 28))
     }
 
+    /// Eight 2 pt segments, 5 apart; done ones ink, the rest hairline grey.
     private var progress: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<8) { i in
-                Capsule().fill(Color(hex: 0x111111).opacity(i <= step ? 0.85 : 0.14)).frame(height: 2)
-            }
+        HStack(spacing: 5) {
+            ForEach(0..<8) { i in RoundedRectangle(cornerRadius: 3).fill(i <= step ? Self.ink : Self.line).frame(height: 2) }
         }
         .accessibilityElement().accessibilityLabel("Step \(step + 1) of 8")
     }
 
-    private func heading(_ lines: [String], art: String) -> some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 0) { ForEach(lines, id: \.self) { Text($0) } }
-                .font(.serif(34, relativeTo: .largeTitle)).foregroundStyle(Color(hex: 0x111111))
-            Spacer()
-            Image(art).resizable().scaledToFit().frame(width: 76, height: 76).accessibilityHidden(true)
+    private func heading(_ title: String, art: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Text(title).font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
+                .fixedSize().padding(.top, 9)
+            Spacer(minLength: 0)
+            Image(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true)
         }
     }
 
-    private func choice(title: [String], art: String, sub: String, options: [String], selection: Binding<String?>, details: [String: String] = [:], note: String? = nil) -> some View {
+    private func subtitle(_ text: String) -> some View {
+        Text(text).font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Self.body).padding(.top, 18)
+    }
+
+    private func choice(title: String, art: String, sub: String, options: [String], selection: Binding<String?>, details: [String: String] = [:], note: String? = nil) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             heading(title, art: art)
-            Text(sub).font(.system(size: 15)).foregroundStyle(Color(hex: 0x4A4A50)).padding(.top, 18).padding(.bottom, 22)
-            VStack(spacing: 12) {
+            subtitle(sub)
+            VStack(spacing: 10) {
                 ForEach(options, id: \.self) { option in
                     let on = selection.wrappedValue == option
                     Button { selection.wrappedValue = option } label: {
                         HStack(spacing: 14) {
-                            Image(systemName: on ? "largecircle.fill.circle" : "circle").font(.system(size: 20, weight: .light))
-                            VStack(alignment: .leading, spacing: 3) {
-                                Text(option).font(.system(size: 15))
-                                if on, let d = details[option] { Text(d).font(.system(size: 12)).foregroundStyle(Color(hex: 0x6B6B70)) }
+                            ZStack {
+                                Circle().fill(on ? Self.ink : .clear)
+                                Circle().strokeBorder(on ? Self.ink : Self.body, lineWidth: 1)
+                                if on { Circle().fill(.white).frame(width: 7, height: 7) }
                             }
-                            Spacer()
+                            .frame(width: 19, height: 19)
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text(option).font(.system(size: 14))
+                                if on, let d = details[option] { Text(d).font(.system(size: 11)).foregroundStyle(Self.body) }
+                            }
+                            Spacer(minLength: 0)
                         }
-                        .foregroundStyle(Color(hex: 0x111111))
-                        .padding(.horizontal, 20).frame(minHeight: on && details[option] != nil ? 70 : 58)
-                        .background(Capsule().fill(on ? Color(hex: 0xEEF1F2) : .white))
-                        .overlay(Capsule().strokeBorder(on ? Color(hex: 0x6B7A80).opacity(0.6) : Color(hex: 0xE5E5E8), lineWidth: on ? 1.2 : 1))
-                        .shadow(color: .black.opacity(0.05), radius: 8, y: 3)
+                        .foregroundStyle(Self.ink)
+                        .padding(.horizontal, 17).padding(.vertical, 18)
+                        .frame(minHeight: 60)
+                        .choiceSurface(selected: on)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            if let note { Text(note).font(.system(size: 12)).foregroundStyle(Color(hex: 0x6B6B70)).padding(.top, 18) }
+            .padding(.top, 32)
+            if let note { Text(note).font(.system(size: 11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 24) }
         }
     }
 
     private var topicsStep: some View {
         VStack(alignment: .leading, spacing: 0) {
-            heading(["What’s on your", "heart lately?"], art: "olive")
-            Text("Choose any topics you might like to explore.").font(.system(size: 15)).foregroundStyle(Color(hex: 0x4A4A50)).padding(.top, 18).padding(.bottom, 22)
-            FlowLayout(spacing: 10) {
+            heading("What’s on your\nheart lately?", art: "olive")
+            subtitle("Choose any topics you might like to explore.")
+            FlowLayout(spacing: 11) {
                 ForEach(Self.topicOptions, id: \.self) { topic in
                     let on = topics.contains(topic)
                     Button { if on { topics.removeAll { $0 == topic } } else { topics.append(topic) } } label: {
-                        Text(topic).font(.system(size: 15)).foregroundStyle(Color(hex: 0x111111))
+                        Text(topic).font(.system(size: 14)).foregroundStyle(Self.ink)
                             .padding(.horizontal, 20).frame(height: 48)
-                            .background(Capsule().fill(on ? Color(hex: 0xEEF1F2) : .white))
-                            .overlay(Capsule().strokeBorder(on ? Color(hex: 0x6B7A80).opacity(0.6) : Color(hex: 0xE5E5E8), lineWidth: on ? 1.2 : 1))
-                            .shadow(color: .black.opacity(0.05), radius: 8, y: 3)
+                            .choiceSurface(selected: on)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
+            .padding(.top, 32)
         }
     }
 
     private var reminderStep: some View {
         VStack(alignment: .leading, spacing: 0) {
-            heading(["A gentle", "reminder?"], art: "reminder-bell")
-            Text("Optional reminders can help you make Bible reading part of your day.").font(.system(size: 15)).foregroundStyle(Color(hex: 0x4A4A50)).padding(.top, 18).padding(.bottom, 22)
-            VStack(alignment: .leading, spacing: 10) {
-                Toggle("Daily reminder", isOn: $reminders).font(.system(size: 15)).tint(Color(hex: 0x111111))
-                Text("A moment that works for you").font(.system(size: 12)).foregroundStyle(Color(hex: 0x6B6B70))
+            heading("A gentle\nreminder?", art: "reminder-bell")
+            subtitle("Optional reminders can help you make Bible reading part of your day.")
+            VStack(alignment: .leading, spacing: 0) {
+                Toggle(isOn: $reminders) { Text("Daily reminder").font(.system(size: 14)) }.tint(Self.ink).frame(height: 44)
+                Text("A moment that works for you").font(.system(size: 12)).foregroundStyle(Self.body).padding(.top, 3)
                 if reminders {
                     DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                        .font(.system(size: 15))
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity, minHeight: 49, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(.white))
+                        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Self.line))
+                        .padding(.top, 16)
                 }
             }
             .padding(22)
-            .background(RoundedRectangle(cornerRadius: 28, style: .continuous).fill(.white))
-            .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
-            VStack(alignment: .leading, spacing: 6) {
-                Text("HER CROWN · YOUR DAILY PAUSE").font(.system(size: 10, weight: .semibold)).tracking(1).foregroundStyle(Color(hex: 0x6B6B70))
-                Text("A moment in the Word?").font(.serif(22))
+            .choiceSurface(selected: false, radius: 44)
+            .padding(.top, 28)
+            VStack(alignment: .leading, spacing: 11) {
+                Text("HER CROWN · YOUR DAILY PAUSE").font(.system(size: 9)).tracking(1).foregroundStyle(Self.body)
+                Text("A moment in the Word?").font(.serif(24)).foregroundStyle(Self.ink)
             }
-            .padding(20).frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 28, style: .continuous).fill(.white))
-            .shadow(color: .black.opacity(0.06), radius: 12, y: 4)
-            .padding(.top, 14)
+            .padding(18).frame(maxWidth: .infinity, alignment: .leading)
+            .choiceSurface(selected: false, radius: 47)
+            .padding(.top, 26)
+            .accessibilityElement(children: .combine)
             .accessibilityLabel("Notification preview: A moment in the Word?")
+            Text("You can change this any time in Settings.").font(.system(size: 11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 20)
         }
     }
 
     private var readyStep: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image("butterfly").resizable().scaledToFit().frame(width: 84, height: 70).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 0) { Text("You’re right where"); Text("you need to begin.") }
-                .font(.serif(34, relativeTo: .largeTitle)).foregroundStyle(Color(hex: 0x111111)).padding(.top, 18)
-            Text("Your Scripture feed is ready. You can change your preferences at any time.").font(.system(size: 15)).foregroundStyle(Color(hex: 0x4A4A50)).padding(.top, 18).padding(.bottom, 26)
-            VStack(spacing: 10) {
-                Text("“\(BibleStore.shared.text("kjv", VerseRef("PSA.23.1")!) ?? "")”").font(.serif(26)).multilineTextAlignment(.center)
-                Text("PSALM 23:1").font(.system(size: 11, weight: .medium)).tracking(0.6).foregroundStyle(Color(hex: 0x4A4A50))
-                Text("King James Version").font(.system(size: 11)).foregroundStyle(Color(hex: 0x6B6B70))
+            Image("butterfly").resizable().scaledToFit().frame(width: 90, height: 74).accessibilityHidden(true)
+            Text("You’re right where\nyou need to begin.").font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
+                .fixedSize(horizontal: false, vertical: true).padding(.top, 20)
+            subtitle("Your Scripture feed is ready. You can change your preferences at any time.")
+            VStack(spacing: 0) {
+                // The mockup's lines: “The LORD is my / shepherd; / I shall not want.” (text from the bundled KJV).
+                let verse = (BibleStore.shared.text("kjv", VerseRef("PSA.23.1")!) ?? "").components(separatedBy: "; ")
+                let first = verse.first.map { "“" + $0 + (verse.count > 1 ? ";" : "”") } ?? ""
+                let lines = [first.components(separatedBy: " ").dropLast().joined(separator: " "), first.components(separatedBy: " ").last ?? ""]
+                    + verse.dropFirst().map { $0 + "”" }
+                VStack(spacing: 2) {
+                    ForEach(Array(lines.enumerated()), id: \.offset) { _, line in Text(line).lineLimit(1).minimumScaleFactor(0.8) }
+                }
+                .font(.serif(27)).multilineTextAlignment(.center).foregroundStyle(Self.ink)
+                VStack(spacing: 0) { Text("PSALM 23:1").frame(height: 18); Text("King James Version").frame(height: 18) }
+                    .font(.system(size: 10)).foregroundStyle(Self.body).padding(.top, 23)
             }
-            .padding(28).frame(maxWidth: .infinity)
-            .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(.white))
-            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Color(hex: 0xE5E5E8)))
+            .padding(.vertical, 32).padding(.horizontal, 24).frame(maxWidth: .infinity)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Self.line))
+            .padding(.top, 36)
         }
     }
 
     // MARK: Pieces
 
     private var backButton: some View {
-        Button { step = max(0, step - 1) } label: { Image(systemName: "arrow.left").font(.system(size: 18)).foregroundStyle(Color(hex: 0x111111)).frame(width: 44, height: 44) }
+        Button { step = max(0, step - 1) } label: { Image(systemName: "arrow.left").font(.system(size: 19)).foregroundStyle(Self.ink).frame(width: 44, height: 44) }
             .accessibilityLabel("Back")
     }
 
-    private func footer(button: String, caption: String?, action: @escaping () -> Void) -> some View {
-        VStack(spacing: 12) {
-            Button(action: action) { Label(button, systemImage: "arrow.right").labelStyle(TrailingIcon()) }
-                .buttonStyle(CapsuleButtonStyle())
-                .disabled(finishing)
-            if let caption { Text(caption).font(.system(size: 12)).foregroundStyle(Color(hex: 0x6B6B70)) }
+    /// Primary 48 pt (54 on the intro), then the 11 pt footnote; the footnote sits 68 pt above the screen bottom.
+    private func footer(button: String, caption: String?, height: CGFloat = 48, action: @escaping () -> Void) -> some View {
+        VStack(spacing: 10) {
+            Button(action: action) {
+                HStack(spacing: 8) { Text(button); Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
+                    .font(.system(size: 14)).foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, minHeight: height)
+                    .background(Capsule().fill(Self.ink))
+                    .shadow(color: .black.opacity(0.267), radius: 4, y: 3)
+            }
+            .buttonStyle(.plain)
+            .disabled(finishing)
+            if let caption { Text(caption).font(.system(size: 11)).foregroundStyle(Self.body).frame(height: 18) }
         }
-        .padding(.horizontal, 28).padding(.bottom, 12)
+        .padding(.top, 26)
+        .padding(.bottom, caption == nil ? 0 : 68)
     }
 
     private func skip() {
@@ -364,4 +429,33 @@ enum DailyReminder {
     }
 
     static func cancel() { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id]) }
+}
+
+private extension View {
+    /// Onboarding choice/chip surface: white (selected: #eff4f6), hairline (selected: #8d9ba0), soft low shadow.
+    func choiceSurface(selected: Bool, radius: CGFloat? = nil) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius ?? 999, style: .continuous)
+        return self
+            .background(shape.fill(selected ? Color(hex: 0xEFF4F6) : .white))
+            .overlay(shape.strokeBorder(selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7), lineWidth: 1))
+            .shadow(color: Color(red: 27 / 255, green: 35 / 255, blue: 37 / 255, opacity: 0.2), radius: 2, y: 3)
+    }
+}
+
+/// The mockup's onboarding clouds: cloud-bank at the top (150% wide) and bottom (170% wide), 22% opacity.
+struct OnboardingClouds: View {
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.04 + geo.size.width * 0.25)
+                Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
+                    .position(x: geo.size.width / 2, y: geo.size.height * 0.92 - geo.size.width * 0.1)
+            }
+            .opacity(0.22)
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
 }

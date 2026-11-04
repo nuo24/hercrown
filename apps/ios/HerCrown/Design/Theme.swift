@@ -33,7 +33,9 @@ extension Color {
 extension Font {
     /// Baskerville (regular / italic), scaled with Dynamic Type relative to `style`.
     static func serif(_ size: CGFloat, italic: Bool = false, weight: Font.Weight = .regular, relativeTo style: Font.TextStyle = .body) -> Font {
-        .custom(italic ? "Baskerville-Italic" : (weight == .semibold || weight == .bold ? "Baskerville-SemiBold" : "Baskerville"), size: size, relativeTo: style)
+        let heavy = weight == .semibold || weight == .bold
+        let name = italic ? (heavy ? "Baskerville-SemiBoldItalic" : "Baskerville-Italic") : (heavy ? "Baskerville-SemiBold" : "Baskerville")
+        return .custom(name, size: size, relativeTo: style)
     }
 
 }
