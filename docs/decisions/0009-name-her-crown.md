@@ -12,3 +12,5 @@
 **Risk noted to the owner:** "Scroll the Bible" is the competitor's brand. A name that contains it can be rejected (App Store 4.1 / 5.2) or draw a trademark complaint after launch. The lower-risk version is the name "Her Crown" with "Scroll the Bible for Women" in the subtitle and keywords. The owner decides before submitting.
 
 **Logo direction:** the crown of thorns with flowers, from the owner's sketches. It must work at 60 px.
+
+**Update 2026-11-04:** The owner keeps "Her Crown: Scroll the Bible" for the first submission and accepts the risk. If App Review rejects the name, switch to "Her Crown: Bible for Women" (subtitle "Scroll less. Read the Word.") and resubmit. The app icon is the partner's wooden crown of thorns on sky (`design/logo/`); the white version is for the website and print.
