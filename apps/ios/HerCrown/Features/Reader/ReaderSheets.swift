@@ -56,74 +56,83 @@ private struct ChapterGrid: View {
     }
 }
 
-/// Reflection: the verse, a prompt clearly marked as not Scripture, and a way to mark today as read.
+/// Reflection: the verse, a prompt clearly marked as not Scripture, her own note (auto-saved), and a way to mark today as read.
 struct ReflectionSheet: View {
     let ref: VerseRef
     let translation: String
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @State private var marked = false
+    @State private var note = ""
+    @State private var noteLoaded = false
+    @State private var noteStatus = ""
+    @FocusState private var editing: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text(BibleStore.shared.label(ref)).font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
-            Text("“\(BibleStore.shared.text(translation, ref) ?? "")”").font(.serif(24, relativeTo: .title2))
-            VStack(alignment: .leading, spacing: 6) {
-                Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
-                Text("What stands out to you in this verse, and how might it shape your day?").font(.system(size: 17))
-                Text("Reflection prompt · not Scripture").font(.system(size: 12)).foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button(marked ? "Today’s reading is marked" : "Mark today as read") {
-                marked = true
-                let day = AppModel.localDay()
-                Task {
-                    _ = try? await app.api.send("POST", "/me/reading-events", json: ["events": [[
-                        "id": "reflect-\(day)-\(ref.description.replacingOccurrences(of: ".", with: "-"))", "localDay": day,
-                        "timeZone": TimeZone.current.identifier, "ref": ref.description,
-                    ]]])
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Text(BibleStore.shared.label(ref)).font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
+                Text("“\(BibleStore.shared.text(translation, ref) ?? "")”").font(.serif(24, relativeTo: .title2))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                    Text("What stands out to you in this verse, and how might it shape your day?").font(.system(size: 17))
+                    Text("Reflection prompt · not Scripture").font(.system(size: 12)).foregroundStyle(.secondary)
                 }
-            }
-            .buttonStyle(CapsuleButtonStyle())
-            .disabled(marked)
-        }
-        .padding(24)
-    }
-}
-
-/// Saved passages, in her reading translation.
-struct SavedSheet: View {
-    let translation: String
-    @Environment(AppModel.self) private var app
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            Group {
-                if app.saved.isEmpty {
-                    VStack(spacing: 14) {
-                        Image("bookmark").resizable().scaledToFit().frame(height: 120).accessibilityHidden(true)
-                        Text("Your saved passages will find a home here.").font(.serif(20))
-                        Text("Tap the heart on a verse to keep it close.").foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("Your notes").font(.system(size: 13, weight: .semibold))
+                        Spacer()
+                        Text(noteStatus).font(.system(size: 12)).foregroundStyle(.secondary)
                     }
-                    .multilineTextAlignment(.center).padding(32)
-                } else {
-                    List {
-                        ForEach(app.saved.sorted(), id: \.self) { ref in
-                            if let r = VerseRef(ref) {
-                                VStack(alignment: .leading, spacing: 6) {
-                                    Text(BibleStore.shared.label(r)).font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
-                                    Text(BibleStore.shared.text(translation, r) ?? "").font(.serif(19))
-                                }
-                                .swipeActions { Button("Remove", role: .destructive) { app.toggleSave(ref) } }
-                            }
+                    TextEditor(text: $note)
+                        .focused($editing)
+                        .font(.system(size: 16))
+                        .scrollContentBackground(.hidden)
+                        .frame(minHeight: 110)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.supporting(scheme)))
+                        .overlay(alignment: .topLeading) {
+                            if note.isEmpty && !editing { Text("Write a thought, a prayer, a question…").font(.system(size: 16)).foregroundStyle(.tertiary).padding(18).allowsHitTesting(false) }
                         }
+                        .disabled(!noteLoaded)
+                }
+                Button(marked ? "Today’s reading is marked" : "Mark today as read") {
+                    marked = true
+                    let day = AppModel.localDay()
+                    Task {
+                        _ = try? await app.api.send("POST", "/me/reading-events", json: ["events": [[
+                            "id": "reflect-\(day)-\(ref.description.replacingOccurrences(of: ".", with: "-"))", "localDay": day,
+                            "timeZone": TimeZone.current.identifier, "ref": ref.description,
+                        ]]])
+                        await Analytics.shared.track("day_marked_read", ["source": .string("reflection")])
                     }
                 }
+                .buttonStyle(CapsuleButtonStyle())
+                .disabled(marked)
             }
-            .navigationTitle("Saved passages")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .padding(24)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .task {
+            struct Note: Decodable { let text: String }
+            if let existing: Note = try? await app.api.get("/me/notes/\(ref.description)") { note = existing.text }
+            noteLoaded = true
+        }
+        .task(id: note) {
+            guard noteLoaded else { return }
+            try? await Task.sleep(for: .milliseconds(800)) // auto-save once she pauses
+            guard !Task.isCancelled else { return }
+            let text = note
+            let at = (Date().timeIntervalSince1970 * 1000).rounded()
+            noteStatus = "Saving…"
+            do {
+                try await app.api.send("PUT", "/me/notes/\(ref.description)", json: ["text": text, "at": at])
+                noteStatus = "Auto-saved"
+                await Analytics.shared.track("note_saved")
+            } catch {
+                noteStatus = "Not saved. Check your connection."
+            }
         }
     }
 }

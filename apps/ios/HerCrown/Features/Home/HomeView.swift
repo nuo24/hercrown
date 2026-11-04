@@ -54,13 +54,14 @@ struct HomeView: View {
         .sheet(item: $openPlan) { plan in PlanSheet(planId: plan.id, model: model).presentationDetents([.large]) }
         .sheet(item: $openDevotional) { d in DevotionalSheet(devotional: d, model: model).presentationDetents([.large]) }
         #if DEBUG
-        // Review switch: `-hcOpenHome streak|devotional|plan`.
+        // Review switch: `-hcOpenHome streak|devotional|plan|saved`.
         .task(id: model.loaded) {
             guard model.loaded else { return }
             switch UserDefaults.standard.string(forKey: "hcOpenHome") {
             case "streak": showingStreak = true
             case "devotional": openDevotional = model.devotional
             case "plan": openPlan = model.todaysPlan
+            case "saved": showingSaved = true
             default: break
             }
         }
