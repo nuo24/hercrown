@@ -1,8 +1,8 @@
 # Terms of Use
 
-_Draft, last updated November 3, 2026. Have it reviewed before launch, and fill in the bracketed details._
+_Draft, last updated November 3, 2026. Have it reviewed before launch._
 
-These terms are an agreement between you and [Your legal name], an individual developer ("we") for the Her Crown app. By using the app you agree to them. Apple's Licensed Application End User License Agreement also applies to apps from the App Store.
+These terms are an agreement between you and Nathan Okolo, an individual developer ("we") for the Her Crown app. By using the app you agree to them. Apple's Licensed Application End User License Agreement also applies to apps from the App Store.
 
 ## The app
 

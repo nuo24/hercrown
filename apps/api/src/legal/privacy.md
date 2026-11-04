@@ -1,8 +1,8 @@
 # Privacy Policy
 
-_Draft, last updated November 3, 2026. Have it reviewed before launch, and fill in the bracketed details._
+_Draft, last updated November 3, 2026. Have it reviewed before launch._
 
-Her Crown ("we", "us") is made by [Your legal name], an individual developer. This policy explains what we collect when you use the Her Crown app and why. Questions: macnatephil@gmail.com.
+Her Crown ("we", "us") is made by Nathan Okolo, an individual developer. This policy explains what we collect when you use the Her Crown app and why. Questions: macnatephil@gmail.com.
 
 ## The short version
 
