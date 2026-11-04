@@ -2,7 +2,7 @@
 
 _Draft, last updated November 3, 2026. Have it reviewed before launch, and fill in the bracketed details._
 
-Her Crown ("we", "us") is made by [Company legal name], [address]. This policy explains what we collect when you use the Her Crown app and why. Questions: macnatephil@gmail.com.
+Her Crown ("we", "us") is made by [Your legal name], an individual developer. This policy explains what we collect when you use the Her Crown app and why. Questions: macnatephil@gmail.com.
 
 ## The short version
 
@@ -13,7 +13,7 @@ Her Crown ("we", "us") is made by [Company legal name], [address]. This policy e
 
 ## What we collect
 
-**Account.** A random account ID. If you sign in with Apple, your Apple account identifier and the email Apple shares, which may be a private relay address. If you sign in with email, your email address.
+**Account.** A random account ID. If you sign in with Apple, your Apple account identifier and the email Apple shares, which may be a private relay address.
 
 **Profile and preferences (optional).** Display name, bio, profile photo, your onboarding answers (intention, familiarity, topics, reading goal), reminder time and time zone, appearance, font size and translation.
 
@@ -37,7 +37,7 @@ When you open Explain Easier or Deeper Study for a verse, we send the verse and 
 
 ## Who processes data for us
 
-- **Cloudflare:** hosting, database, file storage, email.
+- **Cloudflare:** hosting, database and file storage.
 - **Apple:** Sign in with Apple, payments, push notifications.
 - **Superwall:** subscription paywall and purchase events.
 - **Tinybird:** pseudonymous analytics and error reports.

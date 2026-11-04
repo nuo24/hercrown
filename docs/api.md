@@ -107,7 +107,7 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 | `GET /me/entitlements` | Subscription row (`trial` details while trialing) |
 | `POST /me/restore` `{ transactionId }` | Restore Purchases ([restore-purchases.md](restore-purchases.md)) |
 | `GET /me/support` · `POST /me/support` `{ category, message, contactEmail?, contactPreference? }` | Contact & Support. Returns reference `HC-XXXXXXXX`. 5 per day |
-| `GET /legal/{privacy\|terms\|refunds\|credits}` | In-app reading pages (`?format=md` for Markdown) and the App Store URLs |
+| `GET /legal/{privacy\|terms\|refunds\|credits\|support}` | In-app reading pages (`?format=md` for Markdown) and the App Store URLs |
 
 ## Analytics
 

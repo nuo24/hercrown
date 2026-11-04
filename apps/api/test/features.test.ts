@@ -243,8 +243,8 @@ describe("email sign-in", () => {
 });
 
 describe("legal pages", () => {
-  it("serves privacy, terms, refunds and credits without signing in", async () => {
-    for (const page of ["privacy", "terms", "refunds", "credits"]) {
+  it("serves privacy, terms, refunds, credits and support without signing in", async () => {
+    for (const page of ["privacy", "terms", "refunds", "credits", "support"]) {
       const res = await api(`/legal/${page}`);
       expect(res.status, page).toBe(200);
       expect(res.headers.get("content-type")).toContain("text/html");

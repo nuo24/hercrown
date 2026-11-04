@@ -36,6 +36,10 @@ export default defineConfig(async () => {
             BETTER_AUTH_SECRET: "test-secret-test-secret-test-secret-00",
             APPLE_CLIENT_ID: "",
             APPLE_CLIENT_SECRET: "",
+            // Analytics never leave tests: blank the real Tinybird tokens from .dev.vars (tests that need one set it).
+            TINYBIRD_TOKEN: "",
+            TINYBIRD_READ_TOKEN: "",
+            TINYBIRD_ADMIN_TOKEN: "",
           },
         },
       }),

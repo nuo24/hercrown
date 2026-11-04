@@ -1,12 +1,13 @@
-// Public legal pages (App Store needs privacy policy and terms URLs): GET /legal/{privacy|terms|refunds|credits}.
+// Public legal pages (App Store needs privacy policy and terms URLs): GET /legal/{privacy|terms|refunds|credits|support}.
 // Written in Markdown (src/legal/*.md), served as simple HTML. `?format=md` returns the Markdown for in-app rendering.
 import credits from "./legal/credits.md";
 import privacy from "./legal/privacy.md";
 import refunds from "./legal/refunds.md";
+import support from "./legal/support.md";
 import terms from "./legal/terms.md";
 import { escapeHtml } from "./email";
 
-export const LEGAL_PAGES: Record<string, string> = { privacy, terms, refunds, credits };
+export const LEGAL_PAGES: Record<string, string> = { privacy, terms, refunds, credits, support };
 
 /** Minimal Markdown → HTML: headings, paragraphs, two-level lists, bold, italics, links. Input is our own files only. */
 export function markdownToHtml(md: string): string {
