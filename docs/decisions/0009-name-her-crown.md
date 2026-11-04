@@ -13,4 +13,4 @@
 
 **Logo direction:** the crown of thorns with flowers, from the owner's sketches. It must work at 60 px.
 
-**Update 2026-11-04:** The owner keeps "Her Crown: Scroll the Bible" for the first submission and accepts the risk. If App Review rejects the name, switch to "Her Crown: Bible for Women" (subtitle "Scroll less. Read the Word.") and resubmit. The app icon is the partner's wooden crown of thorns on sky (`design/logo/`); the white version is for the website and print.
+**Update 2026-11-04:** The owner keeps "Her Crown: Scroll the Bible" for the first submission and accepts the risk. If App Review rejects the name, switch to "Her Crown: Bible for Women" (subtitle "Scroll less. Read the Word.") and resubmit. The app icon and the App Store screenshots use the white version of the partner's wooden crown of thorns (`design/logo/`); the sky version is kept as an alternate.
