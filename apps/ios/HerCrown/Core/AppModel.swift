@@ -30,6 +30,15 @@ final class AppModel {
     // MARK: Launch
 
     func start() async {
+        #if DEBUG
+        // Review switch: `-hcFreshStart YES` forgets this phone's session and local state, so the app starts as a new
+        // guest at the first onboarding screen. (Deleting the app isn't enough: the Keychain keeps the session.)
+        if UserDefaults.standard.bool(forKey: "hcFreshStart") {
+            api.token = nil
+            for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position", "hc.onboardingCompleted"] { UserDefaults.standard.removeObject(forKey: key) }
+            saved = []; preferences = .defaults; membership = .free; me = nil; onboardingCompleted = false
+        }
+        #endif
         await Analytics.shared.track("app_opened")
         do {
             if api.token == nil { try await signInAsGuest() }

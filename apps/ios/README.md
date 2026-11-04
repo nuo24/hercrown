@@ -18,6 +18,7 @@ Debug-only review switches (launch arguments):
 - `-hcOnboardingStep 0…7` opens an onboarding step; `-hcSkipOnboarding YES -hcTab bible|community|discover|home` opens a tab
 - `-hcOpenStudy explain|deeper|original|related` opens a study tool from the reader
 - `-hcOpenHome streak|devotional|plan|saved|settings` opens a Home sheet; `-hcHomeScroll search|season` scrolls Home
+- `-hcFreshStart YES` starts over as a new guest at the first onboarding screen (deleting the app isn't enough: the Keychain keeps the session)
 - `-hcSkipBilling YES` doesn't start Superwall. A simulator that isn't signed into an Apple Account shows "Sign in to Apple Account" when StoreKit starts; real phones signed into the App Store don't.
 
 ## Superwall dashboard (paywalls are configured there, not in code)
