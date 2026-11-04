@@ -4,6 +4,9 @@ DESCRIPTION >
     (a webhook retry, V1 and V2 of one store event) and are merged; query with FINAL or count distinct people.
     No names, emails, onboarding answers, notes or verse references. See docs/analytics.md.
 
+TOKEN "hercrown_append" APPEND
+TOKEN "hercrown_read" READ
+
 SCHEMA >
     `event_id` String `json:$.event_id`,
     `event` LowCardinality(String) `json:$.event`,
