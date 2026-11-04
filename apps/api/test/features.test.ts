@@ -32,6 +32,8 @@ describe("reader preferences", () => {
     expect((await json("/me/position", "PUT", { ref: "JHN.3.16", at: now })).position.ref).toBe("JHN.3.16");
     expect((await json("/me/position", "PUT", { ref: "GEN.1.1", at: now - 60_000 })).position.ref).toBe("JHN.3.16");
     expect((await json("/me")).preferences.position).toEqual({ ref: "JHN.3.16", updatedAt: now });
+    // Saving a position first creates her preferences with the light default, not the column's old 'dark'.
+    expect((await json("/me")).preferences.appearance).toBe("light");
   });
 });
 

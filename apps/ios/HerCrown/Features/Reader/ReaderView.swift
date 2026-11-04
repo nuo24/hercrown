@@ -15,11 +15,12 @@ struct ReaderView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             AppGradient()
-            pages
+            // .reader-pages: the top 670 pt of the 778 pt frame; the dock floats below.
+            pages.padding(.bottom, 108)
             VerseRail(verses: model.verses.map(\.number), current: Binding(get: { model.current ?? 1 }, set: { model.current = $0 }))
-                .padding(.top, 72)
-                .padding(.bottom, 110)
-                .padding(.leading, 8)
+                .padding(.top, 94)
+                .padding(.bottom, 108)
+                .padding(.leading, 10)
             toolbar
         }
         .sheet(isPresented: $showingChapters) {
@@ -42,16 +43,17 @@ struct ReaderView: View {
 
     // MARK: Toolbar
 
+    /// .reader-toolbar: 12 pt from the edges; white pill controls with the icon-button surface; 16 pt labels.
     private var toolbar: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 2) {
             HStack(spacing: 2) {
-                Button { shuffle() } label: { Image(systemName: "shuffle").frame(width: 38, height: 38) }
+                Button { shuffle() } label: { Image(systemName: "shuffle").font(.system(size: 16)).frame(width: 40, height: 44) }
                     .accessibilityLabel("Surprise me with a verse")
-                Button { showingSaved = true } label: { Image(systemName: "heart").frame(width: 38, height: 38) }
+                Button { showingSaved = true } label: { Image(systemName: "heart").font(.system(size: 16)).frame(width: 40, height: 44) }
                     .accessibilityLabel("Saved passages")
             }
-            .padding(.horizontal, 3)
-            .background(Capsule().fill(.ultraThinMaterial))
+            .padding(2)
+            .iconSurface(Capsule())
             Menu {
                 Picker("Translation", selection: Binding(get: { model.translation }, set: { model.setTranslation($0) })) {
                     Text("King James Version (KJV)").tag("kjv")
@@ -59,26 +61,26 @@ struct ReaderView: View {
                     Text("World English Bible (WEB)").tag("web")
                 }
             } label: {
-                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 15, weight: .semibold)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
-                    .padding(.horizontal, 12).frame(height: 44).background(Capsule().fill(.ultraThinMaterial))
+                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                    .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
+            .padding(.leading, 2)
             .accessibilityLabel("Bible translation, \(BibleStore.offline[model.translation] ?? "KJV")")
             Spacer()
             Button { if let ref = model.currentRef { app.toggleSave(ref.description) } } label: {
                 Image(systemName: model.currentRef.map { app.isSaved($0.description) } == true ? "bookmark.fill" : "bookmark")
-                    .frame(width: 44, height: 44).background(Circle().fill(.ultraThinMaterial))
+                    .font(.system(size: 16)).frame(width: 40, height: 44).iconSurface(Capsule())
             }
             .accessibilityLabel("Save current verse")
             Button { showingChapters = true } label: {
-                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 15, weight: .semibold)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
-                    .padding(.horizontal, 12).frame(height: 44).background(Capsule().fill(.ultraThinMaterial))
+                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 16)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                    .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
             .accessibilityLabel("Chapter, \(model.chapter?.label ?? "")")
         }
-        .font(.system(size: 16))
         .foregroundStyle(Theme.text(scheme))
         .padding(.horizontal, 12)
-        .padding(.top, 4)
+        .padding(.top, 12)
     }
 
     // MARK: Pages
@@ -100,7 +102,6 @@ struct ReaderView: View {
         .scrollTargetBehavior(.paging)
         .scrollPosition(id: Binding(get: { model.current }, set: { model.current = $0 }))
         .scrollIndicators(.hidden)
-        .ignoresSafeArea(edges: .bottom)
         .id("\(model.translation)-\(model.chapter?.book.id ?? "")-\(model.chapter?.number ?? 0)")
     }
 
@@ -134,61 +135,63 @@ struct VersePage: View {
     private var ref: String { "\(chapter.book.id).\(chapter.number).\(verse.number)" }
     private var fontSize: CGFloat { (ReaderFontSize(rawValue: app.preferences.fontSize) ?? .default).points }
 
+    /// .reader-page: 100/44/116 padding, verse block centred (112 pt art, 30 pt serif, 13 pt reference); side actions
+    /// 12 pt from the right and 62 pt above the page bottom; the hint 24 pt above it.
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            VStack(spacing: 22) {
-                Spacer(minLength: 80)
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
                 if let artwork {
-                    Image(artwork).resizable().scaledToFit().frame(height: 110).accessibilityHidden(true)
+                    Image(artwork).resizable().scaledToFit().frame(width: 112, height: 112).accessibilityHidden(true).padding(.bottom, 30)
                 }
                 if verse.number == chapter.verses.first?.number, let title = chapter.title {
-                    Text(title).font(.serif(17, italic: true, relativeTo: .callout)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
+                    Text(title).font(.serif(17, italic: true, relativeTo: .callout)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.bottom, 16)
                 }
                 Text(scripture)
                     .font(.serif(fontSize, relativeTo: .title))
-                    .lineSpacing(fontSize * 0.25)
+                    .tracking(-0.4)
+                    .lineSpacing(fontSize * 0.17)
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Theme.text(scheme))
                 Text("\(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
-                Spacer(minLength: 150)
+                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 24)
+                Spacer(minLength: 0)
             }
-            .padding(.leading, 44)
-            .padding(.trailing, 58) // clear of the action column
-            .frame(maxWidth: .infinity)
+            .padding(EdgeInsets(top: 100, leading: 44, bottom: 116, trailing: 44))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            VStack(spacing: 22) {
-                Button(action: onStudy) { InsightLens().stroke(style: StrokeStyle(lineWidth: 1.65, lineCap: .round, lineJoin: .round)).frame(width: 24, height: 24) }
+            VStack(spacing: 8) {
+                Button(action: onStudy) { InsightLens().stroke(style: StrokeStyle(lineWidth: 1.65, lineCap: .round, lineJoin: .round)).frame(width: 25, height: 25).frame(width: 44, height: 44) }
                     .accessibilityLabel("Insights for \(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                Button { app.toggleSave(ref) } label: { Image(systemName: app.isSaved(ref) ? "heart.fill" : "heart").font(.system(size: 21)) }
+                Button { app.toggleSave(ref) } label: { Image(systemName: app.isSaved(ref) ? "heart.fill" : "heart").font(.system(size: 21)).frame(width: 44, height: 44) }
                     .accessibilityLabel(app.isSaved(ref) ? "Unsave" : "Save")
-                Button(action: onReflect) { Image(systemName: "bubble.left").font(.system(size: 20)) }
+                Button(action: onReflect) { Image(systemName: "bubble.left").font(.system(size: 20)).frame(width: 44, height: 44) }
                     .accessibilityLabel("Reflect")
                 ShareLink(item: "“\(verse.text)” — \(chapter.book.displayName) \(chapter.number):\(verse.number) (\(BibleStore.offline[chapter.translation] ?? "KJV"))") {
-                    Image(systemName: "square.and.arrow.up").font(.system(size: 20))
+                    Image(systemName: "square.and.arrow.up").font(.system(size: 20)).frame(width: 44, height: 44)
                 }
                 .accessibilityLabel("Share")
             }
             .foregroundStyle(Theme.text(scheme))
-            .padding(.trailing, 22)
-            .padding(.bottom, 200)
+            .padding(.trailing, 12)
+            .padding(.bottom, 62)
 
-            HStack(spacing: 6) {
+            HStack(spacing: 10) {
                 if isLast, let next {
                     Button(action: onNext) {
                         HStack(spacing: 6) { Text("Next: \(next)"); Image(systemName: "arrow.right") }
-                            .font(.system(size: 14, weight: .semibold)).padding(.horizontal, 16).frame(height: 40)
-                            .background(Capsule().fill(.ultraThinMaterial))
+                            .font(.system(size: 13)).padding(.horizontal, 16).frame(height: 40)
+                            .iconSurface(Capsule())
                     }
                 } else if !isLast {
-                    Text("Scroll for the next verse").font(.system(size: 12)); Image(systemName: "arrow.down").font(.system(size: 11))
+                    Text("Scroll for the next verse").font(.system(size: 11)); Text("↓").font(.system(size: 14))
                 }
             }
             .foregroundStyle(Theme.muted(scheme))
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.leading, 40)
-            .padding(.bottom, 128)
+            .padding(.leading, 44)
+            .padding(.bottom, 24)
         }
     }
 

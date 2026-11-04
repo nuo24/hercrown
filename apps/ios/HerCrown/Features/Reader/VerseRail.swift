@@ -9,36 +9,40 @@ struct VerseRail: View {
 
     var body: some View {
         GeometryReader { geo in
+            // .verse-rail: 4 pt bars filling the track (~4.5 pt apart), #d8d8de / active ink; the verse number sits 7 pt to
+            // the right of the active bar; the chapter total 12 pt below the track.
             let count = max(verses.count, 1)
-            let gap: CGFloat = count > 60 ? 0.5 : 2
-            let segment = max((geo.size.height - 20 - gap * CGFloat(count - 1)) / CGFloat(count), 0.6)
+            let track = geo.size.height - 22
+            let gap: CGFloat = count > 60 ? 1 : 4.5
+            let segment = max((track - gap * CGFloat(count - 1)) / CGFloat(count), 0.6)
             let index = verses.firstIndex(of: current) ?? 0
+            let dark = scheme == .dark
             ZStack(alignment: .topLeading) {
                 VStack(alignment: .leading, spacing: gap) {
                     ForEach(Array(verses.enumerated()), id: \.offset) { i, _ in
-                        Capsule()
-                            .fill(Theme.text(scheme).opacity(i == index ? 0.95 : 0.22))
-                            .frame(width: i == index ? 5 : 3, height: i == index ? max(segment, 10) : segment)
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(i == index ? (dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x111111)) : (dark ? Color(hex: 0x39393E) : Color(hex: 0xD8D8DE)))
+                            .frame(width: 4, height: segment)
                     }
                 }
                 Text("\(current)")
                     .font(.system(size: 10, weight: .semibold)).monospacedDigit()
-                    .foregroundStyle(Theme.text(scheme))
-                    .offset(x: 9, y: CGFloat(index) * (segment + gap) - 2)
+                    .foregroundStyle(dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x263B32))
+                    .offset(x: 11, y: CGFloat(index) * (segment + gap) + 2)
                 Text("\(verses.last ?? count)")
                     .font(.system(size: 10)).monospacedDigit()
-                    .foregroundStyle(Theme.muted(scheme))
-                    .offset(y: geo.size.height - 12)
+                    .foregroundStyle(Color(hex: 0x707B77))
+                    .offset(y: track + 12)
             }
-            .frame(width: 30, height: geo.size.height, alignment: .topLeading)
+            .frame(width: 24, height: geo.size.height, alignment: .topLeading)
             .contentShape(Rectangle())
             .gesture(DragGesture(minimumDistance: 0).onChanged { value in
-                let y = min(max(value.location.y, 0), geo.size.height - 20)
+                let y = min(max(value.location.y, 0), track)
                 let i = min(count - 1, Int(y / max(segment + gap, 0.1)))
                 if verses.indices.contains(i), verses[i] != current { current = verses[i]; UISelectionFeedbackGenerator().selectionChanged() }
             })
         }
-        .frame(width: 30)
+        .frame(width: 24)
         .accessibilityElement()
         .accessibilityLabel("Verse")
         .accessibilityValue("\(current) of \(verses.last ?? 0)")

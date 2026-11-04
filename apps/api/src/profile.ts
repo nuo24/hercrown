@@ -312,7 +312,8 @@ export async function savePosition(request: Request, env: Env, user: SessionUser
   const ref = await resolveVerse(env.DB, body.ref);
   const at = typeof body.at === "number" && Number.isFinite(body.at) ? Math.min(body.at, Date.now()) : Date.now();
   await env.DB.prepare(
-    `INSERT INTO preferences (user_id, position_ref, position_updated_at, updated_at) VALUES (?1, ?2, ?3, ?3)
+    // New rows say 'light' explicitly: the column's original default (migration 0002) is 'dark'.
+    `INSERT INTO preferences (user_id, position_ref, position_updated_at, updated_at, appearance) VALUES (?1, ?2, ?3, ?3, 'light')
      ON CONFLICT (user_id) DO UPDATE SET position_ref = ?2, position_updated_at = ?3, updated_at = ?3
      WHERE COALESCE(preferences.position_updated_at, 0) <= ?3`,
   ).bind(user.id, ref, at).run();
@@ -326,7 +327,7 @@ export async function savePosition(request: Request, env: Env, user: SessionUser
 export async function completeOnboarding(env: Env, user: SessionUser, tracker?: Tracker) {
   const t = Date.now();
   await env.DB.prepare(
-    `INSERT INTO preferences (user_id, onboarding_version, onboarding_completed_at, updated_at) VALUES (?1, ?2, ?3, ?3)
+    `INSERT INTO preferences (user_id, onboarding_version, onboarding_completed_at, updated_at, appearance) VALUES (?1, ?2, ?3, ?3, 'light')
      ON CONFLICT (user_id) DO UPDATE SET
        onboarding_version = ?2,
        onboarding_completed_at = COALESCE(preferences.onboarding_completed_at, ?3),
