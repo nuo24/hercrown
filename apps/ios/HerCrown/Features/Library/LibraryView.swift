@@ -176,7 +176,7 @@ private struct SavedVerseCard: View {
                     Spacer()
                     Button { app.toggleSave(ref.description) } label: { Image(systemName: "heart.fill") }.accessibilityLabel("Remove from saved")
                     Spacer(); Spacer()
-                    Button(action: onStudy) { Image(systemName: "bubble") }.accessibilityLabel("Study this verse")
+                    Button(action: onStudy) { Image(systemName: "message") }.accessibilityLabel("Study this verse")
                     Spacer(); Spacer()
                     ShareLink(item: "“\(text)” — \(label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up") }.accessibilityLabel("Share verse")
                     Spacer()

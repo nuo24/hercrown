@@ -242,7 +242,7 @@ private struct DiscoverCard: View {
                         Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart").foregroundStyle(app.isSaved(card.ref) ? Theme.text(scheme) : Theme.muted(scheme)).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
-                    Button(action: onStudy) { Image(systemName: "bubble").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Study this verse")
+                    Button(action: onStudy) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Study this verse")
                     ShareLink(item: "“\(card.text)” — \(card.label) (\(BibleStore.offline[translation] ?? ""))") {
                         Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44)
                     }

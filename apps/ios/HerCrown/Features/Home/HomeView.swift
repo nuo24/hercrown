@@ -156,7 +156,7 @@ struct HomeView: View {
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 4) {
                 verseAction(app.isSaved(verse.ref) ? "heart.fill" : "heart", app.isSaved(verse.ref) ? "Remove from saved" : "Save verse", active: app.isSaved(verse.ref)) { app.toggleSave(verse.ref) }
-                verseAction("bubble", "Study this verse") { studyRef = VerseRef(verse.ref) }
+                verseAction("message", "Study this verse") { studyRef = VerseRef(verse.ref) }
                 ShareLink(item: "“\(verse.text ?? "")” — \(verse.label) (\(BibleStore.offline[verse.translation] ?? ""))") {
                     Image(systemName: "square.and.arrow.up").font(.system(size: 18)).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: .infinity, minHeight: 44)
                 }

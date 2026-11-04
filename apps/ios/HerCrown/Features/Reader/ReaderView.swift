@@ -166,7 +166,7 @@ struct VersePage: View {
                     .accessibilityLabel("Insights for \(chapter.book.displayName) \(chapter.number):\(verse.number)")
                 Button { app.toggleSave(ref) } label: { Image(systemName: app.isSaved(ref) ? "heart.fill" : "heart").font(.system(size: 21)).frame(width: 44, height: 44) }
                     .accessibilityLabel(app.isSaved(ref) ? "Unsave" : "Save")
-                Button(action: onReflect) { Image(systemName: "bubble.left").font(.system(size: 20)).frame(width: 44, height: 44) }
+                Button(action: onReflect) { Image(systemName: "message").font(.system(size: 20)).frame(width: 44, height: 44) }
                     .accessibilityLabel("Reflect")
                 ShareLink(item: "“\(verse.text)” — \(chapter.book.displayName) \(chapter.number):\(verse.number) (\(BibleStore.offline[chapter.translation] ?? "KJV"))") {
                     Image(systemName: "square.and.arrow.up").font(.system(size: 20)).frame(width: 44, height: 44)
