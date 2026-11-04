@@ -10,3 +10,5 @@ Ideas and deferred work, parked so they don't derail the current phase.
 - **Support message delivery** (real destination, rate limits). Replace the mock WhatsApp numbers.
 - **Push reminders** (APNs) once reminder opt-in ships in iOS.
 - **Bun** instead of npm, to match the playbook commands exactly.
+- **Email sign-in (one-time codes).** Built in the API but off for launch: sending needs a domain on Cloudflare. Buy the domain (or use the friend's website domain), set `EMAIL_FROM`, then show it in Settings. Guests save their account with Sign in with Apple until then.
+- **Design polish with Appllama** (MCP server https://appllama.io, skills https://github.com/Appllama/appllama-skills). Seen in a social post claiming better-looking AI-built apps. Not evaluated. It's a new vendor, so ask the owner before connecting it. Use it to polish screens, not to replace the friend's mockup (`reference-web/`, `specs/`), which stays the design authority. Best time to try: after the main screens work, before App Store screenshots.
