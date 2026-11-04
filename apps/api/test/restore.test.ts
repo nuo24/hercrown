@@ -5,7 +5,7 @@ import { deleteUserData } from "../src/users";
 import { api, deliverWebhook, signInGuest } from "./helpers";
 
 const DAY = 86_400_000;
-const BUNDLE = "com.biblescroll.app";
+const BUNDLE = "com.hercrown.app";
 const PROD = "https://api.storekit.apple.com";
 const SANDBOX = "https://api.storekit-sandbox.apple.com";
 
@@ -236,13 +236,23 @@ describe("failures", () => {
   });
 
   it("returns a retryable 503 when Apple is unreachable, busy or rejects our key", async () => {
-    for (const fail of [() => { throw new TypeError("network"); }, () => new Response("busy", { status: 503 }), () => new Response("", { status: 401 })]) {
+    for (const fail of [() => { throw new TypeError("network"); }, () => new Response("busy", { status: 503 })]) {
       vi.restoreAllMocks();
       fakeAppStore({ prod: fail as () => Response });
       const { status, body } = await restore();
       expect(status).toBe(503);
       expect(body.error).toBe("restore_unavailable");
     }
+    vi.restoreAllMocks();
+    fakeAppStore({ prod: () => new Response("", { status: 401 }), sandbox: () => new Response("", { status: 401 }) });
+    expect((await restore()).body).toMatchObject({ error: "restore_unavailable", message: "Purchase restore is misconfigured on this server" });
+  });
+
+  it("uses the sandbox while the app isn't live yet (production answers 401)", async () => {
+    fakeAppStore({ prod: () => new Response("", { status: 401 }), sandbox: () => statusResponse([{ status: 1 }], BUNDLE, "Sandbox") });
+    const { status, body } = await restore();
+    expect(status).toBe(200);
+    expect(body).toMatchObject({ restored: true, membership: { premium: true, subscription: { sandbox: true } } });
   });
 
   it("returns 503 when restore isn't configured", async () => {

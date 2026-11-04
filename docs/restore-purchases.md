@@ -73,7 +73,7 @@ Superwall's `restorePurchases()` unlocks Plus **on the device** (it calls `AppSt
 | `APP_STORE_ISSUER_ID` | secret | App Store Connect → Users and Access → Integrations → In-App Purchase: Issuer ID |
 | `APP_STORE_KEY_ID` | secret | Key ID of an **In-App Purchase** key |
 | `APP_STORE_PRIVATE_KEY` | secret | Contents of that `.p8` file (`npx wrangler secret put APP_STORE_PRIVATE_KEY --env staging < SubscriptionKey_XXXX.p8`) |
-| `APPLE_APP_BUNDLE_IDENTIFIER` | var | Real bundle id (placeholder `com.biblescroll.app`) |
+| `APPLE_APP_BUNDLE_IDENTIFIER` | var | Real bundle id (placeholder `com.hercrown.app`) |
 | `PLUS_PRODUCT_IDS` | var | `hercrown.plus.yearly,hercrown.plus.weekly,hercrown.plus.yearly.offer` (proposed ids) |
 | `APP_STORE_ALLOW_SANDBOX` | var | `true` everywhere, including production (App Review uses sandbox) |
 

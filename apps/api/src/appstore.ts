@@ -84,8 +84,12 @@ async function statusesIn(env: Env, environment: AppleEnvironment, transactionId
   }
   if (res.status === 404) return null; // TransactionIdNotFound / AccountNotFound / AppNotFound
   if (res.status === 400) throw new HttpError(400, "invalid_request", "The App Store didn't accept this transaction id");
+  if (res.status === 401 && environment === "production" && env.APP_STORE_ALLOW_SANDBOX === "true") {
+    // Production answers 401 for an app that isn't live on the App Store yet; sandbox (TestFlight, App Review) still works.
+    return null;
+  }
   if (res.status === 401) {
-    console.error("App Store Server API rejected our credentials (401)");
+    console.error(`App Store Server API rejected our credentials (401, ${environment})`);
     throw unavailable("Purchase restore is misconfigured on this server");
   }
   if (!res.ok) {

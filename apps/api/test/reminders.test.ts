@@ -104,7 +104,7 @@ describe("the reminder push", () => {
       `https://api.sandbox.push.apple.com/3/device/${token(11)}`,
     ]);
     const [push] = pushes;
-    expect(push!.headers.get("apns-topic")).toBe("com.biblescroll.app");
+    expect(push!.headers.get("apns-topic")).toBe("com.hercrown.app");
     expect(push!.headers.get("apns-push-type")).toBe("alert");
     expect(push!.headers.get("authorization")).toMatch(/^bearer ey/);
     expect(push!.body.aps.alert.title).toBe("Your free trial ends in 2 days");

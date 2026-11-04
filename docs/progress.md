@@ -100,4 +100,4 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Licenses for the 10 online translations (NLT, NLTCE, AMP, NASB, NASB95, NKJV, CSB, CEV, GNT, NIV) — [decisions/0004](decisions/0004-scripture-sources.md)
 - API.Bible caching terms (ask support@api.bible)
 - Community tab direction ([later.md](later.md))
-- Final bundle id (placeholder `com.biblescroll.app`)
+- Final bundle id (placeholder `com.hercrown.app`)
