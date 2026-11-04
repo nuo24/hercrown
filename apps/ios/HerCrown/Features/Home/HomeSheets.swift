@@ -216,3 +216,79 @@ struct DevotionalSheet: View {
             : "Devotional written by Her Crown\(drawn). Only the quoted passage is Scripture."
     }
 }
+
+/// plans.list: "Recommended for you" and "Topics & seasons", horizontally scrolling plan cards (237×340, 14 radius,
+/// 160 pt tinted cover with a 150 pt cutout).
+struct PlansListSheet: View {
+    let model: HomeModel
+    let onOpen: (ReadingPlan) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
+
+    private var plans: [ReadingPlan] { model.plans?.plans ?? [] }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppGradient()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        section("Recommended for you", "Choose a place to begin. Read at your own pace.", plans.filter { $0.topic == nil || $0.id == "strength" }, top: 18)
+                        section("Topics & seasons", "Thoughtful readings for what’s on your heart.", plans.filter { !($0.topic == nil || $0.id == "strength") }, top: 28)
+                    }
+                    .padding(.bottom, 40)
+                }
+            }
+            .navigationTitle("Reading Plans")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+        .task { await Analytics.shared.track("plans_viewed") }
+    }
+
+    @ViewBuilder private func section(_ title: String, _ subtitle: String, _ items: [ReadingPlan], top: CGFloat) -> some View {
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title).font(.serif(28, relativeTo: .title)).tracking(-0.4)
+                Text(subtitle).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+            }
+            .foregroundStyle(Theme.text(scheme))
+            .padding(EdgeInsets(top: top, leading: 20, bottom: 12, trailing: 20))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) { ForEach(items) { card($0) } }
+                    .padding(EdgeInsets(top: 8, leading: 16, bottom: 20, trailing: 16))
+            }
+        }
+    }
+
+    private func card(_ plan: ReadingPlan) -> some View {
+        let dark = scheme == .dark
+        let cover: Color = switch plan.tone {
+        case "sand": dark ? Color(hex: 0x302C27) : Color(hex: 0xF2EEE7)
+        case "lavender": dark ? Color(hex: 0x232D33) : Color(hex: 0xE8F1F3)
+        default: dark ? Color(hex: 0x242B29) : Color(hex: 0xEDF2E9)
+        }
+        let art = plan.id == "quiet" ? "sunrise" : plan.id == "peace" ? "dove" : "anchor"
+        return Button { onOpen(plan) } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                Image(art).resizable().scaledToFit().frame(width: 150, height: 150)
+                    .frame(maxWidth: .infinity, minHeight: 160).background(cover).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 9) {
+                    Text(plan.title).font(.system(size: 17, weight: .semibold)).tracking(-0.3)
+                    Text("\(plan.days) passages · about 2 min each").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                    Text(plan.description).font(.system(size: 13)).lineSpacing(6.5).fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Text(plan.progress == nil ? "Explore plan →" : "Continue reading →").font(.system(size: 12, weight: .medium))
+                }
+                .multilineTextAlignment(.leading)
+                .padding(18)
+                .frame(maxWidth: .infinity, minHeight: 180, alignment: .topLeading)
+            }
+            .foregroundStyle(Theme.text(scheme))
+            .frame(width: 237, height: 340)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .surfaceCard(radius: 14)
+        }
+        .buttonStyle(.plain)
+    }
+}

@@ -28,7 +28,7 @@ struct Preferences: Codable, Equatable {
     var widgetRef: String?
 
     static let defaults = Preferences(intention: nil, familiarity: nil, topics: [], routine: nil, remindersEnabled: false,
-                                      reminderTime: "08:00", timeZone: nil, appearance: "dark", fontSize: "default",
+                                      reminderTime: "08:00", timeZone: nil, appearance: "light", fontSize: "default",
                                       wordsOfJesusInRed: true, translation: "kjv", widgetRef: nil)
 }
 

@@ -46,7 +46,7 @@ const DEFAULT_PREFERENCES: PreferencesRow = {
   reminders_enabled: 0,
   reminder_time: "08:00",
   time_zone: null,
-  appearance: "dark",
+  appearance: "light",
   gradient: null,
   onboarding_version: null,
   onboarding_completed_at: null,

@@ -60,6 +60,7 @@ struct ReadingPlan: Decodable, Equatable, Identifiable {
     let title: String
     let description: String
     let topic: String?
+    let tone: String?
     let days: Int
     let steps: [Step]
     let progress: Progress?

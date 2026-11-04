@@ -31,7 +31,7 @@ struct RootView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Dock(selection: $tab).padding(.bottom, 2)
+            Dock(selection: $tab).padding(.bottom, 12) // 12 pt above the home indicator, as in the mockup
         }
         .onChange(of: tab) { _, new in Task { await Analytics.shared.track("tab_viewed", ["tab": .string(new.rawValue)]) } }
         .onChange(of: app.requestedTab) { _, new in if let new { tab = new; app.requestedTab = nil } }

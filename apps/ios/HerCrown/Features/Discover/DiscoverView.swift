@@ -188,7 +188,7 @@ private struct DiscoverCard: View {
     }
 
     var body: some View {
-        Card(radius: 22) {
+        Card {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 10) {
                     if let theme = card.theme {

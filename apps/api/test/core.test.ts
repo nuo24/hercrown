@@ -19,7 +19,7 @@ describe("GET /me", () => {
       profile: { displayName: null, bio: null, avatarUrl: null },
       preferences: {
         intention: null, familiarity: null, topics: [], routine: null, remindersEnabled: false,
-        reminderTime: "08:00", timeZone: null, appearance: "dark", gradient: null,
+        reminderTime: "08:00", timeZone: null, appearance: "light", gradient: null,
         fontSize: "default", wordsOfJesusInRed: true, translation: "kjv", widgetRef: null, position: null,
       },
       onboarding: { completed: false, completedAt: null, version: null },

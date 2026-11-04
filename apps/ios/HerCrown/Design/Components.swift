@@ -1,29 +1,31 @@
 import SwiftUI
 
-/// Primary (filled) and secondary (outlined) capsule buttons in the neutral palette, never tinted green.
+/// Buttons from the mockup's cascade. Primary: ink fill, 48 tall, 14 pt. Secondary: surface fill with a 1 pt ink ring,
+/// 40 tall, 13 pt. Both fully rounded and never tinted.
 struct CapsuleButtonStyle: ButtonStyle {
     enum Kind { case primary, secondary }
     var kind: Kind = .primary
     @Environment(\.colorScheme) private var scheme
 
     func makeBody(configuration: Configuration) -> some View {
-        let dark = scheme == .dark
-        let fill: Color = kind == .primary ? (dark ? .white : Color(hex: 0x111111)) : (dark ? Color.white.opacity(0.08) : .white)
-        let fg: Color = kind == .primary ? (dark ? Color(hex: 0x111111) : .white) : Theme.text(scheme)
+        let primary = kind == .primary
+        let fill: Color = primary ? Theme.text(scheme) : Theme.surface(scheme)
+        let fg: Color = primary ? (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme)
         configuration.label
-            .font(.system(size: 15, weight: .semibold))
+            .font(.system(size: primary ? 14 : 13))
             .foregroundStyle(fg)
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .frame(maxWidth: .infinity, minHeight: primary ? 48 : 40)
+            .padding(.horizontal, primary ? 20 : 6)
             .background(Capsule().fill(fill))
-            .overlay(Capsule().strokeBorder(kind == .secondary ? Theme.border(scheme) : .clear, lineWidth: 1))
-            .shadow(color: .black.opacity(kind == .primary ? 0.14 : 0.05), radius: kind == .primary ? 10 : 6, y: 4)
+            .overlay(Capsule().strokeBorder(primary ? .clear : Theme.text(scheme), lineWidth: 1))
+            .shadow(color: .black.opacity(primary ? 0.07 : 0.03), radius: 1, y: 1)
             .opacity(configuration.isPressed ? 0.82 : 1)
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
-/// Round outlined icon button used in headers and the reader toolbar.
+/// .iconbtn: 44 pt surface circle with a hairline ring and a soft lift.
 struct IconButton: View {
     let systemName: String
     let label: String
@@ -34,29 +36,78 @@ struct IconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 16, weight: .regular))
+                .font(.system(size: 17, weight: .regular))
                 .foregroundStyle(Theme.text(scheme))
-                .frame(width: 42, height: 42)
-                .background(Circle().fill(filled ? Theme.supporting(scheme) : Theme.surface(scheme)))
-                .overlay(Circle().strokeBorder(Theme.border(scheme), lineWidth: 0.8))
+                .frame(width: 44, height: 44)
+                .iconSurface(Circle())
         }
         .accessibilityLabel(label)
     }
 }
 
-/// A raised neutral card (16pt continuous radius, layered soft shadow).
+extension View {
+    /// The icon-button surface (.iconbtn): fill, inset hairline, small two-layer shadow.
+    func iconSurface<S: InsettableShape>(_ shape: S) -> some View { modifier(IconSurface(shape: shape)) }
+}
+
+private struct IconSurface<S: InsettableShape>: ViewModifier {
+    let shape: S
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View {
+        let dark = scheme == .dark
+        content
+            .background(shape.fill(Theme.surface(scheme)))
+            .overlay(shape.strokeBorder(dark ? Color.white.opacity(0.125) : Color.black.opacity(0.06), lineWidth: 1))
+            .shadow(color: .black.opacity(dark ? 0.267 : 0.03), radius: 2, y: 2)
+            .shadow(color: .black.opacity(dark ? 0 : 0.04), radius: 1, y: 1)
+    }
+}
+
+/// .surface card: 16 pt continuous radius, hairline ring, layered soft shadow (light and dark values from the mockup).
 struct Card<Content: View>: View {
     var radius: CGFloat = Theme.Radius.card
+    var padding: EdgeInsets = EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
     @ViewBuilder var content: Content
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         content
-            .padding(Theme.Spacing.xl)
+            .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: radius, style: .continuous).fill(scheme == .dark ? Color.white.opacity(0.05) : .white))
-            .overlay(RoundedRectangle(cornerRadius: radius, style: .continuous).strokeBorder(Theme.border(scheme).opacity(scheme == .dark ? 1 : 0.6), lineWidth: 0.6))
-            .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.06), radius: 14, y: 6)
+            .surfaceCard(radius: radius)
+    }
+}
+
+extension View {
+    /// The mockup's .surface: fill, 1 pt ring, two soft shadows.
+    func surfaceCard(radius: CGFloat = Theme.Radius.card, fill: AnyShapeStyle? = nil) -> some View { modifier(SurfaceCard(radius: radius, fill: fill)) }
+}
+
+private struct SurfaceCard: ViewModifier {
+    let radius: CGFloat
+    let fill: AnyShapeStyle?
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View {
+        let dark = scheme == .dark
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        content
+            .background(shape.fill(fill ?? AnyShapeStyle(Theme.surface(scheme))))
+            .overlay(shape.strokeBorder(dark ? Color.white.opacity(0.07) : Color(red: 21 / 255, green: 21 / 255, blue: 27 / 255, opacity: 0.047), lineWidth: 1))
+            .shadow(color: .black.opacity(dark ? 0.267 : 0.03), radius: 2, y: 2)
+            .shadow(color: .black.opacity(dark ? 0.4 : 0.04), radius: 6, y: 6)
+    }
+}
+
+/// .version-badge: small rounded label (translation, topic).
+struct Badge: View {
+    let text: String
+    @Environment(\.colorScheme) private var scheme
+    var body: some View {
+        Text(text).font(.system(size: 11)).tracking(0.3)
+            .foregroundStyle(Theme.muted(scheme))
+            .padding(.horizontal, 8).padding(.vertical, 4)
+            .background(RoundedRectangle(cornerRadius: Theme.Radius.badge).fill(Theme.supporting(scheme)))
+            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.badge).strokeBorder(Theme.border(scheme), lineWidth: 1))
     }
 }
 

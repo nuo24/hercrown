@@ -127,7 +127,7 @@ struct SavedSheet: View {
 
     private func row(_ label: String, _ verse: String?, detail: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Card(radius: 18) {
+            Card {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(label).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
@@ -160,7 +160,7 @@ private struct SavedVerseCard: View {
     var body: some View {
         let text = BibleStore.shared.text(translation, ref) ?? ""
         let label = BibleStore.shared.label(ref)
-        Card(radius: 22) {
+        Card {
             VStack(alignment: .leading, spacing: 14) {
                 Text(label).font(.serif(24, relativeTo: .title2))
                 Text("“\(text)”").font(.serif(24, relativeTo: .title2)).fixedSize(horizontal: false, vertical: true)
