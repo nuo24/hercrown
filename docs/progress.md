@@ -30,8 +30,9 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 ## Phase 4: Auth — ⚠️ built locally
 - [x] Anonymous sign-in, bearer tokens, account deletion, guest → account merge (tested)
 - [x] Sign in with Apple (code ready; switched off until keys exist)
-- [ ] **[HUMAN]** Apple Services ID + key → `wrangler secret put APPLE_CLIENT_ID / APPLE_CLIENT_SECRET`
-- [ ] Verify Apple sign-in end to end on staging
+- [x] Sign in with Apple on staging: key CBVUDK44G6, client id `com.hercrown.app`; server rejects bad tokens (checked 2026-11-03)
+- [ ] **Renew `APPLE_CLIENT_SECRET` before 2027-05-02** (Apple caps it at 6 months; regenerate from AuthKey_CBVUDK44G6.p8)
+- [ ] Verify Apple sign-in end to end from the iOS app
 
 ## Phase 5: AI study tools — ✅ on staging ([docs/study-tools.md](study-tools.md))
 - [x] Sources loaded: STEPBible Greek/Hebrew + lexicons, OpenBible cross-references, JFB / Matthew Henry / Adam Clarke (verified build, checksums)
@@ -58,7 +59,9 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Subscription follows a guest who links an account
 - [x] **Restore Purchases** (`POST /me/restore`): verified with Apple's App Store Server API, ownership transfer + log, retry-safe — [docs/restore-purchases.md](restore-purchases.md)
 - [x] Webhooks accept Superwall V2 (current) and V1; refunds handled in both
-- [ ] **[HUMAN]** In-App Purchase key (App Store Connect → Integrations) → `APP_STORE_ISSUER_ID`, `APP_STORE_KEY_ID`, `APP_STORE_PRIVATE_KEY`
+- [x] In-App Purchase key BH6NN72SQZ on staging; Apple sandbox accepts it; production answers 401 until the app is live (server falls back to sandbox)
+- [x] Push key CBVUDK44G6 on staging; APNs sandbox + production accept it (checked 2026-11-03)
+- [x] App Store Connect: app 6830437910, group Plus, products `hercrown.plus.yearly` / `.weekly` / `.yearly.offer`
 - [ ] Sandbox test: purchase → reinstall → Restore → Plus returns (needs the key + products)
 - [ ] **[HUMAN]** App Store Connect products (see restore doc): yearly $29.99 + 7-day trial, weekly $2.99 + 7-day trial, yearly.offer with $19.99 first-year intro price; Family Sharing on; Superwall project + **V2** webhook → `wrangler secret put SUPERWALL_WEBHOOK_SECRET`
 - [ ] iOS: `Superwall.shared.identify(userId:)` with our user id right after guest sign-in; paywall placements; decline offer
