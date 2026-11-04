@@ -36,7 +36,7 @@ struct RootView: View {
                 switch tab {
                 case .bible: ReaderView(app: app)
                 case .community: CommunityView(onExplore: { tab = .discover })
-                case .discover: UpcomingTab(title: "Discover", artwork: "lantern", note: "Discover arrives in the next build.")
+                case .discover: DiscoverView()
                 case .home: HomeView()
                 }
             }
