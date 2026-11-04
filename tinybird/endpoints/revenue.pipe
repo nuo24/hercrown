@@ -2,7 +2,7 @@ DESCRIPTION >
     Daily billing from verified store webhooks: trials, new and converted subscriptions, refunds, and USD
     price / proceeds (refunds are negative, so the sums are net). Duplicate deliveries are merged (FINAL).
 
-NODE revenue
+NODE daily_revenue
 SQL >
     %
     SELECT

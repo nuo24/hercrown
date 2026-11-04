@@ -21,7 +21,7 @@ SQL >
     WHERE event = 'app_opened' AND install_id IN (SELECT install_id FROM first_open)
       AND environment = {{ String(environment, 'production') }}
 
-NODE retention
+NODE retention_by_cohort
 SQL >
     SELECT
         f.cohort,

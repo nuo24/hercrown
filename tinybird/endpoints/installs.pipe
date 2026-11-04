@@ -3,7 +3,7 @@ DESCRIPTION >
     An install is one X-Install-Id (a reinstall is a new install). The server's onboarding_completed event
     carries the install id of the request that completed it.
 
-NODE installs
+NODE first_opens
 SQL >
     %
     SELECT install_id, min(timestamp) AS first_opened
@@ -27,6 +27,6 @@ SQL >
               AND environment = {{ String(environment, 'production') }}
         )) AS onboarded,
         round(onboarded / nullIf(installs, 0), 4) AS onboarding_rate  -- ÷ installs
-    FROM installs
+    FROM first_opens
 
 TYPE endpoint

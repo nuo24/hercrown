@@ -75,7 +75,7 @@ Other endpoints: `installs.pipe` (top of funnel), `revenue.pipe` (daily trials, 
 ## Setup (human steps)
 
 1. Create a Tinybird workspace. Note its **region API host**, for example `https://api.us-east.aws.tinybird.co`, and set `TINYBIRD_HOST` in `apps/api/wrangler.jsonc` for staging and production. The current value, `https://api.tinybird.co`, is one region's host.
-2. Install the Tinybird CLI. Then, from `tinybird/`, run `tb login` and `tb --cloud deploy --check`, then `tb --cloud deploy`. **These datafiles haven't been through Tinybird's checker yet.**
+2. Deploy from `tinybird/`: `tb --cloud --host https://api.us-east.tinybird.co --token <admin token> deploy` (done: deployment #1, validated by Tinybird). Tokens `hercrown_append` / `hercrown_read` are declared in `events.datasource`. The CLI writes `tinybird/.tinyb` with the token: it is gitignored.
 3. Create a token with **DATASOURCES:APPEND on `events` only** and run `npx wrangler secret put TINYBIRD_TOKEN --env staging`.
 4. Run `npx wrangler queues create bible-scroll-events-staging` (Workers Paid), then deploy staging.
 5. For dashboards, use Tinybird endpoint charts or any tool that can read the endpoint URLs with a **read** token. Never use the append token for this.

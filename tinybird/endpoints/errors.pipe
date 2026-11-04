@@ -1,7 +1,7 @@
 DESCRIPTION >
     Errors by hour, source (api or ios), app version and route/screen, for alerts and the health dashboard.
 
-NODE errors
+NODE hourly_errors
 SQL >
     %
     SELECT

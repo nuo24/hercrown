@@ -42,7 +42,7 @@ SQL >
       {% if not Boolean(include_sandbox, False) %} AND sandbox = 0 {% end %}
     GROUP BY person_id
 
-NODE funnel
+NODE funnel_rates
 SQL >
     %
     SELECT

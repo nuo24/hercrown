@@ -15,3 +15,6 @@ xcuserdata
 # Study data: downloads and full seeds are rebuilt by scripts/build-study.mjs
 .cache/
 apps/api/seeds/study/
+
+# Tinybird CLI settings (contain the workspace token)
+.tinyb

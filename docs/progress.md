@@ -72,8 +72,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] `POST /events` → Queue → Tinybird Events API; server events for onboarding, verified billing, restore outcomes, features, errors
 - [x] Dedup ids (one trial per subscription, V1 = V2), sandbox flag, person id kept across guest → account link, no profile or reading data
 - [x] Tinybird data source + endpoints: funnel (with denominators), installs, revenue, restores, errors
-- [ ] **[HUMAN]** Tinybird workspace → `tb --cloud deploy --check` → append-only token → `wrangler secret put TINYBIRD_TOKEN`; region host in `TINYBIRD_HOST`; `wrangler queues create bible-scroll-events-staging`
-- [ ] Staging run-through: every funnel event and a thrown test error appear in Tinybird
+- [x] Tinybird workspace `hercrown` (us-east): data source + 7 endpoints deployed (deployment #1, 2026-11-04), tokens `hercrown_append` (server) / `hercrown_read` (alerts) on staging; staging events verified arriving; all endpoints return
+- [ ] Staging run-through from the iOS app: every funnel event and a thrown test error appear in Tinybird
 - [ ] Cron alert on error / webhook-failure spikes
 - [ ] iOS: headers, on-disk event queue, Superwall delegate → paywall events
 
