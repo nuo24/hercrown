@@ -27,13 +27,17 @@ struct ReaderView: View {
                 .presentationDetents([.large])
         }
         .sheet(item: $studyRef) { ref in
-            StudyComingSoon(ref: ref, translation: model.translation).presentationDetents([.medium])
+            InsightsSheet(ref: ref, translation: model.translation) { r in model.open(r.book, r.chapter, verse: r.verse) }
+                .presentationDetents([.large])
         }
         .sheet(item: $reflectRef) { ref in
             ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
         .onChange(of: model.current) { _, verse in model.didView(verse) }
+        #if DEBUG
+        .task { if UserDefaults.standard.string(forKey: "hcOpenStudy") != nil { try? await Task.sleep(for: .seconds(1)); studyRef = model.currentRef } }
+        #endif
     }
 
     // MARK: Toolbar

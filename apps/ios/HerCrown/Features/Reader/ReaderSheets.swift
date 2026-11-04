@@ -127,18 +127,3 @@ struct SavedSheet: View {
         }
     }
 }
-
-/// Until the study sheets are built (next build), say so honestly instead of showing sample content.
-struct StudyComingSoon: View {
-    let ref: VerseRef
-    let translation: String
-    var body: some View {
-        VStack(spacing: 16) {
-            Image("open-book").resizable().scaledToFit().frame(height: 110).accessibilityHidden(true)
-            Text(BibleStore.shared.label(ref)).font(.serif(24))
-            Text("Explain easier, Deeper study, Original language and Related verses are ready on the server and arrive in the app’s next build.")
-                .multilineTextAlignment(.center).foregroundStyle(.secondary)
-        }
-        .padding(28)
-    }
-}

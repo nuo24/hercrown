@@ -15,6 +15,8 @@ final class AppModel {
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
     var onboardingCompleted = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
     var offline = false
+    /// A paywall request (placement name). Superwall presents it once integrated; until then RootView explains.
+    var paywallPlacement: String?
 
     let api = APIClient.shared
     let bible = BibleStore.shared
@@ -60,6 +62,13 @@ final class AppModel {
             saved = Set(list.saved.map(\.ref))
             UserDefaults.standard.set(Array(saved), forKey: "hc.saved")
         }
+    }
+
+    // MARK: Membership
+
+    func presentPaywall(placement: String) {
+        paywallPlacement = placement
+        Task { await Analytics.shared.track("paywall_requested", ["placement": .string(placement)]) }
     }
 
     // MARK: Onboarding
