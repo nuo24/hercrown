@@ -45,24 +45,26 @@ struct DiscoverView: View {
         ZStack {
             AppGradient()
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    HStack {
-                        Text("Discover").font(.system(size: 32, weight: .semibold)).tracking(-0.8).foregroundStyle(Theme.text(scheme))
+                VStack(alignment: .leading, spacing: 0) {
+                    // .app-header: 20/20/16, 28 pt title, 44 pt icon buttons
+                    HStack(spacing: 4) {
+                        Text("Discover").font(.system(size: 28)).tracking(-0.8).foregroundStyle(Theme.text(scheme))
                         Spacer()
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
                         IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
                     }
-                    .padding(.top, 6)
-                    hero
-                    chips
-                    cards
+                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
+                    hero.padding(.horizontal, 24)
+                    chips.padding(.top, 22).padding(.bottom, 20)
+                    VStack(spacing: 16) { cards }.padding(.horizontal, 20)
                 }
-                .padding(.horizontal, Theme.Spacing.gutter)
-                .padding(.bottom, 120)
+                .padding(.bottom, 124)
             }
             .refreshable { await load() }
+            .clipped()
         }
-        .task(id: filter) { await load() }
+        // Reload once she's signed in (a brand-new guest signs in while this tab may already be open).
+        .task(id: "\(filter)|\(app.me?.user.id ?? "")") { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .sheet(isPresented: $showingSettings) { SettingsView() }
@@ -84,25 +86,31 @@ struct DiscoverView: View {
 
     // MARK: Hero
 
+    /// .discovery-illustrated-intro: 24 radius, 26/22 padding, sage-to-sky glass, 32 pt serif, 145×163 art.
     private var hero: some View {
-        HStack(alignment: .center, spacing: 12) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text(heroTitle).font(.serif(30, relativeTo: .title)).fixedSize(horizontal: false, vertical: true)
-                Text(heroSubtitle).font(.system(size: 15)).opacity(0.8)
+        let dark = scheme == .dark
+        return HStack(alignment: .center, spacing: 2) {
+            VStack(alignment: .leading, spacing: 14) {
+                Text(heroTitle).font(.serif(32, relativeTo: .title)).tracking(-0.6).fixedSize(horizontal: false, vertical: true)
+                Text(heroSubtitle).font(.system(size: 13)).lineSpacing(5.3).foregroundStyle(dark ? Color(hex: 0xC4D3C9) : Color(hex: 0x51605A))
             }
+            .frame(width: 180, alignment: .leading)
+            .foregroundStyle(Theme.text(scheme))
             Spacer(minLength: 0)
-            Image(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 112, height: 132).accessibilityHidden(true)
+            Image(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 145, height: 163).accessibilityHidden(true)
         }
-        .foregroundStyle(scheme == .dark ? .white : Color(hex: 0x111111))
-        .padding(24)
-        .frame(maxWidth: .infinity, minHeight: 196)
+        .padding(EdgeInsets(top: 22, leading: 22, bottom: 20, trailing: 4))
+        .frame(maxWidth: .infinity, minHeight: 206)
         .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(LinearGradient(colors: scheme == .dark ? [Color(hex: 0x33443B), Color(hex: 0x2B3747)] : [Color(hex: 0xE4EDDF), Color(hex: 0xE0EDF5)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+            RoundedRectangle(cornerRadius: 24, style: .continuous).fill(LinearGradient(
+                stops: dark
+                    ? [.init(color: Color(red: 52 / 255, green: 72 / 255, blue: 61 / 255, opacity: 0.72), location: 0), .init(color: Color(red: 38 / 255, green: 51 / 255, blue: 61 / 255, opacity: 0.69), location: 0.65), .init(color: Color(red: 51 / 255, green: 66 / 255, blue: 86 / 255, opacity: 0.74), location: 1)]
+                    : [.init(color: Color(red: 230 / 255, green: 237 / 255, blue: 223 / 255, opacity: 0.7), location: 0), .init(color: Color.white.opacity(0.52), location: 0.58), .init(color: Color(red: 223 / 255, green: 234 / 255, blue: 244 / 255, opacity: 0.65), location: 1)],
+                startPoint: .topLeading, endPoint: .bottomTrailing))
         )
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Theme.border(scheme), lineWidth: 0.8))
-        .shadow(color: .black.opacity(scheme == .dark ? 0.3 : 0.06), radius: 14, y: 6)
+        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.white.opacity(dark ? 0.15 : 0.78), lineWidth: 1))
+        .shadow(color: dark ? .black.opacity(0.533) : Color(red: 37 / 255, green: 61 / 255, blue: 76 / 255, opacity: 0.22), radius: 8, y: 14)
+        .shadow(color: dark ? .black.opacity(0.333) : Color(red: 33 / 255, green: 61 / 255, blue: 66 / 255, opacity: 0.13), radius: 2, y: 3)
         .animation(.easeOut(duration: 0.2), value: filter)
     }
 
@@ -124,27 +132,29 @@ struct DiscoverView: View {
 
     // MARK: Filters
 
+    /// .filterbar: 44 pt chips, 13 pt, 14 pt side padding, 8 apart; selected is ink.
     private var chips: some View {
-        ScrollViewReader { proxy in
+        let dark = scheme == .dark
+        return ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     ForEach(filters) { f in
                         let selected = f.id == filter
                         Button { filter = f.id } label: {
-                            Text(f.id == "plan" ? "Plan" : f.title).font(.system(size: 16))
-                                .padding(.horizontal, 18).frame(height: 44)
-                                .foregroundStyle(selected ? (scheme == .dark ? Color(hex: 0x111111) : .white) : Theme.text(scheme))
-                                .background(Capsule().fill(selected ? (scheme == .dark ? .white : Color(hex: 0x111111)) : Theme.surface(scheme)))
-                                .overlay(Capsule().strokeBorder(Theme.border(scheme), lineWidth: selected ? 0 : 0.8))
+                            Text(f.id == "plan" ? "Plan" : f.title).font(.system(size: 13))
+                                .padding(.horizontal, 14).frame(height: 44)
+                                .foregroundStyle(selected ? (dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme))
+                                .background(Capsule().fill(selected ? Theme.text(scheme) : (dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))))
+                                .overlay(Capsule().strokeBorder(selected ? .clear : Theme.border(scheme), lineWidth: 1))
+                                .shadow(color: .black.opacity(selected ? 0.08 : 0.03), radius: selected ? 2 : 1, y: selected ? 2 : 1)
                         }
                         .buttonStyle(.plain)
                         .id(f.id)
                         .accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
-                .padding(.horizontal, Theme.Spacing.gutter)
+                .padding(.horizontal, 20)
             }
-            .padding(.horizontal, -Theme.Spacing.gutter)
             .onChange(of: filter) { _, f in withAnimation { proxy.scrollTo(f, anchor: .center) } }
             .onAppear { proxy.scrollTo(filter, anchor: .center) }
         }
@@ -187,46 +197,59 @@ private struct DiscoverCard: View {
         ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? translation.uppercased()
     }
 
+    /// .verse-card: meta (11 pt tag · reference), 29 pt serif verse, translation, a reflection block under a hairline,
+    /// Read & reflect, and 44 pt actions.
     var body: some View {
         Card {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 10) {
                     if let theme = card.theme {
-                        Text(theme).font(.system(size: 13)).padding(.horizontal, 6).padding(.vertical, 2)
-                            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Theme.border(scheme)))
-                        Text("·").foregroundStyle(Theme.muted(scheme))
+                        Text(theme).font(.system(size: 11)).tracking(0.3).padding(.horizontal, 2)
+                            .overlay(Rectangle().strokeBorder(Theme.border(scheme), lineWidth: 1))
+                        Text("·")
                     }
-                    Text(card.label).font(.system(size: 14, weight: .semibold))
+                    Text(card.label).font(.system(size: 11, weight: .medium))
                 }
+                .font(.system(size: 11))
                 .foregroundStyle(Theme.muted(scheme))
-                Text("“\(card.text)”").font(.serif(27, relativeTo: .title2)).fixedSize(horizontal: false, vertical: true)
-                Text(translationName).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+                Text("“\(card.text)”").font(.serif(29, relativeTo: .title2)).tracking(-0.4).lineSpacing(2.9)
+                    .fixedSize(horizontal: false, vertical: true).padding(.top, 26)
+                Text(translationName).font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 16)
                 if let reflection = card.reflection {
-                    Divider().padding(.vertical, 4)
-                    Text("A moment of reflection").font(.system(size: 12, weight: .medium)).tracking(1).foregroundStyle(Theme.muted(scheme))
-                    Text(reflection).font(.system(size: 17, weight: .medium))
-                    Text("Reflection prompt · not Scripture").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("A moment of reflection").font(.system(size: 10)).tracking(0.8).foregroundStyle(Theme.muted(scheme))
+                        Text(reflection).font(.system(size: 15)).lineSpacing(4.6).fixedSize(horizontal: false, vertical: true).padding(.top, 10)
+                        Text("Reflection prompt · not Scripture").font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 14)
+                    }
+                    .padding(.top, 20)
+                    .overlay(alignment: .top) { Rectangle().fill(Theme.border(scheme)).frame(height: 1) }
+                    .padding(.top, 22)
                 }
                 Button {
                     if let ref = VerseRef(card.ref) { app.openInReader(ref) }
                     Task { await Analytics.shared.track("discover_card_read", ["ref": .string(card.ref)]) }
                 } label: {
-                    HStack(spacing: 8) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)) }
-                        .font(.system(size: 16, weight: .medium)).padding(.horizontal, 22).frame(height: 48)
-                        .foregroundStyle(scheme == .dark ? Color(hex: 0x111111) : .white)
-                        .background(Capsule().fill(scheme == .dark ? .white : Color(hex: 0x111111)))
+                    HStack(spacing: 8) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)) }
+                        .font(.system(size: 14)).padding(.horizontal, 20).frame(height: 48)
+                        .foregroundStyle(scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))
+                        .background(Capsule().fill(Theme.text(scheme)))
+                        .shadow(color: .black.opacity(0.07), radius: 1, y: 1)
                 }
                 .buttonStyle(.plain)
-                .padding(.top, 4)
-                HStack(spacing: 34) {
-                    Button { app.toggleSave(card.ref) } label: { Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart") }
-                        .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
-                    Button(action: onStudy) { Image(systemName: "bubble") }.accessibilityLabel("Study this verse")
-                    ShareLink(item: "“\(card.text)” — \(card.label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up") }
-                        .accessibilityLabel("Share verse")
+                .padding(.top, 20)
+                HStack(spacing: 13) {
+                    Button { app.toggleSave(card.ref) } label: {
+                        Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart").foregroundStyle(app.isSaved(card.ref) ? Theme.text(scheme) : Theme.muted(scheme)).frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
+                    Button(action: onStudy) { Image(systemName: "bubble").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Study this verse")
+                    ShareLink(item: "“\(card.text)” — \(card.label) (\(BibleStore.offline[translation] ?? ""))") {
+                        Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("Share verse")
                 }
-                .font(.system(size: 19))
-                .padding(.leading, 6)
+                .font(.system(size: 17))
+                .padding(.top, 8)
             }
             .foregroundStyle(Theme.text(scheme))
         }
