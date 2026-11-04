@@ -52,49 +52,87 @@ struct OnboardingView: View {
     private static let kicker = Color(hex: 0x777777)
     private static let line = Color(hex: 0xE4E4E7)
 
-    // MARK: 0 · Welcome (.screen.welcome: 86/24/58 padding; 48 pt serif; 52 + 44 pt buttons)
+    // MARK: 0 · Welcome
 
     private var welcome: some View {
-        VStack(spacing: 0) {
-            VStack(spacing: 0) {
-                Text("Less scrolling.").font(.serif(48, relativeTo: .largeTitle)).tracking(-1.2)
-                Text("More Scripture.").font(.serif(48, italic: true, relativeTo: .largeTitle)).tracking(-1.2).foregroundStyle(Color(hex: 0x263B32))
-            }
-            .foregroundStyle(Self.ink)
-            Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
-                .font(.system(size: 15)).lineSpacing(5.4).foregroundStyle(Color(hex: 0x65686A))
-                .multilineTextAlignment(.center).frame(width: 265).padding(.top, 20)
-            Spacer(minLength: 0)
-            VStack(spacing: 0) {
-                Button { step = 1 } label: {
-                    HStack(spacing: 8) { Text("Get started"); Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
-                        .font(.system(size: 14, weight: .medium)).foregroundStyle(.white)
-                        .frame(maxWidth: .infinity, minHeight: 52)
-                        .background(Capsule().fill(Self.ink))
-                        .shadow(color: .black.opacity(0.267), radius: 4, y: 3)
+        GeometryReader { geometry in
+            let shortScreen = geometry.size.height <= 700
+            let narrowScreen = geometry.size.width <= 359
+            let titleSize: CGFloat = geometry.size.height <= 650 ? 37 : narrowScreen ? 42 : 48
+
+            ScrollView {
+                VStack(spacing: 0) {
+                    VStack(spacing: -5) {
+                        Text("Less scrolling.").font(.serif(titleSize, relativeTo: .largeTitle))
+                        Text("More Scripture.").font(.serif(titleSize, italic: true, relativeTo: .largeTitle))
+                            .foregroundStyle(Color(hex: 0x263B32))
+                    }
+                    .tracking(-titleSize * 0.025)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Self.ink)
+                    .frame(maxWidth: 350)
+
+                    Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
+                        .font(.system(size: geometry.size.height <= 650 ? 13 : narrowScreen ? 14 : 15))
+                        .lineSpacing(5.4)
+                        .foregroundStyle(Color(hex: 0x65686A))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 265)
+                        .padding(.top, 20)
+                    Spacer(minLength: 24)
+                    welcomeActions
                 }
-                Button { Task { await finish(guest: true) } } label: {
-                    Text("Explore as a guest").font(.system(size: 14, weight: .medium)).foregroundStyle(Color(hex: 0x333333))
-                        .frame(maxWidth: .infinity, minHeight: 44)
-                        .background(Capsule().fill(Color.white.opacity(0.78)))
-                        .overlay(Capsule().strokeBorder(Color(hex: 0xDCDDE0), lineWidth: 1))
-                }
-                .padding(.top, 10)
-                Text("Come as you are. No account needed.").font(.system(size: 11)).foregroundStyle(Self.kicker).padding(.top, 16)
+                .padding(.horizontal, 24)
+                .padding(.top, geometry.size.height * (shortScreen ? 0.30 : 0.38))
+                .padding(.bottom, 58)
+                .frame(minHeight: geometry.size.height)
             }
-            .buttonStyle(.plain)
-        }
-        .padding(EdgeInsets(top: 332, leading: 24, bottom: 57, trailing: 24)) // title at 332 pt, as in the mockup
-        .background(alignment: .top) {
-            GeometryReader { geo in
-                Image("onboarding-collage").resizable().scaledToFill()
-                    .frame(width: geo.size.width + 8, height: geo.size.height - 35).clipped()
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
+            .background(alignment: .top) {
+                Image("onboarding-collage").resizable()
+                    .frame(width: geometry.size.width * 1.04, height: geometry.size.height * 0.96)
+                    .frame(width: geometry.size.width)
+                    .accessibilityHidden(true)
             }
-            .accessibilityHidden(true)
         }
     }
 
-    // MARK: 1 · Time (.scroll-intro: 78/28/58; 260×174 art; 37 pt serif)
+    private var welcomeActions: some View {
+        VStack(spacing: 0) {
+            Button { step = 1 } label: {
+                HStack(spacing: 8) {
+                    Text("Get started")
+                    Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold))
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, minHeight: 52)
+                .background {
+                    Capsule().fill(Self.ink)
+                        .shadow(color: .black.opacity(0.16), radius: 4, y: 3)
+                }
+            }
+            Button { Task { await finish(guest: true) } } label: {
+                Text("Explore as a guest")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color(hex: 0x333333))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .background(Capsule().fill(.white.opacity(0.78)))
+                    .overlay(Capsule().strokeBorder(Color(hex: 0xDCDDE0), lineWidth: 1))
+            }
+            .padding(.top, 10)
+            Text("Come as you are. No account needed.")
+                .font(.system(size: 11))
+                .foregroundStyle(Self.kicker)
+                .frame(minHeight: 16.5)
+                .padding(.top, 16)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: 1 · Scroll intro
 
     private var time: some View {
         VStack(spacing: 0) {
