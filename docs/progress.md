@@ -49,7 +49,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Design system: tokens, Baskerville, shared gradient (exact port of gradient-theme.js), floating neutral dock, capsule buttons
 - [x] Bible reader: verse-per-page paging, persistent verse rail (drag / VoiceOver adjustable), translation + chapter pickers, red letters, psalm titles, contextual art, save/share/reflect, bookmark position, reading days + chapter completion
 - [x] Onboarding: all 8 steps per the mockup, skip/back, guest path, daily reminder (local notification after opt-in), answers saved, completion
-- [ ] Study sheets · Home · Discover · Library · Settings · Superwall paywall + push · widget
+- [x] Study sheets: Explain easier and Deeper study (streaming), Original language, Related verses, widget verse, save, report
+- [x] Home: greeting + streak, streak card with Mark today as read, verse of the day, verse search, Today's Reading (plan sheet; Plus), "For the season you're in" → Discover, today's devotional (labeled AI-assisted and reviewed), streak/progress sheet. Placeholder app icon (crown of thorns)
+- [x] Legal pages on the Worker (`/legal/privacy|terms|refunds|credits|support`): sole proprietor, contact email only, New Jersey law. Owner's legal name still to fill in; legal review before launch
+- [ ] Discover · Library · Settings · Superwall paywall + push · widget
 - Note: unit tests build; running them from the agent's terminal hangs (simulator test-runner connection) — run with ⌘U in Xcode
 
 ## Phase 8: Payments & entitlements — ⚠️ server side built locally

@@ -17,6 +17,10 @@ final class AppModel {
     var offline = false
     /// A paywall request (placement name). Superwall presents it once integrated; until then RootView explains.
     var paywallPlacement: String?
+    /// Another tab asked to show this one (e.g. Home → read a verse in The Bible).
+    var requestedTab: AppTab?
+    /// A topic Discover should open on (Home's "For the season you're in" cards).
+    var discoverTopic: String?
 
     let api = APIClient.shared
     let bible = BibleStore.shared
@@ -69,6 +73,14 @@ final class AppModel {
     func presentPaywall(placement: String) {
         paywallPlacement = placement
         Task { await Analytics.shared.track("paywall_requested", ["placement": .string(placement)]) }
+    }
+
+    // MARK: Navigation
+
+    /// Opens The Bible at this verse: the reader starts from the saved position, so set it, then switch tabs.
+    func openInReader(_ ref: VerseRef) {
+        UserDefaults.standard.set(ref.description, forKey: "hc.position")
+        requestedTab = .bible
     }
 
     // MARK: Onboarding

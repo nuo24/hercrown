@@ -37,13 +37,14 @@ struct RootView: View {
                 case .bible: ReaderView(app: app)
                 case .community: CommunityView(onExplore: { tab = .discover })
                 case .discover: UpcomingTab(title: "Discover", artwork: "lantern", note: "Discover arrives in the next build.")
-                case .home: UpcomingTab(title: "Home", artwork: "cosmos", note: "Home arrives in the next build.")
+                case .home: HomeView()
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             Dock(selection: $tab).padding(.bottom, 2)
         }
         .onChange(of: tab) { _, new in Task { await Analytics.shared.track("tab_viewed", ["tab": .string(new.rawValue)]) } }
+        .onChange(of: app.requestedTab) { _, new in if let new { tab = new; app.requestedTab = nil } }
     }
 }
 
