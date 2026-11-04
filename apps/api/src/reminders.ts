@@ -29,8 +29,8 @@ export function trialInfo(env: Env, endsAt: number | null, willRenew: boolean) {
 }
 
 const PLAN: Record<string, string> = {
-  "biblescroll.plus.yearly": "a yearly plan",
-  "biblescroll.plus.weekly": "a weekly plan",
+  "hercrown.plus.yearly": "a yearly plan",
+  "hercrown.plus.weekly": "a weekly plan",
 };
 
 /** The notification. No price: the App Store price depends on the country; the app shows it from StoreKit. */

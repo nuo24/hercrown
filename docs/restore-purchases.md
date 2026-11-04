@@ -38,7 +38,7 @@ Superwall's `restorePurchases()` unlocks Plus **on the device** (it calls `AppSt
   "transferred": false,
   "membership": {
     "premium": true,
-    "subscription": { "status": "active", "productId": "biblescroll.plus.yearly", "expiresAt": 1798934400000,
+    "subscription": { "status": "active", "productId": "hercrown.plus.yearly", "expiresAt": 1798934400000,
                       "willRenew": true, "isTrial": false, "store": "app_store", "sandbox": false }
   }
 }
@@ -74,13 +74,13 @@ Superwall's `restorePurchases()` unlocks Plus **on the device** (it calls `AppSt
 | `APP_STORE_KEY_ID` | secret | Key ID of an **In-App Purchase** key |
 | `APP_STORE_PRIVATE_KEY` | secret | Contents of that `.p8` file (`npx wrangler secret put APP_STORE_PRIVATE_KEY --env staging < SubscriptionKey_XXXX.p8`) |
 | `APPLE_APP_BUNDLE_IDENTIFIER` | var | Real bundle id (placeholder `com.biblescroll.app`) |
-| `PLUS_PRODUCT_IDS` | var | `biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer` (proposed ids) |
+| `PLUS_PRODUCT_IDS` | var | `hercrown.plus.yearly,hercrown.plus.weekly,hercrown.plus.yearly.offer` (proposed ids) |
 | `APP_STORE_ALLOW_SANDBOX` | var | `true` everywhere, including production (App Review uses sandbox) |
 
 **App Store Connect products (one subscription group, "Plus"):**
-- `biblescroll.plus.yearly` — $29.99/year, introductory offer: 7-day free trial.
-- `biblescroll.plus.weekly` — $2.99/week, introductory offer: 7-day free trial.
-- `biblescroll.plus.yearly.offer` — $29.99/year, introductory offer: pay up front $19.99 for 1 year (the decline offer, first year only). Apple allows one introductory offer per customer per group, so someone who already used a free trial isn't eligible for the $19.99 intro price — Superwall should only show the offer to eligible users.
+- `hercrown.plus.yearly` — $29.99/year, introductory offer: 7-day free trial.
+- `hercrown.plus.weekly` — $2.99/week, introductory offer: 7-day free trial.
+- `hercrown.plus.yearly.offer` — $29.99/year, introductory offer: pay up front $19.99 for 1 year (the decline offer, first year only). Apple allows one introductory offer per customer per group, so someone who already used a free trial isn't eligible for the $19.99 intro price — Superwall should only show the offer to eligible users.
 - Turn on **Family Sharing** for the group (a complaint in Scroll the Bible's reviews).
 
 ## Verified locally vs. still to verify

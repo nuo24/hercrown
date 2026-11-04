@@ -24,7 +24,7 @@ export async function grantPremium(userId: string, status = "active", periodEnd 
   const { env } = await import("cloudflare:workers");
   await env.DB.prepare(
     `INSERT OR REPLACE INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, updated_at)
-     VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', ?2, ?3, 1)`,
+     VALUES (?1, 'plus', 'app_store', 'hercrown.plus.yearly', ?2, ?3, 1)`,
   ).bind(userId, status, periodEnd).run();
 }
 

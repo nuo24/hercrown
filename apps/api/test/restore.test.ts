@@ -38,7 +38,7 @@ function statusResponse(subs: FakeSub[], bundleId = BUNDLE, environment = "Produ
         status: s.status,
         signedTransactionInfo: jws({
           transactionId: "2000000000000099", originalTransactionId: s.otx ?? OTX,
-          bundleId: s.bundleId ?? BUNDLE, productId: s.productId ?? "biblescroll.plus.yearly",
+          bundleId: s.bundleId ?? BUNDLE, productId: s.productId ?? "hercrown.plus.yearly",
           type: "Auto-Renewable Subscription", expiresDate: s.expiresDate ?? Date.now() + 300 * DAY,
           revocationDate: s.revocationDate, environment: s.environment ?? environment,
           ...(s.trial ? { offerType: 1, offerDiscountType: "FREE_TRIAL" } : {}),
@@ -114,7 +114,7 @@ describe("restoring", () => {
     expect(status).toBe(200);
     expect(body).toMatchObject({
       restored: true, transferred: false,
-      membership: { premium: true, subscription: { status: "active", productId: "biblescroll.plus.yearly", willRenew: false, sandbox: false } },
+      membership: { premium: true, subscription: { status: "active", productId: "hercrown.plus.yearly", willRenew: false, sandbox: false } },
     });
   });
 
@@ -159,9 +159,9 @@ describe("restoring", () => {
   it("picks the subscription that grants access when Apple returns several", async () => {
     fakeAppStore({ prod: () => statusResponse([
       { status: 2, otx: "2000000000000005", expiresDate: Date.now() - DAY },
-      { status: 1, otx: "2000000000000006", productId: "biblescroll.plus.weekly", expiresDate: Date.now() + 6 * DAY },
+      { status: 1, otx: "2000000000000006", productId: "hercrown.plus.weekly", expiresDate: Date.now() + 6 * DAY },
     ]) });
-    expect((await restore()).body.membership.subscription.productId).toBe("biblescroll.plus.weekly");
+    expect((await restore()).body.membership.subscription.productId).toBe("hercrown.plus.weekly");
   });
 
   it("is safe to repeat", async () => {
@@ -191,7 +191,7 @@ describe("ownership", () => {
     vi.restoreAllMocks();
     const res = await deliverWebhook({
       id: "evt_after_restore", type: "cancellation", occurred_at: Date.now() + 1000, app_user_id: original.userId,
-      event_data: { name: "cancellation", store: "APP_STORE", environment: "PRODUCTION", original_transaction_id: otx, product_id: "biblescroll.plus.yearly", period_type: "NORMAL" },
+      event_data: { name: "cancellation", store: "APP_STORE", environment: "PRODUCTION", original_transaction_id: otx, product_id: "hercrown.plus.yearly", period_type: "NORMAL" },
       subscription: { will_renew: false, is_active: true },
     });
     expect(res.body).toMatchObject({ applied: true });
@@ -203,15 +203,15 @@ describe("ownership", () => {
   it("doesn't replace a different subscription that already runs longer", async () => {
     await env.DB.prepare(
       `INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at)
-       VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', 'active', ?2, '2000000000000888', 1)`,
+       VALUES (?1, 'plus', 'app_store', 'hercrown.plus.yearly', 'active', ?2, '2000000000000888', 1)`,
     ).bind(userId, Date.now() + 200 * DAY).run();
     const other = await signInGuest();
     await env.DB.prepare(
       `INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at)
-       VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.weekly', 'active', ?2, '2000000000000999', 1)`,
+       VALUES (?1, 'plus', 'app_store', 'hercrown.plus.weekly', 'active', ?2, '2000000000000999', 1)`,
     ).bind(other.userId, Date.now() + 5 * DAY).run();
 
-    fakeAppStore({ prod: () => statusResponse([{ status: 1, otx: "2000000000000999", productId: "biblescroll.plus.weekly", expiresDate: Date.now() + 5 * DAY }]) });
+    fakeAppStore({ prod: () => statusResponse([{ status: 1, otx: "2000000000000999", productId: "hercrown.plus.weekly", expiresDate: Date.now() + 5 * DAY }]) });
     expect((await restore("2000000000000999")).body).toMatchObject({ restored: true, alreadyActive: true, transferred: false });
     expect((await entitlementRows("2000000000000999")).results).toEqual([{ user_id: other.userId, status: "active" }]); // untouched
     expect((await entitlementRows("2000000000000888")).results).toEqual([{ user_id: userId, status: "active" }]);

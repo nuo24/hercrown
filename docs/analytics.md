@@ -58,7 +58,7 @@ A purchase webhook that can't be matched to an account is still recorded (revenu
 | `trial_start_rate` | cohort who started a trial | cohort who saw the paywall | playbook ~30% |
 | `decline_rate` | cohort who declined the paywall | cohort who saw the paywall | |
 | `offer_view_rate` | cohort who saw the $19.99 offer | cohort who declined the paywall | <100%: Apple allows one intro offer per person, so ex-trial users aren't shown it |
-| `offer_take_rate` | cohort who bought `biblescroll.plus.yearly.offer` | cohort who saw the offer | |
+| `offer_take_rate` | cohort who bought `hercrown.plus.yearly.offer` | cohort who saw the offer | |
 | `trial_to_paid_rate` | trials that converted | trials that **started more than 8 days ago** (7-day trial + 1 day for Apple's renewal) | playbook ~30% |
 | `paid_rate` | cohort with any paid start (conversion or direct purchase, including the offer) | cohort (onboarded) | |
 

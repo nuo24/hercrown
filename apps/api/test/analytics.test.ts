@@ -62,7 +62,7 @@ describe("POST /events (from the app)", () => {
 
   it("refuses purchase and other server-only events, bad ids and stale events; keeps the rest", async () => {
     const res = await send([
-      { id: crypto.randomUUID(), name: "trial_started", props: { product_id: "biblescroll.plus.yearly" } },
+      { id: crypto.randomUUID(), name: "trial_started", props: { product_id: "hercrown.plus.yearly" } },
       { id: crypto.randomUUID(), name: "subscription_started" },
       { id: crypto.randomUUID(), name: "onboarding_completed" },
       { id: "not-a-uuid", name: "paywall_declined" },
@@ -149,7 +149,7 @@ describe("billing events (from verified webhooks only)", () => {
     app_user_id: appUserId,
     event_data: {
       id: storeEventId, name: type, store: "APP_STORE", environment: "PRODUCTION", transaction_id: `t-${crypto.randomUUID()}`,
-      original_transaction_id: `otx-a-${appUserId}`, product_id: "biblescroll.plus.yearly", period_type: "NORMAL",
+      original_transaction_id: `otx-a-${appUserId}`, product_id: "hercrown.plus.yearly", period_type: "NORMAL",
       expiration_at: Date.now() + 365 * DAY, price: 29.99, proceeds: 25.49, ...eventData,
     },
     subscription: { is_active: true, will_renew: true },
@@ -166,7 +166,7 @@ describe("billing events (from verified webhooks only)", () => {
     const [started] = await waitForEvent(rows, "trial_started");
     expect(started).toMatchObject({ event_id: `trial_started:otx-a-${userId}`, person_id: userId, source: "api", sandbox: 0 });
     expect(JSON.parse(started!.props)).toEqual({
-      product_id: "biblescroll.plus.yearly", period_type: "TRIAL", store: "APP_STORE", price: 0, proceeds: 0,
+      product_id: "hercrown.plus.yearly", period_type: "TRIAL", store: "APP_STORE", price: 0, proceeds: 0,
     });
 
     await deliverWebhook(v2("renewal", userId, { is_trial_conversion: true }));
@@ -185,11 +185,11 @@ describe("billing events (from verified webhooks only)", () => {
 
   it("the decline offer, refunds and sandbox purchases", async () => {
     await deliverWebhook(v2("initial_purchase", userId, {
-      product_id: "biblescroll.plus.yearly.offer", period_type: "INTRO", price: 19.99, proceeds: 16.99, environment: "SANDBOX",
+      product_id: "hercrown.plus.yearly.offer", period_type: "INTRO", price: 19.99, proceeds: 16.99, environment: "SANDBOX",
     }));
     const [started] = await waitForEvent(rows, "subscription_started");
     expect(started).toMatchObject({ sandbox: 1 });
-    expect(JSON.parse(started!.props)).toMatchObject({ product_id: "biblescroll.plus.yearly.offer", period_type: "INTRO" });
+    expect(JSON.parse(started!.props)).toMatchObject({ product_id: "hercrown.plus.yearly.offer", period_type: "INTRO" });
 
     await deliverWebhook(v2("refund", userId, { price: -19.99, proceeds: -16.99, transaction_id: "t-refund-1" }));
     const [refund] = await waitForEvent(rows, "refunded");

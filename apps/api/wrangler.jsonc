@@ -29,7 +29,7 @@
   "rules": [{ "type": "Text", "globs": ["**/*.md"], "fallthrough": true }],
   // Trial-ending reminders (src/reminders.ts).
   "triggers": { "crons": ["*/15 * * * *"] },
-  "vars": { "APP_ENV": "dev", "BETTER_AUTH_URL": "http://localhost:8787", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" },
+  "vars": { "APP_ENV": "dev", "BETTER_AUTH_URL": "http://localhost:8787", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "hercrown.plus.yearly,hercrown.plus.weekly,hercrown.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" },
 
   "env": {
     "staging": {
@@ -43,7 +43,7 @@
       "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events-staging" }], "consumers": [{ "queue": "bible-scroll-events-staging", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
       "send_email": [{ "name": "EMAIL" }],
       "triggers": { "crons": ["*/15 * * * *"] },
-      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.bible-scroll-api.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "macnatephil@gmail.com", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" }
+      "vars": { "APP_ENV": "staging", "BETTER_AUTH_URL": "https://bible-scroll-api-staging.bible-scroll-api.workers.dev", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "hercrown.plus.yearly,hercrown.plus.weekly,hercrown.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "macnatephil@gmail.com", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" }
     },
     "production": {
       "name": "bible-scroll-api",
@@ -56,7 +56,7 @@
       "queues": { "producers": [{ "binding": "EVENTS", "queue": "bible-scroll-events" }], "consumers": [{ "queue": "bible-scroll-events", "max_batch_size": 100, "max_batch_timeout": 10, "max_retries": 10 }] },
       "send_email": [{ "name": "EMAIL" }],
       "triggers": { "crons": ["*/15 * * * *"] },
-      "vars": { "APP_ENV": "production", "BETTER_AUTH_URL": "https://REPLACE_WITH_API_DOMAIN", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "biblescroll.plus.yearly,biblescroll.plus.weekly,biblescroll.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "macnatephil@gmail.com", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" }
+      "vars": { "APP_ENV": "production", "BETTER_AUTH_URL": "https://REPLACE_WITH_API_DOMAIN", "APPLE_APP_BUNDLE_IDENTIFIER": "com.biblescroll.app", "API_BIBLE_BASE_URL": "https://rest.api.bible/v1", "PLUS_PRODUCT_IDS": "hercrown.plus.yearly,hercrown.plus.weekly,hercrown.plus.yearly.offer", "APP_STORE_ALLOW_SANDBOX": "true", "TINYBIRD_HOST": "https://api.tinybird.co", "TRIAL_REMINDER_LEAD_HOURS": "48", "STUDY_MODEL": "deepseek/deepseek-v4.1-flash", "STUDY_FALLBACK_MODEL": "deepseek/deepseek-v4-flash", "STUDY_DAILY_LIMIT": "60", "STUDY_REASONING": "off", "AI_GATEWAY_URL": "", "EMAIL_FROM": "", "SUPPORT_INBOX": "macnatephil@gmail.com", "ALERT_INBOX": "", "ALERT_ERRORS_PER_HOUR": "25", "ALERT_AI_USD_PER_HOUR": "2" }
     }
   }
   // Secrets (never in this file): npx wrangler secret put BETTER_AUTH_SECRET --env staging

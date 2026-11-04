@@ -30,7 +30,7 @@ SQL >
         countIf(event = 'decline_offer_viewed') > 0 AS has_offer_view,
         countIf(event = 'decline_offer_declined') > 0 AS has_offer_declined,
         countIf(event = 'subscription_started'
-                AND JSONExtractString(props, 'product_id') = {{ String(offer_product, 'biblescroll.plus.yearly.offer') }}) > 0 AS has_offer,
+                AND JSONExtractString(props, 'product_id') = {{ String(offer_product, 'hercrown.plus.yearly.offer') }}) > 0 AS has_offer,
         countIf(event = 'trial_started') > 0 AS has_trial,
         minIf(timestamp, event = 'trial_started') AS trial_started_at,
         countIf(event = 'trial_converted') > 0 AS has_converted,

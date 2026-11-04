@@ -34,7 +34,7 @@ async function startTrial(userId: string, endsInHours: number, opts: { willRenew
     `INSERT OR REPLACE INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id,
        updated_at, will_renew, period_type, environment, last_event_at)
      VALUES (?1, 'plus', 'app_store', ?2, ?3, ?4, ?5, 1, ?6, 'TRIAL', 'PRODUCTION', 1)`,
-  ).bind(userId, opts.product ?? "biblescroll.plus.yearly", opts.status ?? "trialing", now + endsInHours * HOUR,
+  ).bind(userId, opts.product ?? "hercrown.plus.yearly", opts.status ?? "trialing", now + endsInHours * HOUR,
     `otx-${userId}`, opts.willRenew ?? 1).run();
   return now + endsInHours * HOUR;
 }
@@ -162,13 +162,13 @@ describe("the reminder push", () => {
   it("records a trial_reminder_sent event", async () => {
     const rows: EventRow[] = [];
     vi.spyOn(env.EVENTS, "send").mockImplementation(async (body) => (rows.push(body as EventRow), { metadata: {} } as QueueSendResponse));
-    const endsAt = await startTrial(user.userId, 40, { product: "biblescroll.plus.weekly" });
+    const endsAt = await startTrial(user.userId, 40, { product: "hercrown.plus.weekly" });
     await addDevice(user.token, 60);
     await sendTrialReminders(env, now);
     await vi.waitFor(() => expect(rows.some((r) => r.event === "trial_reminder_sent")).toBe(true));
     const event = rows.find((r) => r.event === "trial_reminder_sent")!;
     expect(event.event_id).toBe(`trial_reminder_sent:${user.userId}:${endsAt}`);
-    expect(JSON.parse(event.props)).toEqual({ product_id: "biblescroll.plus.weekly", devices: 1, hours_left: 40 });
+    expect(JSON.parse(event.props)).toEqual({ product_id: "hercrown.plus.weekly", devices: 1, hours_left: 40 });
   });
 
   it("does nothing without an APNs key (the in-app notice still works)", async () => {
@@ -182,7 +182,7 @@ describe("the reminder push", () => {
 describe("the message", () => {
   const monday = Date.UTC(2027, 0, 4, 15, 0);
   it("names the day in the person's time zone", () => {
-    const alert = reminderAlert(monday + 2 * DAY, "biblescroll.plus.weekly", "America/Los_Angeles", monday);
+    const alert = reminderAlert(monday + 2 * DAY, "hercrown.plus.weekly", "America/Los_Angeles", monday);
     expect(alert).toMatchObject({
       title: "Your free trial ends in 2 days",
       body: "Her Crown Plus becomes a weekly plan on Wednesday, Jan 6. To avoid being charged, cancel before then in Settings → Subscriptions.",

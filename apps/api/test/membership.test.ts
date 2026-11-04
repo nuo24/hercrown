@@ -21,7 +21,7 @@ function event(type: string, appUserId: string, data: Record<string, unknown> = 
     object: "event", type, projectId: 1, applicationId: 1, timestamp,
     data: {
       id: `${crypto.randomUUID()}:${type}`, name: type, cancelReason: null, periodType: "NORMAL", store: "APP_STORE",
-      environment: "PRODUCTION", productId: "biblescroll.plus.yearly", transactionId: "t1", originalTransactionId: `otx-${appUserId}`,
+      environment: "PRODUCTION", productId: "hercrown.plus.yearly", transactionId: "t1", originalTransactionId: `otx-${appUserId}`,
       originalAppUserId: appUserId, expirationAt: Date.now() + 365 * DAY, purchasedAt: Date.now(), ...data,
     },
   });
@@ -113,9 +113,9 @@ describe("subscription lifecycle", () => {
     const account = await signInGuest(); // stands in for the Apple account
     await moveUserData(env, userId, account.userId);
     // Later renewals still name the old guest id, but carry the same original transaction.
-    await deliver(event("renewal", userId, { originalTransactionId: "otx-link", productId: "biblescroll.plus.weekly" }));
+    await deliver(event("renewal", userId, { originalTransactionId: "otx-link", productId: "hercrown.plus.weekly" }));
     const res = await (await api("/me/entitlements", { token: account.token })).json<any>();
-    expect(res).toMatchObject({ premium: true, subscription: { productId: "biblescroll.plus.weekly" } });
+    expect(res).toMatchObject({ premium: true, subscription: { productId: "hercrown.plus.weekly" } });
   });
 });
 
@@ -125,7 +125,7 @@ describe("Superwall Webhooks V2 (current format)", () => {
     app_user_id: appUserId, is_family_share: false,
     event_data: {
       name: type, store: "APP_STORE", environment: "PRODUCTION", transaction_id: "t1", original_transaction_id: `otx2-${appUserId}`,
-      product_id: "biblescroll.plus.yearly", period_type: "NORMAL", expiration_at: Date.now() + 365 * DAY, ...eventData,
+      product_id: "hercrown.plus.yearly", period_type: "NORMAL", expiration_at: Date.now() + 365 * DAY, ...eventData,
     },
     subscription: { is_active: true, will_renew: true, ...subscription },
     subscriber: { app_user_id: appUserId, aliases: [appUserId] },
@@ -151,8 +151,8 @@ describe("Superwall Webhooks V2 (current format)", () => {
 
   it("uses the new product on a plan change", async () => {
     await deliverWebhook(v2("initial_purchase", userId));
-    await deliverWebhook(v2("product_change", userId, { new_product_id: "biblescroll.plus.weekly" }));
-    expect((await membership()).subscription.productId).toBe("biblescroll.plus.weekly");
+    await deliverWebhook(v2("product_change", userId, { new_product_id: "hercrown.plus.weekly" }));
+    expect((await membership()).subscription.productId).toBe("hercrown.plus.weekly");
   });
 });
 

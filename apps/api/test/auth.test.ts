@@ -83,7 +83,7 @@ describe("guest → account merge", () => {
                                                         ('g2', ?1, '2026-11-02', 'UTC', 2, NULL, NULL, NULL, 2)`).bind(guest),
       env.DB.prepare("INSERT INTO plan_progress VALUES (?1, 'quiet', 100, 3, NULL, 1)").bind(guest),
       env.DB.prepare("INSERT INTO plan_step_completions VALUES (?1, 'quiet', 0, 1), (?1, 'quiet', 1, 1), (?1, 'quiet', 2, 1)").bind(guest),
-      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'biblescroll.plus.yearly', 'trialing', 2000, 'otx-guest', 1)").bind(guest),
+      env.DB.prepare("INSERT INTO entitlements (user_id, entitlement, source, product_id, status, current_period_end, original_transaction_id, updated_at) VALUES (?1, 'plus', 'app_store', 'hercrown.plus.yearly', 'trialing', 2000, 'otx-guest', 1)").bind(guest),
       env.DB.prepare("INSERT INTO support_requests (id, user_id, category, message, created_at, updated_at) VALUES ('sr1', ?1, 'help', 'hi', 1, 1)").bind(guest),
 
       // Account: existing user from another device with their own name, avatar and settings.
