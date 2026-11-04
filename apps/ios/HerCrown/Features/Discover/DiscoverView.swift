@@ -26,6 +26,7 @@ struct DiscoverView: View {
     @State private var feed: DiscoverFeed?
     @State private var failed = false
     @State private var showingSaved = false
+    @State private var showingSettings = false
     @State private var studyRef: VerseRef?
 
     private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
@@ -49,6 +50,7 @@ struct DiscoverView: View {
                         Text("Discover").font(.system(size: 32, weight: .semibold)).tracking(-0.8).foregroundStyle(Theme.text(scheme))
                         Spacer()
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
+                        IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
                     }
                     .padding(.top, 6)
                     hero
@@ -63,6 +65,7 @@ struct DiscoverView: View {
         .task(id: filter) { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
+        .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
         }

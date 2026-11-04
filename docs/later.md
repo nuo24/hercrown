@@ -7,7 +7,7 @@ Ideas and deferred work, parked so they don't derail the current phase.
 - **Web app** (`apps/web`, React + Vite) and **Android**.
 - **Search in online translations.** Search covers KJV only; modern wording ("love is patient") won't match KJV ("charity suffereth long").
 - **Original-language and version comparison** in insights (unavailable in the mockup; needs real sources).
-- **Support message delivery** (real destination, rate limits). Replace the mock WhatsApp numbers.
+- **In-app support messages.** `POST /me/support` stores requests, but emailing them to the team needs `EMAIL_FROM` (a domain). Until then Settings → Contact & Support opens a pre-filled email to macnatephil@gmail.com. Switch to the in-app form once email works.
 - **Push reminders** (APNs) once reminder opt-in ships in iOS.
 - **Bun** instead of npm, to match the playbook commands exactly.
 - **Email sign-in (one-time codes).** Built in the API but off for launch: sending needs a domain on Cloudflare. Buy the domain (or use the friend's website domain), set `EMAIL_FROM`, then show it in Settings. Guests save their account with Sign in with Apple until then.

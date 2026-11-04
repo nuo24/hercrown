@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var model = HomeModel()
     @State private var showingStreak = false
     @State private var showingSaved = false
+    @State private var showingSettings = false
     @State private var studyRef: VerseRef?
     @State private var openPlan: ReadingPlan?
     @State private var openDevotional: Devotional?
@@ -48,6 +49,7 @@ struct HomeView: View {
         .task { await model.load(translation: translation) }
         .sheet(isPresented: $showingStreak) { StreakSheet(model: model).presentationDetents([.large]) }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
+        .sheet(isPresented: $showingSettings) { SettingsView() }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
         }
@@ -62,6 +64,7 @@ struct HomeView: View {
             case "devotional": openDevotional = model.devotional
             case "plan": openPlan = model.todaysPlan
             case "saved": showingSaved = true
+            case "settings": showingSettings = true
             default: break
             }
         }
@@ -94,6 +97,7 @@ struct HomeView: View {
             }
             .accessibilityLabel("Reading streak, \(model.streak.current) days")
             IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
+            IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
         }
         .padding(.top, 6)
     }

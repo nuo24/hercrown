@@ -52,7 +52,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Study sheets: Explain easier and Deeper study (streaming), Original language, Related verses, widget verse, save, report
 - [x] Home: greeting + streak, streak card with Mark today as read, verse of the day, verse search, Today's Reading (plan sheet; Plus), "For the season you're in" → Discover, today's devotional (labeled AI-assisted and reviewed), streak/progress sheet. Placeholder app icon (crown of thorns)
 - [x] Legal pages on the Worker (`/legal/privacy|terms|refunds|credits|support`): sole proprietor, contact email only, New Jersey law. Owner's legal name still to fill in; legal review before launch
-- [ ] Discover · Library · Settings · Superwall paywall + push · widget
+- [x] Discover: filters (For you, plan, nine themes), themed artwork, Scripture cards with reflections (not Scripture), Home topic handoff
+- [x] Library: saved verses, notes, saved studies, studied; auto-saved notes on the reflection sheet
+- [x] Settings: profile + photo, Sign in with Apple (links guest data), delete account, subscription + Restore Purchases (StoreKit 2 → server verify), appearance, topics, reading pace, reminder + time, translation, font size, red letters, Contact & Support (email for now), FAQs, legal pages in app
+- [ ] Superwall paywall + push registration · widget
 - Note: unit tests build; running them from the agent's terminal hangs (simulator test-runner connection) — run with ⌘U in Xcode
 
 ## Phase 8: Payments & entitlements — ⚠️ server side built locally

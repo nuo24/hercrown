@@ -70,6 +70,22 @@ final class APIClient: @unchecked Sendable {
         return (data, http)
     }
 
+    /// Uploads raw bytes (profile photo).
+    @discardableResult
+    func upload(_ method: String, _ path: String, data: Data, contentType: String) async throws -> Data {
+        var request = makeRequest(method, path, body: nil)
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        let (body, response): (Data, URLResponse)
+        do { (body, response) = try await session.upload(for: request, from: data) } catch { throw APIError.offline }
+        guard let http = response as? HTTPURLResponse else { throw APIError.offline }
+        guard (200..<300).contains(http.statusCode) else {
+            let object = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any]
+            throw APIError(status: http.statusCode, code: object?["error"] as? String ?? "http_\(http.statusCode)",
+                           message: object?["message"] as? String ?? "Something went wrong. Please try again.")
+        }
+        return body
+    }
+
     func get<T: Decodable>(_ path: String, as type: T.Type = T.self) async throws -> T {
         try decoder.decode(T.self, from: try await send("GET", path).0)
     }

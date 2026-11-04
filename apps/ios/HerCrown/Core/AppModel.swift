@@ -1,5 +1,7 @@
 import Foundation
 import Observation
+import StoreKit
+import UserNotifications
 
 /// App-wide state: the session, her preferences and membership, saved verses. Reading works offline from the bundled
 /// Bibles; anything that needs the server is retried when the connection returns.
@@ -74,6 +76,89 @@ final class AppModel {
         paywallPlacement = placement
         Task { await Analytics.shared.track("paywall_requested", ["placement": .string(placement)]) }
     }
+
+    // MARK: Account
+
+    var isGuest: Bool { me?.user.isAnonymous ?? true }
+
+    /// Sign in with Apple: links this guest's data to her Apple account (decision 0002), then refreshes.
+    func signInWithApple(identityToken: String) async throws {
+        let (_, response) = try await api.send("POST", "/api/auth/sign-in/social", json: ["provider": "apple", "idToken": ["token": identityToken]])
+        if let token = response.value(forHTTPHeaderField: "set-auth-token") { api.token = token }
+        try await refresh()
+        await Analytics.shared.track("signed_in", ["method": "apple"])
+    }
+
+    func updateProfile(displayName: String, bio: String) async throws {
+        try await api.send("PATCH", "/me/profile", json: ["displayName": displayName, "bio": bio])
+        try await refresh()
+        await Analytics.shared.track("profile_updated")
+    }
+
+    func uploadAvatar(_ jpeg: Data) async throws {
+        try await api.upload("PUT", "/me/avatar", data: jpeg, contentType: "image/jpeg")
+        try await refresh()
+        await Analytics.shared.track("avatar_updated")
+    }
+
+    func removeAvatar() async throws {
+        try await api.send("DELETE", "/me/avatar")
+        try await refresh()
+    }
+
+    /// Deletes the account and everything in it on the server, then starts over as a new guest on this phone.
+    /// Onboarding stays complete (Settings never sends her back through it).
+    func deleteAccount() async throws {
+        await Analytics.shared.track("account_deleted")
+        await Analytics.shared.flush()
+        try await api.send("POST", "/api/auth/delete-user", json: [String: Any]())
+        api.token = nil
+        for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position"] { UserDefaults.standard.removeObject(forKey: key) }
+        saved = []
+        preferences = .defaults
+        membership = .free
+        me = nil
+        DailyReminder.cancel()
+        try await signInAsGuest()
+        try await refresh()
+    }
+
+    // MARK: Restore purchases
+
+    /// Restore (docs/restore-purchases.md): sync with the App Store, then have the server verify the Plus transaction
+    /// with Apple. Returns what to tell her.
+    func restorePurchases() async -> String {
+        await Analytics.shared.track("restore_tapped")
+        try? await AppStore.sync()
+        var transactionId: String?
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID); break }
+        }
+        if transactionId == nil {
+            for await result in Transaction.all {
+                if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID) }
+            }
+        }
+        guard let transactionId else { return "We couldn’t find a Her Crown Plus purchase for this Apple ID." }
+        struct Outcome: Decodable { let restored: Bool; let reason: String?; let alreadyActive: Bool? }
+        do {
+            let outcome: Outcome = try await api.call("POST", "/me/restore", json: ["transactionId": transactionId])
+            try? await refresh()
+            if outcome.restored { return outcome.alreadyActive == true ? "Plus is already active on this account." : "Welcome back to Plus." }
+            switch outcome.reason {
+            case "expired": return "Your Plus subscription has ended. You can subscribe again any time."
+            case "billing_retry": return "Apple couldn’t renew your subscription. Update your payment method in iPhone Settings."
+            case "revoked": return "This purchase was refunded, so Plus isn’t active."
+            default: return "We couldn’t find a Her Crown Plus purchase for this Apple ID."
+            }
+        } catch let error as APIError {
+            return error.status == 503 ? "The App Store isn’t answering right now. Please try again in a moment." : error.message
+        } catch {
+            return APIError.offline.message
+        }
+    }
+
+    static let plusProducts: Set<String> = ["hercrown.plus.yearly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"]
 
     // MARK: Navigation
 
