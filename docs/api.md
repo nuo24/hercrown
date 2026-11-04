@@ -85,7 +85,7 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 | `GET /me/streak?today=` | Streak card |
 | `GET /me/progress?today=` | Streak sheet: Bible progress (of 1,189), days opened vs read, weeks in a row, days this year, devotionals read |
 | `GET /plans` · `GET /plans/{id}` · `POST /plans/{id}/start` · `POST /plans/{id}/steps/{n}/complete` | Today's Reading / plans. Plus |
-| `GET /me/widget?translation=` | Home-screen widget: her chosen verse, else today's |
+| `GET /me/widget?date=&translation=` | Home-screen widget: her chosen verse, else today's |
 
 ## Discover
 

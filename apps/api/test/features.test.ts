@@ -141,6 +141,9 @@ describe("verse of the day, random verse, widget", () => {
     expect(VOTD_POOL).toContain((await json("/scripture/random")).ref);
     const widget = await json("/me/widget");
     expect(widget.source).toBe("verse_of_the_day");
+    // The phone's day picks the same verse Home shows for that day.
+    const onDay = await json("/me/widget?date=2026-03-01");
+    expect(onDay).toMatchObject({ date: "2026-03-01", ref: (await json("/scripture/verse-of-the-day?date=2026-03-01")).ref });
     await call("/me/preferences", "PATCH", { widgetRef: "JHN.3.16" });
     expect(await json("/me/widget?translation=kjv")).toMatchObject({ source: "chosen", ref: "JHN.3.16", text: expect.stringMatching(/^For God so loved/) });
   });

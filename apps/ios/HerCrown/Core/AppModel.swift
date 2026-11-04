@@ -17,8 +17,6 @@ final class AppModel {
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
     var onboardingCompleted = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
     var offline = false
-    /// A paywall request (placement name). Superwall presents it once integrated; until then RootView explains.
-    var paywallPlacement: String?
     /// Another tab asked to show this one (e.g. Home → read a verse in The Bible).
     var requestedTab: AppTab?
     /// A topic Discover should open on (Home's "For the season you're in" cards).
@@ -46,6 +44,7 @@ final class AppModel {
             offline = true
         }
         phase = .ready
+        await WidgetBridge.refresh(translation: preferences.translation)
         await Analytics.shared.flush()
     }
 
@@ -57,6 +56,7 @@ final class AppModel {
 
     func refresh() async throws {
         let me: Me = try await api.get("/me")
+        if self.me?.user.id != me.user.id { Billing.shared.identify(userId: me.user.id, onboarding: me.preferences) }
         self.me = me
         preferences = me.preferences
         membership = me.membership
@@ -73,7 +73,7 @@ final class AppModel {
     // MARK: Membership
 
     func presentPaywall(placement: String) {
-        paywallPlacement = placement
+        Billing.shared.present(placement: placement)
         Task { await Analytics.shared.track("paywall_requested", ["placement": .string(placement)]) }
     }
 
@@ -119,6 +119,7 @@ final class AppModel {
         membership = .free
         me = nil
         DailyReminder.cancel()
+        Billing.shared.logOut()
         try await signInAsGuest()
         try await refresh()
     }
@@ -201,7 +202,11 @@ final class AppModel {
     func updatePreferences(_ patch: [String: Any], apply: (inout Preferences) -> Void) {
         apply(&preferences)
         Self.cache(preferences)
-        Task { _ = try? await api.send("PATCH", "/me/preferences", json: patch) }
+        let translation = preferences.translation
+        Task {
+            _ = try? await api.send("PATCH", "/me/preferences", json: patch)
+            if patch["widgetRef"] != nil || patch["translation"] != nil { await WidgetBridge.refresh(translation: translation) }
+        }
     }
 
     // MARK: Helpers

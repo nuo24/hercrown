@@ -23,6 +23,8 @@ struct HomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     header
+                    if let trial = app.membership.subscription?.trial, app.membership.subscription?.isTrial == true,
+                       Date().timeIntervalSince1970 * 1000 >= trial.remindFrom { trialNotice(trial) }
                     StreakCard(streak: model.streak) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1") } }
                     if let verse = model.verse { verseOfTheDay(verse) }
                     verseSearch.id("search")
@@ -105,6 +107,25 @@ struct HomeView: View {
     private var greeting: String {
         let name = app.displayName?.trimmingCharacters(in: .whitespaces).split(separator: " ").first.map(String.init)
         return name.map { $0 == "Guest" ? "Hi there!" : "Hi, \($0)!" } ?? "Hi there!"
+    }
+
+    // MARK: Trial notice (docs/trial-reminder.md: from 2 days before the trial converts)
+
+    private func trialNotice(_ trial: Membership.Trial) -> some View {
+        let ends = Date(timeIntervalSince1970: trial.endsAt / 1000)
+        return Card(radius: 18) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Your free trial ends \(ends.formatted(.relative(presentation: .named)))").font(.system(size: 16, weight: .semibold))
+                Text(trial.convertsToPaid
+                     ? "Her Crown Plus becomes a paid plan on \(ends.formatted(date: .abbreviated, time: .omitted)). To avoid being charged, cancel before then."
+                     : "Plus ends on \(ends.formatted(date: .abbreviated, time: .omitted)). You won’t be charged.")
+                    .font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
+                if trial.convertsToPaid, let url = URL(string: trial.manageUrl) {
+                    Link("Manage subscription", destination: url).font(.system(size: 15, weight: .semibold)).padding(.top, 2)
+                }
+            }
+            .foregroundStyle(Theme.text(scheme))
+        }
     }
 
     // MARK: Verse of the day

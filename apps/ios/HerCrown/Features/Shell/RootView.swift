@@ -18,17 +18,7 @@ struct RootView: View {
         Group {
             if app.onboardingCompleted || Self.skipOnboarding { tabs } else { OnboardingView() }
         }
-        .sheet(item: Binding(get: { app.paywallPlacement.map(PaywallRequest.init) }, set: { app.paywallPlacement = $0?.id })) { _ in
-            VStack(spacing: 14) {
-                Image("butterfly").resizable().scaledToFit().frame(width: 90).accessibilityHidden(true)
-                Text("Her Crown Plus").font(.serif(28))
-                Text("Subscriptions open in the next build of the app.").foregroundStyle(.secondary)
-            }
-            .padding(28).presentationDetents([.medium])
-        }
     }
-
-    private struct PaywallRequest: Identifiable { let id: String }
 
     private var tabs: some View {
         ZStack(alignment: .bottom) {

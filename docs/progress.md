@@ -55,7 +55,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Discover: filters (For you, plan, nine themes), themed artwork, Scripture cards with reflections (not Scripture), Home topic handoff
 - [x] Library: saved verses, notes, saved studies, studied; auto-saved notes on the reflection sheet
 - [x] Settings: profile + photo, Sign in with Apple (links guest data), delete account, subscription + Restore Purchases (StoreKit 2 → server verify), appearance, topics, reading pace, reminder + time, translation, font size, red letters, Contact & Support (email for now), FAQs, legal pages in app
-- [ ] Superwall paywall + push registration · widget
+- [x] Superwall (SuperwallKit 4.19): configure, identify with our user id, placements (onboarding_complete, study_*, plan_start, settings*), purchase → server verify, events → analytics; Home trial notice; push registration (PUT /me/devices) offered when a trial starts
+- [x] Home-screen widget (small/medium/large): her widget verse or today's, via App Group `group.com.hercrown.app`
+- [ ] Superwall dashboard: campaigns per placement, paywall_decline → $19.99 offer (owner)
+- [ ] On a phone: Sign in with Apple, push token, purchase in sandbox (TestFlight), widget on the home screen
 - Note: unit tests build; running them from the agent's terminal hangs (simulator test-runner connection) — run with ⌘U in Xcode
 
 ## Phase 8: Payments & entitlements — ⚠️ server side built locally

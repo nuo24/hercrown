@@ -300,6 +300,8 @@ struct OnboardingView: View {
         }
         await app.completeOnboarding()
         finishing = false
+        // Decision 0003: the membership paywall follows onboarding; the guest path goes straight to reading.
+        if !guest { app.presentPaywall(placement: "onboarding_complete") }
     }
 
     static func hhmm(_ date: Date) -> String {

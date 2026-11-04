@@ -76,10 +76,10 @@ export async function getRandomVerse(url: URL, env: Env, user: SessionUser) {
   return Response.json(await verseCard(env, await translationFor(env, user, url), ref, user.id));
 }
 
-/** GET /me/widget: the home-screen widget's verse (her chosen "Widget Verse", else today's verse). */
+/** GET /me/widget?date=: the home-screen widget's verse (her chosen "Widget Verse", else today's verse, same as Home's). */
 export async function getWidget(url: URL, env: Env, user: SessionUser) {
   const prefs = await preferencesRow(env, user.id);
-  const day = localDayIn(prefs.time_zone ?? "UTC");
+  const day = await resolveToday(env, user.id, url.searchParams.get("date"));
   const ref = prefs.widget_ref ?? verseOfTheDayRef(day);
   return Response.json({ source: prefs.widget_ref ? "chosen" : "verse_of_the_day", date: day, ...(await verseCard(env, await translationFor(env, user, url), ref, user.id)) });
 }
