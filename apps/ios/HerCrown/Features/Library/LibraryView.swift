@@ -29,24 +29,29 @@ struct SavedSheet: View {
             ZStack {
                 AppGradient()
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Words to keep close.").font(.system(size: 15)).foregroundStyle(Theme.muted(scheme))
-                        HStack(spacing: 18) {
-                            Image("bookmark").resizable().scaledToFit().frame(width: 44, height: 64).accessibilityHidden(true)
-                            Text("Your collected passages").font(.system(size: 15)).foregroundStyle(Theme.muted(scheme))
+                    VStack(alignment: .leading, spacing: 0) {
+                        // .app-header: 28 pt title; a close button where the mockup has its icon buttons.
+                        HStack {
+                            Text("Saved passages").font(.system(size: 28)).tracking(-0.8)
+                            Spacer()
+                            IconButton(systemName: "xmark", label: "Close") { dismiss() }
                         }
-                        Picker("Library section", selection: $section) {
-                            ForEach(Section.allCases) { s in Text(title(s)).tag(s) }
+                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
+                        Text("Words to keep close.").font(.system(size: 14)).foregroundStyle(Theme.muted(scheme)).padding(.horizontal, 20)
+                        // .saved-illustration-banner: 56×64 ribbon, 13 pt caption, 0/24/22 padding.
+                        HStack(spacing: 14) {
+                            Image("bookmark").resizable().scaledToFit().frame(width: 56, height: 64).accessibilityHidden(true)
+                            Text("Your collected passages").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
                         }
-                        .pickerStyle(.segmented)
-                        content
+                        .padding(EdgeInsets(top: 20, leading: 24, bottom: 22, trailing: 24))
+                        sectionChips.padding(.bottom, 16)
+                        VStack(spacing: 16) { content }.padding(.horizontal, 20)
                     }
-                    .padding(.horizontal, Theme.Spacing.gutter)
+                    .foregroundStyle(Theme.text(scheme))
                     .padding(.bottom, 40)
                 }
             }
-            .navigationTitle("Saved passages")
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $openStudy) { item in
                 if let ref = VerseRef(item.ref), let tool = StudyTool(rawValue: item.tool) {
                     AIStudyView(ref: ref, translation: translation, tool: tool).navigationBarTitleDisplayMode(.inline)
@@ -58,6 +63,26 @@ struct SavedSheet: View {
         }
         .task { await load() }
         .task(id: section) { await loadSection() }
+    }
+
+    /// Sections as the mockup's filter chips (44 pt, 13 pt, ink when selected).
+    private var sectionChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(Section.allCases) { s in
+                    let on = s == section
+                    Button { section = s } label: {
+                        Text(title(s)).font(.system(size: 13)).padding(.horizontal, 14).frame(height: 44)
+                            .foregroundStyle(on ? (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme))
+                            .background(Capsule().fill(on ? Theme.text(scheme) : (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))))
+                            .overlay(Capsule().strokeBorder(on ? .clear : Theme.border(scheme), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(on ? .isSelected : [])
+                }
+            }
+            .padding(.horizontal, 20)
+        }
     }
 
     private func title(_ s: Section) -> String {
@@ -157,31 +182,36 @@ private struct SavedVerseCard: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
 
+    /// The saved .verse-card: 22/20/14 padding; 24 pt serif reference, 28 pt serif verse, translation; a full-width
+    /// Read & reflect, then the actions centred under a hairline.
     var body: some View {
         let text = BibleStore.shared.text(translation, ref) ?? ""
         let label = BibleStore.shared.label(ref)
-        Card {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(label).font(.serif(24, relativeTo: .title2))
-                Text("“\(text)”").font(.serif(24, relativeTo: .title2)).fixedSize(horizontal: false, vertical: true)
+        Card(padding: EdgeInsets(top: 22, leading: 20, bottom: 14, trailing: 20)) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(label).font(.serif(24, relativeTo: .title2)).tracking(-0.48)
+                Text("“\(text)”").font(.serif(28, relativeTo: .title2)).tracking(-0.56).lineSpacing(4.2)
+                    .fixedSize(horizontal: false, vertical: true).padding(.top, 32)
                 Text(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? "")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+                    .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 28)
                 Button(action: onRead) {
-                    HStack(spacing: 8) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 12, weight: .semibold)) }
-                        .font(.system(size: 16, weight: .medium)).frame(maxWidth: .infinity).padding(.vertical, 8)
+                    HStack(spacing: 6) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold)) }
+                        .font(.system(size: 12)).frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.plain)
-                Divider()
-                HStack {
+                .padding(.top, 8)
+                HStack(spacing: 0) {
+                    Button { app.toggleSave(ref.description) } label: { Image(systemName: "heart.fill").frame(width: 58, height: 44) }.accessibilityLabel("Remove from saved")
                     Spacer()
-                    Button { app.toggleSave(ref.description) } label: { Image(systemName: "heart.fill") }.accessibilityLabel("Remove from saved")
-                    Spacer(); Spacer()
-                    Button(action: onStudy) { Image(systemName: "message") }.accessibilityLabel("Study this verse")
-                    Spacer(); Spacer()
-                    ShareLink(item: "“\(text)” — \(label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up") }.accessibilityLabel("Share verse")
+                    Button(action: onStudy) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Study this verse")
                     Spacer()
+                    ShareLink(item: "“\(text)” — \(label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Share verse")
                 }
-                .font(.system(size: 19))
+                .font(.system(size: 17))
+                .frame(width: 236)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 24)
+                .overlay(alignment: .top) { Rectangle().fill(Theme.border(scheme)).frame(width: 200, height: 1).padding(.top, 8) }
             }
             .foregroundStyle(Theme.text(scheme))
         }
