@@ -24,7 +24,12 @@
     "draft:devotionals": "node scripts/draft-devotionals.mjs",
     "build:devotionals": "node scripts/build-devotionals.mjs",
     "seed:devotionals": "node scripts/build-devotionals.mjs && wrangler d1 execute DB --local --file seeds/devotionals.sql",
-    "seed:devotionals:staging": "node scripts/build-devotionals.mjs && wrangler d1 execute DB --env staging --remote --file seeds/devotionals.sql"
+    "seed:devotionals:staging": "node scripts/build-devotionals.mjs && wrangler d1 execute DB --env staging --remote --file seeds/devotionals.sql",
+    "db:migrate:production": "wrangler d1 migrations apply DB --env production --remote",
+    "seed:scripture:production": "wrangler d1 execute DB --env production --remote --file seeds/kjv.sql && wrangler d1 execute DB --env production --remote --file seeds/bsb.sql && wrangler d1 execute DB --env production --remote --file seeds/web.sql",
+    "seed:study:production": "wrangler d1 execute DB --env production --remote --file seeds/study/lexicon.sql && wrangler d1 execute DB --env production --remote --file seeds/study/original_words.sql && wrangler d1 execute DB --env production --remote --file seeds/study/cross_references.sql && wrangler d1 execute DB --env production --remote --file seeds/study/commentary_notes.sql",
+    "seed:devotionals:production": "node scripts/build-devotionals.mjs && wrangler d1 execute DB --env production --remote --file seeds/devotionals.sql",
+    "deploy:production": "wrangler deploy --env production"
   },
   "dependencies": {
     "better-auth": "^1.7.15"
