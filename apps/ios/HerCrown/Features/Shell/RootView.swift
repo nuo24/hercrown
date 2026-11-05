@@ -41,20 +41,50 @@ struct RootView: View {
 /// Community is an honest empty state until its direction is decided (docs/progress.md).
 struct CommunityView: View {
     let onExplore: () -> Void
+    @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+    @State private var showingSaved = false
+    @State private var showingSettings = false
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             AppGradient()
-            VStack(spacing: 14) {
-                Image("community").resizable().scaledToFit().frame(width: 156, height: 156).accessibilityHidden(true)
-                Text("Community").font(.serif(30, relativeTo: .largeTitle)).foregroundStyle(Theme.text(scheme))
-                Text("A place to connect and grow together.").font(.system(size: 15)).foregroundStyle(Theme.muted(scheme))
-                Text("Community is coming soon.").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
-                Button("Explore Scripture", action: onExplore).buttonStyle(CapsuleButtonStyle()).frame(width: 240).padding(.top, 8)
+            ScrollView {
+                VStack(spacing: 0) {
+                    HStack(spacing: 4) {
+                        Text("Community").font(.system(size: 28)).tracking(-0.8)
+                            .foregroundStyle(Theme.text(scheme))
+                            .accessibilityAddTraits(.isHeader)
+                        Spacer()
+                        IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
+                        IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
+                    }
+                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
+
+                    VStack(spacing: 0) {
+                        Image("community").resizable().scaledToFit()
+                            .frame(width: 180, height: 160).accessibilityHidden(true)
+                        Text("Community").font(.serif(30, relativeTo: .largeTitle))
+                            .foregroundStyle(Theme.text(scheme)).padding(.top, 50)
+                        Text("A place to connect and grow together.")
+                            .font(.system(size: 14)).frame(minHeight: 22.4).padding(.top, 8)
+                        Text("Community is coming soon.")
+                            .font(.system(size: 12)).frame(minHeight: 19.2).padding(.top, 12)
+                        Button("Explore Scripture", action: onExplore)
+                            .buttonStyle(CapsuleButtonStyle()).frame(width: 240).padding(.top, 24)
+                    }
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Theme.muted(scheme))
+                    .padding(.horizontal, 32)
+                    .padding(.top, 48)
+                }
+                .padding(.bottom, 108)
             }
-            .padding(.bottom, 80)
+            .scrollBounceBehavior(.basedOnSize)
+            .scrollIndicators(.hidden)
         }
+        .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.preferences.translation) }
+        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
     }
 }
 
