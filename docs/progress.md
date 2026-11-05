@@ -115,3 +115,5 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - API.Bible caching terms (ask support@api.bible)
 - Community tab direction ([later.md](later.md))
 - Final bundle id (placeholder `com.hercrown.app`)
+
+- Superwall: Main + Decline offer published to sandbox-only audiences (2026-11-04); layout polish pending. Before launch: switch both audiences to all users without an active subscription.
