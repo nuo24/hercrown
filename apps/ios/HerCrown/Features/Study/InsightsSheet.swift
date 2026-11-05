@@ -19,20 +19,22 @@ struct InsightsSheet: View {
     var body: some View {
         NavigationStack(path: $path) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
+                VStack(spacing: 0) {
                     Image("open-book").resizable().scaledToFit().frame(width: 68, height: 58).accessibilityHidden(true)
-                    VerseQuote(ref: ref, translation: translation)
+                    VerseQuote(ref: ref, translation: translation).padding(.top, 8)
+                    Divider().padding(.top, 26)
                     VStack(spacing: 0) {
                         ForEach(StudyTool.allCases) { tool in
                             NavigationLink(value: tool) {
-                                HStack(spacing: 14) {
-                                    Image(systemName: tool.symbol).font(.system(size: 18)).frame(width: 24)
-                                    Text(tool.title).font(.system(size: 16))
+                                HStack(spacing: 16) {
+                                    Image(systemName: tool.symbol).font(.system(size: 25)).frame(width: 25)
+                                    Text(tool.title).font(.system(size: 17))
                                     Spacer()
                                     if !app.membership.premium { Text("Plus").font(.system(size: 11, weight: .semibold)).padding(.horizontal, 7).padding(.vertical, 3).background(Capsule().fill(Color.primary.opacity(0.08))) }
                                     Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
                                 }
-                                .padding(.vertical, 15)
+                                .frame(minHeight: 76)
+                                .padding(.horizontal, 4)
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
@@ -76,11 +78,12 @@ struct VerseQuote: View {
     let ref: VerseRef
     let translation: String
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(BibleStore.shared.label(ref)).font(.serif(26, relativeTo: .title2))
-            Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(20, relativeTo: .title3)).foregroundStyle(.primary.opacity(0.9))
+        VStack(spacing: 14) {
+            Text(BibleStore.shared.label(ref)).font(.system(size: 22, weight: .semibold))
+            Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
             Text(BibleStore.offline[translation].map { translationName($0) } ?? "").font(.system(size: 12)).foregroundStyle(.secondary)
         }
+        .multilineTextAlignment(.center)
     }
     private func translationName(_ abbreviation: String) -> String {
         ["KJV": "King James Version", "BSB": "Berean Standard Bible", "WEB": "World English Bible"][abbreviation] ?? abbreviation
