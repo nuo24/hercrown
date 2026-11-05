@@ -220,8 +220,7 @@ describe("explain easier (AI)", () => {
 });
 
 describe("deeper study (AI)", () => {
-  it("adds original words and cross-references to the sources", async () => {
-    reply = () => openRouter(`## Biblical meaning
+  const DEEPER = `## Biblical meaning
 The passage connects God’s love to the gift of his Son [JFB].
 
 ## Historical context
@@ -240,7 +239,10 @@ God’s love is shown through what he gives [JFB].
 Romans 5:8 shows the same love [Cross-ref].
 
 ## Reflect
-What does it mean to you that God gave?`);
+What does it mean to you that God gave?`;
+
+  it("adds original words and cross-references to the sources", async () => {
+    reply = () => openRouter(DEEPER);
     const answer = await (await get("/study/JHN.3.16/deeper")).json<any>();
     // "Life in biblical times" is left out when the sources don't describe any customs.
     expect(answer.sections.map((s: any) => s.title)).toEqual(["Biblical meaning", "Historical context", "Original language", "Theological significance", "Related passages", "Reflect"]);
@@ -250,6 +252,36 @@ What does it mean to you that God gave?`);
     expect(prompt.normalize("NFC")).toContain("ἠγάπησεν · ēgapēsen · loved · to love".normalize("NFC"));
     expect(prompt).toContain("[Cross-ref] Passages often read alongside this verse");
   });
+
+  it("retries an uncited historical section with specific feedback and replaces the old format", async () => {
+    await clearAnswer("JHN.3.16", "deeper");
+    await env.DB.prepare(`INSERT INTO study_answers
+      (ref, tool, version, status, sections, sources, model, prompt_tokens, completion_tokens, cost_micros, created_at)
+      VALUES ('JHN.3.16', 'deeper', 2, 'published', '[]', '[]', 'old', 0, 0, 0, 1)`).run();
+    const answers = [
+      DEEPER.replace("Jesus speaks with Nicodemus [JFB].", "The sources don't describe the setting."),
+      DEEPER,
+    ];
+    reply = () => openRouter(answers.shift()!);
+    const res = await get("/study/JHN.3.16/deeper");
+    expect(res.status).toBe(200);
+    const answer = await res.json<any>();
+    expect(answer.cached).toBe(false);
+    expect(answer.sections).toContainEqual({ title: "Historical context", text: "Jesus speaks with Nicodemus [JFB]." });
+    expect(calls).toHaveLength(2);
+    expect(calls[1]!.body.messages.at(-1).content).toContain('"Historical context" needs a supplied source tag');
+    const rows = await env.DB.prepare("SELECT version FROM study_answers WHERE ref = 'JHN.3.16' AND tool = 'deeper' ORDER BY version").all();
+    expect(rows.results).toEqual([{ version: 2 }, { version: 3 }]);
+  });
+
+  it("does not cache an uncited answer when the retry still fails", async () => {
+    await clearAnswer("JHN.3.16", "deeper");
+    reply = () => openRouter(DEEPER.replace("Romans 5:8 shows the same love [Cross-ref].", "Romans 5:8 shows the same love."));
+    expect((await get("/study/JHN.3.16/deeper")).status).toBe(502);
+    expect(calls).toHaveLength(2);
+    expect(await env.DB.prepare("SELECT 1 FROM study_answers WHERE ref = 'JHN.3.16' AND tool = 'deeper'").first()).toBeNull();
+  });
+
 });
 
 describe("checks", () => {

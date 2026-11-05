@@ -16,6 +16,8 @@ import { BOOKS, parseRef, resolveRef } from "./refs";
 import { bookFromName, refLabel } from "./scripture";
 
 export const PROMPT_VERSION = 1;
+const DEEPER_PROMPT_VERSION = 3;
+const versionFor = (tool: AiTool) => tool === "deeper" ? DEEPER_PROMPT_VERSION : PROMPT_VERSION;
 export const TOOLS = ["explain", "deeper"] as const;
 export type AiTool = (typeof TOOLS)[number];
 const LOCAL = new Set(["kjv", "bsb", "web"]);
@@ -192,6 +194,9 @@ Rules:
 - Write plain, warm, modern English for an adult reader. No preaching, no clichés, no emojis. The commentaries are 150–300 years old; keep their insight, not their dated or harsh tone toward any group.
 - Follow the output format exactly: the headings given, in that order, nothing before or after.`;
 
+const OPTIONAL_CONTEXT = "The sources don't describe the customs behind this verse.";
+const SOURCE_GAP = "The available sources do not give enough detail for this section.";
+
 const FORMATS: Record<AiTool, { titles: string[]; instructions: string; maxTokens: number }> = {
   explain: {
     titles: ["Simple explanation", "Key takeaway"],
@@ -214,7 +219,7 @@ Who is speaking or writing, to whom, and what is happening, in 60–120 words.
 One to three important words from the [Lexicon] list: the original word, its transliteration, and what it means here. At most 100 words.
 
 ## Life in biblical times
-Customs or daily life behind the verse, in at most 90 words, only if the sources describe them. Otherwise write: "The sources don't describe the customs behind this verse."
+Customs or daily life behind the verse, in at most 90 words, only if the sources describe them. Otherwise write exactly: "${OPTIONAL_CONTEXT}"
 
 ## Theological significance
 Explain one or two theological themes supported by the supplied passages or commentary in 80–120 words. Distinguish what the text says from interpretive conclusions.
@@ -223,7 +228,9 @@ Explain one or two theological themes supported by the supplied passages or comm
 One to three passages from the [Cross-ref] list and how each connects, in at most 90 words.
 
 ## Reflect
-One question to think about, in one sentence.`,
+One question to think about, in one sentence.
+
+Keep all seven headings in order. Put a supplied source tag next to the claim it supports in each factual section; use [Lexicon] for Original language and [Cross-ref] for Related passages. No citation is required for Reflect. If a required factual section cannot be grounded, keep its heading and use exactly "${SOURCE_GAP}" as its entire body. Use the source-gap sentence only when the material is genuinely missing. In contested passages, describe the interpretation precisely without language implying any person's lesser worth.`,
     maxTokens: 1500,
   },
 };
@@ -262,23 +269,51 @@ export interface Checked {
 
 const ALLOWED_TAGS = new Set<string>([...Object.keys(SOURCE_TAGS), "Lexicon", "Cross-ref"]);
 
-/** Splits the answer into the required sections and checks its citations. Null = unusable (don't store or show). */
+const citationTags = (text: string) => [...text.matchAll(/\[([A-Za-z-]+)\]/g)].map((m) => m[1]!);
+
 export function checkAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" | "related" | "v" | "words">): Checked | null {
+  const result = validateAnswer(text, tool, ctx);
+  return typeof result === "string" ? null : result;
+}
+
+/** Returns actionable feedback for the one retry. Never use unchecked text as a saved answer. */
+function validateAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" | "related" | "v" | "words">): Checked | string {
   const titles = FORMATS[tool].titles;
-  const parts = text.split(/^##\s+/m).map((p) => p.trim()).filter(Boolean);
-  if (parts.length !== titles.length) return null;
-  const sections = [];
-  for (const [i, part] of parts.entries()) {
+  const parts = text.trim().split(/^##\s+/m);
+  if (parts[0] !== "" || parts.length !== titles.length + 1) {
+    return `Use exactly these headings, in order: ${titles.join(", ")}.`;
+  }
+  const available = new Set<string>([...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])]);
+  const sections: Checked["sections"] = [];
+  const tags: string[] = [];
+  const problems: string[] = [];
+  for (const [i, part] of parts.slice(1).entries()) {
+    const expected = titles[i]!;
     const newline = part.indexOf("\n");
     const title = (newline < 0 ? part : part.slice(0, newline)).trim();
     const body = newline < 0 ? "" : part.slice(newline + 1).trim();
-    if (title.toLowerCase() !== titles[i]!.toLowerCase() || !body) return null;
-    if (/^the sources don.t describe/i.test(body)) continue; // nothing to say: leave the section out
-    sections.push({ title: titles[i]!, text: body });
+    if (title.toLowerCase() !== expected.toLowerCase() || !body) {
+      problems.push(`Section ${i + 1} must be "${expected}" with a nonempty body.`);
+      continue;
+    }
+    if (tool === "deeper" && expected === "Life in biblical times" && body === OPTIONAL_CONTEXT) continue;
+    const cited = citationTags(body);
+    if (cited.some((tag) => !ALLOWED_TAGS.has(tag) || !available.has(tag))) {
+      problems.push(`"${expected}" cites a source that was not supplied.`);
+    }
+    if (tool === "deeper" && expected !== "Reflect" && body !== SOURCE_GAP) {
+      const required = expected === "Original language" ? "Lexicon" : expected === "Related passages" ? "Cross-ref" : undefined;
+      if (required ? !cited.includes(required) : cited.length === 0) {
+        problems.push(`"${expected}" needs ${required ? `[${required}]` : "a supplied source tag"} or the exact source-gap sentence if unsupported.`);
+      }
+    }
+    if (tool === "deeper" && expected === "Life in biblical times" && body === SOURCE_GAP) {
+      problems.push(`Use the exact customs fallback for "${expected}" when unsupported.`);
+    }
+    tags.push(...cited);
+    sections.push({ title: expected, text: body });
   }
-  const tags = [...text.matchAll(/\[([A-Za-z-]+)\]/g)].map((m) => m[1]!);
-  const available = new Set<string>([...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])]);
-  if (tags.some((t) => !ALLOWED_TAGS.has(t) || !available.has(t))) return null; // cites a source it wasn't given
+  if (problems.length) return problems.join(" ");
   // References the answer mentions that aren't the verse's chapter, a cross-reference, or in a source note: kept, flagged for review.
   const known = [ctx.v.label, ...ctx.related.map((r) => r.label)].join(" ");
   const notesText = ctx.notes.map((n) => n.text).join(" ");
@@ -295,6 +330,12 @@ export function checkAnswer(text: string, tool: AiTool, ctx: Pick<Context, "note
 }
 
 // ── AI tools: endpoint ──────────────────────────────────────────────────────
+
+class StudyValidationError extends HttpError {
+  constructor(readonly feedback: string) {
+    super(502, "study_unavailable", "We couldn't prepare this study. Please try again.");
+  }
+}
 
 interface AnswerRow { sections: string; sources: string; model: string; created_at: number; status: string }
 
@@ -331,7 +372,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
   const v = await verseFor(env, refInput);
   const stored = await env.DB.prepare(
     "SELECT sections, sources, model, created_at, status FROM study_answers WHERE ref = ?1 AND tool = ?2 AND version = ?3",
-  ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION).first<AnswerRow>();
+  ).bind(v.ref, tool, versionFor(tool)).first<AnswerRow>();
   if (stored?.status === "published") {
     tracker.track("study_viewed", { tool, cached: true });
     await recordStudied(env, user.id, v.ref, tool);
@@ -353,15 +394,19 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
     } catch (err) {
       if (!(err instanceof HttpError) || err.status !== 502) throw err;
       onReset();
-      return attempt(onDelta);
+      const feedback = err instanceof StudyValidationError ? err.feedback : undefined;
+      return attempt(onDelta, feedback);
     }
   };
 
-  const attempt = async (onDelta: (text: string) => void) => {
+  const attempt = async (onDelta: (text: string) => void, feedback?: string) => {
     let text = "";
     let usage: AiUsage | null = null;
     try {
-      const stream = streamChat(env, messages, { maxTokens: FORMATS[tool].maxTokens });
+      const retryMessages = feedback
+        ? [...messages, { role: "user" as const, content: `Rewrite the full answer from the original sources. Fix these validation problems: ${feedback}` }]
+        : messages;
+      const stream = streamChat(env, retryMessages, { maxTokens: FORMATS[tool].maxTokens });
       for (;;) {
         const next = await stream.next();
         if (next.done) { usage = next.value; break; }
@@ -372,11 +417,11 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
       await logAiCall(env, tracker, user.id, feature, usage, false);
       throw err;
     }
-    const checked = checkAnswer(text, tool, context);
-    await logAiCall(env, tracker, user.id, feature, usage, checked !== null);
-    if (!checked) {
-      console.error(`study: unusable ${tool} answer for ${v.ref}`, text.slice(0, 500));
-      throw new HttpError(502, "study_unavailable", "We couldn't prepare this study. Please try again.");
+    const checked = validateAnswer(text, tool, context);
+    await logAiCall(env, tracker, user.id, feature, usage, typeof checked !== "string");
+    if (typeof checked === "string") {
+      console.warn(`study: unusable ${tool} answer for ${v.ref}: ${checked}`);
+      throw new StudyValidationError(checked);
     }
     if (checked.refsOutsideSources.length) console.warn(`study: ${v.ref} ${tool} mentions refs outside its sources`, checked.refsOutsideSources);
     const t = Date.now();
@@ -387,7 +432,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
          model = excluded.model, prompt_tokens = excluded.prompt_tokens, completion_tokens = excluded.completion_tokens,
          cost_micros = excluded.cost_micros, reports = 0, created_at = excluded.created_at
        WHERE study_answers.status = 'hidden'`,
-    ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, JSON.stringify(checked.sections), JSON.stringify(checked.cited), usage!.model,
+    ).bind(v.ref, tool, versionFor(tool), JSON.stringify(checked.sections), JSON.stringify(checked.cited), usage!.model,
       usage!.promptTokens, usage!.completionTokens, Math.round(usage!.costUsd * 1_000_000), t).run();
     tracker.track("study_viewed", { tool, cached: false });
     await recordStudied(env, user.id, v.ref, tool);
@@ -430,12 +475,12 @@ export async function reportStudy(request: Request, env: Env, user: SessionUser,
   const inserted = await env.DB.prepare(
     `INSERT OR IGNORE INTO study_reports (id, ref, tool, version, user_id, reason, note, created_at)
      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`,
-  ).bind(crypto.randomUUID(), v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, user.id, reason, note, Date.now()).run();
+  ).bind(crypto.randomUUID(), v.ref, tool, versionFor(tool), user.id, reason, note, Date.now()).run();
   if (inserted.meta.changes > 0) {
     await env.DB.prepare(
       `UPDATE study_answers SET reports = reports + 1, status = CASE WHEN reports + 1 >= ?4 THEN 'hidden' ELSE status END
        WHERE ref = ?1 AND tool = ?2 AND version = ?3`,
-    ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, REPORTS_TO_HIDE).run();
+    ).bind(v.ref, tool, versionFor(tool), REPORTS_TO_HIDE).run();
     tracker.track("study_reported", { tool, reason });
   }
   return Response.json({ reported: true });
