@@ -33,17 +33,30 @@ struct VerseProvider: TimelineProvider {
 
 struct VerseWidgetView: View {
     let entry: VerseEntry
+    var quietLayout = false
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
+            if family == .systemLarge {
+                Label(entry.verse?.chosen == true ? "Your chosen verse" : "Verse of the day", systemImage: "book")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 8)
+                Spacer(minLength: 0)
+            }
             if let verse = entry.verse {
                 Text(verse.text)
-                    .font(.custom("Baskerville", size: family == .systemSmall ? 15 : 18))
+                    .font(.custom("Baskerville", size: family == .systemLarge ? (quietLayout ? 24 : 32) : family == .systemSmall ? 15 : 18))
                     .lineLimit(family == .systemSmall ? 6 : family == .systemMedium ? 5 : 12)
                     .minimumScaleFactor(0.7)
-                Spacer(minLength: 0)
+                if family == .systemLarge {
+                    Divider().padding(.vertical, 6)
+                } else {
+                    Spacer(minLength: 0)
+                }
                 Text("\(verse.label) · \(verse.translation.uppercased())").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                if family == .systemLarge { Spacer(minLength: 0) }
             } else {
                 Text("Her Crown").font(.custom("Baskerville", size: 18))
                 Spacer(minLength: 0)
@@ -68,7 +81,18 @@ struct HerCrownWidget: Widget {
     }
 }
 
+struct QuietVerseWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "HerCrownQuietVerse", provider: VerseProvider()) {
+            VerseWidgetView(entry: $0, quietLayout: true)
+        }
+        .configurationDisplayName("Quiet Verse")
+        .description("A large verse widget with smaller type and more breathing room.")
+        .supportedFamilies([.systemLarge])
+    }
+}
+
 @main
 struct HerCrownWidgets: WidgetBundle {
-    var body: some Widget { HerCrownWidget() }
+    var body: some Widget { HerCrownWidget(); QuietVerseWidget() }
 }
