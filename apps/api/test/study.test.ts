@@ -271,7 +271,17 @@ What does it mean to you that God gave?`;
     expect(calls).toHaveLength(2);
     expect(calls[1]!.body.messages.at(-1).content).toContain('"Historical context" needs a supplied source tag');
     const rows = await env.DB.prepare("SELECT version FROM study_answers WHERE ref = 'JHN.3.16' AND tool = 'deeper' ORDER BY version").all();
-    expect(rows.results).toEqual([{ version: 2 }, { version: 3 }]);
+    expect(rows.results).toEqual([{ version: 2 }, { version: 4 }]);
+  });
+
+  it("accepts a passage citation in historical context and allows only the optional heading to be omitted", async () => {
+    await clearAnswer("JHN.3.16", "deeper");
+    reply = () => openRouter(DEEPER.replace("Jesus speaks with Nicodemus [JFB].", "The surrounding verses name Nicodemus [Passage].")
+      .replace("## Life in biblical times\nThe sources don't describe the customs behind this verse.\n\n", ""));
+    const res = await get("/study/JHN.3.16/deeper");
+    expect(res.status).toBe(200);
+    expect((await res.json<any>()).sources.map((source: any) => source.tag)).toContain("Passage");
+    expect(calls).toHaveLength(1);
   });
 
   it("does not cache an uncited answer when the retry still fails", async () => {

@@ -16,7 +16,7 @@ import { BOOKS, parseRef, resolveRef } from "./refs";
 import { bookFromName, refLabel } from "./scripture";
 
 export const PROMPT_VERSION = 1;
-const DEEPER_PROMPT_VERSION = 3;
+const DEEPER_PROMPT_VERSION = 4;
 const versionFor = (tool: AiTool) => tool === "deeper" ? DEEPER_PROMPT_VERSION : PROMPT_VERSION;
 export const TOOLS = ["explain", "deeper"] as const;
 export type AiTool = (typeof TOOLS)[number];
@@ -120,7 +120,6 @@ export async function getOriginal(env: Env, user: SessionUser, refInput: string)
 // ── AI tools: context ───────────────────────────────────────────────────────
 
 const SOURCE_TAGS = { JFB: "jfb", Henry: "henry", Clarke: "clarke" } as const;
-type SourceTag = keyof typeof SOURCE_TAGS | "Lexicon" | "Cross-ref";
 const NOTE_LIMITS: Record<keyof typeof SOURCE_TAGS, { back: number; chars: number }> = {
   JFB: { back: 2, chars: 1800 }, Clarke: { back: 2, chars: 2200 }, Henry: { back: 200, chars: 3200 },
 };
@@ -213,7 +212,7 @@ One sentence, at most 25 words.`,
 Explain the verse in its immediate literary context, tracing its argument or imagery in 80–120 words.
 
 ## Historical context
-Who is speaking or writing, to whom, and what is happening, in 60–120 words.
+Explain who is speaking or writing, to whom, and what is happening, in 60–120 words. If authorship, audience or date aren't established in the material, say what the provided passage itself shows about the setting and cite [Passage]. Do not infer a date or author from silence.
 
 ## Original language
 One to three important words from the [Lexicon] list: the original word, its transliteration, and what it means here. At most 100 words.
@@ -230,8 +229,8 @@ One to three passages from the [Cross-ref] list and how each connects, in at mos
 ## Reflect
 One question to think about, in one sentence.
 
-Keep all seven headings in order. Put a supplied source tag next to the claim it supports in each factual section; use [Lexicon] for Original language and [Cross-ref] for Related passages. No citation is required for Reflect. If a required factual section cannot be grounded, keep its heading and use exactly "${SOURCE_GAP}" as its entire body. Use the source-gap sentence only when the material is genuinely missing. In contested passages, describe the interpretation precisely without language implying any person's lesser worth.`,
-    maxTokens: 1500,
+Keep all headings in order; only Life in biblical times may be omitted. [Passage] refers to the supplied verse and nearby verses, not outside knowledge. Put a supplied source tag next to the claim it supports in each factual section; use [Lexicon] for Original language and [Cross-ref] for Related passages. No citation is required for Reflect. If a required factual section cannot be grounded, keep its heading and use exactly "${SOURCE_GAP}" as its entire body. Use the source-gap sentence only when the material is genuinely missing. In contested passages, describe the interpretation precisely without language implying any person's lesser worth.`,
+    maxTokens: 1800,
   },
 };
 
@@ -242,11 +241,11 @@ export function buildMessages(ctx: Context, tool: AiTool): ChatMessage[] {
       ctx.words.map((w) => `${w.text} · ${w.transliteration} · ${w.gloss} · ${w.meaning} · ${w.parsing ?? ""}`).join("\n")}`] : []),
     ...(ctx.related.length ? [`[Cross-ref] Passages often read alongside this verse (BSB):\n${ctx.related.map((r) => `${r.label}: ${r.text}`).join("\n")}`] : []),
   ];
-  const tags = [...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])];
-  const user = `VERSE: ${ctx.v.label}
+  const tags = [...(tool === "deeper" ? ["Passage"] : []), ...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])];
+  const user = `${tool === "deeper" ? "[Passage] " : ""}VERSE: ${ctx.v.label}
 BSB: ${ctx.bsb}${ctx.kjv ? `\nKJV: ${ctx.kjv}` : ""}
 
-NEARBY VERSES (BSB):
+${tool === "deeper" ? "[Passage] " : ""}NEARBY VERSES (BSB):
 ${ctx.nearby}
 
 SOURCES:
@@ -267,7 +266,7 @@ export interface Checked {
   refsOutsideSources: string[];
 }
 
-const ALLOWED_TAGS = new Set<string>([...Object.keys(SOURCE_TAGS), "Lexicon", "Cross-ref"]);
+const ALLOWED_TAGS = new Set<string>([...Object.keys(SOURCE_TAGS), "Lexicon", "Cross-ref", "Passage"]);
 
 const citationTags = (text: string) => [...text.matchAll(/\[([A-Za-z-]+)\]/g)].map((m) => m[1]!);
 
@@ -278,12 +277,15 @@ export function checkAnswer(text: string, tool: AiTool, ctx: Pick<Context, "note
 
 /** Returns actionable feedback for the one retry. Never use unchecked text as a saved answer. */
 function validateAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" | "related" | "v" | "words">): Checked | string {
-  const titles = FORMATS[tool].titles;
-  const parts = text.trim().split(/^##\s+/m);
+  const fullTitles = FORMATS[tool].titles;
+  const parts = text.trim().split(/^##[ \t]+/m);
+  const titles = tool === "deeper" && parts.length === fullTitles.length
+    ? fullTitles.filter((title) => title !== "Life in biblical times")
+    : fullTitles;
   if (parts[0] !== "" || parts.length !== titles.length + 1) {
     return `Use exactly these headings, in order: ${titles.join(", ")}.`;
   }
-  const available = new Set<string>([...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])]);
+  const available = new Set<string>([...(tool === "deeper" ? ["Passage"] : []), ...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])]);
   const sections: Checked["sections"] = [];
   const tags: string[] = [];
   const problems: string[] = [];
@@ -296,7 +298,7 @@ function validateAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" |
       problems.push(`Section ${i + 1} must be "${expected}" with a nonempty body.`);
       continue;
     }
-    if (tool === "deeper" && expected === "Life in biblical times" && body === OPTIONAL_CONTEXT) continue;
+    if (tool === "deeper" && expected === "Life in biblical times" && body.replaceAll("’", "'") === OPTIONAL_CONTEXT) continue;
     const cited = citationTags(body);
     if (cited.some((tag) => !ALLOWED_TAGS.has(tag) || !available.has(tag))) {
       problems.push(`"${expected}" cites a source that was not supplied.`);
@@ -307,8 +309,14 @@ function validateAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" |
         problems.push(`"${expected}" needs ${required ? `[${required}]` : "a supplied source tag"} or the exact source-gap sentence if unsupported.`);
       }
     }
-    if (tool === "deeper" && expected === "Life in biblical times" && body === SOURCE_GAP) {
-      problems.push(`Use the exact customs fallback for "${expected}" when unsupported.`);
+    if (tool === "deeper" && body === SOURCE_GAP) {
+      const missingSpecificSource = (expected === "Original language" && !available.has("Lexicon")) ||
+        (expected === "Related passages" && !available.has("Cross-ref"));
+      if (!missingSpecificSource) {
+        problems.push(expected === "Life in biblical times"
+          ? `Use the exact customs fallback for "${expected}" when unsupported.`
+          : `Use the supplied material in "${expected}". For literary or historical context, describe only what the text itself shows and cite [Passage].`);
+      }
     }
     tags.push(...cited);
     sections.push({ title: expected, text: body });
@@ -340,6 +348,7 @@ class StudyValidationError extends HttpError {
 interface AnswerRow { sections: string; sources: string; model: string; created_at: number; status: string }
 
 const SOURCE_INFO: Record<string, { name: string; author: string; published: string; license: string; url: string }> = {
+  Passage: { name: "This passage and nearby Scripture", author: "Bundled Bible text", published: "", license: "Public domain", url: "https://berean.bible/" },
   JFB: { name: "Commentary Critical and Explanatory on the Whole Bible", author: "Jamieson, Fausset & Brown", published: "1871", license: "Public domain", url: "https://bible.helloao.org" },
   Henry: { name: "Commentary on the Whole Bible", author: "Matthew Henry", published: "1706", license: "Public domain", url: "https://bible.helloao.org" },
   Clarke: { name: "Commentary on the Bible", author: "Adam Clarke", published: "1831", license: "Public domain", url: "https://bible.helloao.org" },
