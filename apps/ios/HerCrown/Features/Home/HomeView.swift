@@ -5,6 +5,7 @@ import SwiftUI
 struct HomeView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model = HomeModel()
     @State private var showingStreak = false
     @State private var showingSaved = false
@@ -90,7 +91,7 @@ struct HomeView: View {
     private var header: some View {
         HStack(spacing: 4) {
             HStack(spacing: 8) {
-                Text(greeting).font(.system(size: 28)).tracking(-0.8)
+                Text(greeting).font(.system(size: 25)).tracking(-0.65)
                     .lineLimit(1).minimumScaleFactor(0.6)
                 Image.illustration("cosmos").resizable().scaledToFit().frame(width: 30, height: 36).accessibilityHidden(true)
             }
@@ -151,9 +152,27 @@ struct HomeView: View {
                 Spacer()
                 Badge(text: BibleStore.offline[verse.translation] ?? verse.translation.uppercased())
             }
-            Text(verse.text ?? "").font(.serif(29, relativeTo: .title2)).tracking(-0.45).lineSpacing(1.45)
-                .padding(.top, 28)
-                .fixedSize(horizontal: false, vertical: true)
+            Group {
+                if dynamicTypeSize.isAccessibilitySize {
+                    dailyVerseText(verse, size: 26)
+                } else {
+                    ViewThatFits(in: .vertical) {
+                        dailyVerseText(verse, size: 26)
+                        dailyVerseText(verse, size: 22)
+                        dailyVerseText(verse, size: 20)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(verse.text ?? "").font(.serif(20, relativeTo: .title2)).lineLimit(3)
+                            if let ref = VerseRef(verse.ref) {
+                                Button("Read full verse") { app.openInReader(ref) }
+                                    .font(.system(size: 13, weight: .medium))
+                            }
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .frame(height: 112, alignment: .topLeading)
+                }
+            }
+            .padding(.top, 20)
             HStack(spacing: 4) {
                 verseAction(app.isSaved(verse.ref) ? "heart.fill" : "heart", app.isSaved(verse.ref) ? "Remove from saved" : "Save verse", active: app.isSaved(verse.ref)) { app.toggleSave(verse.ref) }
                 verseAction("message", "Study this verse") { studyRef = VerseRef(verse.ref) }
@@ -162,7 +181,7 @@ struct HomeView: View {
                 }
                 .accessibilityLabel("Share verse")
             }
-            .padding(.top, 24)
+            .padding(.top, 12)
         }
         .foregroundStyle(Theme.text(scheme))
         .padding(EdgeInsets(top: 20, leading: 20, bottom: 12, trailing: 20))
@@ -182,6 +201,14 @@ struct HomeView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    private func dailyVerseText(_ verse: DayVerse, size: CGFloat) -> some View {
+        Text(verse.text ?? "")
+            .font(.serif(size, relativeTo: .title2))
+            .tracking(-0.4)
+            .lineSpacing(1.3)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private func verseAction(_ symbol: String, _ label: String, active: Bool = false, action: @escaping () -> Void) -> some View {

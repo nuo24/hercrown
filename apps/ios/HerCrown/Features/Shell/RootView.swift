@@ -52,7 +52,7 @@ struct CommunityView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     HStack(spacing: 4) {
-                        Text("Community").font(.system(size: 28)).tracking(-0.8)
+                        Text("Community").font(.system(size: 25)).tracking(-0.65)
                             .foregroundStyle(Theme.text(scheme))
                             .accessibilityAddTraits(.isHeader)
                         Spacer()
@@ -64,8 +64,8 @@ struct CommunityView: View {
                     VStack(spacing: 0) {
                         Image.illustration("community").resizable().scaledToFit()
                             .frame(width: 180, height: 160).accessibilityHidden(true)
-                        Text("Community").font(.serif(30, relativeTo: .largeTitle))
-                            .foregroundStyle(Theme.text(scheme)).padding(.top, 50)
+                        Text("Community").font(.serif(27, relativeTo: .largeTitle))
+                            .foregroundStyle(Theme.text(scheme)).padding(.top, 36)
                         Text("A place to connect and grow together.")
                             .font(.system(size: 14)).frame(minHeight: 22.4).padding(.top, 8)
                         Text("Community is coming soon.")

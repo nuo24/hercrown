@@ -48,7 +48,7 @@ struct DiscoverView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     // .app-header: 20/20/16, 28 pt title, 44 pt icon buttons
                     HStack(spacing: 4) {
-                        Text("Discover").font(.system(size: 28)).tracking(-0.8).foregroundStyle(Theme.text(scheme))
+                        Text("Discover").font(.system(size: 25)).tracking(-0.65).foregroundStyle(Theme.text(scheme))
                         Spacer()
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
                         IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
@@ -91,16 +91,16 @@ struct DiscoverView: View {
         let dark = scheme == .dark
         return HStack(alignment: .center, spacing: 2) {
             VStack(alignment: .leading, spacing: 14) {
-                Text(heroTitle).font(.serif(32, relativeTo: .title)).tracking(-0.6).fixedSize(horizontal: false, vertical: true)
+                Text(heroTitle).font(.serif(28, relativeTo: .title)).tracking(-0.6).fixedSize(horizontal: false, vertical: true)
                 Text(heroSubtitle).font(.system(size: 13)).lineSpacing(5.3).foregroundStyle(dark ? Color(hex: 0xC4D3C9) : Color(hex: 0x51605A))
             }
-            .frame(width: 180, alignment: .leading)
+            .frame(maxWidth: 180, alignment: .leading)
             .foregroundStyle(Theme.text(scheme))
             Spacer(minLength: 0)
-            Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 145, height: 163).accessibilityHidden(true)
+            Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 124, height: 136).accessibilityHidden(true)
         }
         .padding(EdgeInsets(top: 22, leading: 22, bottom: 20, trailing: 4))
-        .frame(maxWidth: .infinity, minHeight: 206)
+        .frame(maxWidth: .infinity, minHeight: 178)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous).fill(LinearGradient(
                 stops: dark
@@ -227,7 +227,7 @@ private struct DiscoverCard: View {
                 }
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.muted(scheme))
-                Text("“\(card.text)”").font(.serif(29, relativeTo: .title2)).tracking(-0.4).lineSpacing(2.9)
+                Text("“\(card.text)”").font(.serif(25, relativeTo: .title2)).tracking(-0.4).lineSpacing(2.9)
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 26)
                 Text(translationName).font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 16)
                 if let reflection = card.reflection {

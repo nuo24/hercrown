@@ -7,8 +7,8 @@ enum AppTab: String, CaseIterable, Identifiable {
     var symbol: String { switch self { case .bible: "book"; case .community: "person.2"; case .discover: "safari"; case .home: "house" } }
 }
 
-/// .liquid-dock: 80 pt translucent glass capsule 14 pt from the screen edges, 3 pt inset, four 72 pt tabs, 25 pt icons,
-/// 12 pt labels; the active tab sits in a sliding glass pill (values from the mockup, light and dark).
+/// .liquid-dock: 64 pt translucent glass capsule 14 pt from the screen edges, 3 pt inset, four 58 pt tabs, 20 pt icons,
+/// 11 pt labels; the active tab sits in a sliding glass pill (values from the mockup, light and dark).
 struct Dock: View {
     @Binding var selection: AppTab
     @Environment(\.colorScheme) private var scheme
@@ -23,12 +23,12 @@ struct Dock: View {
                 Button {
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) { selection = tab }
                 } label: {
-                    VStack(spacing: 5) {
-                        Image(systemName: tab.symbol).font(.system(size: 25, weight: active ? .medium : .regular)).frame(height: 25)
-                        Text(tab.title).font(.system(size: 12, weight: active ? .semibold : .regular))
+                    VStack(spacing: 4) {
+                        Image(systemName: tab.symbol).font(.system(size: 20, weight: active ? .medium : .regular)).frame(height: 22)
+                        Text(tab.title).font(.system(size: 11, weight: active ? .semibold : .regular))
                     }
                     .foregroundStyle(active ? (dark ? Color.white : Color(hex: 0x111111)) : (dark ? Color(hex: 0xC0C5C7) : Color(hex: 0x717177)))
-                    .frame(maxWidth: .infinity, minHeight: 74)
+                    .frame(maxWidth: .infinity, minHeight: 58)
                     .background {
                         if active {
                             Capsule()
@@ -46,14 +46,14 @@ struct Dock: View {
             }
         }
         .padding(3)
-        .frame(height: 80)
+        .frame(height: 64)
         .background {
             Capsule()
                 .fill(reduceTransparency ? AnyShapeStyle(dark ? Color(hex: 0x292929) : Color(hex: 0xF7F7F8))
                                          : AnyShapeStyle(.ultraThinMaterial))
                 .overlay(Capsule().fill(dark ? Color(red: 41 / 255, green: 41 / 255, blue: 41 / 255, opacity: 0.52) : Color.white.opacity(0.439)))
                 .overlay(Capsule().strokeBorder(Color.white.opacity(dark ? 0.28 : 0.59), lineWidth: 1))
-                .shadow(color: dark ? .black.opacity(0.6) : Color(red: 24 / 255, green: 45 / 255, blue: 60 / 255, opacity: 0.15), radius: 9, y: 10)
+                .shadow(color: dark ? .black.opacity(0.6) : Color(red: 24 / 255, green: 45 / 255, blue: 60 / 255, opacity: 0.15), radius: 7, y: 6)
                 .shadow(color: dark ? .black.opacity(0.4) : Color(red: 35 / 255, green: 53 / 255, blue: 61 / 255, opacity: 0.15), radius: 3, y: 3)
         }
         .frame(maxWidth: 412)
