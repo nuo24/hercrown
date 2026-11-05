@@ -111,7 +111,7 @@ struct HomeView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)
-        .padding(.bottom, 16)
+        .padding(.bottom, 18)
     }
 
     private var greeting: String {
@@ -151,7 +151,7 @@ struct HomeView: View {
                 Spacer()
                 Badge(text: BibleStore.offline[verse.translation] ?? verse.translation.uppercased())
             }
-            Text(verse.text ?? "").font(.serif(29, relativeTo: .title2)).tracking(-0.45).lineSpacing(1.5)
+            Text(verse.text ?? "").font(.serif(29, relativeTo: .title2)).tracking(-0.45).lineSpacing(1.45)
                 .padding(.top, 28)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 4) {
@@ -400,16 +400,16 @@ private struct SeasonCard: View {
         let colors: [Color] = faith
             ? (dark ? [Color(hex: 0x293B30), Color(hex: 0x222E28)] : [Color(hex: 0xE7EEE5), Color(hex: 0xF4F7EF)])
             : (dark ? [Color(hex: 0x293C4B), Color(hex: 0x232E38)] : [Color(hex: 0xE2EDF5), Color(hex: 0xF1F4F7)])
-        let ink: Color = faith ? (dark ? Color(hex: 0xEFF4EE) : Color(hex: 0x111111)) : (dark ? Color(hex: 0xEFF5FA) : Color(hex: 0x273B4C))
+        let ink: Color = faith ? (dark ? Color(hex: 0xEFF4EE) : Color(hex: 0x1F342A)) : (dark ? Color(hex: 0xEFF5FA) : Color(hex: 0x273B4C))
         let sub: Color = faith ? (dark ? Color(hex: 0xC2D3C6) : Color(hex: 0x506354)) : (dark ? Color(hex: 0xC4D3E0) : Color(hex: 0x526574))
         Button(action: action) {
             VStack(alignment: .leading, spacing: 0) {
-                Image(faith ? "faith-hands" : "purpose-compass").resizable().scaledToFit().frame(width: 145, height: 134).frame(maxWidth: .infinity)
+                Image(faith ? "faith-hands" : "purpose-compass").resizable().scaledToFit().frame(height: 134).frame(maxWidth: .infinity)
                     .accessibilityHidden(true)
                 Text(faith ? "Rooted in faith" : "Find your next step").font(.serif(23, relativeTo: .title3)).tracking(-0.3)
                     .foregroundStyle(ink).fixedSize(horizontal: false, vertical: true).padding(.top, 12)
                 Text(faith ? "Find a little reassurance" : "Explore your purpose").font(.system(size: 11)).foregroundStyle(sub).padding(.top, 9)
-                Image(systemName: "arrow.right").font(.system(size: 16)).foregroundStyle(ink).padding(.top, 15)
+                Image(systemName: "arrow.right").font(.system(size: 18)).foregroundStyle(ink).padding(.top, 15)
                 Spacer(minLength: 0)
             }
             .multilineTextAlignment(.leading)
