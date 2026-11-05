@@ -10,6 +10,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
     @State private var legal: LegalPage?
+    #if DEBUG
+    @State private var previewPage = false
+    #endif
     @State private var reminderTime = Date()
     @State private var reminderDenied = false
 
@@ -104,6 +107,21 @@ struct SettingsView: View {
                 .clipped()
             }
             .toolbar(.hidden, for: .navigationBar)
+            #if DEBUG
+            .navigationDestination(isPresented: $previewPage) {
+                switch UserDefaults.standard.string(forKey: "hcPreviewSettings") {
+                case "account": AccountView()
+                case "subscription": SubscriptionView()
+                case "topics": TopicsView()
+                default: EmptyView()
+                }
+            }
+            .task {
+                guard let page = UserDefaults.standard.string(forKey: "hcPreviewSettings") else { return }
+                if let destination = LegalPage(rawValue: page) { legal = destination }
+                else { previewPage = true }
+            }
+            #endif
         }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .onAppear {
@@ -141,7 +159,9 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text(app.displayName.flatMap { $0 == "Guest" ? nil : "Hi, \($0.split(separator: " ").first.map(String.init) ?? $0)." } ?? "Hi there.")
                     .font(.serif(30, relativeTo: .title)).tracking(-0.5)
-                Text("A little space, just for you.").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                Text("A little space, just for you.").font(.system(size: 12))
+                    .frame(minHeight: 18).foregroundStyle(Theme.muted(scheme))
+                    .padding(.bottom, 8)
             }
             Spacer(minLength: 0)
             Image(systemName: "chevron.right").font(.system(size: 15)).foregroundStyle(Theme.text(scheme)).frame(width: 36, height: 44)
