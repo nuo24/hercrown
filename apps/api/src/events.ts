@@ -5,6 +5,8 @@
 // Purchases are counted only from verified store webhooks, never from what the app says happened.
 
 import { badRequest, HttpError, readJson } from "./http";
+import devotionals from "../../../content/devotionals.json";
+import verses from "./content/verses.json";
 
 export const DATASOURCE = "events";
 
@@ -41,31 +43,85 @@ export type ServerEvent =
   | "support_sent" | "note_saved" | "chapter_completed" | "devotional_read" | "study_saved"
   | "error";
 
-type Kind = "string" | "number" | "boolean";
-const PAYWALL: Record<string, Kind> = { placement: "string", paywall_id: "string", variant: "string", experiment_id: "string" };
+// String values must be known labels or machine IDs. A type check alone would let private text through.
+type PropRule = "number" | "boolean" | readonly string[] | RegExp;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const placement = [
+  "onboarding_complete", "study_explain", "study_deeper", "study_original", "study_related",
+  "plan_start", "settings", "settings_subscription", "paywall_decline", "transaction_abandon",
+];
+const PAYWALL: Record<string, PropRule> = {
+  placement,
+  paywall_id: /^\d{1,8}$/,
+  variant: ["A", "B", "C", "D", "control", "treatment", "holdout"],
+  experiment_id: UUID,
+};
+const products = ["hercrown.plus.yearly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"];
+const plans = ["quiet", "peace", "strength"];
+const tabs = ["bible", "community", "discover", "home"];
 
 /** Events the app may send to POST /events, with the only props kept for each. */
-export const CLIENT_EVENTS: Record<string, Record<string, Kind>> = {
+export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   app_opened: {},
-  onboarding_step: { step: "string", index: "number" },
+  onboarding_step: { step: ["welcome", "time", "intention", "familiarity", "topics", "rhythm", "reminder", "ready"], index: "number" },
+  paywall_requested: { placement },
   paywall_viewed: PAYWALL,
+  paywall_closed: {},
   paywall_declined: PAYWALL,
+  paywall_error: { placement }, // Never forward localizedDescription.
+  paywall_skipped: {
+    placement,
+    reason: [
+      "The paywall was skipped because the placement is not part of a campaign.",
+      "The paywall was skipped because the user is part of a holdout.",
+      "The paywall was skipped because the user doesn't match any audience.",
+    ],
+  },
   decline_offer_viewed: PAYWALL,
   decline_offer_declined: PAYWALL,
-  purchase_started: { ...PAYWALL, product_id: "string" }, // the tap; the purchase itself comes from the store webhook
-  purchase_failed: { ...PAYWALL, product_id: "string", reason: "string" },
+  purchase_started: { ...PAYWALL, product_id: products },
+  purchase_failed: { ...PAYWALL, product_id: products },
+  purchase_abandoned: {},
+  purchase_completed_client: {},
+  trial_started_client: {},
   restore_tapped: {},
-  push_permission: { granted: "boolean", placement: "string" },
-  trial_notice_viewed: { placement: "string" }, // the in-app "trial ends soon" notice (home or settings)
-  manage_subscription_tapped: { placement: "string" },
-  error: { message: "string", stack: "string", screen: "string" },
+  push_permission: { granted: "boolean", placement: ["onboarding_reminder", "trial_started"] },
+  push_register_failed: {},
+  trial_notice_viewed: { placement: ["home", "settings"] },
+  manage_subscription_tapped: { placement: ["home", "settings"] },
+  error: { screen: [...tabs, "onboarding", "settings"] },
+  signed_in: { method: ["apple"] },
+  profile_updated: {},
+  avatar_updated: {},
+  account_deleted: {},
+  settings_viewed: {},
+  setting_changed: { setting: ["appearance"], value: ["system", "light", "dark"] },
+  support_opened: {},
+  topics_updated: { count: "number" },
+  tab_viewed: { tab: tabs },
+  library_viewed: {},
+  translation_changed: { translation: ["kjv", "bsb", "web"] },
+  study_opened: { tool: ["explain", "deeper", "original", "related"] },
+  verse_search_studied: {}, // Keep the event, strip the verse reference.
+  note_saved: {},
+  discover_viewed: { filter: ["for-you", "plan", ...verses.themes] },
+  discover_card_read: {},
+  home_topic_opened: { topic: ["Faith", "Purpose"] },
+  day_marked_read: { source: ["home"] },
+  streak_viewed: { current: "number" },
+  plans_viewed: {},
+  plan_viewed: { plan: plans, locked: "boolean" },
+  plan_started: { plan: plans },
+  plan_step_read: { plan: plans, step: "number" },
+  devotional_opened: {
+    id: devotionals.devotionals.filter((d) => d.approved && d.approvedBy?.trim()).map((d) => d.id),
+  },
 };
 
 const MAX_BATCH = 50;
 const MAX_TEXT = 200;
 const MAX_STACK = 4000;
 const MAX_AGE_MS = 30 * 86_400_000; // queued offline for longer than this: dropped
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const VERSION = /^[\w.+\-() ]{1,32}$/;
 const BUILDS = ["appstore", "testflight", "debug"] as const;
 
@@ -228,14 +284,18 @@ export async function receiveEvents(request: Request, tracker: Tracker): Promise
   return Response.json({ accepted: rows.length, rejected }, { status: 202 });
 }
 
-function cleanProps(raw: unknown, spec: Record<string, Kind>): Props {
+function cleanProps(raw: unknown, spec: Record<string, PropRule>): Props {
   const props: Props = {};
   if (!raw || typeof raw !== "object") return props;
-  for (const [key, kind] of Object.entries(spec)) {
+  for (const [key, rule] of Object.entries(spec)) {
     const value = (raw as Record<string, unknown>)[key];
-    if (typeof value !== kind) continue;
-    if (kind === "number" && !Number.isFinite(value)) continue;
-    props[key] = typeof value === "string" ? value.slice(0, key === "stack" ? MAX_STACK : MAX_TEXT) : (value as number | boolean);
+    if (rule === "number") {
+      if (typeof value === "number" && Number.isFinite(value)) props[key] = value;
+    } else if (rule === "boolean") {
+      if (typeof value === "boolean") props[key] = value;
+    } else if (typeof value === "string" && (rule instanceof RegExp ? rule.test(value) : rule.includes(value))) {
+      props[key] = value;
+    }
   }
   return props;
 }

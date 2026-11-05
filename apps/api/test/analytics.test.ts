@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 import { env } from "cloudflare:workers";
 import { createExecutionContext, createMessageBatch, getQueueResult } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -40,6 +42,29 @@ beforeEach(async () => {
 afterEach(() => vi.restoreAllMocks());
 
 describe("POST /events (from the app)", () => {
+  it("accepts every event emitted by iOS, including Superwall delegate events", async () => {
+    const sources = import.meta.glob<string>("../../ios/HerCrown/**/*.swift", {
+      eager: true, query: "?raw", import: "default",
+    });
+    const calls = Object.values(sources).flatMap((source) =>
+      [...source.matchAll(/Analytics\.shared\.track\(\s*(?:"([a-z_]+)"|(\w+))/g)]);
+    const dynamicCalls = calls.flatMap(([, , expression]) => expression ? [expression] : []);
+    expect(dynamicCalls).toEqual(["name"]); // The delegate switch is the only indirect call.
+    const billing = sources["../../ios/HerCrown/Core/Billing.swift"]!;
+    const delegate = billing.match(/let name: String\? = switch eventInfo\.event \{([^}]+)\}/)?.[1] ?? "";
+    const delegateEvents = [...delegate.matchAll(/case\s+\.\w+:\s*"([a-z_]+)"/g)].map((match) => match[1]!);
+    expect(delegateEvents).toContain("purchase_completed_client");
+    const names = [...new Set([...calls.flatMap(([, name]) => name ? [name] : []), ...delegateEvents])];
+
+    for (let offset = 0; offset < names.length; offset += 50) {
+      const batch = names.slice(offset, offset + 50);
+      const res = await send(batch.map((name) => ({ id: crypto.randomUUID(), name })), token);
+      expect(res.status).toBe(202);
+      expect(await res.json(), batch.join(", ")).toEqual({ accepted: batch.length, rejected: [] });
+    }
+    expect(rows.map((row) => row.event)).toEqual(names);
+  });
+
   it("queues listed events with the app's context and the person id", async () => {
     const id = crypto.randomUUID();
     const res = await send([{ id, name: "paywall_viewed", at: Date.now() - 1000, props: { placement: "onboarding_complete", variant: "A" } }], token);
@@ -88,6 +113,30 @@ describe("POST /events (from the app)", () => {
     expect(JSON.parse(rows[0]!.props)).toEqual({ step: "topics", index: 3 });
     await send([{ id: crypto.randomUUID(), name: "onboarding_step", props: { step: 4, index: "4" } }], token);
     expect(JSON.parse(rows[1]!.props)).toEqual({});
+  });
+
+  it("keeps safe iOS values and strips Scripture references and free-form diagnostics", async () => {
+    const skip = "The paywall was skipped because the user doesn't match any audience.";
+    const payloads = [
+      { name: "paywall_skipped", props: { placement: "settings_subscription", reason: skip } },
+      { name: "paywall_skipped", props: { placement: "Hannah", reason: "a@b.co" } },
+      { name: "paywall_error", props: { placement: "plan_start", message: "a@b.co", stack: "private text" } },
+      { name: "error", props: { screen: "home", message: "a@b.co", stack: "private text" } },
+      { name: "discover_card_read", props: { ref: "PSA.23.1", text: "verse text" } },
+      { name: "verse_search_studied", props: { ref: "PSA.23.1", note: "private note" } },
+      { name: "plan_viewed", props: { plan: "peace", locked: false } },
+      { name: "plan_step_read", props: { plan: "Hannah", step: 2 } },
+      { name: "devotional_opened", props: { id: "private-note" } },
+      { name: "devotional_opened", props: { id: "forget-not-his-benefits" } },
+      { name: "setting_changed", props: { setting: "appearance", value: "dark", name: "Hannah" } },
+    ];
+    const res = await send(payloads.map((payload) => ({ id: crypto.randomUUID(), ...payload })), token);
+    expect(await res.json()).toEqual({ accepted: payloads.length, rejected: [] });
+    expect(rows.map((row) => JSON.parse(row.props))).toEqual([
+      { placement: "settings_subscription", reason: skip }, {}, { placement: "plan_start" }, { screen: "home" },
+      {}, {}, { plan: "peace", locked: false }, { step: 2 }, {}, { id: "forget-not-his-benefits" },
+      { setting: "appearance", value: "dark" },
+    ]);
   });
 
   it("marks TestFlight and debug builds as sandbox", async () => {

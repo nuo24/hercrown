@@ -9,9 +9,9 @@ Worker (onboarding, verified webhooks, restore, errors, features) ──┘
 
 ## Rules
 
-- **Purchases come only from verified Superwall webhooks.** The app can't send `trial_started`, `subscription_started`, `trial_converted` or any other billing event; `POST /events` rejects them. What the app reports (`purchase_started`) is a tap, not a sale.
+- **Purchases come only from verified Superwall webhooks.** `POST /events` rejects `trial_started`, `subscription_started`, `trial_converted` and other verified billing event names. The separate client events describe the checkout UI and never grant Plus or count toward revenue or trial conversions.
 - **One fact, one id.** Server events that must count once have deterministic ids: `trial_started:<original transaction id>`, `trial_converted:<original transaction id>`, `subscription_started:<original transaction id>`, `refunded:<transaction id>`, `onboarding_completed:<person id>`; other store events use Superwall's store event id, which is the same in webhook V1 and V2. App events use a UUID the app makes once and reuses on retry. Tinybird merges rows with the same `(event, event_id)` (ReplacingMergeTree); the funnel counts distinct people, so a duplicate never inflates it.
-- **Privacy.** Events carry a pseudonymous `person_id` (a random user id), an install id, app version, platform and country (from Cloudflare). Never names, emails, Apple ids, onboarding answers (intentions, topics), notes or verse references. Billing events carry product, period type, store, and USD price and proceeds only. Reading events say that a passage was read or saved, not which one. Tests enforce this ([analytics.test.ts](../apps/api/test/analytics.test.ts)).
+- **Privacy.** Events carry a pseudonymous `person_id` (a random user id), an install id, app version, platform and country (from Cloudflare). Client props accept only listed keys and types. Strings must be predefined labels or approved IDs. Names, emails, onboarding answers, note text, verse text and references, and free-form error messages and stacks are stripped at ingestion. Reading events record the action without the passage. Tests enforce this ([analytics.test.ts](../apps/api/test/analytics.test.ts)).
 - **One person across sign-in.** When a guest links Sign in with Apple and gets a new user id, the new account keeps the guest's `person_id` (`analytics_ids` table), so the funnel isn't split. If the Apple account already existed, it keeps its own id and an `account_linked {previous_person_id}` event records the link. The row is deleted with the account.
 - **Analytics never breaks the app.** Server events are queued after the response; failures are logged and dropped. Without `TINYBIRD_TOKEN` (local dev), the queue consumer logs the events instead of sending them.
 - **Sandbox is separate.** `sandbox = 1` for store sandbox purchases (TestFlight, App Review) and for app builds that aren't from the App Store (`X-Build: testflight | debug`). Endpoints exclude it unless `include_sandbox=1`. `environment` is the Worker's `APP_ENV` (dev, staging, production).
@@ -20,17 +20,7 @@ Worker (onboarding, verified webhooks, restore, errors, features) ──┘
 
 | Event | From | Props | When |
 |---|---|---|---|
-| `app_opened` | app | | Every launch/foreground. Allowed before sign-in. |
-| `onboarding_step` | app | `step`, `index` | Each onboarding screen shown |
 | `onboarding_completed` | server | `version` | First `POST /me/onboarding/complete` for this person |
-| `paywall_viewed` | app | `placement`, `paywall_id`, `variant`, `experiment_id` | Superwall `paywallOpen` for the main paywall |
-| `paywall_declined` | app | same | Superwall `paywallDecline` on the main paywall |
-| `decline_offer_viewed` | app | same | `paywallOpen` for the $19.99 offer (presented by the `paywall_decline` placement) |
-| `decline_offer_declined` | app | same | `paywallDecline` on the offer; the free reader opens |
-| `purchase_started` / `purchase_failed` | app | paywall props + `product_id` (+ `reason`) | Buy tapped / StoreKit error or cancel |
-| `restore_tapped` | app | | Restore button tapped |
-| `push_permission` | app | `granted`, `placement` | After the iOS notification prompt |
-| `trial_notice_viewed` / `manage_subscription_tapped` | app | `placement` | In-app trial-ending notice shown / Manage tapped |
 | `trial_reminder_sent` | server | `product_id`, `devices`, `hours_left` | Trial-ending push delivered to Apple ([trial-reminder.md](trial-reminder.md)) |
 | `trial_started` | webhook | `product_id`, `period_type`, `store`, `price`, `proceeds` | `initial_purchase` with period TRIAL |
 | `subscription_started` | webhook | same | `initial_purchase` without a trial (INTRO = the $19.99 offer) |
@@ -43,7 +33,52 @@ Worker (onboarding, verified webhooks, restore, errors, features) ──┘
 | `ai_call` | server | `feature`, `model`, `tokens_in`, `tokens_out`, `latency_ms`, `cost_usd`, `ok` | Every model call ([study-tools.md](study-tools.md)) |
 | `study_viewed` / `study_reported` | server | `tool`, `cached` / `tool`, `reason` | A study opened (stored or new) / reported |
 | `note_saved`, `study_saved`, `chapter_completed`, `devotional_read`, `support_sent` | server | `tool`/`saved`, `devotional_id`, `category` (never note or message text) | The action succeeded |
-| `error` | both | `source`, `message`, `stack`, `route`/`method` (api) or `screen` (ios) | Unhandled server error (500); app crash or error |
+| `error` | server | `source`, `message`, `stack`, `route`, `method` | Unhandled server error (500) |
+
+### iOS client events
+
+All props below are optional. Types are string unless marked number or bool. The `source` column on the stored row is `ios`, including for names also emitted by the server (`plan_started`, `note_saved`, and `error`).
+
+| Event | Props kept | When |
+|---|---|---|
+| `app_opened` | — | App opens, including before sign-in |
+| `onboarding_step` | `step`, `index` (number) | An onboarding screen appears |
+| `paywall_requested` | `placement` | The app requests a paywall |
+| `paywall_viewed`, `paywall_declined` | Paywall props | Superwall opens a paywall or reports a decline |
+| `paywall_closed` | — | Superwall closes a paywall |
+| `paywall_error` | `placement` | Paywall presentation fails. The raw message is dropped. |
+| `paywall_skipped` | `placement`, `reason` | Superwall skips a placement. Only its fixed skip reasons are kept. |
+| `decline_offer_viewed`, `decline_offer_declined` | Paywall props | Reserved for separate offer tracking |
+| `purchase_started`, `purchase_failed` | Paywall props and `product_id` | Superwall reports a checkout start or failure |
+| `purchase_abandoned` | — | Superwall reports checkout abandonment |
+| `purchase_completed_client`, `trial_started_client` | — | Superwall reports a client checkout or free trial success |
+| `restore_tapped` | — | The app starts a restore |
+| `push_permission` | `granted` (bool), `placement` | The notification permission prompt resolves |
+| `push_register_failed` | — | APNs token registration fails |
+| `trial_notice_viewed`, `manage_subscription_tapped` | `placement` | Reserved for the trial notice and manage subscription interaction |
+| `signed_in` | `method` | Sign in with Apple succeeds |
+| `profile_updated`, `avatar_updated`, `account_deleted` | — | The account action succeeds |
+| `settings_viewed`, `support_opened` | — | Settings or Support opens |
+| `setting_changed` | `setting`, `value` | Appearance changes |
+| `topics_updated` | `count` (number) | The number of selected topics changes |
+| `tab_viewed` | `tab` | The app switches tabs |
+| `library_viewed` | — | Saved passages opens |
+| `translation_changed` | `translation` | The reader changes translation |
+| `study_opened` | `tool` | A study tool opens |
+| `verse_search_studied`, `discover_card_read` | — | A search result opens for study or a Discover card is marked studied |
+| `note_saved` | — | A note is saved |
+| `discover_viewed` | `filter` | Discover loads for a selected filter |
+| `home_topic_opened` | `topic` | A Home topic card opens Discover |
+| `day_marked_read` | `source` | Today is marked read from Home |
+| `streak_viewed` | `current` (number) | Streak details open |
+| `plans_viewed` | — | The plans list opens |
+| `plan_viewed` | `plan`, `locked` (bool) | Plan details open |
+| `plan_started` | `plan` | The app attempts to start a new plan. Use the server event to count successful starts. |
+| `plan_step_read` | `plan`, `step` (number) | The reader opens a plan step |
+| `devotional_opened` | `id` | An approved devotional opens |
+| `error` | `screen` | Reserved for client errors. Messages and stacks are dropped. |
+
+Paywall props are `placement`, `paywall_id`, `variant`, and `experiment_id`. The current Superwall delegate forwards the event names without props. The Worker keeps the safe fields for clients that include them.
 
 A purchase webhook that can't be matched to an account is still recorded (revenue stays complete) with `person_id` null, so it's left out of per-person funnel rates.
 
@@ -82,8 +117,8 @@ Other endpoints: `installs.pipe` (top of funnel), `revenue.pipe` (daily trials, 
 
 ## Verified
 
-**Locally (21 tests in `analytics.test.ts`, plus the earlier suites):**
-- `POST /events` accepts listed events, refuses server-only and unknown events, bad ids and stale events, and strips unlisted props. It works before sign-in, flags sandbox builds, and adds the person, install, version and platform.
+**Locally (`analytics.test.ts`):**
+- `POST /events` accepts every event emitted by the Swift source, including the Superwall delegate mapping. It refuses server-only and unknown events, bad ids and stale events, strips unsafe props, works before sign-in, flags sandbox builds, and adds the person, install, version and platform.
 - Onboarding completion counts once per person.
 - Trial start → conversion → renewal from V2 webhooks:
   - A redelivery keeps the same `event_id`.
