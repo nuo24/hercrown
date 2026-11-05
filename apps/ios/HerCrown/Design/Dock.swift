@@ -24,17 +24,17 @@ struct Dock: View {
                     withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) { selection = tab }
                 } label: {
                     VStack(spacing: 5) {
-                        Image(systemName: tab.symbol).font(.system(size: 21, weight: active ? .medium : .light)).frame(height: 25)
+                        Image(systemName: tab.symbol).font(.system(size: 25, weight: active ? .medium : .regular)).frame(height: 25)
                         Text(tab.title).font(.system(size: 12, weight: active ? .semibold : .regular))
                     }
                     .foregroundStyle(active ? (dark ? Color.white : Color(hex: 0x111111)) : (dark ? Color(hex: 0xC0C5C7) : Color(hex: 0x717177)))
-                    .frame(maxWidth: .infinity, minHeight: 72)
+                    .frame(maxWidth: .infinity, minHeight: 74)
                     .background {
                         if active {
                             Capsule()
-                                .fill(Color.white.opacity(dark ? 0.14 : 0.9))
+                                .fill(Color.white.opacity(dark ? 0.14 : 0.396))
                                 .overlay(Capsule().strokeBorder(LinearGradient(colors: [Color.white.opacity(dark ? 0.27 : 0.7), .clear], startPoint: .top, endPoint: .center), lineWidth: 1))
-                                .shadow(color: Color(red: 25 / 255, green: 61 / 255, blue: 73 / 255, opacity: dark ? 0 : 0.25), radius: 4, y: 3)
+                                .shadow(color: Color(red: 25 / 255, green: 61 / 255, blue: 73 / 255, opacity: dark ? 0 : 0.12), radius: 4, y: 3)
                                 .matchedGeometryEffect(id: "pill", in: pill)
                         }
                     }
@@ -51,11 +51,12 @@ struct Dock: View {
             Capsule()
                 .fill(reduceTransparency ? AnyShapeStyle(dark ? Color(hex: 0x292929) : Color(hex: 0xF7F7F8))
                                          : AnyShapeStyle(.ultraThinMaterial))
-                .overlay(Capsule().fill(dark ? Color(red: 41 / 255, green: 41 / 255, blue: 41 / 255, opacity: 0.52) : Color.white.opacity(0.72)))
+                .overlay(Capsule().fill(dark ? Color(red: 41 / 255, green: 41 / 255, blue: 41 / 255, opacity: 0.52) : Color.white.opacity(0.439)))
                 .overlay(Capsule().strokeBorder(Color.white.opacity(dark ? 0.28 : 0.59), lineWidth: 1))
-                .shadow(color: dark ? .black.opacity(0.6) : Color(red: 24 / 255, green: 45 / 255, blue: 60 / 255, opacity: 0.12), radius: 9, y: 10)
+                .shadow(color: dark ? .black.opacity(0.6) : Color(red: 24 / 255, green: 45 / 255, blue: 60 / 255, opacity: 0.15), radius: 9, y: 10)
                 .shadow(color: dark ? .black.opacity(0.4) : Color(red: 35 / 255, green: 53 / 255, blue: 61 / 255, opacity: 0.15), radius: 3, y: 3)
         }
+        .frame(maxWidth: 412)
         .padding(.horizontal, 14)
     }
 }
