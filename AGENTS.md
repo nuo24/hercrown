@@ -48,6 +48,7 @@ Local secrets live in `apps/api/.dev.vars` (copy `.dev.vars.example`). Node 22 /
 6. Never touch production data, deploy to production, or commit secrets.
 7. Decisions go in `docs/decisions/NNNN-title.md`; parked ideas in `docs/later.md`; progress in `docs/progress.md`.
 8. Settings edits never reset onboarding. Fixtures and mock data are never presented as real.
+9. Deploy and archive only from a clean Git checkout. Record the source commit with the Cloudflare version or TestFlight build number in `docs/progress.md`.
 
 ## Done means
 
