@@ -10,7 +10,12 @@ struct ReaderView: View {
     @State private var studyRef: VerseRef?
     @State private var reflectRef: VerseRef?
 
-    init(app: AppModel) { _model = State(initialValue: ReaderModel(app: app)) }
+    init(app: AppModel) {
+        _model = State(initialValue: ReaderModel(app: app))
+        #if DEBUG
+        _showingChapters = State(initialValue: UserDefaults.standard.bool(forKey: "hcPreviewChapterPicker"))
+        #endif
+    }
 
     var body: some View {
         ZStack(alignment: .topLeading) {

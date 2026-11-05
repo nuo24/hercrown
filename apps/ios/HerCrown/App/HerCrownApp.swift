@@ -26,7 +26,12 @@ struct HerCrownApp: App {
     }
 
     private var colorScheme: ColorScheme? {
-        switch app.preferences.appearance {
+        #if DEBUG
+        let appearance = UserDefaults.standard.string(forKey: "hcPreviewAppearance") ?? app.preferences.appearance
+        #else
+        let appearance = app.preferences.appearance
+        #endif
+        return switch appearance {
         case "light": .light
         case "dark": .dark
         default: nil
