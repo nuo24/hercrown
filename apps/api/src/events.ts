@@ -78,6 +78,8 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
     ],
   },
   decline_offer_viewed: PAYWALL,
+  return_offer_viewed: { kind: ["decline", "trial"] },
+  return_offer_dismissed: { kind: ["decline", "trial"] },
   decline_offer_declined: PAYWALL,
   purchase_started: { ...PAYWALL, product_id: products },
   purchase_failed: { ...PAYWALL, product_id: products },

@@ -105,6 +105,9 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 | Call | Use |
 |---|---|
 | `GET /me/entitlements` | Subscription row (`trial` details while trialing) |
+| `POST /me/return-offer/decline` | Staging only. Records the first Main paywall decline for a free user. |
+| `POST /me/return-offer/impression` `{ kind: "decline" \| "trial" }` | Staging only. Checks eligibility and atomically reserves one display per account per rolling 24 hours. |
+| `POST /me/trial-return-offer` | Staging only. Signs the Apple promotional offer for a verified annual sandbox trial with auto-renew disabled. |
 | `POST /me/restore` `{ transactionId }` | Restore Purchases ([restore-purchases.md](restore-purchases.md)) |
 | `GET /me/support` · `POST /me/support` `{ category, message, contactEmail?, contactPreference? }` | Contact & Support. Returns reference `HC-XXXXXXXX`. 5 per day |
 | `GET /legal/{privacy\|terms\|refunds\|credits\|support}` | In-app reading pages (`?format=md` for Markdown) and the App Store URLs |

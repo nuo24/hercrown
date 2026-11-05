@@ -1,8 +1,7 @@
-import { APPLE_STATUS, subscriptionStatuses } from "./appstore";
-import { es256Jwt } from "./jwt";
+import { recordOfferDecline, reserveReturnOffer, signTrialReturnOffer } from "./return-offers";
 // The whole API as one fetch handler. No router framework (ai-app-playbook chapter 02).
 import { getAuth } from "./auth";
-import { ENTITLEMENT, entitlementFor, handleSuperwallWebhook } from "./billing";
+import { entitlementFor, handleSuperwallWebhook } from "./billing";
 import { deliverEvents, type EventRow, receiveEvents, requestContext, type ServerEvent, Tracker } from "./events";
 import { errorResponse, HttpError } from "./http";
 import { getDevotional, getDiscover, getRandomVerse, getTodaysDevotional, getVerseOfTheDay, getWidget, markDevotionalRead } from "./content";
@@ -100,29 +99,12 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
       return getMe(env, user);
     case "GET /me/entitlements":
       return Response.json(await entitlementFor(env, user.id));
-    case "POST /me/trial-return-offer": {
-      if (env.APP_ENV !== "staging") throw new HttpError(404, "not_found", "Offer unavailable");
-      const row = await env.DB.prepare(
-        "SELECT original_transaction_id FROM entitlements WHERE user_id = ?1 AND entitlement = ?2 AND environment = 'SANDBOX'",
-      ).bind(user.id, ENTITLEMENT).first<{ original_transaction_id: string | null }>();
-      const originalId = row?.original_transaction_id;
-      const result = originalId ? await subscriptionStatuses(env, originalId) : null;
-      const productId = "hercrown.plus.yearly";
-      const transaction = result?.subscriptions.find(({ status, transaction: tx, renewal }) =>
-        status === APPLE_STATUS.ACTIVE && tx.originalTransactionId === originalId &&
-        tx.productId === productId && tx.offerType === 1 && tx.offerDiscountType === "FREE_TRIAL" &&
-        (tx.expiresDate ?? 0) > Date.now() && renewal?.autoRenewStatus === 0
-      )?.transaction;
-      if (result?.environment !== "sandbox" || !transaction) {
-        throw new HttpError(403, "offer_ineligible", "This offer is unavailable for your subscription.");
-      }
-      const token = await es256Jwt(env.APP_STORE_PRIVATE_KEY, { kid: env.APP_STORE_KEY_ID }, {
-        iss: env.APP_STORE_ISSUER_ID, bid: env.APPLE_APP_BUNDLE_IDENTIFIER, aud: "promotional-offer",
-        iat: Math.floor(Date.now() / 1000), nonce: crypto.randomUUID(), productId,
-        offerIdentifier: "trial_return_1999", transactionId: transaction.transactionId,
-      });
-      return Response.json({ token }, { headers: { "Cache-Control": "no-store" } });
-    }
+    case "POST /me/return-offer/decline":
+      return recordOfferDecline(env, user.id);
+    case "POST /me/return-offer/impression":
+      return reserveReturnOffer(request, env, user.id);
+    case "POST /me/trial-return-offer":
+      return signTrialReturnOffer(env, user.id);
     case "POST /me/restore":
       return restorePurchases(request, env, user, tracker);
     case "PATCH /me/profile":

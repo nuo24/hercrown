@@ -48,7 +48,8 @@ All props below are optional. Types are string unless marked number or bool. The
 | `paywall_closed` | — | Superwall closes a paywall |
 | `paywall_error` | `placement` | Paywall presentation fails. The raw message is dropped. |
 | `paywall_skipped` | `placement`, `reason` | Superwall skips a placement. Only its fixed skip reasons are kept. |
-| `decline_offer_viewed`, `decline_offer_declined` | Paywall props | Reserved for separate offer tracking |
+| `decline_offer_viewed`, `decline_offer_declined` | Paywall props | Reserved for the legacy Superwall offer |
+| `return_offer_viewed`, `return_offer_dismissed` | `kind`: `decline\|trial` | Sandbox offer shown or explicitly dismissed |
 | `purchase_started`, `purchase_failed` | Paywall props and `product_id` | Superwall reports a checkout start or failure |
 | `purchase_abandoned` | — | Superwall reports checkout abandonment |
 | `purchase_completed_client`, `trial_started_client` | — | Superwall reports a client checkout or free trial success |
