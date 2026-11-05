@@ -201,7 +201,7 @@ struct RelatedVersesView: View {
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
                             }
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 20)
                         }
                         .buttonStyle(.plain)
                         Divider()
