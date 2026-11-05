@@ -258,10 +258,10 @@ struct PlansListSheet: View {
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text(title).font(.serif(28, relativeTo: .title)).tracking(-0.4)
-                Text(subtitle).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+                Text(subtitle).font(.system(size: 13)).frame(minHeight: 19.5).foregroundStyle(Theme.muted(scheme))
             }
             .foregroundStyle(Theme.text(scheme))
-            .padding(EdgeInsets(top: top, leading: 20, bottom: 12, trailing: 20))
+            .padding(EdgeInsets(top: top + 8, leading: 20, bottom: 12, trailing: 20))
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) { ForEach(items) { card($0) } }
                     .padding(EdgeInsets(top: 8, leading: 16, bottom: 20, trailing: 16))
@@ -284,7 +284,7 @@ struct PlansListSheet: View {
                 VStack(alignment: .leading, spacing: 9) {
                     Text(plan.title).font(.system(size: 17, weight: .semibold)).tracking(-0.3)
                     Text("\(plan.days) passages · about 2 min each").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                    Text(plan.description).font(.system(size: 13)).lineSpacing(6.5).fixedSize(horizontal: false, vertical: true)
+                    Text(plan.description).font(.system(size: 13)).lineSpacing(4.03).fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 0)
                     Text(plan.progress == nil ? "Explore plan →" : "Continue reading →").font(.system(size: 12, weight: .medium))
                 }
