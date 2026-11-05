@@ -17,6 +17,7 @@ struct AIStudyView: View {
                 Text("\(BibleStore.shared.label(ref)) · \(BibleStore.offline[translation] ?? "KJV")").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
                 Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(20, relativeTo: .title3))
                 Divider()
+                Text("AI-assisted study").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
                 content
             }
             .padding(24)
@@ -68,8 +69,8 @@ struct AIStudyView: View {
 
     private func section(_ title: String, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.serif(21, relativeTo: .title3))
-            CitedText(text: body).font(.system(size: 16)).lineSpacing(4)
+            Text(title).font(.system(size: 16, weight: .semibold))
+            CitedText(text: body).font(.system(size: 14)).lineSpacing(7.14)
         }
     }
 
