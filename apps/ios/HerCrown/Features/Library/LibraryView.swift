@@ -36,8 +36,12 @@ struct SavedSheet: View {
                             Spacer()
                             IconButton(systemName: "xmark", label: "Close") { dismiss() }
                         }
-                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
-                        Text("Words to keep close.").font(.system(size: 14)).foregroundStyle(Theme.muted(scheme)).padding(.horizontal, 20)
+                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
+                        Text("Words to keep close.")
+                            .font(.system(size: 14))
+                            .frame(minHeight: 22.4)
+                            .foregroundStyle(Theme.muted(scheme))
+                            .padding(.horizontal, 20)
                         // .saved-illustration-banner: 56×64 ribbon, 13 pt caption, 0/24/22 padding.
                         HStack(spacing: 14) {
                             Image("bookmark").resizable().scaledToFit().frame(width: 56, height: 64).accessibilityHidden(true)
@@ -189,7 +193,7 @@ private struct SavedVerseCard: View {
         let label = BibleStore.shared.label(ref)
         Card(padding: EdgeInsets(top: 22, leading: 20, bottom: 14, trailing: 20)) {
             VStack(alignment: .leading, spacing: 0) {
-                Text(label).font(.serif(24, relativeTo: .title2)).tracking(-0.48)
+                Text(label).font(.serif(24, relativeTo: .title2)).tracking(-0.48).frame(minHeight: 28.8)
                 Text("“\(text)”").font(.serif(28, relativeTo: .title2)).tracking(-0.56).lineSpacing(4.2)
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 32)
                 Text(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? "")
