@@ -455,7 +455,20 @@ struct SubscriptionView: View {
 
     var body: some View {
         Form {
-            Section("Your plan") {
+            Section {
+                VStack(spacing: 12) {
+                    Image("butterfly").resizable().scaledToFit()
+                        .frame(width: 96, height: 84).accessibilityHidden(true)
+                    Text("Your reading, your way.").font(.serif(30, relativeTo: .title))
+                    Text("Enjoy free reading, or explore a little more with Plus.")
+                        .font(.system(size: 14)).foregroundStyle(.secondary)
+                }
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .listRowBackground(Color.clear)
+            }
+            Section("Current plan") {
                 if let sub = app.membership.subscription, app.membership.premium {
                     LabeledContent("Plan", value: planName(sub.productId))
                     if sub.isTrial, let trial = sub.trial {
@@ -464,10 +477,11 @@ struct SubscriptionView: View {
                         LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                     }
                 } else {
-                    LabeledContent("Plan", value: "Free")
+                    Text("Free reading").font(.serif(28, relativeTo: .title2))
                     Text("Reading the Bible is always free. Plus adds reading plans and every study tool: Explain easier, Deeper study, Original language and Related verses.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
                     Button("Explore Her Crown Plus") { app.presentPaywall(placement: "settings_subscription") }
+                        .buttonStyle(CapsuleButtonStyle(kind: .secondary))
                 }
             }
             Section {
