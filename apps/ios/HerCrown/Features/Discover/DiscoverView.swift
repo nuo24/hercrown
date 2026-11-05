@@ -17,6 +17,16 @@ struct DiscoverFeed: Decodable, Equatable {
     let cards: [Card]
 }
 
+enum DiscoverStudied {
+    static let storageKey = "hc.discoverStudied"
+
+    static func byAccount(_ data: Data) -> [String: [String]] {
+        (try? JSONDecoder().decode([String: [String]].self, from: data)) ?? [:]
+    }
+
+    static func accountKey(_ userID: String?) -> String { userID ?? "offline" }
+}
+
 /// discover.feed (specs/SCREEN-MAP.md): illustrated introduction, topic filters (For you, her plan, nine themes) and
 /// Scripture cards from our Bibles, each with a reflection question clearly marked as not Scripture.
 struct DiscoverView: View {
@@ -28,6 +38,12 @@ struct DiscoverView: View {
     @State private var showingSaved = false
     @State private var showingSettings = false
     @State private var studyRef: VerseRef?
+    @State private var noteRef: VerseRef?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage(DiscoverStudied.storageKey) private var studiedData = Data()
+
+    private var accountKey: String { DiscoverStudied.accountKey(app.me?.user.id) }
+    private var studied: [String] { DiscoverStudied.byAccount(studiedData)[accountKey] ?? [] }
 
     private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
     private static let themes = ["Peace", "Purpose", "Faith", "Relationships", "Identity", "Anxiety", "Gratitude", "Hope", "Wisdom"]
@@ -69,7 +85,17 @@ struct DiscoverView: View {
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
         .sheet(item: $studyRef) { ref in
-            InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
+            NavigationStack {
+                AIStudyView(ref: ref, translation: feed?.translation ?? translation, tool: .deeper)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) { Button("Done") { studyRef = nil } }
+                    }
+            }
+                .presentationDetents([.large])
+        }
+        .sheet(item: $noteRef) { ref in
+            ReflectionSheet(ref: ref, translation: feed?.translation ?? translation, notesOnly: true)
+                .presentationDetents([.large])
         }
     }
 
@@ -82,6 +108,15 @@ struct DiscoverView: View {
             failed = feed?.filter != filter
         }
         await Analytics.shared.track("discover_viewed", ["filter": .string(filter)])
+    }
+
+    private func markStudied(_ ref: String, accountKey: String) {
+        var completed = DiscoverStudied.byAccount(studiedData)
+        guard completed[accountKey]?.contains(ref) != true else { return }
+        completed[accountKey, default: []].append(ref)
+        guard let data = try? JSONEncoder().encode(completed) else { return }
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.32)) { studiedData = data }
+        Task { await Analytics.shared.track("discover_card_read", ["ref": .string(ref)]) }
     }
 
     // MARK: Hero
@@ -179,15 +214,22 @@ struct DiscoverView: View {
 
     @ViewBuilder private var cards: some View {
         if let feed, feed.filter == filter {
-            if feed.cards.isEmpty {
+            let remaining = feed.cards.filter { !studied.contains($0.ref) }
+            if remaining.isEmpty {
                 VStack(spacing: 10) {
                     Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
-                    Text(filter == "plan" ? "Start a reading plan from Home to see its passages here." : "Nothing here yet.")
+                    Text(filter == "plan" ? "Start a reading plan from Home to see its passages here." : (feed.cards.isEmpty ? "Nothing here yet." : "You’ve studied every verse in this collection."))
                         .font(.system(size: 15)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 40)
             } else {
-                ForEach(feed.cards) { card in DiscoverCard(card: card, translation: feed.translation ?? translation, onStudy: { studyRef = VerseRef(card.ref) }) }
+                ForEach(remaining) { card in
+                    DiscoverCard(card: card, translation: feed.translation ?? translation,
+                                 onStudy: { studyRef = VerseRef(card.ref) },
+                                 onNote: { noteRef = VerseRef(card.ref) },
+                                 onComplete: { [accountKey] in markStudied(card.ref, accountKey: accountKey) })
+                        .transition(.asymmetric(insertion: .identity, removal: .opacity))
+                }
             }
         } else if failed {
             VStack(spacing: 12) {
@@ -205,8 +247,14 @@ private struct DiscoverCard: View {
     let card: DiscoverFeed.Card
     let translation: String
     let onStudy: () -> Void
+    let onNote: () -> Void
+    let onComplete: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var confirmStudied = false
+    @State private var completing = false
 
     private var translationName: String {
         ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? translation.uppercased()
@@ -240,10 +288,7 @@ private struct DiscoverCard: View {
                     .overlay(alignment: .top) { Rectangle().fill(Theme.border(scheme)).frame(height: 1) }
                     .padding(.top, 22)
                 }
-                Button {
-                    if let ref = VerseRef(card.ref) { app.openInReader(ref) }
-                    Task { await Analytics.shared.track("discover_card_read", ["ref": .string(card.ref)]) }
-                } label: {
+                Button(action: onStudy) {
                     HStack(spacing: 8) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)) }
                         .font(.system(size: 14)).padding(.horizontal, 20).frame(height: 48)
                         .foregroundStyle(scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))
@@ -257,16 +302,37 @@ private struct DiscoverCard: View {
                         Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart").foregroundStyle(app.isSaved(card.ref) ? Theme.text(scheme) : Theme.muted(scheme)).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
-                    Button(action: onStudy) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Study this verse")
+                    Button(action: onNote) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Write a note")
                     ShareLink(item: "“\(card.text)” — \(card.label) (\(BibleStore.offline[translation] ?? ""))") {
                         Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel("Share verse")
+                    Button { confirmStudied = true } label: {
+                        Image(systemName: completing ? "checkmark.circle.fill" : "checkmark.circle")
+                            .font(.system(size: 24, weight: .medium))
+                            .foregroundStyle(completing ? Theme.readDay : Theme.muted(scheme))
+                            .scaleEffect(completing && !reduceMotion ? 1.15 : 1)
+                            .frame(width: 44, height: 44)
+                    }
+                    .accessibilityLabel("Mark as studied")
+                    .disabled(completing)
                 }
                 .font(.system(size: 17))
                 .padding(.top, 8)
             }
             .foregroundStyle(Theme.text(scheme))
+        }
+        .alert("Mark as studied?", isPresented: $confirmStudied) {
+            Button("Mark as Studied") {
+                withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) { completing = true }
+                Task {
+                    if !reduceMotion { try? await Task.sleep(for: .milliseconds(440)) }
+                    onComplete()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This study will leave Discover and move to Saved → Studied, including any notes you’ve written.")
         }
     }
 }

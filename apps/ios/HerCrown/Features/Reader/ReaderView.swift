@@ -7,6 +7,7 @@ struct ReaderView: View {
     @State private var model: ReaderModel
     @State private var showingChapters = false
     @State private var showingSaved = false
+    @State private var showingBookmarks = false
     @State private var studyRef: VerseRef?
     @State private var reflectRef: VerseRef?
 
@@ -37,9 +38,17 @@ struct ReaderView: View {
                 .presentationDetents([.large])
         }
         .sheet(item: $reflectRef) { ref in
-            ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.medium, .large])
+            ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.large])
         }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
+        .sheet(isPresented: $showingBookmarks) {
+            ReaderBookmarks(current: model.currentRef) { ref in
+                model.open(ref.book, ref.chapter, verse: ref.verse)
+                showingBookmarks = false
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         .onChange(of: model.current) { _, verse in model.didView(verse) }
         #if DEBUG
         .task {
@@ -77,11 +86,11 @@ struct ReaderView: View {
             .padding(.leading, 2)
             .accessibilityLabel("Bible translation, \(BibleStore.offline[model.translation] ?? "KJV")")
             Spacer()
-            Button { if let ref = model.currentRef { app.toggleSave(ref.description) } } label: {
+            Button { showingBookmarks = true } label: {
                 Image(systemName: model.currentRef.map { app.isSaved($0.description) } == true ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 14)).frame(width: 40, height: 44).iconSurface(Capsule())
             }
-            .accessibilityLabel("Save current verse")
+            .accessibilityLabel("Bookmarks")
             Button { showingChapters = true } label: {
                 HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 16)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
@@ -221,5 +230,81 @@ struct VersePage: View {
             }
         }
         return (try? AttributedString(ns, including: \.uiKit)) ?? AttributedString(verse.text)
+    }
+}
+
+private struct ReaderBookmarks: View {
+    @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
+    let current: VerseRef?
+    let open: (VerseRef) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    if let current {
+                        let saved = app.isSaved(current.description)
+                        VStack(alignment: .leading, spacing: 12) {
+                            caption("Current position")
+                            Text(title(current)).font(.serif(28, relativeTo: .title))
+                            Button {
+                                app.toggleSave(current.description)
+                            } label: {
+                                Label(saved ? "Remove Bookmark" : "Bookmark This Verse", systemImage: saved ? "bookmark.fill" : "bookmark")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .frame(maxWidth: .infinity, minHeight: 50)
+                                    .foregroundStyle(scheme == .dark ? .black : .white)
+                                    .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 12))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(16)
+                        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 22))
+                    }
+                    caption("Saved")
+                    if app.saved.isEmpty {
+                        Text("Bookmarked verses will appear here.").font(.subheadline)
+                            .foregroundStyle(Theme.muted(scheme))
+                    }
+                    ForEach(app.saved.sorted().compactMap { VerseRef($0) }, id: \.self) { ref in
+                        HStack {
+                            Button { open(ref) } label: {
+                                Label(title(ref), systemImage: "bookmark.fill")
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .frame(minHeight: 44)
+                                    .contentShape(Rectangle())
+                            }
+                            Button { app.toggleSave(ref.description) } label: {
+                                Image(systemName: "trash").frame(width: 44, height: 44)
+                                    .foregroundStyle(Theme.muted(scheme))
+                            }
+                            .accessibilityLabel("Remove bookmark for \(title(ref))")
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal, 12)
+                        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
+                    }
+                }
+                .padding(16)
+            }
+            .foregroundStyle(Theme.text(scheme))
+            .background(AppGradient())
+            .navigationTitle("Bookmarks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        }
+    }
+
+    private func caption(_ text: String) -> some View {
+        Text(text.uppercased()).font(.system(size: 12, weight: .semibold)).tracking(1)
+            .foregroundStyle(Theme.muted(scheme))
+    }
+
+    private func title(_ ref: VerseRef) -> String {
+        let book = BibleStore.shared.book(ref.book)?.displayName ?? ref.book
+        let range = ref.end.map { "–\($0)" } ?? ""
+        return "\(book) \(ref.chapter):\(ref.verse)\(range)"
     }
 }

@@ -5,6 +5,7 @@ import SwiftUI
 private struct NoteItem: Decodable, Identifiable { let ref: String; let label: String; let verse: String?; let text: String; let updatedAt: Double; var id: String { ref } }
 private struct StudyItem: Decodable, Identifiable { let ref: String; let label: String; let verse: String?; let tool: String; let savedAt: Double; var id: String { ref + tool } }
 private struct StudiedItem: Decodable, Identifiable { let ref: String; let label: String; let verse: String?; let tools: [String]; let lastStudiedAt: Double; var id: String { ref } }
+private struct LibraryStudyRoute: Hashable { let ref: VerseRef; let tool: StudyTool }
 private struct LibraryCounts: Decodable { let savedVerses: Int; let notes: Int; let studies: Int; let studied: Int }
 
 /// saved: "Saved passages · Words to keep close." One collection shared by the reader, Home and Discover.
@@ -22,7 +23,13 @@ struct SavedSheet: View {
     @State private var studied: [StudiedItem]?
     @State private var counts: LibraryCounts?
     @State private var studyRef: VerseRef?
-    @State private var openStudy: StudyItem?
+    @State private var openStudy: LibraryStudyRoute?
+    @State private var noteRef: VerseRef?
+    @AppStorage(DiscoverStudied.storageKey) private var studiedData = Data()
+
+    private var discoverStudied: [String] {
+        DiscoverStudied.byAccount(studiedData)[DiscoverStudied.accountKey(app.me?.user.id)] ?? []
+    }
 
     var body: some View {
         NavigationStack {
@@ -56,14 +63,16 @@ struct SavedSheet: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .navigationDestination(item: $openStudy) { item in
-                if let ref = VerseRef(item.ref), let tool = StudyTool(rawValue: item.tool) {
-                    AIStudyView(ref: ref, translation: translation, tool: tool).navigationBarTitleDisplayMode(.inline)
-                }
+            .navigationDestination(item: $openStudy) { route in
+                AIStudyView(ref: route.ref, translation: translation, tool: route.tool).navigationBarTitleDisplayMode(.inline)
             }
         }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in dismiss(); app.openInReader(r) }.presentationDetents([.large])
+        }
+        .sheet(item: $noteRef) { ref in
+            ReflectionSheet(ref: ref, translation: translation, notesOnly: true)
+                .presentationDetents([.large])
         }
         .task { await load() }
         .task(id: section) { await loadSection() }
@@ -134,13 +143,40 @@ struct SavedSheet: View {
         case .studies:
             if let studies {
                 if studies.isEmpty { empty("Studies you save will live here.", "Tap the bookmark on Explain easier or Deeper study.") }
-                else { ForEach(studies) { s in row(s.label, s.verse, detail: StudyTool(rawValue: s.tool)?.title ?? s.tool) { openStudy = s } } }
+                else {
+                    ForEach(studies) { study in
+                        let tool = StudyTool(rawValue: study.tool)
+                        row(study.label, study.verse, detail: tool?.title ?? study.tool) {
+                            if let ref = VerseRef(study.ref), let tool { openStudy = LibraryStudyRoute(ref: ref, tool: tool) }
+                        }
+                    }
+                }
             } else { ProgressView().frame(maxWidth: .infinity).padding(40) }
         case .studied:
-            if let studied {
-                if studied.isEmpty { empty("Verses you study will show here.", "Tap the lens beside any verse to begin.") }
-                else { ForEach(studied) { s in row(s.label, s.verse, detail: s.tools.compactMap { StudyTool(rawValue: $0)?.title }.joined(separator: " · ")) { studyRef = VerseRef(s.ref) } } }
-            } else { ProgressView().frame(maxWidth: .infinity).padding(40) }
+            let discoverRefs = discoverStudied.reversed().compactMap { VerseRef($0) }
+            if discoverRefs.isEmpty && studied == nil {
+                ProgressView().frame(maxWidth: .infinity).padding(40)
+            } else if discoverRefs.isEmpty && studied?.isEmpty == true {
+                empty("Verses you study will show here.", "Tap the lens beside any verse to begin.")
+            } else {
+                ForEach(discoverRefs, id: \.self) { ref in
+                    VStack(alignment: .trailing, spacing: 4) {
+                        row(BibleStore.shared.label(ref), BibleStore.shared.text(translation, ref), detail: "Deeper study") {
+                            openStudy = LibraryStudyRoute(ref: ref, tool: .deeper)
+                        }
+                        Button { noteRef = ref } label: {
+                            Label("Verse notes", systemImage: "message")
+                                .font(.system(size: 13)).frame(minHeight: 44).padding(.horizontal, 12)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                ForEach((studied ?? []).filter { !discoverStudied.contains($0.ref) }) { s in
+                    row(s.label, s.verse, detail: s.tools.compactMap { StudyTool(rawValue: $0)?.title }.joined(separator: " · ")) {
+                        studyRef = VerseRef(s.ref)
+                    }
+                }
+            }
         }
     }
 
@@ -171,11 +207,6 @@ struct SavedSheet: View {
         }
         .buttonStyle(.plain)
     }
-}
-
-extension StudyItem: Hashable {
-    static func == (a: StudyItem, b: StudyItem) -> Bool { a.id == b.id }
-    func hash(into h: inout Hasher) { h.combine(id) }
 }
 
 private struct SavedVerseCard: View {

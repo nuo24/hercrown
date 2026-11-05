@@ -60,81 +60,141 @@ private struct ChapterGrid: View {
 struct ReflectionSheet: View {
     let ref: VerseRef
     let translation: String
+    var notesOnly = false
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
-    @State private var marked = false
     @State private var note = ""
     @State private var noteLoaded = false
     @State private var noteStatus = ""
+    @State private var savedNote = ""
+    @State private var finishing = false
+    @State private var saving = false
     @FocusState private var editing: Bool
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text(BibleStore.shared.label(ref)).font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
-                Text("“\(BibleStore.shared.text(translation, ref) ?? "")”")
-                    .font(.serif(28, relativeTo: .title2)).lineSpacing(4.2)
-                Divider()
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
-                    Text("What stands out to you in this verse, and how might it shape your day?").font(.system(size: 14)).lineSpacing(7.14)
-                    Text("Reflection prompt · not Scripture").font(.system(size: 12)).foregroundStyle(.secondary)
-                }
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("Your notes").font(.system(size: 13, weight: .semibold))
-                        Spacer()
-                        Text(noteStatus).font(.system(size: 12)).foregroundStyle(.secondary)
-                    }
-                    TextEditor(text: $note)
-                        .focused($editing)
-                        .font(.system(size: 16))
-                        .scrollContentBackground(.hidden)
-                        .frame(minHeight: 110)
-                        .padding(10)
-                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.supporting(scheme)))
-                        .overlay(alignment: .topLeading) {
-                            if note.isEmpty && !editing { Text("Write a thought, a prayer, a question…").font(.system(size: 16)).foregroundStyle(.tertiary).padding(18).allowsHitTesting(false) }
-                        }
-                        .disabled(!noteLoaded)
-                }
-                Button(marked ? "Today’s reading is marked" : "Mark today as read") {
-                    marked = true
-                    let day = AppModel.localDay()
-                    Task {
-                        _ = try? await app.api.send("POST", "/me/reading-events", json: ["events": [[
-                            "id": "reflect-\(day)-\(ref.description.replacingOccurrences(of: ".", with: "-"))", "localDay": day,
-                            "timeZone": TimeZone.current.identifier, "ref": ref.description,
-                        ]]])
-                        await Analytics.shared.track("day_marked_read", ["source": .string("reflection")])
-                    }
-                }
-                .buttonStyle(CapsuleButtonStyle())
-                .disabled(marked)
+        NavigationStack {
+            GeometryReader { viewport in
+                content(viewportHeight: viewport.size.height)
             }
-            .padding(24)
+                .navigationTitle(notesOnly ? "Verse notes" : "Reflection")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { Task { await finish() } }
+                            .disabled(!noteLoaded || finishing || saving)
+                    }
+                }
         }
-        .scrollDismissesKeyboard(.interactively)
+        .interactiveDismissDisabled(note != savedNote || finishing)
+    }
+
+    private func content(viewportHeight: CGFloat) -> some View {
+        let editorHeight = min(180, max(104, viewportHeight * 0.38))
+        return VStack(spacing: 12) {
+            ViewThatFits(in: .vertical) {
+                passage(fontSize: 26)
+                passage(fontSize: 22)
+                passage(fontSize: 19)
+                passage(fontSize: 17)
+                ScrollView { passage(fontSize: 17) }
+                    .scrollDismissesKeyboard(.interactively)
+            }
+            .frame(maxHeight: .infinity, alignment: .topLeading)
+            noteEditor(height: editorHeight)
+        }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 10)
         .task {
+            if !finishing { editing = true }
             struct Note: Decodable { let text: String }
-            if let existing: Note = try? await app.api.get("/me/notes/\(ref.description)") { note = existing.text }
+            if let existing: Note = try? await app.api.get("/me/notes/\(ref.description)") {
+                savedNote = existing.text
+                if note.isEmpty { note = existing.text }
+            }
             noteLoaded = true
         }
-        .task(id: note) {
-            guard noteLoaded else { return }
-            try? await Task.sleep(for: .milliseconds(800)) // auto-save once she pauses
-            guard !Task.isCancelled else { return }
-            let text = note
-            let at = (Date().timeIntervalSince1970 * 1000).rounded()
-            noteStatus = "Saving…"
-            do {
-                try await app.api.send("PUT", "/me/notes/\(ref.description)", json: ["text": text, "at": at])
-                noteStatus = "Auto-saved"
-                await Analytics.shared.track("note_saved")
-            } catch {
-                noteStatus = "Not saved. Check your connection."
+        .task(id: noteLoaded ? note : nil) {
+            guard noteLoaded, note != savedNote else { return }
+            try? await Task.sleep(for: .milliseconds(800))
+            guard !Task.isCancelled, !finishing else { return }
+            _ = await saveNote()
+        }
+    }
+
+    private func passage(fontSize: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(BibleStore.shared.label(ref))
+                .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
+            Text(BibleStore.shared.text(translation, ref) ?? "")
+                .font(.serif(fontSize, relativeTo: .title2))
+            if !notesOnly {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                    Text("What stands out to you in this verse, and how might it shape your day?")
+                        .font(.system(size: 13)).lineSpacing(2)
+                    Text("Reflection prompt · not Scripture").font(.system(size: 11)).foregroundStyle(.secondary)
+                }
             }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func noteEditor(height: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Your notes").font(.system(size: 13, weight: .semibold))
+                Spacer()
+                Text(noteStatus).font(.system(size: 12)).foregroundStyle(.secondary)
+            }
+            TextEditor(text: $note)
+                .focused($editing)
+                .font(.body)
+                .scrollContentBackground(.hidden)
+                .padding(10)
+                .frame(height: height)
+                .background(scheme == .dark ? Color(hex: 0x35363D) : .white, in: RoundedRectangle(cornerRadius: 14))
+                .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Color.primary.opacity(0.24)).allowsHitTesting(false) }
+                .overlay(alignment: .topLeading) {
+                    if note.isEmpty {
+                        Text("Write a thought, a prayer, a question…")
+                            .font(.body).foregroundStyle(.secondary)
+                            .padding(.leading, 15).padding(.top, 18)
+                            .allowsHitTesting(false).accessibilityHidden(true)
+                    }
+                }
+                .accessibilityLabel("Your notes")
+                .disabled(finishing)
+        }
+    }
+
+    private func finish() async {
+        finishing = true
+        editing = false
+        if note == savedNote {
+            dismiss()
+        } else if await saveNote() {
+            dismiss()
+        }
+        finishing = false
+    }
+
+    private func saveNote() async -> Bool {
+        let text = note
+        let at = (Date().timeIntervalSince1970 * 1000).rounded()
+        saving = true
+        defer { saving = false }
+        noteStatus = "Saving…"
+        do {
+            try await app.api.send("PUT", "/me/notes/\(ref.description)", json: ["text": text, "at": at])
+            savedNote = text
+            noteStatus = "Auto-saved"
+            await Analytics.shared.track("note_saved")
+            return true
+        } catch {
+            noteStatus = "Not saved. Check your connection."
+            return false
         }
     }
 }

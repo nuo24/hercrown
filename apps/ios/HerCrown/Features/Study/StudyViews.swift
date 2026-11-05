@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Explain easier / Deeper study: streams in, then shows the checked sections with their sources and an honest label.
 struct AIStudyView: View {
@@ -8,6 +9,8 @@ struct AIStudyView: View {
     @Environment(AppModel.self) private var app
     @State private var state: StudyState<StudyAnswer> = .loading
     @State private var saved = false
+    @State private var showingNotes = false
+    @State private var copied = false
     @State private var reporting = false
     @State private var reported = false
 
@@ -17,7 +20,6 @@ struct AIStudyView: View {
                 Text("\(BibleStore.shared.label(ref)) · \(BibleStore.offline[translation] ?? "KJV")").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
                 Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(20, relativeTo: .title3))
                 Divider()
-                Text("AI-assisted study").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
                 content
             }
             .padding(24)
@@ -30,6 +32,9 @@ struct AIStudyView: View {
                         .accessibilityLabel(saved ? "Remove from your studies" : "Save to your studies")
                 }
             }
+        }
+        .sheet(isPresented: $showingNotes) {
+            ReflectionSheet(ref: ref, translation: translation).presentationDetents([.large])
         }
         .confirmationDialog("What’s wrong with this study?", isPresented: $reporting, titleVisibility: .visible) {
             ForEach([("inaccurate", "It’s inaccurate"), ("unclear", "It’s unclear"), ("offensive", "It’s offensive"), ("other", "Something else")], id: \.0) { reason, title in
@@ -52,11 +57,29 @@ struct AIStudyView: View {
                 ForEach(answer.sources) { s in
                     Text("[\(s.tag)] \(s.author), \(s.name) (\(s.published)) · \(s.license)").font(.system(size: 12)).foregroundStyle(.secondary)
                 }
-                Text(answer.notice).font(.system(size: 12)).foregroundStyle(.secondary).padding(.top, 4)
+                Text("Study commentary · separate from Scripture").font(.system(size: 12)).foregroundStyle(.secondary).padding(.top, 4)
                 Button(reported ? "Thanks — we’ll take a look" : "Report a problem") { reporting = true }
                     .font(.system(size: 13)).disabled(reported).padding(.top, 4)
             }
             .padding(.top, 6)
+            let export = ([ "\(tool.title) · \(BibleStore.shared.label(ref))" ] +
+                answer.sections.map { "\($0.title)\n\($0.text)" } +
+                ["Sources\n" + answer.sources.map { "[\($0.tag)] \($0.author), \($0.name)" }.joined(separator: "\n")])
+                .joined(separator: "\n\n")
+            HStack {
+                Button { toggleSave() } label: { Label(saved ? "Saved" : "Save", systemImage: saved ? "bookmark.fill" : "bookmark") }
+                Spacer()
+                Button { showingNotes = true } label: { Label("Note", systemImage: "note.text") }
+                Spacer()
+                Button { UIPasteboard.general.string = export; copied = true } label: {
+                    Label(copied ? "Copied" : "Copy", systemImage: "doc.on.doc")
+                }
+                Spacer()
+                ShareLink(item: export) { Label("Share", systemImage: "square.and.arrow.up") }
+            }
+            .font(.system(size: 13, weight: .medium))
+            .labelStyle(.titleAndIcon)
+            .padding(.vertical, 12)
         case .needsPlus:
             PlusRequiredView(tool: tool)
         case .failed(let message):

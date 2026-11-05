@@ -46,7 +46,7 @@ struct InsightsSheet: View {
                         } label: {
                             HStack(spacing: 14) {
                                 Image(systemName: widgetSet ? "checkmark.circle" : "square.grid.2x2").font(.system(size: 18)).frame(width: 24)
-                                Text(widgetSet ? "Set as your widget verse" : "Widget verse").font(.system(size: 16))
+                                Text(widgetSet ? "Widget verse set" : "Set as your widget verse").font(.system(size: 16))
                                 Spacer()
                             }
                             .padding(.vertical, 15)
@@ -100,9 +100,10 @@ struct PlusRequiredView: View {
             Text("Go deeper with Plus").font(.serif(26))
             Text("\(tool.title) is part of Her Crown Plus, along with reading plans and every study tool. Reading the Bible stays free.")
                 .multilineTextAlignment(.center).foregroundStyle(.secondary)
-            Button("See Her Crown Plus") { app.presentPaywall(placement: "study_\(tool.rawValue)") }
+            NavigationLink("See Her Crown Plus") { SubscriptionView() }
                 .buttonStyle(CapsuleButtonStyle()).padding(.top, 6)
         }
         .padding(28)
+        .task { await app.refreshMembership() }
     }
 }
