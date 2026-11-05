@@ -335,45 +335,58 @@ struct HomeView: View {
 /// .streak-card: "N days · Reading streak · Best", the week, Mark today as read (20/22 padding).
 struct StreakCard: View {
     let streak: Streak
+    var inDetail = false
     let onMark: () -> Void
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        Card(padding: EdgeInsets(top: 20, leading: 22, bottom: 20, trailing: 22)) {
-            VStack(spacing: 0) {
-                HStack(alignment: .firstTextBaseline, spacing: 10) {
-                    Text("\(streak.current) \(streak.current == 1 ? "day" : "days")").font(.system(size: 23, weight: .semibold)).tracking(-0.5)
-                    Text("Reading streak").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                    Spacer(minLength: 12)
-                    Text("Best: \(streak.best) \(streak.best == 1 ? "day" : "days")").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                }
-                HStack(spacing: 8) {
-                    ForEach(Array(week.enumerated()), id: \.offset) { i, day in
-                        VStack(spacing: 8) {
-                            Text(day.letter).font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                            ZStack {
-                                Circle().fill(day.read ? Theme.readDay : Theme.supporting(scheme))
-                                Circle().strokeBorder(day.read ? Theme.readDay : Theme.border(scheme), lineWidth: 1)
-                                if day.read { Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(.white) }
-                            }
-                            .frame(width: 30, height: 30)
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("\(day.letter), \(day.read ? "read" : "not read")")
-                        if i < week.count - 1 { Spacer(minLength: 0) }
-                    }
-                }
-                .padding(.top, 20).padding(.bottom, 14)
-                Button(streak.readToday ? "Today’s reading complete" : "Mark today as read", action: onMark)
-                    .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                    .disabled(streak.readToday)
-                    .opacity(streak.readToday ? 0.7 : 1)
-                Text(streak.readToday ? "A little time in the Word, every day." : "Read a passage, then mark your day complete.")
-                    .font(.system(size: 11)).lineSpacing(3.4).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
-                    .padding(.top, 10)
+        if inDetail {
+            content
+                .padding(.vertical, 20)
+                .frame(maxWidth: .infinity)
+                .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+        } else {
+            Card(padding: EdgeInsets(top: 20, leading: 22, bottom: 20, trailing: 22)) {
+                content
             }
-            .foregroundStyle(Theme.text(scheme))
         }
+    }
+
+    private var content: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text("\(streak.current) \(streak.current == 1 ? "day" : "days")").font(.system(size: 23, weight: .semibold)).tracking(-0.5)
+                Text("Reading streak").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                Spacer(minLength: 12)
+                Text("Best: \(streak.best) \(streak.best == 1 ? "day" : "days")").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+            }
+            HStack(spacing: 8) {
+                ForEach(Array(week.enumerated()), id: \.offset) { i, day in
+                    VStack(spacing: 8) {
+                        Text(day.letter).font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                        ZStack {
+                            Circle().fill(day.read ? Theme.readDay : Theme.supporting(scheme))
+                            Circle().strokeBorder(day.read ? Theme.readDay : Theme.border(scheme), lineWidth: 1)
+                            if day.read { Image(systemName: "checkmark").font(.system(size: 11, weight: .bold)).foregroundStyle(.white) }
+                        }
+                        .frame(width: 30, height: 30)
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(day.letter), \(day.read ? "read" : "not read")")
+                    if i < week.count - 1 { Spacer(minLength: 0) }
+                }
+            }
+            .padding(.top, 20).padding(.bottom, 14)
+            Button(streak.readToday ? "Today’s reading complete" : "Mark today as read", action: onMark)
+                .buttonStyle(CapsuleButtonStyle(kind: .secondary))
+                .disabled(streak.readToday)
+                .opacity(streak.readToday ? 0.7 : 1)
+            Text(streak.readToday ? "A little time in the Word, every day." : "Read a passage, then mark your day complete.")
+                .font(.system(size: 11)).lineSpacing(3.4).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
+                .frame(minHeight: 16.5)
+                .padding(.top, 10)
+        }
+        .foregroundStyle(Theme.text(scheme))
     }
 
     /// The server's last seven days, or seven empty days ending today before it has answered.

@@ -17,10 +17,10 @@ struct StreakSheet: View {
                             Text("\(m) days in a row. What a faithful rhythm.").font(.serif(19))
                         }
                     }
-                    StreakCard(streak: model.streak) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1"); await model.loadProgress() } }
+                    StreakCard(streak: model.streak, inDetail: true) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1"); await model.loadProgress() } }
                     if let p = model.progress { progress(p) } else { ProgressView().frame(maxWidth: .infinity) }
                     Text("One completed reading day counts once. Read on consecutive days to grow your streak. Missing a full day starts a new run; your personal best stays.")
-                        .font(.system(size: 15)).multilineTextAlignment(.center).foregroundStyle(Theme.muted(scheme))
+                        .font(.system(size: 14)).lineSpacing(7.14).multilineTextAlignment(.center).foregroundStyle(Theme.text(scheme))
                 }
                 .padding(Theme.Spacing.gutter)
             }
