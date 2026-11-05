@@ -108,7 +108,7 @@ enum Push {
         #if DEBUG
         let environment = "sandbox"
         #else
-        let environment = AppConfig.buildChannel == "appstore" ? "production" : "sandbox"
+        let environment = "production"
         #endif
         Task { _ = try? await APIClient.shared.send("PUT", "/me/devices", json: ["token": token, "environment": environment, "timeZone": TimeZone.current.identifier]) }
     }
