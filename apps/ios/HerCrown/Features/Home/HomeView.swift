@@ -92,7 +92,7 @@ struct HomeView: View {
             HStack(spacing: 8) {
                 Text(greeting).font(.system(size: 28)).tracking(-0.8)
                     .lineLimit(1).minimumScaleFactor(0.6)
-                Image("cosmos").resizable().scaledToFit().frame(width: 30, height: 36).accessibilityHidden(true)
+                Image.illustration("cosmos").resizable().scaledToFit().frame(width: 30, height: 36).accessibilityHidden(true)
             }
             .foregroundStyle(Theme.text(scheme))
             Spacer(minLength: 8)
@@ -174,7 +174,7 @@ struct HomeView: View {
         .padding(16)
         .background {
             ZStack {
-                Image("quiet-sky").resizable().scaledToFill()
+                Image.illustration("quiet-sky").resizable().scaledToFill()
                 LinearGradient(stops: dark
                                ? [.init(color: Color(red: 11 / 255, green: 23 / 255, blue: 36 / 255, opacity: 0.37), location: 0), .init(color: Color(red: 7 / 255, green: 16 / 255, blue: 29 / 255, opacity: 0.565), location: 1)]
                                : [.init(color: Color(red: 198 / 255, green: 231 / 255, blue: 242 / 255, opacity: 0.25), location: 0), .init(color: Color.white.opacity(0.05), location: 0.55), .init(color: Color(red: 234 / 255, green: 244 / 255, blue: 250 / 255, opacity: 0.6), location: 1)],
@@ -205,7 +205,7 @@ struct HomeView: View {
         Card {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 10) {
-                    Image("magnifier").resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
+                    Image.illustration("magnifier").resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
                     Text("Verse Search").font(.system(size: 22)).tracking(-0.5)
                 }
                 Text("Choose a passage to read and reflect on.").font(.system(size: 14)).lineSpacing(4.3).foregroundStyle(Theme.muted(scheme))
@@ -244,7 +244,7 @@ struct HomeView: View {
         let active = model.plans.flatMap { list in list.plans.first { $0.id == list.activePlanId } }
         return Button { if let active { openPlan = active } else { showingPlans = true } } label: {
             HStack(alignment: .top, spacing: 14) {
-                Image("journal").resizable().scaledToFit().frame(width: 80, height: 96).frame(width: 82, height: 100).accessibilityHidden(true)
+                Image.illustration("journal").resizable().scaledToFit().frame(width: 80, height: 96).frame(width: 82, height: 100).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 0) {
                     Text("Today’s Reading").font(.system(size: 22)).tracking(-0.5).padding(.top, 3)
                     Text(active?.title ?? "Choose your plan").font(.system(size: 12, weight: .semibold)).padding(.top, 6)
@@ -323,7 +323,7 @@ struct HomeView: View {
         }
         .foregroundStyle(Theme.text(scheme))
         .overlay(alignment: .topTrailing) {
-            Image("reflection").resizable().scaledToFit().frame(width: 78, height: 88).padding(.top, 44).accessibilityHidden(true)
+            Image.illustration("reflection").resizable().scaledToFit().frame(width: 78, height: 88).padding(.top, 44).accessibilityHidden(true)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -417,7 +417,7 @@ private struct SeasonCard: View {
         let sub: Color = faith ? (dark ? Color(hex: 0xC2D3C6) : Color(hex: 0x506354)) : (dark ? Color(hex: 0xC4D3E0) : Color(hex: 0x526574))
         Button(action: action) {
             VStack(alignment: .leading, spacing: 0) {
-                Image(faith ? "faith-hands" : "purpose-compass").resizable().scaledToFit().frame(height: 134).frame(maxWidth: .infinity)
+                Image.illustration(faith ? "faith-hands" : "purpose-compass").resizable().scaledToFit().frame(height: 134).frame(maxWidth: .infinity)
                     .accessibilityHidden(true)
                 Text(faith ? "Rooted in faith" : "Find your next step").font(.serif(23, relativeTo: .title3)).tracking(-0.3)
                     .foregroundStyle(ink).fixedSize(horizontal: false, vertical: true).padding(.top, 12)

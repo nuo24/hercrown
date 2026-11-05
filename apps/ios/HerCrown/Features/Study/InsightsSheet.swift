@@ -20,7 +20,7 @@ struct InsightsSheet: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 0) {
-                    Image("open-book").resizable().scaledToFit().frame(width: 68, height: 58).accessibilityHidden(true)
+                    Image.illustration("open-book").resizable().scaledToFit().frame(width: 68, height: 58).accessibilityHidden(true)
                     VerseQuote(ref: ref, translation: translation).padding(.top, 8)
                     Divider().padding(.top, 26)
                     VStack(spacing: 0) {
@@ -96,7 +96,7 @@ struct PlusRequiredView: View {
     @Environment(AppModel.self) private var app
     var body: some View {
         VStack(spacing: 14) {
-            Image("butterfly").resizable().scaledToFit().frame(width: 90).accessibilityHidden(true)
+            Image.illustration("butterfly").resizable().scaledToFit().frame(width: 90).accessibilityHidden(true)
             Text("Go deeper with Plus").font(.serif(26))
             Text("\(tool.title) is part of Her Crown Plus, along with reading plans and every study tool. Reading the Bible stays free.")
                 .multilineTextAlignment(.center).foregroundStyle(.secondary)

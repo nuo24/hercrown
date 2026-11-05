@@ -62,7 +62,7 @@ struct AppGradient: View {
 struct CloudAtmosphere: View {
     var body: some View {
         GeometryReader { geo in
-            Image("cloud-bank")
+            Image.illustration("cloud-bank")
                 .resizable()
                 .scaledToFill()
                 .frame(width: geo.size.width, height: geo.size.height * 0.5)

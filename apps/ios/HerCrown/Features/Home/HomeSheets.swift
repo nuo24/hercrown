@@ -13,7 +13,7 @@ struct StreakSheet: View {
                     Text("Your reading rhythm").font(.serif(32, relativeTo: .largeTitle)).frame(maxWidth: .infinity)
                     if let m = model.streak.milestone {
                         HStack(spacing: 12) {
-                            Image("milestone").resizable().scaledToFit().frame(width: 56, height: 56).accessibilityHidden(true)
+                            Image.illustration("milestone").resizable().scaledToFit().frame(width: 56, height: 56).accessibilityHidden(true)
                             Text("\(m) days in a row. What a faithful rhythm.").font(.serif(19))
                         }
                     }
@@ -279,7 +279,7 @@ struct PlansListSheet: View {
         let art = plan.id == "quiet" ? "sunrise" : plan.id == "peace" ? "dove" : "anchor"
         return Button { onOpen(plan) } label: {
             VStack(alignment: .leading, spacing: 0) {
-                Image(art).resizable().scaledToFit().frame(width: 150, height: 150)
+                Image.illustration(art).resizable().scaledToFit().frame(width: 150, height: 150)
                     .frame(maxWidth: .infinity, minHeight: 160).background(cover).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 9) {
                     Text(plan.title).font(.system(size: 17, weight: .semibold)).tracking(-0.3)

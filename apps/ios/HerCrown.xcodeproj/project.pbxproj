@@ -123,6 +123,7 @@
 				C0DE00000000000000000003 /* Frameworks */,
 				C0DE00000000000000000009 /* Resources */,
 				C0DE00000000000000000010 /* Bundle offline Bibles */,
+				C0DE00000000000000000071 /* Bundle mockup artwork */,
 				C0DE00000000000000000054 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -299,6 +300,76 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# The verified Scripture seeds (apps/api/seeds) are the single source for both the server and the app.\nset -e\nfor t in kjv bsb web; do\n  cp \"${SRCROOT}/../api/seeds/${t}.json\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${t}.json\"\ndone\n";
+		};
+		C0DE00000000000000000071 /* Bundle mockup artwork */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			inputPaths = (
+				"$(SRCROOT)/../../reference-web/dist/assets/onboarding-collage.png",
+				"$(SRCROOT)/../../reference-web/dist/assets/quiet-meadow.png",
+				"$(SRCROOT)/../../reference-web/dist/assets/quiet-sky.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/anchor.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/bookmark.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/butterfly.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/cloud-bank.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/community.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/cosmos.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/dove.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/faith-hands.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/gratitude-basket.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/hourglass.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/intention-heart.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/journal.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/lantern.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/magnifier.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/milestone.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/olive.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/open-book.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/purpose-compass.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/reflection.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/relationship-hands.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/reminder-bell.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/rest-stones.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/seedling.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/sunrise.png",
+				"$(SRCROOT)/../../reference-web/dist/illustration-pack/wisdom-pearl.png",
+			);
+			name = "Bundle mockup artwork";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/onboarding-collage.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/quiet-meadow.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/quiet-sky.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/anchor.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/bookmark.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/butterfly.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/cloud-bank.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/community.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/cosmos.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/dove.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/faith-hands.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/gratitude-basket.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/hourglass.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/intention-heart.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/journal.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/lantern.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/magnifier.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/milestone.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/olive.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/open-book.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/purpose-compass.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/reflection.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/relationship-hands.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/reminder-bell.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/rest-stones.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/seedling.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/sunrise.png",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Illustrations/wisdom-pearl.png",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nsource=\"$SRCROOT/../../reference-web/dist\"\ndestination=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Illustrations\"\nmkdir -p \"$destination\"\nfor artwork in \"$source\"/illustration-pack/*.png \"$source\"/assets/*.png; do\n  cp -X \"$artwork\" \"$destination/\"\ndone\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

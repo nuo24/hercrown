@@ -44,7 +44,7 @@ struct SavedSheet: View {
                             .padding(.horizontal, 20)
                         // .saved-illustration-banner: 56×64 ribbon, 13 pt caption, 0/24/22 padding.
                         HStack(spacing: 14) {
-                            Image("bookmark").resizable().scaledToFit().frame(width: 56, height: 64).accessibilityHidden(true)
+                            Image.illustration("bookmark").resizable().scaledToFit().frame(width: 56, height: 64).accessibilityHidden(true)
                             Text("Your collected passages").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
                         }
                         .padding(EdgeInsets(top: 20, leading: 24, bottom: 22, trailing: 24))
@@ -146,7 +146,7 @@ struct SavedSheet: View {
 
     private func empty(_ title: String, _ hint: String) -> some View {
         VStack(spacing: 12) {
-            Image("bookmark").resizable().scaledToFit().frame(height: 110).accessibilityHidden(true)
+            Image.illustration("bookmark").resizable().scaledToFit().frame(height: 110).accessibilityHidden(true)
             Text(title).font(.serif(21))
             Text(hint).font(.system(size: 15)).foregroundStyle(Theme.muted(scheme))
         }

@@ -62,7 +62,7 @@ struct CommunityView: View {
                     .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
 
                     VStack(spacing: 0) {
-                        Image("community").resizable().scaledToFit()
+                        Image.illustration("community").resizable().scaledToFit()
                             .frame(width: 180, height: 160).accessibilityHidden(true)
                         Text("Community").font(.serif(30, relativeTo: .largeTitle))
                             .foregroundStyle(Theme.text(scheme)).padding(.top, 50)
@@ -98,7 +98,7 @@ private struct UpcomingTab: View {
         ZStack {
             AppGradient()
             VStack(spacing: 14) {
-                Image(artwork).resizable().scaledToFit().frame(height: 130).accessibilityHidden(true)
+                Image.illustration(artwork).resizable().scaledToFit().frame(height: 130).accessibilityHidden(true)
                 Text(title).font(.serif(30)).foregroundStyle(Theme.text(scheme))
                 Text(note).font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
             }

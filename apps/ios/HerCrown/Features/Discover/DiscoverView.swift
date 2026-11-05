@@ -97,7 +97,7 @@ struct DiscoverView: View {
             .frame(width: 180, alignment: .leading)
             .foregroundStyle(Theme.text(scheme))
             Spacer(minLength: 0)
-            Image(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 145, height: 163).accessibilityHidden(true)
+            Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 145, height: 163).accessibilityHidden(true)
         }
         .padding(EdgeInsets(top: 22, leading: 22, bottom: 20, trailing: 4))
         .frame(maxWidth: .infinity, minHeight: 206)
@@ -181,7 +181,7 @@ struct DiscoverView: View {
         if let feed, feed.filter == filter {
             if feed.cards.isEmpty {
                 VStack(spacing: 10) {
-                    Image(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
+                    Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
                     Text(filter == "plan" ? "Start a reading plan from Home to see its passages here." : "Nothing here yet.")
                         .font(.system(size: 15)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
                 }

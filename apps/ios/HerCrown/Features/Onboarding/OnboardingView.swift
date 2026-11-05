@@ -90,7 +90,7 @@ struct OnboardingView: View {
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
             .background(alignment: .top) {
-                Image("onboarding-collage").resizable()
+                Image.illustration("onboarding-collage").resizable()
                     .frame(width: geometry.size.width * 1.04, height: geometry.size.height * 0.96)
                     .frame(width: geometry.size.width)
                     .accessibilityHidden(true)
@@ -140,13 +140,13 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     ZStack(alignment: .topLeading) {
-                        Image("cosmos").resizable().scaledToFit().frame(width: 60, height: 68)
+                        Image.illustration("cosmos").resizable().scaledToFit().frame(width: 60, height: 68)
                             .rotationEffect(.degrees(-18))
-                        Image("open-book").resizable().scaledToFit().frame(width: 164, height: 150)
+                        Image.illustration("open-book").resizable().scaledToFit().frame(width: 164, height: 150)
                             .rotationEffect(.degrees(7)).offset(x: 62, y: 9)
-                        Image("hourglass").resizable().scaledToFit().frame(width: 82, height: 100)
+                        Image.illustration("hourglass").resizable().scaledToFit().frame(width: 82, height: 100)
                             .rotationEffect(.degrees(-12)).offset(x: 25, y: 74)
-                        Image("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54)
+                        Image.illustration("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54)
                             .rotationEffect(.degrees(14)).offset(x: 206, y: 106)
                     }
                     .frame(width: 260, height: 174, alignment: .topLeading)
@@ -239,7 +239,7 @@ struct OnboardingView: View {
                 .lineSpacing(-0.96)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
-            Image(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true)
+            Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true)
         }
     }
 
@@ -338,7 +338,7 @@ struct OnboardingView: View {
 
     private var readyStep: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image("butterfly").resizable().scaledToFit().frame(width: 90, height: 74).accessibilityHidden(true)
+            Image.illustration("butterfly").resizable().scaledToFit().frame(width: 90, height: 74).accessibilityHidden(true)
             Text("You’re right where\nyou need to begin.").font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
                 .fixedSize(horizontal: false, vertical: true).padding(.top, 20)
             subtitle("Your Scripture feed is ready. You can change your preferences at any time.")
@@ -505,9 +505,9 @@ struct OnboardingClouds: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
+                Image.illustration("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
                     .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.5, alignment: isIntro ? 0.03 : 0.04))
-                Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
+                Image.illustration("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
                     .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.7, alignment: isIntro ? 0.94 : 0.92))
             }
             .opacity(isIntro ? 0.36 : 0.22)

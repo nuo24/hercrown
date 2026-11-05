@@ -151,7 +151,7 @@ struct VersePage: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
                 if let artwork {
-                    Image(artwork).resizable().scaledToFit().frame(width: 112, height: 112).accessibilityHidden(true).padding(.bottom, 30)
+                    Image.illustration(artwork).resizable().scaledToFit().frame(width: 112, height: 112).accessibilityHidden(true).padding(.bottom, 30)
                 }
                 if verse.number == chapter.verses.first?.number, let title = chapter.title {
                     Text(title).font(.serif(17, italic: true, relativeTo: .callout)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.bottom, 16)

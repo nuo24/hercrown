@@ -174,7 +174,7 @@ struct SettingsView: View {
     private var membershipCard: some View {
         Button { if !app.membership.premium { app.presentPaywall(placement: "settings") } } label: {
             HStack(alignment: .center, spacing: 16) {
-                Image("butterfly").resizable().scaledToFit().frame(width: 76, height: 70).accessibilityHidden(true)
+                Image.illustration("butterfly").resizable().scaledToFit().frame(width: 76, height: 70).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 6) {
                     Text(app.membership.premium ? "You’re growing with Plus." : "Grow in your own time.").font(.serif(23, relativeTo: .title3)).lineLimit(1).minimumScaleFactor(0.8)
                     Text(app.membership.premium ? "Plans and every study tool are yours." : "Explore Her Crown Plus.").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
@@ -432,7 +432,7 @@ struct Avatar: View {
             Circle().fill(Theme.supporting(scheme))
             if let image { Image(uiImage: image).resizable().scaledToFill() }
             else if let initial = app.displayName.flatMap({ $0 == "Guest" ? nil : $0.first }) { Text(String(initial)).font(.serif(size * 0.45)) }
-            else { Image("cosmos").resizable().scaledToFit().padding(size * 0.18) }
+            else { Image.illustration("cosmos").resizable().scaledToFit().padding(size * 0.18) }
         }
         .frame(width: size, height: size)
         .clipShape(Circle())
@@ -457,7 +457,7 @@ struct SubscriptionView: View {
         Form {
             Section {
                 VStack(spacing: 12) {
-                    Image("butterfly").resizable().scaledToFit()
+                    Image.illustration("butterfly").resizable().scaledToFit()
                         .frame(width: 96, height: 84).accessibilityHidden(true)
                     Text("Your reading, your way.").font(.serif(30, relativeTo: .title))
                     Text("Enjoy free reading, or explore a little more with Plus.")
@@ -524,7 +524,7 @@ struct TopicsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 VStack(spacing: 12) {
-                    Image("cosmos").resizable().scaledToFit()
+                    Image.illustration("cosmos").resizable().scaledToFit()
                         .frame(width: 82, height: 90).accessibilityHidden(true)
                     Text("What’s on your heart?").font(.serif(30, relativeTo: .title))
                     Text("Choose the themes you’d like to make space for. You can change these anytime.")
