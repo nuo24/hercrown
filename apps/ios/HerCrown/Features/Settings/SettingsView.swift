@@ -317,8 +317,11 @@ struct AccountView: View {
                 HStack {
                     Spacer()
                     VStack(spacing: 10) {
-                        Avatar(size: 96)
-                        PhotosPicker(selection: $photo, matching: .images) { Text(app.me?.profile.avatarUrl == nil ? "Add photo" : "Change photo") }
+                        Avatar(size: 112)
+                        PhotosPicker(selection: $photo, matching: .images) {
+                            Label(app.me?.profile.avatarUrl == nil ? "Upload photo" : "Change photo", systemImage: "camera")
+                        }
+                        .buttonStyle(CapsuleButtonStyle())
                         if app.me?.profile.avatarUrl != nil {
                             Button("Remove photo", role: .destructive) { run { try await app.removeAvatar() } }.font(.system(size: 14))
                         }
