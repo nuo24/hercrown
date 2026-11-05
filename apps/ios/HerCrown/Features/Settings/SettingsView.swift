@@ -516,22 +516,47 @@ struct SubscriptionView: View {
 /// settings.topics: the nine onboarding topics; saving updates Discover's ordering and returns to Settings.
 struct TopicsView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var scheme
     @Environment(\.dismiss) private var dismiss
     @State private var topics: [String] = []
 
     var body: some View {
-        Form {
-            Section {
-                ForEach(OnboardingView.topicOptions, id: \.self) { topic in
-                    Button {
-                        if topics.contains(topic) { topics.removeAll { $0 == topic } } else { topics.append(topic) }
-                    } label: {
-                        HStack { Text(topic); Spacer(); if topics.contains(topic) { Image(systemName: "checkmark") } }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(spacing: 12) {
+                    Image("cosmos").resizable().scaledToFit()
+                        .frame(width: 82, height: 90).accessibilityHidden(true)
+                    Text("What’s on your heart?").font(.serif(30, relativeTo: .title))
+                    Text("Choose the themes you’d like to make space for. You can change these anytime.")
+                        .font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
+                }
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+                VStack(spacing: 10) {
+                    ForEach(OnboardingView.topicOptions, id: \.self) { topic in
+                        let selected = topics.contains(topic)
+                        Button {
+                            if selected { topics.removeAll { $0 == topic } }
+                            else { topics.append(topic) }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: selected ? "checkmark.square.fill" : "square")
+                                    .font(.system(size: 18))
+                                Text(topic).font(.system(size: 14))
+                                Spacer()
+                            }
+                            .foregroundStyle(Theme.text(scheme))
+                            .padding(16)
+                            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 12))
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
-            } footer: { Text("We’ll put Scripture on these topics first in Discover.") }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(24)
         }
-        .scrollContentBackground(.hidden)
         .background(AppGradient())
         .navigationTitle("On your heart")
         .navigationBarTitleDisplayMode(.inline)
