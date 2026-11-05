@@ -145,3 +145,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - iOS 1.0 build 4 archived from `30f612ce865234606680507c30af0d18636168a4` and verified in internal TestFlight (build ID `ca46b665-9692-46a7-a50a-5d0db27f6241`). **Settings → Sandbox testing → Start fresh onboarding** opens onboarding with a separate staging guest. **Return to previous account** restores the prior Her Crown session and its local reading state. Apple sandbox purchase eligibility is separate.
 - The simulator build and all 174 API tests passed. The Settings entry was checked on the iPhone 17 Pro simulator. Full purchase and offer verification still requires a physical iPhone with an eligible sandbox tester.
+
+## Subscription reconciliation and release audit
+
+- iOS 1.0 build 5 archived from `9ede6d75d71813894b487c1a39e1e13c4e8321f7` and uploaded to internal TestFlight (build upload ID `bbefe907-cf36-40a7-9ae7-d644f92f9dd9`). A verified active Apple subscription now leads to an explicit restore action instead of a new checkout when the current Her Crown account is Free. Restoring may transfer Plus from a different Her Crown account, so it requires the user to act.
+- Simulator build and all 174 API tests passed. Checked the Free subscription screen on iPhone 17 Pro. The Apple-active / Her-Crown-Free path and a completed sandbox purchase and restore still need verification on a physical iPhone.
+- App Store Connect, 2026-11-05: version 1.0 is Prepare for Submission, with build 1 selected, six iPhone listing screenshots and no App Review contact email. All three subscriptions are Missing Metadata, and none has an App Review screenshot.
+- Before submission: set up the production Worker and purchase notifications, configure the release build for production, verify the Paid Apps Agreement and payout setup are active, fill the review details and the metadata for the subscriptions being shipped, and select the release build.
