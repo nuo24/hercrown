@@ -4,6 +4,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(AppModel.self) private var app
     @State private var tab: AppTab = Self.startTab
+    @State private var showingSettings = false
 
     // Debug-only review switches: `-hcSkipOnboarding YES -hcTab home`.
     #if DEBUG
@@ -18,6 +19,8 @@ struct RootView: View {
         Group {
             if app.onboardingCompleted || Self.skipOnboarding { tabs } else { OnboardingView() }
         }
+        // Settings can switch accounts and replace the content underneath it.
+        .fullScreenCover(isPresented: $showingSettings) { SettingsView().environment(app) }
     }
 
     private var tabs: some View {
@@ -25,9 +28,9 @@ struct RootView: View {
             Group {
                 switch tab {
                 case .bible: ReaderView(app: app)
-                case .community: CommunityView(onExplore: { tab = .discover })
-                case .discover: DiscoverView()
-                case .home: HomeView()
+                case .community: CommunityView(onExplore: { tab = .discover }, onOpenSettings: openSettings)
+                case .discover: DiscoverView(onOpenSettings: openSettings)
+                case .home: HomeView(onOpenSettings: openSettings)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -36,15 +39,17 @@ struct RootView: View {
         .onChange(of: tab) { _, new in Task { await Analytics.shared.track("tab_viewed", ["tab": .string(new.rawValue)]) } }
         .onChange(of: app.requestedTab) { _, new in if let new { tab = new; app.requestedTab = nil } }
     }
+
+    private func openSettings() { showingSettings = true }
 }
 
 /// Community is an honest empty state until its direction is decided (docs/progress.md).
 struct CommunityView: View {
     let onExplore: () -> Void
+    let onOpenSettings: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
     @State private var showingSaved = false
-    @State private var showingSettings = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -57,7 +62,7 @@ struct CommunityView: View {
                             .accessibilityAddTraits(.isHeader)
                         Spacer()
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
-                        IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
+                        IconButton(systemName: "gearshape", label: "Settings", action: onOpenSettings)
                     }
                     .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
 
@@ -84,7 +89,6 @@ struct CommunityView: View {
             .scrollIndicators(.hidden)
         }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.preferences.translation) }
-        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
     }
 }
 

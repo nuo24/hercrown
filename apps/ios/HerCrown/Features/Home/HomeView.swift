@@ -3,13 +3,13 @@ import SwiftUI
 /// Home (specs/SCREEN-MAP.md `home`): greeting with her streak, streak card, verse of the day, verse search,
 /// Today's Reading, "For the season you're in" topic cards, and today's devotional in the reflection card.
 struct HomeView: View {
+    let onOpenSettings: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model = HomeModel()
     @State private var showingStreak = false
     @State private var showingSaved = false
-    @State private var showingSettings = false
     @State private var studyRef: VerseRef?
     @State private var openPlan: ReadingPlan?
     @State private var showingPlans = false
@@ -59,7 +59,6 @@ struct HomeView: View {
         .task(id: app.me?.user.id) { await model.load(translation: translation) }
         .sheet(isPresented: $showingStreak) { StreakSheet(model: model).presentationDetents([.large]) }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
-        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
         .sheet(isPresented: $showingPlans) { PlansListSheet(model: model) { plan in showingPlans = false; openPlan = plan }.presentationDetents([.large]) }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
@@ -76,7 +75,7 @@ struct HomeView: View {
             case "plan": openPlan = model.todaysPlan
             case "plans": showingPlans = true
             case "saved": showingSaved = true
-            case "settings": showingSettings = true
+            case "settings": onOpenSettings()
             default: break
             }
         }
@@ -110,7 +109,7 @@ struct HomeView: View {
             }
             .accessibilityLabel("Reading streak, \(model.streak.current) days")
             IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
-            IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
+            IconButton(systemName: "gearshape", label: "Settings", action: onOpenSettings)
         }
         .padding(.horizontal, 20)
         .padding(.top, 20)

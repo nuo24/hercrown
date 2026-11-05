@@ -35,7 +35,7 @@ struct SettingsView: View {
                                     Button { changeTestSession() } label: {
                                         row("arrow.counterclockwise",
                                             app.hasTestSessionBackup ? "Return to previous account" : "Start fresh onboarding",
-                                            app.hasTestSessionBackup ? "Leave this temporary test account" : "Use a separate test account")
+                                            app.hasTestSessionBackup ? "Leave this temporary test account" : "Reset Her Crown onboarding. Apple purchases stay on your Apple account.")
                                     }
                                     .buttonStyle(.plain)
                                     .disabled(changingTestSession)
@@ -546,8 +546,8 @@ struct SubscriptionView: View {
                         LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                     }
                 } else if appleSubscriptionFound {
-                    Text("Apple subscription found").font(.serif(28, relativeTo: .title2))
-                    Text("Restore your purchase to connect Plus to this Her Crown account.")
+                    Text("Free reading").font(.serif(28, relativeTo: .title2))
+                    Text("Apple found a Plus subscription that isn’t connected to this Her Crown account. Restore your purchase to connect it.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
                 } else if checkedAppleSubscription {
                     Text("Free reading").font(.serif(28, relativeTo: .title2))

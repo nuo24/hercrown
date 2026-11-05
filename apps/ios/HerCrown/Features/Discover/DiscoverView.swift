@@ -30,13 +30,13 @@ enum DiscoverStudied {
 /// discover.feed (specs/SCREEN-MAP.md): illustrated introduction, topic filters (For you, her plan, nine themes) and
 /// Scripture cards from our Bibles, each with a reflection question clearly marked as not Scripture.
 struct DiscoverView: View {
+    let onOpenSettings: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
     @State private var filter = "for-you"
     @State private var feed: DiscoverFeed?
     @State private var failed = false
     @State private var showingSaved = false
-    @State private var showingSettings = false
     @State private var studyRef: VerseRef?
     @State private var noteRef: VerseRef?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -67,7 +67,7 @@ struct DiscoverView: View {
                         Text("Discover").font(.system(size: 25)).tracking(-0.65).foregroundStyle(Theme.text(scheme))
                         Spacer()
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
-                        IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
+                        IconButton(systemName: "gearshape", label: "Settings", action: onOpenSettings)
                     }
                     .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
                     hero.padding(.horizontal, 24)
@@ -83,7 +83,6 @@ struct DiscoverView: View {
         .task(id: "\(filter)|\(app.me?.user.id ?? "")") { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
-        .fullScreenCover(isPresented: $showingSettings) { SettingsView() }
         .sheet(item: $studyRef) { ref in
             NavigationStack {
                 AIStudyView(ref: ref, translation: feed?.translation ?? translation, tool: .deeper)
