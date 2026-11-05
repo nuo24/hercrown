@@ -73,10 +73,12 @@ struct ReflectionSheet: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text(BibleStore.shared.label(ref)).font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
-                Text("“\(BibleStore.shared.text(translation, ref) ?? "")”").font(.serif(24, relativeTo: .title2))
+                Text("“\(BibleStore.shared.text(translation, ref) ?? "")”")
+                    .font(.serif(28, relativeTo: .title2)).lineSpacing(4.2)
+                Divider()
                 VStack(alignment: .leading, spacing: 6) {
                     Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
-                    Text("What stands out to you in this verse, and how might it shape your day?").font(.system(size: 17))
+                    Text("What stands out to you in this verse, and how might it shape your day?").font(.system(size: 14)).lineSpacing(7.14)
                     Text("Reflection prompt · not Scripture").font(.system(size: 12)).foregroundStyle(.secondary)
                 }
                 VStack(alignment: .leading, spacing: 6) {

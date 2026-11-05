@@ -42,7 +42,12 @@ struct ReaderView: View {
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
         .onChange(of: model.current) { _, verse in model.didView(verse) }
         #if DEBUG
-        .task { if UserDefaults.standard.string(forKey: "hcOpenStudy") != nil { try? await Task.sleep(for: .seconds(1)); studyRef = model.currentRef } }
+        .task {
+            guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy") else { return }
+            try? await Task.sleep(for: .seconds(1))
+            if preview == "reflection" { reflectRef = model.currentRef }
+            else { studyRef = model.currentRef }
+        }
         #endif
     }
 
