@@ -82,11 +82,17 @@ struct PlanSheet: View {
             ScrollView {
                 if let plan {
                     VStack(alignment: .leading, spacing: 16) {
-                        Image("journal").resizable().scaledToFit().frame(width: 70, height: 80).accessibilityHidden(true)
-                        Text(plan.title).font(.serif(32, relativeTo: .largeTitle))
-                        Text(plan.description).font(.system(size: 16)).foregroundStyle(Theme.muted(scheme))
-                        Text("\(plan.days) passages · Read at your own pace").font(.system(size: 13, weight: .medium)).foregroundStyle(Theme.muted(scheme))
+                        VStack(spacing: 16) {
+                            Text("A gentle reading plan").font(.system(size: 11)).foregroundStyle(Theme.muted(scheme))
+                            Text(plan.title).font(.serif(32, relativeTo: .largeTitle))
+                            Text(plan.description).font(.system(size: 14)).lineSpacing(7.14)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .multilineTextAlignment(.center)
                         VStack(spacing: 0) { ForEach(plan.steps) { step in stepRow(plan, step) } }
+                        Text("\(plan.days) passages · Read at your own pace")
+                            .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme))
+                            .frame(maxWidth: .infinity)
                         primaryButton(plan)
                     }
                     .padding(Theme.Spacing.gutter)
