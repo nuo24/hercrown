@@ -2,6 +2,8 @@
 
 Production is humans only (AGENTS.md rule 6). This is the first-time setup; about 45 minutes. Do it after TestFlight works on staging and before submitting to the App Store.
 
+The first release includes the $29.99 annual and $2.99 weekly plans. The separate $19.99 product has U.S. availability in App Store Connect for sandbox testing. Leave it out of the first review submission. Before submitting, reconcile the weekly introductory trial in App Store Connect with the weekly terms on the paywall.
+
 The production server will be **https://bible-scroll-api.bible-scroll-api.workers.dev** (already set as `BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`). When the domain exists, it can move there.
 
 Run everything from `apps/api` in Terminal:
@@ -86,6 +88,8 @@ Tell Claude production is live. Claude will:
 - run a check against production (sign-in, Bible, study tools, events reaching Tinybird).
 
 Then upload a new TestFlight build and use those links in App Store Connect.
+
+In that build, verify onboarding and free reading, one sandbox purchase, and restoring it on a fresh Her Crown profile. Confirm the production purchase webhook receives the sandbox transaction. Review and publish the privacy label, then add the release build, subscription group, and the annual and weekly products to the same App Review submission.
 
 ## Safety
 
