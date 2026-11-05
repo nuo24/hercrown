@@ -53,7 +53,7 @@ struct DiscoverView: View {
                         IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
                         IconButton(systemName: "gearshape", label: "Settings") { showingSettings = true }
                     }
-                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20))
+                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
                     hero.padding(.horizontal, 24)
                     chips.padding(.top, 22).padding(.bottom, 20)
                     VStack(spacing: 16) { cards }.padding(.horizontal, 20)
@@ -107,10 +107,25 @@ struct DiscoverView: View {
                     ? [.init(color: Color(red: 52 / 255, green: 72 / 255, blue: 61 / 255, opacity: 0.72), location: 0), .init(color: Color(red: 38 / 255, green: 51 / 255, blue: 61 / 255, opacity: 0.69), location: 0.65), .init(color: Color(red: 51 / 255, green: 66 / 255, blue: 86 / 255, opacity: 0.74), location: 1)]
                     : [.init(color: Color(red: 230 / 255, green: 237 / 255, blue: 223 / 255, opacity: 0.7), location: 0), .init(color: Color.white.opacity(0.52), location: 0.58), .init(color: Color(red: 223 / 255, green: 234 / 255, blue: 244 / 255, opacity: 0.65), location: 1)],
                 startPoint: .topLeading, endPoint: .bottomTrailing))
+                .overlay {
+                    if !dark {
+                        RoundedRectangle(cornerRadius: 24)
+                            .fill(LinearGradient(stops: [
+                                .init(color: .white.opacity(0.59), location: 0),
+                                .init(color: .white.opacity(0.08), location: 0.35),
+                                .init(color: .clear, location: 0.58),
+                                .init(color: .white.opacity(0.27), location: 1)
+                            ], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    }
+                }
         )
-        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.white.opacity(dark ? 0.15 : 0.78), lineWidth: 1))
-        .shadow(color: dark ? .black.opacity(0.533) : Color(red: 37 / 255, green: 61 / 255, blue: 76 / 255, opacity: 0.22), radius: 8, y: 14)
-        .shadow(color: dark ? .black.opacity(0.333) : Color(red: 33 / 255, green: 61 / 255, blue: 66 / 255, opacity: 0.13), radius: 2, y: 3)
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .strokeBorder(Color.white.opacity(dark ? 0.15 : 0.78), lineWidth: 1)
+                .allowsHitTesting(false)
+        }
+        .shadow(color: dark ? .black.opacity(0.533) : Color(red: 37 / 255, green: 61 / 255, blue: 76 / 255, opacity: 0.11), radius: 7, y: 7)
+        .shadow(color: dark ? .black.opacity(0.333) : Color(red: 33 / 255, green: 61 / 255, blue: 66 / 255, opacity: 0.07), radius: 2, y: 3)
         .animation(.easeOut(duration: 0.2), value: filter)
     }
 
