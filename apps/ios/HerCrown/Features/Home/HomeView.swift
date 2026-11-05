@@ -14,7 +14,7 @@ struct HomeView: View {
     @State private var openPlan: ReadingPlan?
     @State private var showingPlans = false
     @State private var openDevotional: Devotional?
-    @State private var searchRef = HomeView.searchVerses[0].ref
+    @State private var searchRef = VerseRef(book: "PSA", chapter: 23, verse: 1)
 
     private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
 
@@ -27,8 +27,9 @@ struct HomeView: View {
                     header
                     // .home-stack: 20 pt gutters, 16 pt between cards.
                     VStack(alignment: .leading, spacing: 16) {
-                        if let trial = app.membership.subscription?.trial, app.membership.subscription?.isTrial == true,
-                           Date().timeIntervalSince1970 * 1000 >= trial.remindFrom { trialNotice(trial) }
+                        if app.membership.premium, let trial = app.membership.subscription?.trial, app.membership.subscription?.isTrial == true,
+                           Date().timeIntervalSince1970 * 1000 >= trial.remindFrom,
+                           Date().timeIntervalSince1970 * 1000 < trial.endsAt { trialNotice(trial) }
                         StreakCard(streak: model.streak) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1") } }
                         if let verse = model.verse { verseOfTheDay(verse) }
                         verseSearch.id("search")
@@ -99,7 +100,8 @@ struct HomeView: View {
             Spacer(minLength: 8)
             Button { showingStreak = true } label: {
                 HStack(spacing: 3) {
-                    Image(systemName: "flame").font(.system(size: 17))
+                    StreakFlame().stroke(style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round))
+                        .frame(width: 21, height: 21).accessibilityHidden(true)
                     Text("\(model.streak.current)").font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundStyle(Theme.streak(scheme))
@@ -222,48 +224,55 @@ struct HomeView: View {
 
     // MARK: Verse search (.search-card)
 
-    /// The mockup's passage picker: one well-known verse per onboarding topic.
-    static let searchVerses: [(ref: String, title: String)] = [
-        ("PSA.23.1", "Peace"), ("PRO.31.25", "Identity"), ("MAT.11.28", "Anxiety"), ("JER.29.11", "Hope"), ("PRO.3.5", "Faith"),
-        ("PSA.119.105", "Purpose"), ("PSA.107.1", "Gratitude"), ("PRO.17.17", "Relationships"), ("JAS.1.5", "Wisdom"),
-    ]
-
     private var verseSearch: some View {
-        Card {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 10) {
-                    Image.illustration("magnifier").resizable().scaledToFit().frame(width: 44, height: 44).accessibilityHidden(true)
-                    Text("Verse Search").font(.system(size: 22)).tracking(-0.5)
-                }
-                Text("Choose a passage to read and reflect on.").font(.system(size: 14)).lineSpacing(4.3).foregroundStyle(Theme.muted(scheme))
-                    .padding(.top, 10)
-                Menu {
-                    Picker("Choose a passage to study", selection: $searchRef) {
-                        ForEach(Self.searchVerses, id: \.ref) { v in Text("\(label(v.ref)) · \(v.title)").tag(v.ref) }
+        let books = BibleStore.shared.books
+        let chapters = books.first { $0.id == searchRef.book }?.chapterCount ?? 0
+        let verses = BibleStore.shared.chapter(translation, book: searchRef.book, chapter: searchRef.chapter)?.verses ?? []
+        let selectedVerse = verses.first { $0.number == searchRef.verse } ?? verses.first
+
+        return Card {
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Verse Search", systemImage: "magnifyingglass")
+                    .font(.serif(23, relativeTo: .title3))
+                Text("Choose a passage to read and reflect on.")
+                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+                HStack(spacing: 0) {
+                    Picker("Book", selection: Binding(get: { searchRef.book }, set: {
+                        searchRef = VerseRef(book: $0, chapter: 1, verse: 1)
+                    })) {
+                        ForEach(books) { book in
+                            Text(book.displayName).lineLimit(1).minimumScaleFactor(0.7).tag(book.id)
+                        }
                     }
-                } label: {
-                    HStack {
-                        Text("\(label(searchRef)) · \(Self.searchVerses.first { $0.ref == searchRef }?.title ?? "")").font(.system(size: 16))
-                        Spacer()
-                        Image(systemName: "chevron.down").font(.system(size: 13, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    Picker("Chapter", selection: Binding(get: { searchRef.chapter }, set: {
+                        searchRef = VerseRef(book: searchRef.book, chapter: $0, verse: 1)
+                    })) {
+                        ForEach(1..<(chapters + 1), id: \.self) { Text("\($0)").tag($0) }
                     }
-                    .foregroundStyle(Theme.text(scheme))
-                    .padding(.horizontal, 12).frame(height: 44)
-                    .iconSurface(RoundedRectangle(cornerRadius: Theme.Radius.field, style: .continuous))
+                    .frame(width: 64)
+                    Picker("Verse", selection: Binding(get: { selectedVerse?.number ?? 1 }, set: {
+                        searchRef = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: $0)
+                    })) {
+                        ForEach(verses) { verse in Text("\(verse.number)").tag(verse.number) }
+                    }
+                    .frame(width: 64)
                 }
-                .padding(.top, 18)
+                .pickerStyle(.wheel)
+                .frame(height: 100)
+                .clipped()
                 Button("Study this verse") {
-                    studyRef = VerseRef(searchRef)
-                    Task { await Analytics.shared.track("verse_search_studied", ["ref": .string(searchRef)]) }
+                    guard let selectedVerse else { return }
+                    let ref = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: selectedVerse.number)
+                    studyRef = ref
+                    Task { await Analytics.shared.track("verse_search_studied", ["ref": .string(ref.description)]) }
                 }
                 .buttonStyle(CapsuleButtonStyle())
-                .padding(.top, 12)
+                .disabled(selectedVerse == nil)
             }
             .foregroundStyle(Theme.text(scheme))
         }
     }
-
-    private func label(_ ref: String) -> String { VerseRef(ref).map { BibleStore.shared.label($0) } ?? ref }
 
     // MARK: Today's Reading (.reading-card: 16 padding, 14 gap, 82×100 journal)
 
@@ -369,9 +378,15 @@ struct StreakCard: View {
     var body: some View {
         if inDetail {
             content
-                .padding(.vertical, 20)
+                .padding(20)
                 .frame(maxWidth: .infinity)
-                .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+                .background(
+                    LinearGradient(colors: scheme == .dark
+                        ? [Color(hex: 0x28382F), Color(hex: 0x212A26)]
+                        : [Color(hex: 0xE5EDE1), Color(hex: 0xF2F5EC)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing),
+                    in: RoundedRectangle(cornerRadius: 24)
+                )
         } else {
             Card(padding: EdgeInsets(top: 20, leading: 22, bottom: 20, trailing: 22)) {
                 content
@@ -381,11 +396,25 @@ struct StreakCard: View {
 
     private var content: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text("\(streak.current) \(streak.current == 1 ? "day" : "days")").font(.system(size: 23, weight: .semibold)).tracking(-0.5)
-                Text("Reading streak").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                Spacer(minLength: 12)
-                Text("Best: \(streak.best) \(streak.best == 1 ? "day" : "days")").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+            if inDetail {
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Current streak").font(.subheadline).foregroundStyle(.secondary)
+                        Text("\(streak.current) \(streak.current == 1 ? "day" : "days")")
+                            .font(.serif(42, relativeTo: .largeTitle)).tracking(-1)
+                    }
+                    Spacer(minLength: 8)
+                    Text("Best: \(streak.best) \(streak.best == 1 ? "day" : "days")")
+                        .font(.subheadline).foregroundStyle(.secondary)
+                        .padding(.bottom, 6)
+                }
+            } else {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("\(streak.current) \(streak.current == 1 ? "day" : "days")").font(.system(size: 23, weight: .semibold)).tracking(-0.5)
+                    Text("Reading streak").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                    Spacer(minLength: 12)
+                    Text("Best: \(streak.best) \(streak.best == 1 ? "day" : "days")").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
+                }
             }
             HStack(spacing: 8) {
                 ForEach(Array(week.enumerated()), id: \.offset) { i, day in
@@ -460,5 +489,22 @@ private struct SeasonCard: View {
             .shadow(color: Color(red: 25 / 255, green: 49 / 255, blue: 44 / 255, opacity: 0.19), radius: 6, y: 9)
         }
         .buttonStyle(.plain)
+    }
+}
+
+
+// The flame path from design/icon-pack/flame.svg, drawn in its original 24-point view box.
+struct StreakFlame: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 12, y: 3))
+        path.addCurve(to: CGPoint(x: 8, y: 12), control1: CGPoint(x: 13, y: 8), control2: CGPoint(x: 8, y: 8))
+        path.addArc(center: CGPoint(x: 12, y: 12), radius: 4, startAngle: .degrees(180), endAngle: .degrees(0), clockwise: true)
+        path.addCurve(to: CGPoint(x: 15, y: 9), control1: CGPoint(x: 16, y: 11), control2: CGPoint(x: 15.6, y: 10))
+        path.addCurve(to: CGPoint(x: 20, y: 17), control1: CGPoint(x: 19, y: 12), control2: CGPoint(x: 20, y: 14))
+        path.addArc(center: CGPoint(x: 12, y: 17), radius: 8, startAngle: .degrees(0), endAngle: .degrees(180), clockwise: false)
+        path.addCurve(to: CGPoint(x: 12, y: 3), control1: CGPoint(x: 4, y: 12), control2: CGPoint(x: 9, y: 9))
+        path.closeSubpath()
+        return path.applying(CGAffineTransform(scaleX: rect.width / 24, y: rect.height / 24))
     }
 }

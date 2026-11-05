@@ -6,11 +6,39 @@ struct StreakSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var flicker = false
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Your reading rhythm").font(.serif(32, relativeTo: .largeTitle)).frame(maxWidth: .infinity)
+                    VStack(spacing: 10) {
+                        StreakFlame()
+                            .stroke(style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
+                            .foregroundStyle(Theme.streak(scheme))
+                            .frame(width: 34, height: 34)
+                            .scaleEffect(x: flicker ? 0.95 : 1, y: flicker ? 1.10 : 1, anchor: .bottom)
+                            .rotationEffect(.degrees(flicker ? -5 : 3), anchor: .bottom)
+                            .frame(width: 62, height: 62)
+                            .background(Theme.streak(scheme).opacity(0.09), in: Circle())
+                            .accessibilityHidden(true)
+                            .task(id: reduceMotion) {
+                                if reduceMotion {
+                                    flicker = false
+                                } else {
+                                    withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
+                                        flicker = true
+                                    }
+                                }
+                            }
+                        Text("Your reading rhythm").font(.serif(32, relativeTo: .largeTitle))
+                        Text("Build a Bible habit, one day at a time.")
+                            .font(.subheadline).foregroundStyle(Theme.muted(scheme))
+                    }
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 22)
                     if let m = model.streak.milestone {
                         HStack(spacing: 12) {
                             Image.illustration("milestone").resizable().scaledToFit().frame(width: 56, height: 56).accessibilityHidden(true)
@@ -20,7 +48,8 @@ struct StreakSheet: View {
                     StreakCard(streak: model.streak, inDetail: true) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1"); await model.loadProgress() } }
                     if let p = model.progress { progress(p) } else { ProgressView().frame(maxWidth: .infinity) }
                     Text("One completed reading day counts once. Read on consecutive days to grow your streak. Missing a full day starts a new run; your personal best stays.")
-                        .font(.system(size: 14)).lineSpacing(7.14).multilineTextAlignment(.center).foregroundStyle(Theme.text(scheme))
+                        .font(.footnote).lineSpacing(4).foregroundStyle(.secondary)
+                        .padding(.horizontal, 4)
                 }
                 .padding(Theme.Spacing.gutter)
             }
@@ -33,34 +62,54 @@ struct StreakSheet: View {
     }
 
     private func progress(_ p: ReadingProgress) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("Through the Bible").font(.system(size: 15, weight: .semibold))
-                    Spacer()
-                    Text("\(p.bible.chaptersRead) of \(p.bible.totalChapters) chapters").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Through the Bible").font(.serif(25, relativeTo: .title2))
+                        Text("\(p.bible.chaptersRead.formatted()) of \(p.bible.totalChapters.formatted()) chapters")
+                            .font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    Spacer(minLength: 0)
+                    Image.illustration("open-book").resizable().scaledToFit()
+                        .frame(width: 58, height: 52).accessibilityHidden(true)
                 }
-                ProgressView(value: Double(p.bible.chaptersRead), total: Double(max(p.bible.totalChapters, 1))).tint(Color(hex: 0xD9A35B))
+                ProgressView(value: Double(p.bible.chaptersRead), total: Double(max(p.bible.totalChapters, 1)))
+                    .tint(scheme == .dark ? Color(hex: 0xAAC5B0) : Theme.readDay)
+                    .accessibilityLabel("Bible reading progress")
             }
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
-                stat("\(p.daysRead.total)", p.daysRead.total == 1 ? "day read" : "days read")
-                stat("\(p.daysThisYear)", p.daysThisYear == 1 ? "day this year" : "days this year")
-                stat("\(p.weeksInARow)", p.weeksInARow == 1 ? "week in a row" : "weeks in a row")
-                stat("\(p.devotionalsRead)", p.devotionalsRead == 1 ? "devotional read" : "devotionals read")
-                stat("\(p.daysOpened.total)", p.daysOpened.total == 1 ? "day opened" : "days opened")
-                stat("\(p.versesStudied)", p.versesStudied == 1 ? "verse studied" : "verses studied")
+            .padding(18)
+            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 20))
+            .overlay { RoundedRectangle(cornerRadius: 20).strokeBorder(Theme.border(scheme)) }
+
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Your reading journal").font(.serif(26, relativeTo: .title2))
+                    .padding(.bottom, 8)
+                journalRow("Days read", detail: "\(p.daysThisYear.formatted()) this year", count: p.daysRead.total, art: "seedling")
+                Divider()
+                journalRow("Weeks in a row", detail: "\(p.daysOpened.total.formatted()) days opened", count: p.weeksInARow, art: "olive")
+                Divider()
+                journalRow("Devotionals read", count: p.devotionalsRead, art: "journal")
+                Divider()
+                journalRow("Verses studied", count: p.versesStudied, art: "magnifier")
             }
+            .padding(.horizontal, 4)
         }
     }
 
-    private func stat(_ value: String, _ label: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value).font(.system(size: 24, weight: .semibold))
-            Text(label).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
+    private func journalRow(_ label: String, detail: String? = nil, count: Int, art: String) -> some View {
+        HStack(spacing: 12) {
+            Image.illustration(art).resizable().scaledToFit()
+                .frame(width: 34, height: 34).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label).font(.serif(20, relativeTo: .title3))
+                if let detail { Text(detail).font(.footnote).foregroundStyle(.secondary) }
+            }
+            Spacer(minLength: 8)
+            Text(count.formatted()).font(.serif(29, relativeTo: .title2)).monospacedDigit()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Theme.supporting(scheme)))
+        .padding(.vertical, 10)
+        .accessibilityElement(children: .combine)
     }
 }
 
