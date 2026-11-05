@@ -1,5 +1,7 @@
 # 0003 · Paywall: free scrolling, Premium trial, decline offer
 
+**Update:** The immediate decline offer was superseded by [decision 0010](0010-delayed-sandbox-return-offer.md).
+
 **Date:** 2026-11-02 · **Status:** accepted (implementation in Phase 8)
 
 **Decision:** Copy what works for Scroll the Bible rather than the playbook's hard paywall:

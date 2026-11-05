@@ -160,10 +160,12 @@ final class AppModel {
         return await verifyPurchases()
     }
 
-    func verifyPurchases() async -> String {
-        var transactionId: String?
-        for await result in Transaction.currentEntitlements {
-            if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID); break }
+    func verifyPurchases(transactionID verifiedID: String? = nil) async -> String {
+        var transactionId = verifiedID
+        if transactionId == nil {
+            for await result in Transaction.currentEntitlements {
+                if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID); break }
+            }
         }
         if transactionId == nil {
             for await result in Transaction.all {

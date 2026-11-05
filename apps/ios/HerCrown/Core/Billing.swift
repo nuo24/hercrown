@@ -15,6 +15,15 @@ final class Billing: NSObject {
     private weak var app: AppModel?
 
     private(set) var configured = false
+    private var presentingPlacement: UUID?
+    var isPaywallBusy: Bool {
+        configured && (presentingPlacement != nil || Superwall.shared.isPaywallPresented)
+    }
+
+    static func isSandbox() async -> Bool {
+        guard case .verified(let transaction) = try? await AppTransaction.shared else { return false }
+        return transaction.environment == .sandbox
+    }
 
     func configure(app: AppModel) {
         self.app = app
@@ -46,19 +55,29 @@ final class Billing: NSObject {
 
     /// Shows the paywall campaign for this placement (onboarding_complete, study_explain, plan_start, settings…).
     func present(placement: String) {
-        guard configured else { return }
+        guard configured, !isPaywallBusy else { return }
+        let requestID = UUID()
+        let userID = app?.me?.user.id
+        presentingPlacement = requestID
         let handler = PaywallPresentationHandler()
         handler.onDismiss { [weak self] _, result in
             Task { @MainActor in
+                guard let self, self.presentingPlacement == requestID else { return }
+                self.presentingPlacement = nil
                 switch result {
-                case .purchased, .restored: await self?.syncPurchase()
-                case .declined: break // the dashboard's paywall_decline campaign shows the one-time yearly offer
+                case .purchased, .restored: await self.syncPurchase()
+                case .declined:
+                    guard let userID, let app = self.app, app.me?.user.id == userID, !app.membership.premium,
+                          await Self.isSandbox(), app.me?.user.id == userID else { return }
+                    struct Recorded: Decodable { let ok: Bool }
+                    let _: Recorded? = try? await app.api.call("POST", "/me/return-offer/decline", json: [String: String]())
                 }
             }
         }
         handler.onError { [weak self] error in
             let message = error.localizedDescription
             Task { @MainActor in
+                if self?.presentingPlacement == requestID { self?.presentingPlacement = nil }
                 await Analytics.shared.track("paywall_error", ["placement": .string(placement), "message": .string(message)])
                 #if DEBUG
                 await self?.reportPaywallDiagnostic(placement: placement, reason: message)
@@ -67,6 +86,7 @@ final class Billing: NSObject {
         }
         handler.onSkip { [weak self] (reason: PaywallSkippedReason) in
             Task { @MainActor in
+                if self?.presentingPlacement == requestID { self?.presentingPlacement = nil }
                 await Analytics.shared.track("paywall_skipped", ["placement": .string(placement), "reason": .string(reason.description)])
                 #if DEBUG
                 await self?.reportPaywallDiagnostic(placement: placement, reason: reason.description)

@@ -72,7 +72,8 @@ enum StudyService {
             for try await (event, data) in APIClient.shared.events(path(ref, tool)) {
                 switch event {
                 case "delta":
-                    if let d = try? JSONDecoder().decode([String: String].self, from: data)["text"] { text += d; update(.partial(text)) }
+                    // Deeper Study only displays the final, citation-checked answer.
+                    if tool != .deeper, let d = try? JSONDecoder().decode([String: String].self, from: data)["text"] { text += d; update(.partial(text)) }
                 case "reset":
                     text = ""; update(.loading)
                 case "done":

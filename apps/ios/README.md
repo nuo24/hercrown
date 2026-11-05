@@ -22,14 +22,13 @@ Debug-only review switches (launch arguments):
 - `-hcSkipBilling YES` doesn't start Superwall. A simulator that isn't signed into an Apple Account shows "Sign in to Apple Account" when StoreKit starts; real phones signed into the App Store don't.
 - `-hcPaywallDiagnostics YES` shows the skip or error reason and Her Crown, Superwall, and StoreKit subscription statuses after a failed paywall attempt.
 
-## Superwall dashboard (paywalls are configured there, not in code)
+## Superwall dashboard and sandbox return offer
 
-The app registers these placements. Each needs a campaign with a paywall, and the products `hercrown.plus.yearly`, `hercrown.plus.weekly`, `hercrown.plus.yearly.offer` added under Products.
+The app registers these placements. Main placements need a Superwall campaign with the yearly and weekly products. Keep the old `paywall_decline` placement paused; the sandbox return offer is presented in the app on a later reopen.
 
 | Placement | When |
 |---|---|
 | `onboarding_complete` | End of onboarding (not on the guest path). Main paywall: yearly $29.99 and weekly $2.99, each with a 7-day trial for eligible users |
-| `paywall_decline` | Superwall's built-in placement when she closes a paywall: the one-time $19.99 first-year offer (`hercrown.plus.yearly.offer`) |
 | `study_explain`, `study_deeper`, `study_original`, `study_related` | A free reader opens a study tool |
 | `plan_start` | A free reader starts a reading plan |
 | `settings`, `settings_subscription` | Membership card and Settings → Subscription |

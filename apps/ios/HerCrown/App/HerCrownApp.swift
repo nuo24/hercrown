@@ -5,20 +5,26 @@ import SwiftUI
 struct HerCrownApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var app = AppModel()
-    @State private var returnProduct: Product?
-    @State private var showingReturnOffer = false
+    @State private var returnOffer: ReturnOffer?
+    @State private var checkingOnNextOpen = true
+    @State private var purchasingReturnOffer = false
     @State private var returnOfferMessage: String?
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            appContent.alert("Paywall test result", isPresented: Binding(
-                get: { app.paywallDiagnostic != nil },
-                set: { if !$0 { app.paywallDiagnostic = nil } }
-            )) {
-                Button("OK", role: .cancel) {}
-            } message: { Text(app.paywallDiagnostic ?? "") }
+            if ProcessInfo.processInfo.arguments.contains("--preview-return-offer") {
+                ReturnOfferView(firstYear: "$19.99", renewal: "$29.99", onClaim: {}, onClose: {})
+                    .preferredColorScheme(colorScheme)
+            } else {
+                appContent.alert("Paywall test result", isPresented: Binding(
+                    get: { app.paywallDiagnostic != nil },
+                    set: { if !$0 { app.paywallDiagnostic = nil } }
+                )) {
+                    Button("OK", role: .cancel) {}
+                } message: { Text(app.paywallDiagnostic ?? "") }
+            }
             #else
             appContent
             #endif
@@ -38,11 +44,11 @@ struct HerCrownApp: App {
                 await Push.registerIfAllowed()
             }
             .task(id: scenePhase == .active && app.phase == .ready) {
-                if scenePhase == .active && app.phase == .ready { await checkReturnOffer() }
-            }
-            .task(id: scenePhase == .active && app.phase == .ready) {
                 guard scenePhase == .active && app.phase == .ready else { return }
                 await app.refreshMembership()
+                guard !Task.isCancelled, checkingOnNextOpen else { return }
+                checkingOnNextOpen = false
+                await checkReturnOffer()
             }
             .task(id: app.membership) {
                 guard app.membership.premium, let trial = app.membership.subscription?.trial else { return }
@@ -51,11 +57,16 @@ struct HerCrownApp: App {
                 try? await Task.sleep(for: .seconds(delay))
                 if !Task.isCancelled { await app.refreshMembership() }
             }
-            .alert("Save $10 on your first year", isPresented: $showingReturnOffer) {
-                Button("Claim my first year") { Task { await purchaseReturnOffer() } }
-                Button("Maybe later", role: .cancel) {}
-            } message: {
-                Text("$19.99 for your first year of Her Crown Plus, then $29.99 per year. Auto-renews until canceled.")
+            .sheet(item: $returnOffer) { offer in
+                ReturnOfferView(firstYear: offer.firstYear, renewal: offer.product.displayPrice, busy: purchasingReturnOffer) {
+                    Task { await purchaseReturnOffer(offer) }
+                } onClose: {
+                    returnOffer = nil
+                    Task { await Analytics.shared.track("return_offer_dismissed", ["kind": .string(offer.kind.rawValue)]) }
+                }
+                .presentationDetents([.large])
+                .interactiveDismissDisabled()
+                .preferredColorScheme(colorScheme)
             }
             .alert("Her Crown Plus", isPresented: Binding(
                 get: { returnOfferMessage != nil },
@@ -64,63 +75,120 @@ struct HerCrownApp: App {
                 Button("OK", role: .cancel) {}
             } message: { Text(returnOfferMessage ?? "") }
             .onChange(of: scenePhase) { _, phase in
-                if phase == .background { Task { await Analytics.shared.flush() } }
+                if phase == .background {
+                    checkingOnNextOpen = true
+                    Task { await Analytics.shared.flush() }
+                }
             }
     }
 
     private let returnOfferID = "trial_return_1999"
 
-    private func checkReturnOffer() async {
-        guard #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted else { return }
-        let key = "hc.trialReturnShown.\(user.id)"
-        let defaults = UserDefaults.standard
-        let day = AppModel.localDay()
-        guard defaults.string(forKey: key) != day,
-              await Storefront.current?.countryCode == "USA",
-              let product = try? await Product.products(for: ["hercrown.plus.yearly"]).first,
-              product.price == Decimal(string: "29.99"),
-              let subscription = product.subscription,
-              subscription.promotionalOffers.contains(where: {
-                  $0.id == returnOfferID && $0.price == Decimal(string: "19.99") && $0.paymentMode == .payUpFront
-              }),
-              let statuses = try? await subscription.status else { return }
-        let eligible = statuses.contains { status in
-            guard status.state == .subscribed,
-                  case .verified(let tx) = status.transaction,
-                  case .verified(let renewal) = status.renewalInfo else { return false }
-            return tx.environment == .sandbox && tx.productID == product.id &&
-                tx.offer?.type == .introductory && tx.offer?.paymentMode == .freeTrial &&
-                (tx.expirationDate ?? .distantPast) > Date() && !renewal.willAutoRenew
-        }
-        guard eligible, !Task.isCancelled, app.me?.user.id == user.id,
-              scenePhase == .active, defaults.string(forKey: key) != day else { return }
-        defaults.set(day, forKey: key)
-        returnProduct = product
-        showingReturnOffer = true
+    private struct ReturnOffer: Identifiable {
+        enum Kind: String { case trial, decline }
+        let id = UUID()
+        let userID: String
+        let kind: Kind
+        let product: Product
+        let firstYear: String
     }
 
-    private func purchaseReturnOffer() async {
-        guard let product = returnProduct else { return }
-        returnProduct = nil
-        struct SignedOffer: Decodable { let token: String }
+    private func canShowOffer(for userID: String) -> Bool {
+        !Task.isCancelled && scenePhase == .active && app.me?.user.id == userID &&
+            returnOffer == nil && !purchasingReturnOffer && !Billing.shared.isPaywallBusy
+    }
+
+    private func checkReturnOffer() async {
+        guard #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
+              canShowOffer(for: user.id), await Billing.isSandbox(),
+              await Storefront.current?.countryCode == "USA" else { return }
+        let products = (try? await Product.products(for: ["hercrown.plus.yearly", "hercrown.plus.yearly.offer"])) ?? []
+        let candidate: ReturnOffer
+        if let yearly = products.first(where: { $0.id == "hercrown.plus.yearly" }),
+           yearly.price == Decimal(string: "29.99"), let subscription = yearly.subscription,
+           subscription.subscriptionPeriod.unit == .year, subscription.subscriptionPeriod.value == 1,
+           let promo = subscription.promotionalOffers.first(where: { $0.id == returnOfferID && isFirstYear($0) }),
+           let statuses = try? await subscription.status,
+           statuses.contains(where: { status in
+               guard status.state == .subscribed,
+                     case .verified(let tx) = status.transaction,
+                     case .verified(let renewal) = status.renewalInfo else { return false }
+               return tx.environment == .sandbox && tx.productID == yearly.id &&
+                   tx.offer?.type == .introductory && tx.offer?.paymentMode == .freeTrial &&
+                   (tx.expirationDate ?? .distantPast) > Date() && !renewal.willAutoRenew
+           }) {
+            candidate = ReturnOffer(userID: user.id, kind: .trial, product: yearly, firstYear: promo.displayPrice)
+        } else {
+            guard !app.membership.premium,
+                  let yearly = products.first(where: { $0.id == "hercrown.plus.yearly.offer" }),
+                  yearly.price == Decimal(string: "29.99"), let subscription = yearly.subscription,
+                  subscription.subscriptionPeriod.unit == .year, subscription.subscriptionPeriod.value == 1,
+                  let intro = subscription.introductoryOffer, isFirstYear(intro),
+                  await subscription.isEligibleForIntroOffer else { return }
+            for await result in Transaction.currentEntitlements {
+                switch result {
+                case .verified(let tx), .unverified(let tx, _):
+                    if AppModel.plusProducts.contains(tx.productID) { return }
+                }
+            }
+            candidate = ReturnOffer(userID: user.id, kind: .decline, product: yearly, firstYear: intro.displayPrice)
+        }
+
+        guard canShowOffer(for: user.id) else { return }
+        struct Reservation: Decodable { let available: Bool }
+        let reservation: Reservation? = try? await app.api.call(
+            "POST", "/me/return-offer/impression", json: ["kind": candidate.kind.rawValue]
+        )
+        guard reservation?.available == true, canShowOffer(for: user.id) else { return }
+        returnOffer = candidate
+        await Analytics.shared.track("return_offer_viewed", ["kind": .string(candidate.kind.rawValue)])
+    }
+
+    private func isFirstYear(_ offer: Product.SubscriptionOffer) -> Bool {
+        let period = offer.period
+        let oneYear = (period.unit == .year && period.value == 1) || (period.unit == .month && period.value == 12)
+        return offer.price == Decimal(string: "19.99") && offer.paymentMode == .payUpFront &&
+            oneYear && offer.periodCount == 1
+    }
+
+    private func purchaseReturnOffer(_ offer: ReturnOffer) async {
+        guard !purchasingReturnOffer, returnOffer?.id == offer.id, app.me?.user.id == offer.userID else { return }
+        purchasingReturnOffer = true
+        defer { purchasingReturnOffer = false }
+        var message: String?
+        await Analytics.shared.track("purchase_started", ["product_id": .string(offer.product.id)])
         do {
-            let offer: SignedOffer = try await app.api.call("POST", "/me/trial-return-offer", json: [String: String]())
-            let options = Product.PurchaseOption.promotionalOffer(returnOfferID, compactJWS: offer.token)
-            switch try await product.purchase(options: Set(options)) {
-            case .success(.verified(let transaction)):
-                returnOfferMessage = await app.verifyPurchases()
+            var options = Set<Product.PurchaseOption>()
+            if offer.kind == .trial {
+                struct SignedOffer: Decodable { let token: String }
+                let signed: SignedOffer = try await app.api.call("POST", "/me/trial-return-offer", json: [String: String]())
+                options.formUnion(Product.PurchaseOption.promotionalOffer(returnOfferID, compactJWS: signed.token))
+            } else if await offer.product.subscription?.isEligibleForIntroOffer != true {
+                throw OfferUnavailable()
+            }
+            guard app.me?.user.id == offer.userID else { return }
+            switch try await offer.product.purchase(options: options) {
+            case .success(.verified(let transaction)) where transaction.environment == .sandbox:
+                guard app.me?.user.id == offer.userID else { return }
+                message = await app.verifyPurchases(transactionID: String(transaction.originalID))
                 await transaction.finish()
             case .pending:
-                returnOfferMessage = "Your purchase is pending approval."
+                message = "Your purchase is pending approval."
             case .userCancelled:
-                break
+                await Analytics.shared.track("purchase_abandoned")
+                return
             default:
-                returnOfferMessage = "We couldn’t verify the purchase."
+                message = "We couldn’t verify the purchase."
             }
         } catch {
-            returnOfferMessage = "The offer couldn’t be applied. Please try again later."
+            await Analytics.shared.track("purchase_failed", ["product_id": .string(offer.product.id)])
+            message = "The offer couldn’t be applied. Please try again later."
         }
+        returnOffer = nil
+        returnOfferMessage = message
     }
+
+    private struct OfferUnavailable: Error {}
 
     private var colorScheme: ColorScheme? {
         #if DEBUG
