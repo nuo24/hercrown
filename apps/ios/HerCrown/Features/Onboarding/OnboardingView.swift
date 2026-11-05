@@ -482,6 +482,11 @@ enum DailyReminder {
         UNUserNotificationCenter.current().add(request)
     }
 
+    static func time(from hhmm: String) -> Date {
+        let parts = hhmm.split(separator: ":").compactMap { Int($0) }
+        return Calendar.current.date(bySettingHour: parts.first ?? 8, minute: parts.count > 1 ? parts[1] : 0, second: 0, of: Date()) ?? Date()
+    }
+
     static func cancel() { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id]) }
 }
 

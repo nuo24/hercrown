@@ -63,13 +63,28 @@ final class AppModel {
     }
 
     func signInAsGuest() async throws {
-        let (_, response) = try await api.send("POST", "/api/auth/sign-in/anonymous", json: [String: Any]())
+        api.token = try await guestSessionToken()
+    }
+
+    private func guestSessionToken() async throws -> String {
+        let (_, response) = try await api.send("POST", "/api/auth/sign-in/anonymous", json: [String: Any](), authentication: .anonymous)
         guard let token = response.value(forHTTPHeaderField: "set-auth-token") else { throw APIError.offline }
-        api.token = token
+        return token
     }
 
     func refresh() async throws {
+        let token = api.token
         let me: Me = try await api.get("/me")
+        guard api.token == token else { return }
+        applySession(me)
+        struct SavedList: Decodable { struct Item: Decodable { let ref: String }; let saved: [Item] }
+        if let list: SavedList = try? await api.get("/me/saved"), api.token == token {
+            saved = Set(list.saved.map(\.ref))
+            UserDefaults.standard.set(Array(saved), forKey: "hc.saved")
+        }
+    }
+
+    private func applySession(_ me: Me) {
         if self.me?.user.id != me.user.id { Billing.shared.identify(userId: me.user.id, onboarding: me.preferences) }
         self.me = me
         preferences = me.preferences
@@ -77,11 +92,71 @@ final class AppModel {
         onboardingCompleted = me.onboarding.completed || onboardingCompleted
         Self.cache(preferences)
         UserDefaults.standard.set(onboardingCompleted, forKey: "hc.onboardingCompleted")
-        struct SavedList: Decodable { struct Item: Decodable { let ref: String }; let saved: [Item] }
-        if let list: SavedList = try? await api.get("/me/saved") {
-            saved = Set(list.saved.map(\.ref))
-            UserDefaults.standard.set(Array(saved), forKey: "hc.saved")
-        }
+    }
+
+    // MARK: Sandbox testing
+
+    private static let testBackupToken = "test-session-original-token"
+    private static let testBackupDefaults = "hc.testSessionBackup"
+    private static let sessionDefaults = [
+        "hc.saved", "hc.preferences", "hc.streak", "hc.position", "hc.onboardingCompleted",
+        "hcOnboardingStep",
+    ]
+
+    var hasTestSessionBackup: Bool { Keychain.read(Self.testBackupToken) != nil }
+
+    static func allowsTestSessions() async -> Bool {
+        guard AppConfig.apiBaseURL.host == "bible-scroll-api-staging.bible-scroll-api.workers.dev" else { return false }
+        #if DEBUG
+        return true
+        #else
+        return await Billing.isSandbox()
+        #endif
+    }
+
+    func startTestSession() async throws {
+        guard await Self.allowsTestSessions(), !hasTestSessionBackup, let original = api.token else { throw APIError.offline }
+        let candidate = try await guestSessionToken()
+        let guest: Me = try await api.get("/me", authentication: .bearer(candidate))
+        guard api.token == original, guest.user.isAnonymous, guest.user.id != me?.user.id,
+              !guest.onboarding.completed, !guest.membership.premium else { throw APIError.offline }
+        await Analytics.shared.flush()
+        guard api.token == original else { throw APIError.offline }
+
+        let defaults = UserDefaults.standard
+        var backup: [String: Any] = [:]
+        for key in Self.sessionDefaults { backup[key] = defaults.object(forKey: key) }
+        defaults.set(backup, forKey: Self.testBackupDefaults)
+        Keychain.write(original, for: Self.testBackupToken)
+        guard hasTestSessionBackup else { throw APIError.offline }
+        switchTestSession(to: guest, token: candidate, localState: [:])
+    }
+
+    func restoreTestSession() async throws {
+        guard await Self.allowsTestSessions(), let original = Keychain.read(Self.testBackupToken) else { throw APIError.offline }
+        let account: Me = try await api.get("/me", authentication: .bearer(original))
+        await Analytics.shared.flush()
+        let defaults = UserDefaults.standard
+        switchTestSession(to: account, token: original, localState: defaults.dictionary(forKey: Self.testBackupDefaults) ?? [:])
+        Keychain.delete(Self.testBackupToken)
+        defaults.removeObject(forKey: Self.testBackupDefaults)
+    }
+
+    private func switchTestSession(to account: Me, token: String, localState: [String: Any]) {
+        api.token = token
+        Billing.shared.logOut()
+        me = nil
+        let defaults = UserDefaults.standard
+        for key in Self.sessionDefaults { defaults.set(localState[key], forKey: key) }
+        saved = Set(defaults.stringArray(forKey: "hc.saved") ?? [])
+        onboardingCompleted = defaults.bool(forKey: "hc.onboardingCompleted")
+        requestedTab = nil
+        discoverTopic = nil
+        offline = false
+        applySession(account)
+        if preferences.remindersEnabled { DailyReminder.schedule(at: DailyReminder.time(from: preferences.reminderTime)) }
+        else { DailyReminder.cancel() }
+        Task { await WidgetBridge.refresh(translation: account.preferences.translation) }
     }
 
     // MARK: Membership

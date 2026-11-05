@@ -35,7 +35,14 @@ final class APIClient: @unchecked Sendable {
         }
     }
 
-    private func makeRequest(_ method: String, _ path: String, body: Data?, accept: String = "application/json") -> URLRequest {
+    enum Authentication {
+        case current
+        case anonymous
+        case bearer(String)
+    }
+
+    private func makeRequest(_ method: String, _ path: String, body: Data?, accept: String = "application/json",
+                             authentication: Authentication = .current) -> URLRequest {
         var request = URLRequest(url: URL(string: path, relativeTo: base)!)
         request.httpMethod = method
         // Native sessions use bearer tokens. A stale web session cookie can block guest sign-in.
@@ -44,7 +51,12 @@ final class APIClient: @unchecked Sendable {
         request.timeoutInterval = 30
         request.setValue(accept, forHTTPHeaderField: "Accept")
         if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
-        if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        let bearer: String? = switch authentication {
+        case .current: token
+        case .anonymous: nil
+        case .bearer(let value): value
+        }
+        if let bearer { request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization") }
         request.setValue(AppConfig.installID, forHTTPHeaderField: "X-Install-Id")
         request.setValue(AppConfig.appVersion, forHTTPHeaderField: "X-App-Version")
         request.setValue("ios", forHTTPHeaderField: "X-Platform")
@@ -54,12 +66,12 @@ final class APIClient: @unchecked Sendable {
 
     /// Sends a request and returns the raw response. Throws `APIError` for non-2xx answers and `.offline` for network failures.
     @discardableResult
-    func send(_ method: String, _ path: String, json: Any? = nil) async throws -> (Data, HTTPURLResponse) {
+    func send(_ method: String, _ path: String, json: Any? = nil, authentication: Authentication = .current) async throws -> (Data, HTTPURLResponse) {
         let body = try json.map { try JSONSerialization.data(withJSONObject: $0) }
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await session.data(for: makeRequest(method, path, body: body))
+            (data, response) = try await session.data(for: makeRequest(method, path, body: body, authentication: authentication))
         } catch {
             throw APIError.offline
         }
@@ -88,8 +100,8 @@ final class APIClient: @unchecked Sendable {
         return body
     }
 
-    func get<T: Decodable>(_ path: String, as type: T.Type = T.self) async throws -> T {
-        try decoder.decode(T.self, from: try await send("GET", path).0)
+    func get<T: Decodable>(_ path: String, as type: T.Type = T.self, authentication: Authentication = .current) async throws -> T {
+        try decoder.decode(T.self, from: try await send("GET", path, authentication: authentication).0)
     }
 
     func call<T: Decodable>(_ method: String, _ path: String, json: Any? = nil, as type: T.Type = T.self) async throws -> T {

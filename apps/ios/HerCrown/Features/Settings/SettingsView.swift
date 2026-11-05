@@ -11,6 +11,9 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var inheritedScheme
     @State private var legal: LegalPage?
+    @State private var showsTestSession = false
+    @State private var changingTestSession = false
+    @State private var testSessionError = false
     #if DEBUG
     @State private var previewPage = false
     private static var openedPreviewPage = false
@@ -26,6 +29,18 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         header
                         VStack(alignment: .leading, spacing: 0) {
+                            if showsTestSession, app.me != nil {
+                                sectionTitle("Sandbox testing")
+                                group {
+                                    Button { changeTestSession() } label: {
+                                        row("arrow.counterclockwise",
+                                            app.hasTestSessionBackup ? "Return to previous account" : "Start fresh onboarding",
+                                            app.hasTestSessionBackup ? "Leave this temporary test account" : "Use a separate test account")
+                                    }
+                                    .buttonStyle(.plain)
+                                    .disabled(changingTestSession)
+                                }
+                            }
                             NavigationLink { AccountView() } label: { profile }.buttonStyle(.plain)
                             membershipCard
                             sectionTitle("Account & reading")
@@ -129,8 +144,14 @@ struct SettingsView: View {
         }
         .environment(\.colorScheme, scheme)
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
+        .task { showsTestSession = await AppModel.allowsTestSessions() }
+        .alert("Couldn’t switch test accounts", isPresented: $testSessionError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Check your connection and try again.")
+        }
         .onAppear {
-            reminderTime = Self.time(from: app.preferences.reminderTime)
+            reminderTime = DailyReminder.time(from: app.preferences.reminderTime)
             Task { await Analytics.shared.track("settings_viewed") }
         }
     }
@@ -315,9 +336,18 @@ struct SettingsView: View {
         app.updatePreferences(["reminderTime": value]) { $0.reminderTime = value }
     }
 
-    static func time(from hhmm: String) -> Date {
-        let parts = hhmm.split(separator: ":").compactMap { Int($0) }
-        return Calendar.current.date(bySettingHour: parts.first ?? 8, minute: parts.count > 1 ? parts[1] : 0, second: 0, of: Date()) ?? Date()
+    private func changeTestSession() {
+        changingTestSession = true
+        Task {
+            defer { changingTestSession = false }
+            do {
+                if app.hasTestSessionBackup { try await app.restoreTestSession() }
+                else { try await app.startTestSession() }
+                dismiss()
+            } catch {
+                testSessionError = true
+            }
+        }
     }
 
     /// Opens an email to the team with what we need to help (until in-app messages can be delivered: docs/later.md).
