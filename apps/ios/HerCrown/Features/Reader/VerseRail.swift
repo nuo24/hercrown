@@ -12,23 +12,24 @@ struct VerseRail: View {
             // .verse-rail: 4 pt bars filling the track (~4.5 pt apart), #d8d8de / active ink; the verse number sits 7 pt to
             // the right of the active bar; the chapter total 12 pt below the track.
             let count = max(verses.count, 1)
-            let track = geo.size.height - 22
-            let gap: CGFloat = count > 60 ? 1 : 4.5
-            let segment = max((track - gap * CGFloat(count - 1)) / CGFloat(count), 0.6)
+            let track = max(0, geo.size.height - 22)
+            let gap = count == 1 ? 0 : min(5, track / (CGFloat(count) * 4))
+            let segment = max((track - gap * CGFloat(count - 1)) / CGFloat(count), 0)
             let index = verses.firstIndex(of: current) ?? 0
             let dark = scheme == .dark
             ZStack(alignment: .topLeading) {
                 VStack(alignment: .leading, spacing: gap) {
                     ForEach(Array(verses.enumerated()), id: \.offset) { i, _ in
                         RoundedRectangle(cornerRadius: 5)
-                            .fill(i == index ? (dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x111111)) : (dark ? Color(hex: 0x39393E) : Color(hex: 0xD8D8DE)))
+                            .fill(i == index ? (dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x152520)) : (dark ? Color(hex: 0x69736E, opacity: 0.62) : Color(hex: 0xB7BFC4, opacity: 0.65)))
                             .frame(width: 4, height: segment)
+                            .scaleEffect(x: i == index ? 1.8 : 1, anchor: .leading)
                     }
                 }
                 Text("\(current)")
                     .font(.system(size: 10, weight: .semibold)).monospacedDigit()
                     .foregroundStyle(dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x263B32))
-                    .offset(x: 11, y: CGFloat(index) * (segment + gap) + 2)
+                    .offset(x: 10, y: CGFloat(index) * (segment + gap) + segment / 2 - 6)
                 Text("\(verses.last ?? count)")
                     .font(.system(size: 10)).monospacedDigit()
                     .foregroundStyle(Color(hex: 0x707B77))

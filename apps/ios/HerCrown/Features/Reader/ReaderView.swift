@@ -43,13 +43,13 @@ struct ReaderView: View {
 
     // MARK: Toolbar
 
-    /// .reader-toolbar: 12 pt from the edges; white pill controls with the icon-button surface; 16 pt labels.
+    /// .reader-toolbar: 12 pt from the edges; compact pill controls with the icon-button surface.
     private var toolbar: some View {
         HStack(spacing: 2) {
             HStack(spacing: 2) {
-                Button { shuffle() } label: { Image(systemName: "shuffle").font(.system(size: 16)).frame(width: 40, height: 44) }
+                Button { shuffle() } label: { Image(systemName: "shuffle").font(.system(size: 14)).frame(width: 40, height: 44) }
                     .accessibilityLabel("Surprise me with a verse")
-                Button { showingSaved = true } label: { Image(systemName: "heart").font(.system(size: 16)).frame(width: 40, height: 44) }
+                Button { showingSaved = true } label: { Image(systemName: "heart").font(.system(size: 14)).frame(width: 40, height: 44) }
                     .accessibilityLabel("Saved passages")
             }
             .padding(2)
@@ -61,7 +61,7 @@ struct ReaderView: View {
                     Text("World English Bible (WEB)").tag("web")
                 }
             } label: {
-                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 14)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
             .padding(.leading, 2)
@@ -69,11 +69,11 @@ struct ReaderView: View {
             Spacer()
             Button { if let ref = model.currentRef { app.toggleSave(ref.description) } } label: {
                 Image(systemName: model.currentRef.map { app.isSaved($0.description) } == true ? "bookmark.fill" : "bookmark")
-                    .font(.system(size: 16)).frame(width: 40, height: 44).iconSurface(Capsule())
+                    .font(.system(size: 14)).frame(width: 40, height: 44).iconSurface(Capsule())
             }
             .accessibilityLabel("Save current verse")
             Button { showingChapters = true } label: {
-                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 16)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 14)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
             .accessibilityLabel("Chapter, \(model.chapter?.label ?? "")")
@@ -135,8 +135,7 @@ struct VersePage: View {
     private var ref: String { "\(chapter.book.id).\(chapter.number).\(verse.number)" }
     private var fontSize: CGFloat { (ReaderFontSize(rawValue: app.preferences.fontSize) ?? .default).points }
 
-    /// .reader-page: 100/44/116 padding, verse block centred (112 pt art, 30 pt serif, 13 pt reference); side actions
-    /// 12 pt from the right and 62 pt above the page bottom; the hint 24 pt above it.
+    /// Center the Scripture and artwork between the toolbar and the bottom controls.
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(spacing: 0) {
@@ -155,21 +154,22 @@ struct VersePage: View {
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Theme.text(scheme))
                 Text("\(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 24)
+                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 20)
                 Spacer(minLength: 0)
             }
+            .frame(maxWidth: 350)
             .padding(EdgeInsets(top: 100, leading: 44, bottom: 116, trailing: 44))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             VStack(spacing: 8) {
                 Button(action: onStudy) { InsightLens().stroke(style: StrokeStyle(lineWidth: 1.65, lineCap: .round, lineJoin: .round)).frame(width: 25, height: 25).frame(width: 44, height: 44) }
                     .accessibilityLabel("Insights for \(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                Button { app.toggleSave(ref) } label: { Image(systemName: app.isSaved(ref) ? "heart.fill" : "heart").font(.system(size: 21)).frame(width: 44, height: 44) }
+                Button { app.toggleSave(ref) } label: { Image(systemName: app.isSaved(ref) ? "heart.fill" : "heart").font(.system(size: 19)).frame(width: 44, height: 44) }
                     .accessibilityLabel(app.isSaved(ref) ? "Unsave" : "Save")
-                Button(action: onReflect) { Image(systemName: "message").font(.system(size: 20)).frame(width: 44, height: 44) }
+                Button(action: onReflect) { Image(systemName: "message").font(.system(size: 19)).frame(width: 44, height: 44) }
                     .accessibilityLabel("Reflect")
                 ShareLink(item: "“\(verse.text)” — \(chapter.book.displayName) \(chapter.number):\(verse.number) (\(BibleStore.offline[chapter.translation] ?? "KJV"))") {
-                    Image(systemName: "square.and.arrow.up").font(.system(size: 20)).frame(width: 44, height: 44)
+                    Image(systemName: "square.and.arrow.up").font(.system(size: 19)).frame(width: 44, height: 44)
                 }
                 .accessibilityLabel("Share")
             }
