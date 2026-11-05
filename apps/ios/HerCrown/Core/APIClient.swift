@@ -38,6 +38,8 @@ final class APIClient: @unchecked Sendable {
     private func makeRequest(_ method: String, _ path: String, body: Data?, accept: String = "application/json") -> URLRequest {
         var request = URLRequest(url: URL(string: path, relativeTo: base)!)
         request.httpMethod = method
+        // Native sessions use bearer tokens. A stale web session cookie can block guest sign-in.
+        request.httpShouldHandleCookies = false
         request.httpBody = body
         request.timeoutInterval = 30
         request.setValue(accept, forHTTPHeaderField: "Accept")

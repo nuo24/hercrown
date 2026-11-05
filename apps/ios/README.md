@@ -20,6 +20,7 @@ Debug-only review switches (launch arguments):
 - `-hcOpenHome streak|devotional|plan|saved|settings` opens a Home sheet; `-hcHomeScroll search|season` scrolls Home
 - `-hcFreshStart YES` starts over as a new guest at the first onboarding screen (deleting the app isn't enough: the Keychain keeps the session)
 - `-hcSkipBilling YES` doesn't start Superwall. A simulator that isn't signed into an Apple Account shows "Sign in to Apple Account" when StoreKit starts; real phones signed into the App Store don't.
+- `-hcPaywallDiagnostics YES` shows the skip or error reason and Her Crown, Superwall, and StoreKit subscription statuses after a failed paywall attempt.
 
 ## Superwall dashboard (paywalls are configured there, not in code)
 
@@ -27,11 +28,13 @@ The app registers these placements. Each needs a campaign with a paywall, and th
 
 | Placement | When |
 |---|---|
-| `onboarding_complete` | End of onboarding (not on the guest path). Main paywall: yearly $29.99 with 7-day trial, weekly $2.99 |
+| `onboarding_complete` | End of onboarding (not on the guest path). Main paywall: yearly $29.99 and weekly $2.99, each with a 7-day trial for eligible users |
 | `paywall_decline` | Superwall's built-in placement when she closes a paywall: the one-time $19.99 first-year offer (`hercrown.plus.yearly.offer`) |
 | `study_explain`, `study_deeper`, `study_original`, `study_related` | A free reader opens a study tool |
 | `plan_start` | A free reader starts a reading plan |
 | `settings`, `settings_subscription` | Membership card and Settings → Subscription |
+
+For the onboarding paywall layout, use the [mockup markup](../../reference-web/dist/paywall.mjs) and [styles](../../reference-web/dist/paywall.css). The hero layers the original cloud bank, open book, and cosmos illustrations from the [illustration pack](../../reference-web/dist/illustration-pack). Keep the yearly and weekly options, close and restore controls, and free-reading exit. Use the product and trial terms from [decision 0003](../../docs/decisions/0003-trial-hard-paywall-decline-offer.md) when configuring the campaign.
 
 After a purchase or restore the app asks the server to verify it with Apple (`POST /me/restore`), so Plus unlocks at once; the webhook keeps it current. Paywall copy must spell out the trial terms and the reminder (docs/trial-reminder.md).
 

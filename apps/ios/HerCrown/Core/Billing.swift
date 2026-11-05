@@ -1,4 +1,5 @@
 import Foundation
+import StoreKit
 import SuperwallKit
 import UIKit
 import UserNotifications
@@ -22,7 +23,14 @@ final class Billing: NSObject {
         if UserDefaults.standard.bool(forKey: "hcSkipBilling") { return }
         #endif
         configured = true
-        Superwall.configure(apiKey: Self.publicKey)
+        let options = SuperwallOptions()
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "hcPaywallDiagnostics") {
+            // Exercise the Apple sandbox payment sheet during this diagnostic run.
+            options.testModeBehavior = .never
+        }
+        #endif
+        Superwall.configure(apiKey: Self.publicKey, options: options)
         Superwall.shared.delegate = self
     }
 
@@ -48,11 +56,52 @@ final class Billing: NSObject {
                 }
             }
         }
-        handler.onError { error in
-            Task { await Analytics.shared.track("paywall_error", ["placement": .string(placement), "message": .string(error.localizedDescription)]) }
+        handler.onError { [weak self] error in
+            let message = error.localizedDescription
+            Task { @MainActor in
+                await Analytics.shared.track("paywall_error", ["placement": .string(placement), "message": .string(message)])
+                #if DEBUG
+                await self?.reportPaywallDiagnostic(placement: placement, reason: message)
+                #endif
+            }
+        }
+        handler.onSkip { [weak self] (reason: PaywallSkippedReason) in
+            Task { @MainActor in
+                await Analytics.shared.track("paywall_skipped", ["placement": .string(placement), "reason": .string(reason.description)])
+                #if DEBUG
+                await self?.reportPaywallDiagnostic(placement: placement, reason: reason.description)
+                #endif
+            }
         }
         Superwall.shared.register(placement: placement, handler: handler)
     }
+
+    #if DEBUG
+    private func reportPaywallDiagnostic(placement: String, reason: String) async {
+        guard UserDefaults.standard.bool(forKey: "hcPaywallDiagnostics"), let app else { return }
+        let serverStatus = app.me == nil ? "Unavailable" : (app.membership.premium ? "Plus" : "Free")
+        let superwallStatus = switch Superwall.shared.subscriptionStatus {
+        case .active: "Active"
+        case .inactive: "Inactive"
+        case .unknown: "Unknown"
+        }
+        var appleStatus = "No verified Her Crown subscription"
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result, AppModel.plusProducts.contains(transaction.productID) {
+                appleStatus = "Active (\(transaction.environment.rawValue))"
+                break
+            }
+        }
+        app.paywallDiagnostic = """
+        \(placement)
+        \(reason)
+
+        Her Crown: \(serverStatus)
+        Superwall: \(superwallStatus)
+        Apple: \(appleStatus)
+        """
+    }
+    #endif
 
     func logOut() { if configured { Superwall.shared.reset() } }
 

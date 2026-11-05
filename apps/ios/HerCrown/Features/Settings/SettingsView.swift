@@ -2,16 +2,18 @@ import AuthenticationServices
 import PhotosUI
 import SafariServices
 import SwiftUI
+import StoreKit
 
 /// settings.root (specs/SCREEN-MAP.md): profile, membership, Account & reading, Here for you, About & legal.
 /// Every change here saves at once and never touches onboarding.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) private var scheme
+    @Environment(\.colorScheme) private var inheritedScheme
     @State private var legal: LegalPage?
     #if DEBUG
     @State private var previewPage = false
+    private static var openedPreviewPage = false
     #endif
     @State private var reminderTime = Date()
     @State private var reminderDenied = false
@@ -32,7 +34,7 @@ struct SettingsView: View {
                                 divider
                                 NavigationLink { SubscriptionView() } label: { row("bookmark", "Subscription", app.membership.premium ? "Her Crown Plus" : "Free plan · explore Plus") }.buttonStyle(.plain)
                                 divider
-                                Button { toggleAppearance() } label: { row("sun.max", "Appearance", appearanceSubtitle, chevron: false) }.buttonStyle(.plain)
+                                Menu { appearanceChoices } label: { row(scheme == .dark ? "moon" : "sun.max", "Appearance", appearanceTitle, chevron: "chevron.down") }.buttonStyle(.plain)
                                 divider
                                 NavigationLink { TopicsView() } label: { row("heart", "On your heart", app.preferences.topics.isEmpty ? "Choose topics" : app.preferences.topics.joined(separator: " · ")) }.buttonStyle(.plain)
                                 divider
@@ -117,12 +119,15 @@ struct SettingsView: View {
                 }
             }
             .task {
-                guard let page = UserDefaults.standard.string(forKey: "hcPreviewSettings") else { return }
+                guard let page = UserDefaults.standard.string(forKey: "hcPreviewSettings"),
+                      !Self.openedPreviewPage else { return }
+                Self.openedPreviewPage = true
                 if let destination = LegalPage(rawValue: page) { legal = destination }
                 else { previewPage = true }
             }
             #endif
         }
+        .environment(\.colorScheme, scheme)
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .onAppear {
             reminderTime = Self.time(from: app.preferences.reminderTime)
@@ -138,17 +143,44 @@ struct SettingsView: View {
             Spacer()
             Text("Settings").font(.system(size: 16))
             Spacer()
-            IconButton(systemName: scheme == .dark ? "moon" : "sun.max", label: "Switch appearance") { toggleAppearance() }
+            Menu { appearanceChoices } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: scheme == .dark ? "moon" : "sun.max").font(.system(size: 15))
+                    Image(systemName: "chevron.down").font(.system(size: 8, weight: .semibold))
+                }
+                .frame(width: 44, height: 44)
+                .iconSurface(Circle())
+            }
+            .accessibilityLabel("Appearance, \(appearanceTitle)")
         }
         .padding(EdgeInsets(top: 20, leading: 22, bottom: 16, trailing: 22))
     }
 
-    private var appearanceSubtitle: String { scheme == .dark ? "Dark · switch to light" : "Light · switch to dark" }
+    private var scheme: ColorScheme {
+        switch app.preferences.appearance {
+        case "light": .light
+        case "dark": .dark
+        default: inheritedScheme
+        }
+    }
 
-    private func toggleAppearance() {
-        let next = scheme == .dark ? "light" : "dark"
-        app.updatePreferences(["appearance": next]) { $0.appearance = next }
-        Task { await Analytics.shared.track("setting_changed", ["setting": "appearance", "value": .string(next)]) }
+    private var appearanceTitle: String {
+        switch app.preferences.appearance {
+        case "light": "Light"
+        case "dark": "Dark"
+        default: "System"
+        }
+    }
+
+    private var appearanceChoices: some View {
+        Picker("Appearance", selection: Binding(get: { app.preferences.appearance }, set: { next in
+            app.updatePreferences(["appearance": next]) { $0.appearance = next }
+            Task { await Analytics.shared.track("setting_changed", ["setting": "appearance", "value": .string(next)]) }
+        })) {
+            Text("System").tag("system")
+            Text("Light").tag("light")
+            Text("Dark").tag("dark")
+        }
     }
 
     // MARK: Profile (.settings-profile: 76 pt avatar, 30 pt serif greeting)
@@ -172,7 +204,7 @@ struct SettingsView: View {
     // MARK: Membership (.settings-membership: 75% surface, 20 radius, 20/18 padding)
 
     private var membershipCard: some View {
-        Button { if !app.membership.premium { app.presentPaywall(placement: "settings") } } label: {
+        NavigationLink { SubscriptionView() } label: {
             HStack(alignment: .center, spacing: 16) {
                 Image.illustration("butterfly").resizable().scaledToFit().frame(width: 76, height: 70).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 6) {
@@ -212,7 +244,7 @@ struct SettingsView: View {
 
     private var divider: some View { Rectangle().fill(Theme.border(scheme)).frame(height: 1) }
 
-    private func row(_ symbol: String, _ title: String, _ subtitle: String?, chevron: Bool = true) -> some View {
+    private func row(_ symbol: String, _ title: String, _ subtitle: String?, chevron: String = "chevron.right") -> some View {
         HStack(spacing: 13) {
             Image(systemName: symbol).font(.system(size: 19, weight: .light)).frame(width: 25, height: 21)
             VStack(alignment: .leading, spacing: 3) {
@@ -220,7 +252,7 @@ struct SettingsView: View {
                 if let subtitle, !subtitle.isEmpty { Text(subtitle).font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).lineLimit(2) }
             }
             Spacer(minLength: 0)
-            if chevron { Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)) }
+            Image(systemName: chevron).font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
         }
         .padding(EdgeInsets(top: 14, leading: 15, bottom: 14, trailing: 15))
         .frame(minHeight: 67)
@@ -449,6 +481,9 @@ struct Avatar: View {
 
 /// settings.subscription: current plan, benefits, Explore Plus, Restore, Manage. Never claims Plus without a verified entitlement.
 struct SubscriptionView: View {
+    #if DEBUG
+    @State private var openingSandboxCheckout = false
+    #endif
     @Environment(AppModel.self) private var app
     @State private var restoring = false
     @State private var message: String?
@@ -480,7 +515,15 @@ struct SubscriptionView: View {
                     Text("Free reading").font(.serif(28, relativeTo: .title2))
                     Text("Reading the Bible is always free. Plus adds reading plans and every study tool: Explain easier, Deeper study, Original language and Related verses.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
-                    Button("Explore Her Crown Plus") { app.presentPaywall(placement: "settings_subscription") }
+                    Button("Explore Her Crown Plus") {
+                        #if DEBUG
+                        guard !openingSandboxCheckout else { return }
+                        openingSandboxCheckout = true
+                        Task { await openSandboxCheckout() }
+                        #else
+                        app.presentPaywall(placement: "settings_subscription")
+                        #endif
+                    }
                         .buttonStyle(CapsuleButtonStyle(kind: .secondary))
                 }
             }
@@ -501,6 +544,32 @@ struct SubscriptionView: View {
         .navigationTitle("Subscription")
         .navigationBarTitleDisplayMode(.inline)
     }
+
+    #if DEBUG
+    private func openSandboxCheckout() async {
+        defer { openingSandboxCheckout = false }
+        message = "Opening Apple sandbox checkout…"
+        do {
+            guard let product = try await Product.products(for: ["hercrown.plus.yearly"]).first else {
+                message = "Apple sandbox did not return the Her Crown yearly plan."
+                return
+            }
+            switch try await product.purchase() {
+            case .success(.verified(let transaction)):
+                message = await app.verifyPurchases()
+                await transaction.finish()
+            case .userCancelled:
+                message = nil
+            case .pending:
+                message = "Apple is waiting for purchase approval."
+            default:
+                message = "Apple could not verify the purchase."
+            }
+        } catch {
+            message = "Apple checkout could not open. \(error.localizedDescription)"
+        }
+    }
+    #endif
 
     private func planName(_ id: String?) -> String {
         switch id {

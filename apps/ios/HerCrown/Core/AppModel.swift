@@ -27,6 +27,10 @@ final class AppModel {
 
     var displayName: String? { me?.profile.displayName }
 
+    #if DEBUG
+    var paywallDiagnostic: String?
+    #endif
+
     // MARK: Launch
 
     func start() async {
@@ -35,6 +39,7 @@ final class AppModel {
         // guest at the first onboarding screen. (Deleting the app isn't enough: the Keychain keeps the session.)
         if UserDefaults.standard.bool(forKey: "hcFreshStart") {
             api.token = nil
+            Billing.shared.logOut()
             for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position", "hc.onboardingCompleted"] { UserDefaults.standard.removeObject(forKey: key) }
             saved = []; preferences = .defaults; membership = .free; me = nil; onboardingCompleted = false
         }
@@ -80,6 +85,18 @@ final class AppModel {
     }
 
     // MARK: Membership
+
+    func refreshMembership() async {
+        guard let userID = me?.user.id else { return }
+        let updated: Membership? = try? await api.get("/me/entitlements")
+        guard !Task.isCancelled, me?.user.id == userID else { return }
+        if let updated { membership = updated }
+        else if membership.subscription?.isTrial == true,
+                let expires = membership.subscription?.expiresAt,
+                expires <= Date().timeIntervalSince1970 * 1000 {
+            membership = .free
+        }
+    }
 
     func presentPaywall(placement: String) {
         Billing.shared.present(placement: placement)
@@ -140,6 +157,10 @@ final class AppModel {
     func restorePurchases() async -> String {
         await Analytics.shared.track("restore_tapped")
         try? await AppStore.sync()
+        return await verifyPurchases()
+    }
+
+    func verifyPurchases() async -> String {
         var transactionId: String?
         for await result in Transaction.currentEntitlements {
             if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID); break }
