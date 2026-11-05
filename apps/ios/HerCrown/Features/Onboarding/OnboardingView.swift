@@ -205,7 +205,7 @@ struct OnboardingView: View {
                     default: readyStep
                     }
                 }
-                .padding(.top, 39)
+                .padding(.top, 36)
             }
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
@@ -217,7 +217,7 @@ struct OnboardingView: View {
                     Button("Not now") { reminders = false; step = 7 }
                         .font(.system(size: 14)).foregroundStyle(Color(hex: 0x333333)).frame(maxWidth: .infinity, minHeight: 48)
                 }
-                .padding(.bottom, 9)
+                .padding(.bottom, 58)
             case 7: footer(button: finishing ? "Getting ready…" : "Start reading", caption: "A little space. An open heart.") { Task { await finish(guest: false) } }
             default: footer(button: "Continue", caption: "Your pace. Your starting point.") { step += 1 }
             }
@@ -234,16 +234,18 @@ struct OnboardingView: View {
     }
 
     private func heading(_ title: String, art: String) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .center, spacing: 16) {
             Text(title).font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
-                .fixedSize().padding(.top, 9)
+                .lineSpacing(-0.96)
+                .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
             Image(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true)
         }
     }
 
     private func subtitle(_ text: String) -> some View {
-        Text(text).font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Self.body).padding(.top, 18)
+        Text(text).font(.system(size: 14)).lineSpacing(6.44).foregroundStyle(Self.body)
+            .padding(.vertical, 3.22).padding(.top, 18)
     }
 
     private func choice(title: String, art: String, sub: String, options: [String], selection: Binding<String?>, details: [String: String] = [:], note: String? = nil) -> some View {
@@ -263,7 +265,7 @@ struct OnboardingView: View {
                             .frame(width: 19, height: 19)
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(option).font(.system(size: 14))
-                                if on, let d = details[option] { Text(d).font(.system(size: 11)).foregroundStyle(Self.body) }
+                                if let d = details[option] { Text(d).font(.system(size: 11)).foregroundStyle(Self.body) }
                             }
                             Spacer(minLength: 0)
                         }
@@ -276,7 +278,7 @@ struct OnboardingView: View {
                     .accessibilityAddTraits(on ? .isSelected : [])
                 }
             }
-            .padding(.top, 32)
+            .padding(.top, 28)
             if let note { Text(note).font(.system(size: 11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 24) }
         }
     }
@@ -363,7 +365,7 @@ struct OnboardingView: View {
     // MARK: Pieces
 
     private var backButton: some View {
-        Button { step = max(0, step - 1) } label: { Image(systemName: "arrow.left").font(.system(size: 19)).foregroundStyle(Self.ink).frame(width: 44, height: 44) }
+        Button { step = max(0, step - 1) } label: { Image(systemName: "arrow.left").font(.system(size: 18)).foregroundStyle(Self.ink).frame(width: 44, height: 44) }
             .accessibilityLabel("Back")
     }
 
@@ -488,9 +490,11 @@ private extension View {
     func choiceSurface(selected: Bool, radius: CGFloat? = nil) -> some View {
         let shape = RoundedRectangle(cornerRadius: radius ?? 999, style: .continuous)
         return self
-            .background(shape.fill(selected ? Color(hex: 0xEFF4F6) : .white))
+            .background {
+                shape.fill(selected ? Color(hex: 0xEFF4F6) : .white)
+                    .shadow(color: .black.opacity(0.08), radius: 3, y: 2)
+            }
             .overlay(shape.strokeBorder(selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7), lineWidth: 1))
-            .shadow(color: Color(red: 27 / 255, green: 35 / 255, blue: 37 / 255, opacity: 0.2), radius: 2, y: 3)
     }
 }
 
@@ -502,11 +506,11 @@ struct OnboardingClouds: View {
         GeometryReader { geo in
             ZStack {
                 Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
-                    .position(x: geo.size.width / 2, y: isIntro ? cloudCenter(in: geo.size, scale: 1.5, alignment: 0.03) : geo.size.height * 0.04 + geo.size.width * 0.25)
+                    .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.5, alignment: isIntro ? 0.03 : 0.04))
                 Image("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
-                    .position(x: geo.size.width / 2, y: isIntro ? cloudCenter(in: geo.size, scale: 1.7, alignment: 0.94) : geo.size.height * 0.92 - geo.size.width * 0.1)
+                    .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.7, alignment: isIntro ? 0.94 : 0.92))
             }
-            .opacity(isIntro ? 0.36 : 0.16)
+            .opacity(isIntro ? 0.36 : 0.22)
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
