@@ -66,7 +66,7 @@ struct ReaderView: View {
                     Text("World English Bible (WEB)").tag("web")
                 }
             } label: {
-                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 14)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.system(size: 16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
             .padding(.leading, 2)
@@ -78,7 +78,7 @@ struct ReaderView: View {
             }
             .accessibilityLabel("Save current verse")
             Button { showingChapters = true } label: {
-                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 14)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(model.chapter?.label ?? "Genesis 1").font(.system(size: 16)).lineLimit(1); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44).iconSurface(Capsule())
             }
             .accessibilityLabel("Chapter, \(model.chapter?.label ?? "")")
@@ -159,7 +159,7 @@ struct VersePage: View {
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Theme.text(scheme))
                 Text("\(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 20)
+                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 30)
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: 350)
@@ -185,12 +185,18 @@ struct VersePage: View {
             HStack(spacing: 10) {
                 if isLast, let next {
                     Button(action: onNext) {
-                        HStack(spacing: 6) { Text("Next: \(next)"); Image(systemName: "arrow.right") }
-                            .font(.system(size: 13)).padding(.horizontal, 16).frame(height: 40)
-                            .iconSurface(Capsule())
+                        HStack(spacing: 10) {
+                            Text("End of chapter · Next: \(next)").font(.system(size: 11))
+                            Text("↓").font(.system(size: 14)).accessibilityHidden(true)
+                        }
+                        .padding(.vertical, 14)
+                        .contentShape(Rectangle())
                     }
-                } else if !isLast {
-                    Text("Scroll for the next verse").font(.system(size: 11)); Text("↓").font(.system(size: 14))
+                    .buttonStyle(.plain)
+                    .padding(.vertical, -14)
+                } else {
+                    Text(isLast ? "End of chapter" : "Scroll for the next verse").font(.system(size: 11))
+                    if !isLast { Text("↓").font(.system(size: 14)).accessibilityHidden(true) }
                 }
             }
             .foregroundStyle(Theme.muted(scheme))
