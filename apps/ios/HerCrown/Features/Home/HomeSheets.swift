@@ -175,16 +175,18 @@ struct DevotionalSheet: View {
                         Text("\(devotional.minutes ?? 1) min read").font(.system(size: 12))
                     }
                     .foregroundStyle(Theme.muted(scheme))
-                    Text(devotional.title).font(.serif(34, relativeTo: .largeTitle))
+                    Text(devotional.title).font(.serif(32, relativeTo: .largeTitle))
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("“\(devotional.passage ?? "")”").font(.serif(21, italic: true, relativeTo: .title3))
+                        Text("“\(devotional.passage ?? "")”")
+                            .font(.serif(28, relativeTo: .title2)).lineSpacing(4.2)
                         Text("\(devotional.label) · \(BibleStore.offline[devotional.translation] ?? devotional.translation.uppercased())")
                             .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
                     }
-                    .padding(.leading, 14)
-                    .overlay(alignment: .leading) { Rectangle().fill(Color(hex: 0xD9A35B)).frame(width: 2) }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 14))
                     ForEach(Array(devotional.body.components(separatedBy: "\n\n").enumerated()), id: \.offset) { _, paragraph in
-                        Text(paragraph).font(.system(size: 17)).lineSpacing(5)
+                        Text(paragraph).font(.system(size: 14)).lineSpacing(7.14)
                     }
                     if let reflection = devotional.reflection {
                         VStack(alignment: .leading, spacing: 8) {
