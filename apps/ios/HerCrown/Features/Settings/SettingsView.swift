@@ -515,6 +515,10 @@ struct SubscriptionView: View {
     @State private var openingSandboxCheckout = false
     #endif
     @Environment(AppModel.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var appleSubscriptionFound = false
+    @State private var checkedAppleSubscription = false
+    @State private var confirmsRestore = false
     @State private var restoring = false
     @State private var message: String?
 
@@ -541,7 +545,11 @@ struct SubscriptionView: View {
                     } else if let expires = sub.expiresAt {
                         LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                     }
-                } else {
+                } else if appleSubscriptionFound {
+                    Text("Apple subscription found").font(.serif(28, relativeTo: .title2))
+                    Text("Restore your purchase to connect Plus to this Her Crown account.")
+                        .font(.system(size: 14)).foregroundStyle(.secondary)
+                } else if checkedAppleSubscription {
                     Text("Free reading").font(.serif(28, relativeTo: .title2))
                     Text("Reading the Bible is always free. Plus adds reading plans and every study tool: Explain easier, Deeper study, Original language and Related verses.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
@@ -551,16 +559,17 @@ struct SubscriptionView: View {
                         openingSandboxCheckout = true
                         Task { await openSandboxCheckout() }
                         #else
-                        app.presentPaywall(placement: "settings_subscription")
+                        app.presentPaywall(placement: "settings_subscription") { appleSubscriptionFound = true }
                         #endif
                     }
-                        .buttonStyle(CapsuleButtonStyle(kind: .secondary))
+                    .buttonStyle(CapsuleButtonStyle(kind: .secondary))
+                } else {
+                    ProgressView("Checking for an Apple subscription…")
                 }
             }
             Section {
                 Button(restoring ? "Restoring…" : "Restore Purchases") {
-                    restoring = true
-                    Task { message = await app.restorePurchases(); restoring = false }
+                    confirmsRestore = true
                 }
                 .disabled(restoring)
                 if let message { Text(message).font(.system(size: 14)) }
@@ -573,11 +582,31 @@ struct SubscriptionView: View {
         .background(AppGradient())
         .navigationTitle("Subscription")
         .navigationBarTitleDisplayMode(.inline)
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            checkedAppleSubscription = false
+            let existing = await app.activeAppleSubscription()
+            guard !Task.isCancelled else { return }
+            appleSubscriptionFound = existing != nil
+            checkedAppleSubscription = true
+        }
+        .confirmationDialog("Restore Plus to this account?", isPresented: $confirmsRestore, titleVisibility: .visible) {
+            Button("Restore Purchases") {
+                restoring = true
+                Task { message = await app.restorePurchases(); restoring = false }
+            }
+        } message: {
+            Text("Restoring connects Plus to your current Her Crown account and may move Plus access from another account.")
+        }
     }
 
     #if DEBUG
     private func openSandboxCheckout() async {
         defer { openingSandboxCheckout = false }
+        if await app.activeAppleSubscription() != nil {
+            appleSubscriptionFound = true
+            return
+        }
         message = "Opening Apple sandbox checkout…"
         do {
             guard let product = try await Product.products(for: ["hercrown.plus.yearly"]).first else {

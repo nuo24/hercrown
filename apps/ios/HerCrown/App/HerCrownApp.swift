@@ -68,6 +68,14 @@ struct HerCrownApp: App {
                 .interactiveDismissDisabled()
                 .preferredColorScheme(colorScheme)
             }
+            .alert("Apple subscription found", isPresented: $app.showExistingAppleSubscription) {
+                Button("Restore Purchases") {
+                    Task { returnOfferMessage = await app.restorePurchases() }
+                }
+                Button("Keep reading", role: .cancel) {}
+            } message: {
+                Text("This Apple account already has Her Crown Plus. Restoring connects it to your current Her Crown account and may move Plus access from another account.")
+            }
             .alert("Her Crown Plus", isPresented: Binding(
                 get: { returnOfferMessage != nil },
                 set: { if !$0 { returnOfferMessage = nil } }

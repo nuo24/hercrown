@@ -14,6 +14,8 @@ final class AppModel {
     var me: Me?
     var preferences: Preferences = AppModel.cachedPreferences ?? .defaults
     var membership: Membership = .free
+    var showExistingAppleSubscription = false
+    private var checkingPaywall = false
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
     var onboardingCompleted = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
     var offline = false
@@ -173,9 +175,32 @@ final class AppModel {
         }
     }
 
-    func presentPaywall(placement: String) {
-        Billing.shared.present(placement: placement)
-        Task { await Analytics.shared.track("paywall_requested", ["placement": .string(placement)]) }
+    /// StoreKit knows what the device's Apple account already bought, even when the current app account is Free.
+    func activeAppleSubscription() async -> Transaction? {
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result, Self.plusProducts.contains(transaction.productID) {
+                return transaction
+            }
+        }
+        return nil
+    }
+
+    func presentPaywall(placement: String, onExistingSubscription: (() -> Void)? = nil) {
+        guard !checkingPaywall, !membership.premium else { return }
+        checkingPaywall = true
+        let userID = me?.user.id
+        Task {
+            defer { checkingPaywall = false }
+            let existing = await activeAppleSubscription()
+            guard me?.user.id == userID, !membership.premium else { return }
+            if existing != nil {
+                if let onExistingSubscription { onExistingSubscription() }
+                else { showExistingAppleSubscription = true }
+                return
+            }
+            Billing.shared.present(placement: placement)
+            await Analytics.shared.track("paywall_requested", ["placement": .string(placement)])
+        }
     }
 
     // MARK: Account
@@ -238,9 +263,7 @@ final class AppModel {
     func verifyPurchases(transactionID verifiedID: String? = nil) async -> String {
         var transactionId = verifiedID
         if transactionId == nil {
-            for await result in Transaction.currentEntitlements {
-                if case .verified(let tx) = result, Self.plusProducts.contains(tx.productID) { transactionId = String(tx.originalID); break }
-            }
+            if let active = await activeAppleSubscription() { transactionId = String(active.originalID) }
         }
         if transactionId == nil {
             for await result in Transaction.all {
