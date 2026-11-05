@@ -21,12 +21,14 @@ export interface AppleTransaction {
   revocationDate?: number;
   offerType?: number;
   offerDiscountType?: string;
+  offerIdentifier?: string;
   environment?: "Sandbox" | "Production";
   appAccountToken?: string;
 }
 
 export interface AppleRenewalInfo {
   autoRenewStatus?: 0 | 1;
+  expirationIntent?: number;
   gracePeriodExpiresDate?: number;
   isInBillingRetryPeriod?: boolean;
 }

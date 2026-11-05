@@ -546,11 +546,11 @@ struct SubscriptionView: View {
                         LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                     }
                 } else if appleSubscriptionFound {
-                    Text("Free reading").font(.serif(28, relativeTo: .title2))
+                    LabeledContent("Plan", value: "Free reading")
                     Text("Apple found a Plus subscription that isn’t connected to this Her Crown account. Restore your purchase to connect it.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
                 } else if checkedAppleSubscription {
-                    Text("Free reading").font(.serif(28, relativeTo: .title2))
+                    LabeledContent("Plan", value: "Free reading")
                     Text("Reading the Bible is always free. Plus adds reading plans and every study tool: Explain easier, Deeper study, Original language and Related verses.")
                         .font(.system(size: 14)).foregroundStyle(.secondary)
                     Button("Explore Her Crown Plus") {

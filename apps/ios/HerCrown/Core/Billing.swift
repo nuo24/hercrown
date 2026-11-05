@@ -68,9 +68,9 @@ final class Billing: NSObject {
                 case .purchased, .restored: await self.syncPurchase()
                 case .declined:
                     guard let userID, let app = self.app, app.me?.user.id == userID, !app.membership.premium,
-                          await Self.isSandbox(), app.me?.user.id == userID else { return }
-                    struct Recorded: Decodable { let ok: Bool }
-                    let _: Recorded? = try? await app.api.call("POST", "/me/return-offer/decline", json: [String: String]())
+                          AppConfig.apiBaseURL.host == "bible-scroll-api-staging.bible-scroll-api.workers.dev" else { return }
+                    UserDefaults.standard.set(true, forKey: self.pendingDeclineKey(userID))
+                    await self.syncPendingDecline(for: userID)
                 }
             }
         }
@@ -94,6 +94,20 @@ final class Billing: NSObject {
             }
         }
         Superwall.shared.register(placement: placement, handler: handler)
+    }
+
+    private func pendingDeclineKey(_ userID: String) -> String { "hc.pendingPaywallDecline.\(userID)" }
+
+    func syncPendingDecline(for userID: String) async {
+        let key = pendingDeclineKey(userID)
+        guard UserDefaults.standard.bool(forKey: key), let app, app.me?.user.id == userID,
+              let token = app.api.token, await Self.isSandbox() else { return }
+        do {
+            _ = try await app.api.send("POST", "/me/return-offer/decline", authentication: .bearer(token))
+            UserDefaults.standard.removeObject(forKey: key)
+        } catch {
+            // Keep the decline for the next foreground check if this request was interrupted.
+        }
     }
 
     #if DEBUG

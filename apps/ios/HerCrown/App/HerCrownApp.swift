@@ -110,6 +110,7 @@ struct HerCrownApp: App {
         guard #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
               canShowOffer(for: user.id), await Billing.isSandbox(),
               await Storefront.current?.countryCode == "USA" else { return }
+        await Billing.shared.syncPendingDecline(for: user.id)
         let products = (try? await Product.products(for: ["hercrown.plus.yearly", "hercrown.plus.yearly.offer"])) ?? []
         let candidate: ReturnOffer
         if let yearly = products.first(where: { $0.id == "hercrown.plus.yearly" }),
@@ -118,12 +119,12 @@ struct HerCrownApp: App {
            let promo = subscription.promotionalOffers.first(where: { $0.id == returnOfferID && isFirstYear($0) }),
            let statuses = try? await subscription.status,
            statuses.contains(where: { status in
-               guard status.state == .subscribed,
-                     case .verified(let tx) = status.transaction,
+               guard case .verified(let tx) = status.transaction,
                      case .verified(let renewal) = status.renewalInfo else { return false }
-               return tx.environment == .sandbox && tx.productID == yearly.id &&
-                   tx.offer?.type == .introductory && tx.offer?.paymentMode == .freeTrial &&
-                   (tx.expirationDate ?? .distantPast) > Date() && !renewal.willAutoRenew
+               guard tx.environment == .sandbox, AppModel.plusProducts.contains(tx.productID),
+                     tx.revocationDate == nil, tx.offer?.id != returnOfferID, !renewal.willAutoRenew else { return false }
+               return (status.state == .subscribed && (tx.expirationDate ?? .distantPast) > Date()) ||
+                   (status.state == .expired && renewal.expirationReason == .autoRenewDisabled)
            }) {
             candidate = ReturnOffer(userID: user.id, kind: .trial, product: yearly, firstYear: promo.displayPrice)
         } else {

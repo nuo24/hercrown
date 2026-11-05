@@ -1,4 +1,4 @@
-import { APPLE_STATUS, subscriptionStatuses } from "./appstore";
+import { APPLE_STATUS, subscriptionStatuses, type AppleSubscription } from "./appstore";
 import { ENTITLEMENT, entitlementFor } from "./billing";
 import { badRequest, HttpError, notFound, readJson } from "./http";
 import { es256Jwt } from "./jwt";
@@ -7,6 +7,7 @@ const DAY_MS = 86_400_000;
 // Short grace for TestFlight. Decide the production timing separately before launch.
 const SANDBOX_DECLINE_GRACE_MS = 120_000;
 const YEARLY = "hercrown.plus.yearly";
+const RETURN_OFFER_ID = "trial_return_1999";
 
 function stagingOnly(env: Env) {
   if (env.APP_ENV !== "staging") throw notFound("Offer unavailable");
@@ -37,7 +38,7 @@ export async function reserveReturnOffer(request: Request, env: Env, userId: str
     if (existing?.declined_at == null || existing.declined_at > cutoff || (await entitlementFor(env, userId)).premium) {
       return unavailable();
     }
-  } else if (!(await eligibleTrial(env, userId))) {
+  } else if (!(await eligibleCancellation(env, userId, now))) {
     return unavailable();
   }
 
@@ -51,28 +52,37 @@ export async function reserveReturnOffer(request: Request, env: Env, userId: str
   return Response.json({ available: reserved !== null });
 }
 
-async function eligibleTrial(env: Env, userId: string) {
+export function canReceiveCancellationOffer({ status, transaction, renewal }: AppleSubscription, now: number) {
+  if (renewal?.autoRenewStatus !== 0 || transaction.revocationDate != null ||
+      transaction.offerIdentifier === RETURN_OFFER_ID || transaction.expiresDate == null) return false;
+  if (status === APPLE_STATUS.ACTIVE) return transaction.expiresDate > now;
+  // Apple expiration intent 1 means the subscriber canceled auto-renewal.
+  return status === APPLE_STATUS.EXPIRED && transaction.expiresDate <= now && renewal.expirationIntent === 1;
+}
+
+async function eligibleCancellation(env: Env, userId: string, now = Date.now()) {
   const row = await env.DB.prepare(
     "SELECT original_transaction_id FROM entitlements WHERE user_id = ?1 AND entitlement = ?2 AND environment = 'SANDBOX'",
   ).bind(userId, ENTITLEMENT).first<{ original_transaction_id: string | null }>();
   const originalId = row?.original_transaction_id;
   const result = originalId ? await subscriptionStatuses(env, originalId) : null;
-  if (result?.environment !== "sandbox") return undefined;
-  return result.subscriptions.find(({ status, transaction: tx, renewal }) =>
-    status === APPLE_STATUS.ACTIVE && tx.originalTransactionId === originalId &&
-    tx.productId === YEARLY && tx.offerType === 1 && tx.offerDiscountType === "FREE_TRIAL" &&
-    (tx.expiresDate ?? 0) > Date.now() && renewal?.autoRenewStatus === 0
-  )?.transaction;
+  if (result?.environment !== "sandbox" || result.bundleId !== env.APPLE_APP_BUNDLE_IDENTIFIER) return undefined;
+  const products = env.PLUS_PRODUCT_IDS.split(",").map((product) => product.trim());
+  return result.subscriptions.find((subscription) => {
+    const tx = subscription.transaction;
+    return tx.originalTransactionId === originalId && products.includes(tx.productId) &&
+      canReceiveCancellationOffer(subscription, now);
+  })?.transaction;
 }
 
 export async function signTrialReturnOffer(env: Env, userId: string) {
   stagingOnly(env);
-  const transaction = await eligibleTrial(env, userId);
+  const transaction = await eligibleCancellation(env, userId);
   if (!transaction) throw new HttpError(403, "offer_ineligible", "This offer is unavailable for your subscription.");
   const token = await es256Jwt(env.APP_STORE_PRIVATE_KEY, { kid: env.APP_STORE_KEY_ID }, {
     iss: env.APP_STORE_ISSUER_ID, bid: env.APPLE_APP_BUNDLE_IDENTIFIER, aud: "promotional-offer",
     iat: Math.floor(Date.now() / 1000), nonce: crypto.randomUUID(), productId: YEARLY,
-    offerIdentifier: "trial_return_1999", transactionId: transaction.transactionId,
+    offerIdentifier: RETURN_OFFER_ID, transactionId: transaction.transactionId,
   });
   return Response.json({ token }, { headers: { "Cache-Control": "no-store" } });
 }
