@@ -13,10 +13,14 @@ if (!token) throw new Error("Set STUDY_EVAL_TOKEN to the bearer token of a Plus 
 const { cases, global_exclude } = JSON.parse(readFileSync(new URL("../evals/study-cases.json", import.meta.url), "utf8"));
 
 const LIMITS = {
-  "Simple explanation": 140, "Key takeaway": 30, "Historical context": 140, "Original language": 120,
-  "Life in biblical times": 110, "Related passages": 110, "Reflect": 40,
+  "Simple explanation": 140, "Key takeaway": 30, "Biblical meaning": 140, "Historical context": 140,
+  "Original language": 120, "Life in biblical times": 110, "Theological significance": 140,
+  "Related passages": 110, "Reflect": 40,
 };
-const NEEDS_CITATION = new Set(["Simple explanation", "Historical context", "Original language", "Related passages"]);
+const NEEDS_CITATION = new Set([
+  "Simple explanation", "Biblical meaning", "Historical context", "Original language",
+  "Theological significance", "Related passages",
+]);
 const words = (s) => s.replace(/\[[^\]]+\]/g, "").split(/\s+/).filter(Boolean).length;
 const re = (p) => new RegExp(p, "iu");
 
@@ -32,6 +36,12 @@ for (const c of cases) {
     const sections = body.sections ?? [];
     const text = sections.map((s) => s.text).join("\n");
     if (res.status === 200) {
+      if (tool === "deeper") {
+        const required = ["Biblical meaning", "Historical context", "Original language",
+          "Theological significance", "Related passages", "Reflect"];
+        const titles = sections.map((s) => s.title).filter((title) => title !== "Life in biblical times");
+        if (titles.join("|") !== required.join("|")) problems.push("missing or out-of-order Deeper Study v2 sections");
+      }
       if (c.include.length && !c.include.some((p) => re(p).test(text))) problems.push(`missing: ${c.include.join(" / ")}`);
       for (const p of [...c.exclude, ...global_exclude]) if (re(p).test(text)) problems.push(`contains: ${p}`);
       for (const s of sections) {
@@ -46,12 +56,17 @@ for (const c of cases) {
 
 const passed = results.filter((r) => r.problems.length === 0).length;
 const fresh = results.filter((r) => r.cached === false).length;
+const stored = results.filter((r) => r.cached === true).length;
 const lines = [
   `# Study tools eval: ${new Date().toISOString().slice(0, 10)}`,
   "",
-  `Run: \`node scripts/eval-study.mjs ${base}\` · ${cases.length} verses × 2 tools · ${fresh} freshly generated, ${results.length - fresh} stored.`,
+  `Run: \`node apps/api/scripts/eval-study.mjs ${base}\` · ${cases.length} verses × 2 tools · ${fresh} freshly generated, ${stored} stored, ${results.length - fresh - stored} without a cache status.`,
   "",
   `**Automatic checks: ${passed}/${results.length} passed.** They check the format, citations, length, an expected fact, and known wrong or overconfident claims. They don't prove an answer is right: read every answer below and mark it.`,
+  ...["explain", "deeper"].map((tool) => {
+    const answers = results.filter((r) => r.tool === tool);
+    return `- ${tool}: ${answers.filter((r) => r.problems.length === 0).length}/${answers.length} passed.`;
+  }),
   "",
   "| Verse | Tool | Time | Sources cited | Automatic | Reviewer |",
   "|---|---|---|---|---|---|",
