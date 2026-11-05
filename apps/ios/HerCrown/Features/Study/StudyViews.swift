@@ -140,10 +140,10 @@ struct OriginalLanguageView: View {
                                 }
                                 Spacer()
                             }
-                            .padding(.vertical, 6)
+                            .padding(14)
+                            .surfaceCard(radius: 14)
                         }
                         .buttonStyle(.plain)
-                        Divider()
                     }
                     Text("\(data.source.name) · \(data.source.license)").font(.system(size: 11)).foregroundStyle(.secondary)
                 case .needsPlus: PlusRequiredView(tool: .original)
