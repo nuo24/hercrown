@@ -104,7 +104,7 @@ describe("explain easier (AI)", () => {
     expect(answer).toMatchObject({
       ref: "JHN.3.16", label: "John 3:16", tool: "explain", cached: false,
       sections: [{ title: "Simple explanation", text: expect.stringContaining("[JFB]") }, { title: "Key takeaway", text: expect.any(String) }],
-      notice: expect.stringContaining("isn't Scripture"),
+      notice: expect.stringContaining("separate from Scripture"),
     });
     expect(answer.sources.map((s: any) => s.tag).sort()).toEqual(["Clarke", "JFB"]);
     expect(answer.sources[0].license).toBe("Public domain");
@@ -221,7 +221,10 @@ describe("explain easier (AI)", () => {
 
 describe("deeper study (AI)", () => {
   it("adds original words and cross-references to the sources", async () => {
-    reply = () => openRouter(`## Historical context
+    reply = () => openRouter(`## Biblical meaning
+The passage connects God’s love to the gift of his Son [JFB].
+
+## Historical context
 Jesus speaks with Nicodemus [JFB].
 
 ## Original language
@@ -230,6 +233,9 @@ Jesus speaks with Nicodemus [JFB].
 ## Life in biblical times
 The sources don't describe the customs behind this verse.
 
+## Theological significance
+God’s love is shown through what he gives [JFB].
+
 ## Related passages
 Romans 5:8 shows the same love [Cross-ref].
 
@@ -237,7 +243,7 @@ Romans 5:8 shows the same love [Cross-ref].
 What does it mean to you that God gave?`);
     const answer = await (await get("/study/JHN.3.16/deeper")).json<any>();
     // "Life in biblical times" is left out when the sources don't describe any customs.
-    expect(answer.sections.map((s: any) => s.title)).toEqual(["Historical context", "Original language", "Related passages", "Reflect"]);
+    expect(answer.sections.map((s: any) => s.title)).toEqual(["Biblical meaning", "Historical context", "Original language", "Theological significance", "Related passages", "Reflect"]);
     expect(answer.sources.map((s: any) => s.tag).sort()).toEqual(["Cross-ref", "JFB", "Lexicon"]);
     const prompt = calls[0]!.body.messages[1].content as string;
     expect(prompt).toContain("[Lexicon] Original words in this verse");

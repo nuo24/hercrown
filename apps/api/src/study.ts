@@ -19,7 +19,7 @@ export const PROMPT_VERSION = 1;
 export const TOOLS = ["explain", "deeper"] as const;
 export type AiTool = (typeof TOOLS)[number];
 const LOCAL = new Set(["kjv", "bsb", "web"]);
-const NOTICE = "AI-generated from the sources cited below. It isn't Scripture: check it against the Bible and the sources.";
+const NOTICE = "Study commentary · separate from Scripture.";
 const REPORTS_TO_HIDE = 3;
 
 interface Verse { book: string; chapter: number; verse: number; ref: string; label: string }
@@ -203,8 +203,11 @@ One sentence, at most 25 words.`,
     maxTokens: 500,
   },
   deeper: {
-    titles: ["Historical context", "Original language", "Life in biblical times", "Related passages", "Reflect"],
-    instructions: `## Historical context
+    titles: ["Biblical meaning", "Historical context", "Original language", "Life in biblical times", "Theological significance", "Related passages", "Reflect"],
+    instructions: `## Biblical meaning
+Explain the verse in its immediate literary context, tracing its argument or imagery in 80–120 words.
+
+## Historical context
 Who is speaking or writing, to whom, and what is happening, in 60–120 words.
 
 ## Original language
@@ -213,12 +216,15 @@ One to three important words from the [Lexicon] list: the original word, its tra
 ## Life in biblical times
 Customs or daily life behind the verse, in at most 90 words, only if the sources describe them. Otherwise write: "The sources don't describe the customs behind this verse."
 
+## Theological significance
+Explain one or two theological themes supported by the supplied passages or commentary in 80–120 words. Distinguish what the text says from interpretive conclusions.
+
 ## Related passages
 One to three passages from the [Cross-ref] list and how each connects, in at most 90 words.
 
 ## Reflect
 One question to think about, in one sentence.`,
-    maxTokens: 900,
+    maxTokens: 1500,
   },
 };
 
@@ -325,7 +331,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
   const v = await verseFor(env, refInput);
   const stored = await env.DB.prepare(
     "SELECT sections, sources, model, created_at, status FROM study_answers WHERE ref = ?1 AND tool = ?2 AND version = ?3",
-  ).bind(v.ref, tool, PROMPT_VERSION).first<AnswerRow>();
+  ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION).first<AnswerRow>();
   if (stored?.status === "published") {
     tracker.track("study_viewed", { tool, cached: true });
     await recordStudied(env, user.id, v.ref, tool);
@@ -381,7 +387,7 @@ export async function getAiStudy(request: Request, env: Env, ctx: ExecutionConte
          model = excluded.model, prompt_tokens = excluded.prompt_tokens, completion_tokens = excluded.completion_tokens,
          cost_micros = excluded.cost_micros, reports = 0, created_at = excluded.created_at
        WHERE study_answers.status = 'hidden'`,
-    ).bind(v.ref, tool, PROMPT_VERSION, JSON.stringify(checked.sections), JSON.stringify(checked.cited), usage!.model,
+    ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, JSON.stringify(checked.sections), JSON.stringify(checked.cited), usage!.model,
       usage!.promptTokens, usage!.completionTokens, Math.round(usage!.costUsd * 1_000_000), t).run();
     tracker.track("study_viewed", { tool, cached: false });
     await recordStudied(env, user.id, v.ref, tool);
@@ -424,12 +430,12 @@ export async function reportStudy(request: Request, env: Env, user: SessionUser,
   const inserted = await env.DB.prepare(
     `INSERT OR IGNORE INTO study_reports (id, ref, tool, version, user_id, reason, note, created_at)
      VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)`,
-  ).bind(crypto.randomUUID(), v.ref, tool, PROMPT_VERSION, user.id, reason, note, Date.now()).run();
+  ).bind(crypto.randomUUID(), v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, user.id, reason, note, Date.now()).run();
   if (inserted.meta.changes > 0) {
     await env.DB.prepare(
       `UPDATE study_answers SET reports = reports + 1, status = CASE WHEN reports + 1 >= ?4 THEN 'hidden' ELSE status END
        WHERE ref = ?1 AND tool = ?2 AND version = ?3`,
-    ).bind(v.ref, tool, PROMPT_VERSION, REPORTS_TO_HIDE).run();
+    ).bind(v.ref, tool, tool === "deeper" ? PROMPT_VERSION + 1 : PROMPT_VERSION, REPORTS_TO_HIDE).run();
     tracker.track("study_reported", { tool, reason });
   }
   return Response.json({ reported: true });
