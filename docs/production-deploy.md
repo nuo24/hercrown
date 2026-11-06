@@ -2,7 +2,7 @@
 
 Production is humans only (AGENTS.md rule 6). This is the first-time setup; about 45 minutes. Do it after TestFlight works on staging and before submitting to the App Store.
 
-The first release includes the $29.99 annual and $2.99 weekly plans. The separate $19.99 product has U.S. availability in App Store Connect for sandbox testing. Leave it out of the first review submission. Before submitting, reconcile the weekly introductory trial in App Store Connect with the weekly terms on the paywall.
+Version 1.0 includes the $29.99 annual plan with a 7-day trial for eligible subscribers and the $2.99 weekly plan with no trial. Both $19.99 return offers are off for production. Leave the separate $19.99 subscription out of App Review and keep Superwall's legacy `paywall_decline` placement paused. The annual `trial_return_1999` offer can remain configured for sandbox testing. App Store Connect uses manual release.
 
 The production server will be **https://bible-scroll-api.bible-scroll-api.workers.dev** (already set as `BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`). When the domain exists, it can move there.
 
@@ -22,17 +22,19 @@ npx wrangler r2 bucket create bible-scroll-files
 npx wrangler queues create bible-scroll-events
 ```
 
-The first two print an id. Paste them into `wrangler.jsonc` under `"production"`, replacing `REPLACE_WITH_PRODUCTION_D1_ID` and `REPLACE_WITH_PRODUCTION_KV_ID`. (Or send them to Claude to paste; ids aren't secret.)
+The first two print an ID. Set them in `wrangler.jsonc` under `"production"`, replacing `REPLACE_WITH_PRODUCTION_D1_ID` and `REPLACE_WITH_PRODUCTION_KV_ID`. The R2 bucket and queue are referenced by name. Commit the binding changes before deploying.
 
 ## 2. Build the database (10 min)
 
 ```
 npm run db:migrate:production
 npm run seed:scripture:production       # KJV, BSB, WEB (large: a few minutes)
-npm run build:study                     # only if apps/api/seeds/study/ is empty
+npm run build:study                     # only if seeds/study/ is missing any seed files
 npm run seed:study:production
 npm run seed:devotionals:production     # approved devotionals only
 ```
+
+The migration command applies every pending migration through `0011_return_offers.sql`. Apply 0011 with the rest. It creates the table used by the staging offer flow, and the production Worker rejects those endpoints.
 
 ## 3. Secrets (15 min)
 
@@ -42,13 +44,16 @@ Each command asks you to paste the value. Paste it, press Enter. Nothing is save
 |---|---|
 | `BETTER_AUTH_SECRET` | **New** for production: run `openssl rand -base64 32` and paste the output. Never reuse staging's. |
 | `OPENROUTER_API_KEY` | `apps/api/.dev.vars` |
-| `APP_STORE_ISSUER_ID`, `APP_STORE_KEY_ID`, `APP_STORE_PRIVATE_KEY` | `.dev.vars` (the In-App Purchase key, BH6NN72SQZ) |
+| `APP_STORE_ISSUER_ID`, `APP_STORE_KEY_ID`, `APP_STORE_PRIVATE_KEY` | In-App Purchase credentials used for purchase verification and restore. The offer signer shares these credentials. There are no additional return-offer secrets for 1.0. |
 | `APPLE_TEAM_ID` | `494RZLCNHQ` |
 | `APNS_KEY_ID`, `APNS_PRIVATE_KEY` | `.dev.vars` (key CBVUDK44G6) |
 | `APPLE_CLIENT_ID`, `APPLE_CLIENT_SECRET` | `.dev.vars` (renew the secret before 2027-05-02) |
-| `TINYBIRD_TOKEN`, `TINYBIRD_READ_TOKEN` | `.dev.vars` (same workspace; events are tagged `production`) |
+| `TINYBIRD_TOKEN` | Tinybird ingest token. The Worker tags events with `environment=production`. |
+| `TINYBIRD_READ_TOKEN` | Optional for normal app operation. The scheduled error-spike alert uses it to query the events data source. |
 | `API_BIBLE_KEY` | Skip: there isn't one yet (only needed for extra online translations) |
-| `SUPERWALL_WEBHOOK_SECRET` | From step 5 (new webhook) |
+| `SUPERWALL_WEBHOOK_SECRET` | Set this after creating the production webhook in step 5, before testing purchases. |
+
+`EMAIL_FROM` is an optional Wrangler variable for Cloudflare email. With it empty, the app's support inbox still records messages and scheduled alerts go to Workers Observability. `AI_GATEWAY_URL` is optional. The default study configuration uses OpenRouter directly.
 
 ```
 npx wrangler secret put BETTER_AUTH_SECRET --env production
@@ -67,32 +72,32 @@ npx wrangler secret put APNS_PRIVATE_KEY --env production < ~/Documents/hercrown
 
 ```
 npm run check && npm test
+git status --short --untracked-files=no # expect no output before deploying
 npm run deploy:production
-curl https://bible-scroll-api.bible-scroll-api.workers.dev/health
 ```
 
-Open these in a browser; each should load:
-- https://bible-scroll-api.bible-scroll-api.workers.dev/legal/privacy
-- https://bible-scroll-api.bible-scroll-api.workers.dev/legal/terms
-- https://bible-scroll-api.bible-scroll-api.workers.dev/legal/support
+Check that all four URLs return HTTP 200.
+
+```sh
+for path in health legal/privacy legal/terms legal/support; do
+  curl -fsS -o /dev/null -w "%{http_code} /$path\n" "https://bible-scroll-api.bible-scroll-api.workers.dev/$path" || break
+done
+```
 
 ## 5. Superwall production webhook (5 min)
 
-Superwall → Settings → Webhooks → **Add**: name "Her Crown – Production", version V2, URL `https://bible-scroll-api.bible-scroll-api.workers.dev/webhooks/superwall`. Copy its signing secret into `npx wrangler secret put SUPERWALL_WEBHOOK_SECRET --env production`. Keep the staging webhook too.
+In Superwall → Integrations → Webhooks, add **Her Crown – Production**, version V2, with URL `https://bible-scroll-api.bible-scroll-api.workers.dev/webhooks/superwall`. Keep the staging webhook. The owner sets the new signing secret in Terminal using `npx wrangler secret put SUPERWALL_WEBHOOK_SECRET --env production`. Verify a signed delivery before release.
 
-## 6. Point the app and the listing at production (Claude)
+## 6. Point the app and the listing at production
 
-Tell Claude production is live. Claude will:
-- set the iOS app's App Store and TestFlight builds to the production server (Debug builds stay on staging),
-- change the privacy, terms and support links in `docs/app-store-listing.md` and the legal pages,
-- run a check against production (sign-in, Bible, study tools, events reaching Tinybird).
+After the production URLs pass, point Release builds at production and keep Debug pointed at staging. Update the app, Superwall Main and the App Store listing's legal and support URLs. Confirm Sandbox testing is hidden when the app points at production. For the owner-run smoke test, use a new test guest to sign in and read a chapter. Check a study answer with a verified Plus test account and confirm a Tinybird event has `environment=production`.
 
-Then upload a new TestFlight build and use those links in App Store Connect.
+Archive from a clean commit after the partner's design pass. Use the production URLs in App Store Connect.
 
-In that build, verify onboarding and free reading, one sandbox purchase, and restoring it on a fresh Her Crown profile. Confirm the production purchase webhook receives the sandbox transaction. Review and publish the privacy label, then add the release build, subscription group, and the annual and weekly products to the same App Review submission.
+In the production-pointed TestFlight build, verify onboarding, free reading, sandbox checkout and sandbox restore on a fresh Her Crown profile. Confirm the production backend receives the sandbox purchase. Publish the reviewed privacy label and add the release build, subscription group, annual and weekly products to the same App Review submission. After approval and immediately before the owner presses Release, switch Superwall Main to all users without an active entitlement. Verify live checkout and restore separately after release.
 
 ## Safety
 
 - Never run the `:staging` scripts with production ids or the other way round.
-- Production data is real people's: no test commands against it. Testing happens on staging.
+- The owner runs the production smoke checks with dedicated test accounts. Never use real user data for testing.
 - `APP_STORE_ALLOW_SANDBOX` stays `"true"` in production: App Review and TestFlight purchases are sandbox purchases.
