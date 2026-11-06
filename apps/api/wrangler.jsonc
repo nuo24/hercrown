@@ -47,8 +47,8 @@
     },
     "production": {
       "name": "bible-scroll-api",
-      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db", "database_id": "REPLACE_WITH_PRODUCTION_D1_ID", "migrations_dir": "migrations" }],
-      "kv_namespaces": [{ "binding": "KV", "id": "REPLACE_WITH_PRODUCTION_KV_ID" }],
+      "d1_databases": [{ "binding": "DB", "database_name": "bible-scroll-db", "database_id": "0d1c85db-4107-4f6d-8d52-0b2dddced4f6", "migrations_dir": "migrations" }],
+      "kv_namespaces": [{ "binding": "KV", "id": "cb28c4e0265040ef99fe5bc5dcb06759" }],
       "r2_buckets": [{ "binding": "FILES", "bucket_name": "bible-scroll-files" }],
       "ratelimits": [{ "name": "AUTH_LIMITER", "namespace_id": "1003", "simple": { "limit": 30, "period": 60 } },
                        { "name": "RESTORE_LIMITER", "namespace_id": "2003", "simple": { "limit": 10, "period": 60 } },

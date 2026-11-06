@@ -174,7 +174,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] App Store Connect age rating is 4+ and the third-party content rights declaration is saved.
 - [x] Both $19.99 return offers are off for version 1.0. The app requires a sandbox receipt, the Worker endpoints require staging, and Superwall's legacy `paywall_decline` placement is paused. Exclude the separate $19.99 product from the 1.0 submission.
 - [x] App Privacy published in App Store Connect on 2026-11-06. The label covers country-level analytics and device IDs used for analytics and notifications. Switch the privacy policy URL to production after the Worker is live.
-- [ ] Owner deploys the production Worker. Add the production Superwall webhook and set its signing secret on the production Worker. Verify delivery.
+- [x] Provisioned production D1, KV, R2 and the events queue on 2026-11-06. Production bindings are recorded in `apps/api/wrangler.jsonc`.
+- [ ] Owner migrates and seeds production D1, sets production secrets and deploys the Worker. Add the production Superwall webhook, set its signing secret and verify delivery.
 - [ ] Sandbox checkout and restore on the production-pointed TestFlight build. Verify the entitlement and purchase event on the production backend.
 - [ ] After Apple approves 1.0, switch Superwall Main to all users without an active entitlement immediately before the owner presses Release.
 - [ ] Production checkout and restore from the public App Store build. Verify the entitlement and purchase event on the production backend.
