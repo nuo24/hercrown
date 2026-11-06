@@ -90,14 +90,16 @@ Apple reviews the first subscriptions with the first app version. Attach the sub
 | Contact Info → Email Address | App Functionality | The email Apple shares with Sign in with Apple (can be a private relay address) |
 | Contact Info → Name | App Functionality | The display name she chooses |
 | User Content → Photos | App Functionality | Optional profile photo |
-| User Content → Other User Content | App Functionality | Notes on verses, and support messages |
+| User Content → Customer Support | App Functionality | Support requests and replies |
+| User Content → Other User Content | App Functionality | Private notes on verses and optional profile or onboarding answers |
 | Identifiers → User ID | App Functionality, Analytics | Her account id |
-| Identifiers → Device ID | Analytics | A random install id (not the advertising id) |
-| Purchases → Purchase History | App Functionality | Subscription status from Apple and Superwall |
+| Identifiers → Device ID | Analytics, App Functionality | A random install ID and the push notification token for trial reminders |
+| Location → Coarse Location | Analytics | The country code Cloudflare provides with requests, stored with analytics events |
+| Purchases → Purchase History | Analytics, App Functionality | Subscription status and purchase events from Apple and Superwall |
 | Usage Data → Product Interaction | Analytics, App Functionality | Events like "paywall viewed" and "study opened"; reading days and progress |
 | Diagnostics → Other Diagnostic Data | App Functionality | Error reports |
 
-**Not collected:** location, contacts, health, financial info (Apple handles payment), browsing history, search history, sensitive info, advertising data.
+**Not collected:** precise location, contacts, health, financial info (Apple handles payment), browsing history, search history, sensitive info, advertising data.
 
 This must stay in step with the Privacy Policy. If a new SDK or data type is added, update both.
 
