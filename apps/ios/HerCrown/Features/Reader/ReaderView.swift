@@ -32,6 +32,7 @@ struct ReaderView: View {
         .sheet(isPresented: $showingChapters) {
             ChapterPicker(current: model.chapter) { book, number in model.open(book, number); showingChapters = false }
                 .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: model.translation) { r in model.open(r.book, r.chapter, verse: r.verse) }

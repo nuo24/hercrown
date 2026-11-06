@@ -1,58 +1,131 @@
 import SwiftUI
 
-/// Native chapter selection: books by testament, then a grid of chapters.
+/// Choose a book, then a chapter, from the bundled Bible catalog.
 struct ChapterPicker: View {
     let current: Chapter?
     let onPick: (String, Int) -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @State private var query = ""
+    @State private var selectedBook: BibleBook?
 
     private var books: [BibleBook] {
         let all = BibleStore.shared.books
-        return query.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        let search = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return search.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(search) }
     }
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(["OT", "NT"], id: \.self) { testament in
-                    Section(testament == "OT" ? "Old Testament" : "New Testament") {
-                        ForEach(books.filter { $0.testament == testament }) { book in
-                            NavigationLink(book.name) { ChapterGrid(book: book, current: current, onPick: onPick) }
-                        }
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Button {
+                    if selectedBook != nil { selectedBook = nil }
+                    else { dismiss() }
+                } label: {
+                    Label("Back", systemImage: "arrow.left")
+                        .frame(minWidth: 44, minHeight: 44, alignment: .leading)
+                        .contentShape(Rectangle())
+                }
+                Spacer()
+                Button {
+                    dismiss()
+                } label: {
+                    Text("Done")
+                        .frame(minWidth: 44, minHeight: 44, alignment: .trailing)
+                        .contentShape(Rectangle())
                 }
             }
-            .searchable(text: $query, prompt: "Find a book")
-            .navigationTitle("Choose a chapter")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
+            .font(.ui(13, weight: .medium))
+            .buttonStyle(.plain)
+            .padding(.bottom, 10)
+
+            Text(selectedBook?.name ?? "Choose a chapter")
+                .font(.ui(20, weight: .medium, relativeTo: .title3))
+                .accessibilityAddTraits(.isHeader)
+                .padding(.bottom, 18)
+
+            if let selectedBook {
+                chapterGrid(selectedBook)
+            } else {
+                bookSearch
+                bookList
+            }
         }
+        .padding(.horizontal, 22)
+        .padding(.top, 16)
+        .foregroundStyle(Theme.text(scheme))
+        .background(Theme.canvas(scheme).ignoresSafeArea())
     }
-}
 
-private struct ChapterGrid: View {
-    let book: BibleBook
-    let current: Chapter?
-    let onPick: (String, Int) -> Void
+    private var bookSearch: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Search books").font(.ui(13, weight: .medium))
+            TextField("Search books…", text: $query)
+                .font(.ui(16))
+                .padding(.horizontal, 13)
+                .frame(minHeight: 46)
+                .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.border(scheme)))
+                .accessibilityLabel("Search books")
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+        }
+        .padding(.bottom, 18)
+    }
 
-    var body: some View {
+    private var bookList: some View {
         ScrollView {
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
-                ForEach(1...book.chapterCount, id: \.self) { n in
-                    let selected = current?.book.id == book.id && current?.number == n
-                    Button { onPick(book.id, n) } label: {
-                        Text("\(n)").font(.system(size: 16, weight: selected ? .semibold : .regular))
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(selected ? Color.primary.opacity(0.15) : Color.primary.opacity(0.05)))
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(books) { book in
+                    Button {
+                        selectedBook = book
+                    } label: {
+                        HStack(spacing: 12) {
+                            Text(book.name).font(.ui(14, weight: .medium))
+                            Text("\(book.chapterCount) chapters").font(.ui(11))
+                                .foregroundStyle(Theme.muted(scheme))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 9))
+                                .foregroundStyle(Theme.muted(scheme))
+                                .accessibilityHidden(true)
+                        }
+                        .padding(.horizontal, 16)
+                        .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Chapter \(n)")
+                    .accessibilityElement(children: .combine)
+                    Divider()
+                }
+                if books.isEmpty {
+                    Text("No books found.").font(.ui(14))
+                        .foregroundStyle(Theme.muted(scheme))
+                        .padding(.vertical, 16)
                 }
             }
-            .padding()
         }
-        .navigationTitle(book.name)
+        .scrollDismissesKeyboard(.interactively)
+    }
+
+    private func chapterGrid(_ book: BibleBook) -> some View {
+        ScrollView {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5), spacing: 10) {
+                ForEach(1...book.chapterCount, id: \.self) { number in
+                    let selected = current?.book.id == book.id && current?.number == number
+                    Button { onPick(book.id, number) } label: {
+                        Text("\(number)").font(.ui(16, weight: selected ? .medium : .regular))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 10))
+                            .overlay {
+                                if selected { RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.text(scheme)) }
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Chapter \(number)")
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+            .padding(.vertical, 12)
+        }
     }
 }
 
