@@ -284,6 +284,17 @@ What does it mean to you that God gave?`;
     expect(calls).toHaveLength(1);
   });
 
+  it("names unsupported citation tags when retrying an original-language section", async () => {
+    await clearAnswer("JHN.3.16", "deeper");
+    const answers = [DEEPER.replace("[Lexicon]", "[Strong] [Lexicon]"), DEEPER];
+    reply = () => openRouter(answers.shift()!);
+    const res = await get("/study/JHN.3.16/deeper");
+    expect(res.status).toBe(200);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]!.body.messages.at(-1).content).toContain('"Original language" used unsupported tags [Strong]');
+    expect((await res.json<any>()).sources.map((source: any) => source.tag)).not.toContain("Strong");
+  });
+
   it("does not cache an uncited answer when the retry still fails", async () => {
     await clearAnswer("JHN.3.16", "deeper");
     reply = () => openRouter(DEEPER.replace("Romans 5:8 shows the same love [Cross-ref].", "Romans 5:8 shows the same love."));

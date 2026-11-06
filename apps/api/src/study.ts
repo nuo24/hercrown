@@ -215,7 +215,7 @@ Explain the verse in its immediate literary context, tracing its argument or ima
 Explain who is speaking or writing, to whom, and what is happening, in 60–120 words. If authorship, audience or date aren't established in the material, say what the provided passage itself shows about the setting and cite [Passage]. Do not infer a date or author from silence.
 
 ## Original language
-One to three important words from the [Lexicon] list: the original word, its transliteration, and what it means here. At most 100 words.
+One to three important words from the [Lexicon] list: the original word, its transliteration, and what it means here. Cite the exact tag [Lexicon] for word meanings. Use square brackets only for the supplied source tags, never for Strong’s numbers, translation names, or editorial labels. At most 100 words.
 
 ## Life in biblical times
 Customs or daily life behind the verse, in at most 90 words, only if the sources describe them. Otherwise write exactly: "${OPTIONAL_CONTEXT}"
@@ -300,8 +300,9 @@ function validateAnswer(text: string, tool: AiTool, ctx: Pick<Context, "notes" |
     }
     if (tool === "deeper" && expected === "Life in biblical times" && body.replaceAll("’", "'") === OPTIONAL_CONTEXT) continue;
     const cited = citationTags(body);
-    if (cited.some((tag) => !ALLOWED_TAGS.has(tag) || !available.has(tag))) {
-      problems.push(`"${expected}" cites a source that was not supplied.`);
+    const unknown = [...new Set(cited.filter((tag) => !ALLOWED_TAGS.has(tag) || !available.has(tag)))];
+    if (unknown.length) {
+      problems.push(`"${expected}" used unsupported tags ${unknown.map((tag) => `[${tag}]`).join(", ")}. Use only ${[...available].map((tag) => `[${tag}]`).join(", ") || "the supplied material without tags"}.`);
     }
     if (tool === "deeper" && expected !== "Reflect" && body !== SOURCE_GAP) {
       const required = expected === "Original language" ? "Lexicon" : expected === "Related passages" ? "Cross-ref" : undefined;
