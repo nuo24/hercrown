@@ -14,6 +14,11 @@ struct SettingsView: View {
     @State private var showsTestSession = false
     @State private var changingTestSession = false
     @State private var testSessionError = false
+    #if HC_STAGING_TESTFLIGHT
+    @State private var checkingYearlyTrial = false
+    @State private var yearlyTrialReport = ""
+    @State private var showsYearlyTrialReport = false
+    #endif
     #if DEBUG
     @State private var previewPage = false
     private static var openedPreviewPage = false
@@ -39,6 +44,22 @@ struct SettingsView: View {
                                     }
                                     .buttonStyle(.plain)
                                     .disabled(changingTestSession)
+                                    #if HC_STAGING_TESTFLIGHT
+                                    divider
+                                    Button {
+                                        checkingYearlyTrial = true
+                                        Task {
+                                            yearlyTrialReport = await Billing.shared.yearlyTrialReport()
+                                            checkingYearlyTrial = false
+                                            showsYearlyTrialReport = true
+                                        }
+                                    } label: {
+                                        row("checkmark.circle", checkingYearlyTrial ? "Checking yearly trial…" : "Check yearly trial",
+                                            "Compare Apple’s offer with the last paywall.")
+                                    }
+                                    .buttonStyle(.plain)
+                                    .disabled(checkingYearlyTrial || changingTestSession)
+                                    #endif
                                 }
                             }
                             NavigationLink { AccountView() } label: { profile }.buttonStyle(.plain)
@@ -152,6 +173,13 @@ struct SettingsView: View {
         } message: {
             Text("Check your connection and try again.")
         }
+        #if HC_STAGING_TESTFLIGHT
+        .alert("Yearly trial check", isPresented: $showsYearlyTrialReport) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(yearlyTrialReport)
+        }
+        #endif
         .onAppear {
             reminderTime = DailyReminder.time(from: app.preferences.reminderTime)
             Task { await Analytics.shared.track("settings_viewed") }

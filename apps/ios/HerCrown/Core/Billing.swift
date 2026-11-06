@@ -16,6 +16,9 @@ final class Billing: NSObject {
 
     private(set) var configured = false
     private var presentingPlacement: UUID?
+    #if HC_STAGING_TESTFLIGHT
+    private var lastPaywallTrialResult: String?
+    #endif
     var isPaywallBusy: Bool {
         configured && (presentingPlacement != nil || Superwall.shared.isPaywallPresented)
     }
@@ -35,6 +38,8 @@ final class Billing: NSObject {
         let options = SuperwallOptions()
         #if HC_STAGING_TESTFLIGHT
         options.testModeBehavior = .never
+        // Load the paywall at presentation so sandbox testing starts with the current Apple session.
+        options.paywalls.shouldPreload = false
         #elseif DEBUG
         if UserDefaults.standard.bool(forKey: "hcPaywallDiagnostics") {
             // Exercise the Apple sandbox payment sheet during this diagnostic run.
@@ -69,6 +74,12 @@ final class Billing: NSObject {
         let userID = app?.me?.user.id
         presentingPlacement = requestID
         let handler = PaywallPresentationHandler()
+        #if HC_STAGING_TESTFLIGHT
+        handler.onPresent { [weak self] info in
+            let result = "\(placement): \(info.name) · trial \(info.isFreeTrialAvailable ? "available" : "unavailable")"
+            self?.lastPaywallTrialResult = result
+        }
+        #endif
         handler.onDismiss { [weak self] _, result in
             Task { @MainActor in
                 guard let self, self.presentingPlacement == requestID else { return }
@@ -150,7 +161,42 @@ final class Billing: NSObject {
     }
     #endif
 
-    func logOut() { if configured { Superwall.shared.reset() } }
+    func logOut() {
+        #if HC_STAGING_TESTFLIGHT
+        lastPaywallTrialResult = nil
+        #endif
+        if configured { Superwall.shared.reset() }
+    }
+
+    #if HC_STAGING_TESTFLIGHT
+    func yearlyTrialReport() async -> String {
+        let country = await Storefront.current?.countryCode ?? "Unknown"
+        let storefront = "Apple storefront: \(country)"
+        let presentation = "Last Superwall paywall: \(lastPaywallTrialResult ?? "None opened yet")"
+        let result: String
+        do {
+            if let product = try await Product.products(for: ["hercrown.plus.yearly"]).first,
+               let subscription = product.subscription {
+                let offer = subscription.introductoryOffer
+                let hasWeekTrial = offer?.paymentMode == .freeTrial && offer?.period.unit == .week
+                    && offer?.period.value == 1 && offer?.periodCount == 1
+                let eligible = await subscription.isEligibleForIntroOffer
+                let active = await app?.activeAppleSubscription() != nil
+                result = """
+                Yearly price: \(product.displayPrice)
+                Apple returned a 7-day free trial: \(hasWeekTrial ? "Yes" : "No")
+                Apple account eligible for an introductory offer: \(eligible ? "Yes" : "No")
+                Existing Apple subscription: \(active ? "Yes" : "No")
+                """
+            } else {
+                result = "Apple did not return the yearly subscription."
+            }
+        } catch {
+            result = "Couldn’t load the yearly subscription from Apple. Try again."
+        }
+        return [storefront, result, presentation].joined(separator: "\n\n")
+    }
+    #endif
 
     /// After a purchase or restore: the server verifies the transaction with Apple and grants Plus, then the app refreshes.
     /// If she just started a free trial, offer the trial-ending reminder (docs/trial-reminder.md).
