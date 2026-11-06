@@ -58,8 +58,8 @@ struct ReturnOfferView: View {
                 }
 
                 Text("\(firstYear) for your first year, then \(renewal)/year. Apple charges your account at confirmation. Renews automatically until canceled. Manage or cancel in Apple Settings.")
-                    .font(.ui(14))
-                    .lineSpacing(3)
+                    .font(.ui(11, relativeTo: .footnote))
+                    .lineSpacing(2)
                     .foregroundStyle(Theme.muted(scheme))
                     .padding(.top, 16)
 
