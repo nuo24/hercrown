@@ -516,6 +516,8 @@ struct SubscriptionView: View {
     @State private var openingSandboxCheckout = false
     #endif
     @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
     @State private var appleSubscriptionFound = false
     @State private var checkedAppleSubscription = false
@@ -524,65 +526,67 @@ struct SubscriptionView: View {
     @State private var message: String?
 
     var body: some View {
-        Form {
-            Section {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
                 VStack(spacing: 12) {
                     Image.illustration("butterfly").resizable().scaledToFit()
                         .frame(width: 96, height: 84).accessibilityHidden(true)
                     Text("Your reading, your way.").font(.serif(30, relativeTo: .title))
                     Text("Enjoy free reading, or explore a little more with Plus.")
-                        .font(.system(size: 14)).foregroundStyle(.secondary)
+                        .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                        .frame(maxWidth: 260)
                 }
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
-                .listRowBackground(Color.clear)
-            }
-            Section("Current plan") {
-                if let sub = app.membership.subscription, app.membership.premium {
-                    LabeledContent("Plan", value: planName(sub.productId))
-                    if sub.isTrial, let trial = sub.trial {
-                        LabeledContent("Free trial ends", value: Date(timeIntervalSince1970: trial.endsAt / 1000).formatted(date: .abbreviated, time: .omitted))
-                    } else if let expires = sub.expiresAt {
-                        LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
+                .padding(.top, 22)
+                .padding(.bottom, 24)
+
+                subscriptionGroup("Current plan") { currentPlan }
+                subscriptionGroup("Purchases") {
+                    Button { confirmsRestore = true } label: {
+                        purchaseRow(restoring ? "Restoring…" : "Restore Purchases", icon: "arrow.clockwise")
                     }
-                } else if appleSubscriptionFound {
-                    LabeledContent("Plan", value: "Free reading")
-                    Text("Apple found a Plus subscription that isn’t connected to this Her Crown account. Restore your purchase to connect it.")
-                        .font(.system(size: 14)).foregroundStyle(.secondary)
-                } else if checkedAppleSubscription {
-                    LabeledContent("Plan", value: "Free reading")
-                    Text("Reading the Bible is always free. Plus adds reading plans and every study tool: Explain easier, Deeper study, Original language and Related verses.")
-                        .font(.system(size: 14)).foregroundStyle(.secondary)
-                    Button("Explore Her Crown Plus") {
-                        #if DEBUG
-                        guard !openingSandboxCheckout else { return }
-                        openingSandboxCheckout = true
-                        Task { await openSandboxCheckout() }
-                        #else
-                        app.presentPaywall(placement: "settings_subscription") { appleSubscriptionFound = true }
-                        #endif
+                    .disabled(restoring)
+                    Divider()
+                    Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                        purchaseRow("Manage subscription", icon: "bookmark")
                     }
-                    .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                } else {
-                    ProgressView("Checking for an Apple subscription…")
+                    if let message {
+                        Divider()
+                        Text(message).font(.ui(14)).padding(16)
+                    }
                 }
+                Text("Subscriptions are billed and managed by Apple. Cancel at least 24 hours before your trial or period ends to avoid the next charge.")
+                    .font(.ui(12))
+                    .foregroundStyle(Theme.muted(scheme))
+                    .padding(.top, 14)
             }
-            Section {
-                Button(restoring ? "Restoring…" : "Restore Purchases") {
-                    confirmsRestore = true
-                }
-                .disabled(restoring)
-                if let message { Text(message).font(.system(size: 14)) }
-                Link("Manage subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
-            } footer: {
-                Text("Yearly includes a 7-day free trial for eligible subscribers. Weekly has no free trial. Apple manages billing. Cancel at least 24 hours before your trial or billing period ends to avoid the next charge.")
-            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 24)
         }
-        .scrollContentBackground(.hidden)
+        .foregroundStyle(Theme.text(scheme))
         .background(AppGradient())
-        .navigationTitle("Subscription")
-        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            ZStack(alignment: .leading) {
+                Text("Subscription")
+                    .font(.ui(16, weight: .medium))
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(maxWidth: .infinity)
+                Button { dismiss() } label: {
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 17))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+            }
+            .padding(.horizontal, 20)
+            .frame(minHeight: 58)
+            .foregroundStyle(Theme.text(scheme))
+            .background(Theme.canvas(scheme))
+        }
+        .toolbar(.hidden, for: .navigationBar)
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             checkedAppleSubscription = false
@@ -599,6 +603,79 @@ struct SubscriptionView: View {
         } message: {
             Text("Restoring connects Plus to your current Her Crown account and may move Plus access from another account.")
         }
+    }
+
+    @ViewBuilder
+    private var currentPlan: some View {
+        if let sub = app.membership.subscription, app.membership.premium {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Her Crown Plus").font(.serif(28, weight: .semibold, relativeTo: .title2))
+                    .accessibilityAddTraits(.isHeader)
+                Text(planName(sub.productId)).font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                if sub.isTrial, let trial = sub.trial {
+                    LabeledContent("Free trial ends", value: Date(timeIntervalSince1970: trial.endsAt / 1000).formatted(date: .abbreviated, time: .omitted))
+                } else if let expires = sub.expiresAt {
+                    LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
+                }
+            }
+            .font(.ui(14))
+            .padding(18)
+        } else if !checkedAppleSubscription {
+            ProgressView("Checking for an Apple subscription…").padding(18)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Free reading").font(.serif(28, weight: .semibold, relativeTo: .title2))
+                    .accessibilityAddTraits(.isHeader)
+                Text(appleSubscriptionFound
+                     ? "Apple found a Plus subscription that isn’t connected to this Her Crown account. Restore your purchase to connect it."
+                     : "Reading the Bible is always free. Plus adds reading plans and every study tool.")
+                    .font(.ui(14))
+                    .foregroundStyle(Theme.muted(scheme))
+                if !appleSubscriptionFound {
+                    Button("Explore Her Crown Plus") {
+                        #if DEBUG
+                        guard !openingSandboxCheckout else { return }
+                        openingSandboxCheckout = true
+                        Task { await openSandboxCheckout() }
+                        #else
+                        app.presentPaywall(placement: "settings_subscription") { appleSubscriptionFound = true }
+                        #endif
+                    }
+                    .buttonStyle(CapsuleButtonStyle())
+                }
+            }
+            .padding(18)
+        }
+    }
+
+    private func subscriptionGroup<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.ui(13, weight: .semibold))
+                .foregroundStyle(Theme.muted(scheme))
+                .padding(.horizontal, 4)
+                .accessibilityAddTraits(.isHeader)
+            VStack(alignment: .leading, spacing: 0, content: content)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
+                .buttonStyle(.plain)
+        }
+        .padding(.top, 28)
+    }
+
+    private func purchaseRow(_ title: String, icon: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon).font(.system(size: 18)).frame(width: 24)
+            Text(title).font(.ui(14, weight: .medium))
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right")
+                .font(.system(size: 12))
+                .foregroundStyle(Theme.muted(scheme))
+        }
+        .foregroundStyle(Theme.text(scheme))
+        .padding(16)
+        .frame(minHeight: 58)
+        .contentShape(Rectangle())
     }
 
     #if DEBUG

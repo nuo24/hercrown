@@ -58,6 +58,13 @@ final class Billing: NSObject {
     /// Shows the paywall campaign for this placement (onboarding_complete, study_explain, plan_start, settings…).
     func present(placement: String) {
         guard configured, !isPaywallBusy else { return }
+        let style: InterfaceStyle?
+        switch placement == "onboarding_complete" ? "light" : app?.preferences.appearance {
+        case "light": style = .light
+        case "dark": style = .dark
+        default: style = nil
+        }
+        Superwall.shared.setInterfaceStyle(to: style)
         let requestID = UUID()
         let userID = app?.me?.user.id
         presentingPlacement = requestID
