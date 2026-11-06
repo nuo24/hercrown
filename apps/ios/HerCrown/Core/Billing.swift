@@ -33,7 +33,9 @@ final class Billing: NSObject {
         #endif
         configured = true
         let options = SuperwallOptions()
-        #if DEBUG
+        #if HC_STAGING_TESTFLIGHT
+        options.testModeBehavior = .never
+        #elseif DEBUG
         if UserDefaults.standard.bool(forKey: "hcPaywallDiagnostics") {
             // Exercise the Apple sandbox payment sheet during this diagnostic run.
             options.testModeBehavior = .never

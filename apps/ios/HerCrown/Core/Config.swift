@@ -2,7 +2,7 @@ import Foundation
 
 /// Build-time configuration. Secrets never live in the app: the server holds every key.
 enum AppConfig {
-    #if DEBUG
+    #if DEBUG || HC_STAGING_TESTFLIGHT
     static let isStaging = true
     static let apiBaseURL = URL(string: "https://bible-scroll-api-staging.bible-scroll-api.workers.dev")!
     #else
