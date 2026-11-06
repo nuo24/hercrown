@@ -191,7 +191,14 @@ final class AppModel {
         let userID = me?.user.id
         Task {
             defer { checkingPaywall = false }
-            let existing = await activeAppleSubscription()
+            // A fresh staging guest can exercise onboarding even if the tester's Apple account has Plus.
+            let isFreshTestOnboarding: Bool
+            if placement == "onboarding_complete", hasTestSessionBackup {
+                isFreshTestOnboarding = await Self.allowsTestSessions()
+            } else {
+                isFreshTestOnboarding = false
+            }
+            let existing = isFreshTestOnboarding ? nil : await activeAppleSubscription()
             guard me?.user.id == userID, !membership.premium else { return }
             if existing != nil {
                 if let onExistingSubscription { onExistingSubscription() }
