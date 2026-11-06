@@ -575,7 +575,7 @@ struct SubscriptionView: View {
                 if let message { Text(message).font(.system(size: 14)) }
                 Link("Manage subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
             } footer: {
-                Text("Subscriptions are billed and managed by Apple. Cancel at least 24 hours before your trial or period ends to avoid the next charge.")
+                Text("Yearly includes a 7-day free trial for eligible subscribers. Weekly has no free trial. Apple manages billing. Cancel at least 24 hours before your trial or billing period ends to avoid the next charge.")
             }
         }
         .scrollContentBackground(.hidden)

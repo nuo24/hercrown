@@ -41,6 +41,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Evals: 26 verses × 2 tools, 51/52 automatic ([report](evals/study-2026-11-03.md)); ~$0.0003 per answer
 - [x] OpenRouter key on staging
 - [ ] **[HUMAN]** Read the eval report; decide on sensitive passages (hand-reviewed answers?) and Tyndale Open Study Notes (CC BY-SA)
+- [x] **[HUMAN]** Approved the Ephesians 5:22 Deeper Study answer on 2026-11-06. The automatic wording flag remains in the [v4 eval](evals/study-2026-11-05-v4.md).
 - [ ] Optional: Cloudflare AI Gateway (`AI_GATEWAY_URL`); complete Matthew Henry from CCEL
 
 ## Phase 7: iOS — in progress ([apps/ios](../apps/ios/README.md))
@@ -165,3 +166,15 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Follow-up on November 5, 2026: verified U.S.-only availability on the separate draft $19.99 product after the owner authorized sandbox testing. The first release remains scoped to annual and weekly. Production is the next priority: its public health check returned HTTP 404, Wrangler still has production D1 and KV placeholders, and the app points at staging. See [the owner-run production checklist](production-deploy.md).
 
 - Internal TestFlight build 8 archived from clean source `4ac126ef05ae8f4296aff17e7f1aed1f195b77c1` and uploaded to Apple (upload ID `fc0f9ed6-2675-45e6-bced-fd257596538f`). Fresh sandbox onboarding routes Start reading to Superwall again even if the Apple account has an active purchase. Regular onboarding retains the restore prompt. Typecheck and all 175 API tests passed. Verify paywall presentation on a physical iPhone.
+
+## Version 1.0 launch checklist
+
+- [x] App Store Connect uses manual release. The owner presses Release after approval.
+- [x] App Store Connect weekly plan has no introductory offer in any territory and is Ready to Submit. Yearly retains its 7-day trial for eligible subscribers. Superwall Main publishes the matching weekly disclosure.
+- [x] App Store Connect age rating is 4+ and the third-party content rights declaration is saved.
+- [x] Both $19.99 return offers are off for version 1.0. The app requires a sandbox receipt, the Worker endpoints require staging, and Superwall's legacy `paywall_decline` placement is paused. Exclude the separate $19.99 product from the 1.0 submission.
+- [ ] Review and publish App Privacy in App Store Connect.
+- [ ] Owner deploys the production Worker. Add the production Superwall webhook and set its signing secret on the production Worker. Verify delivery.
+- [ ] Sandbox checkout and restore on the production-pointed TestFlight build. Verify the entitlement and purchase event on the production backend.
+- [ ] After Apple approves 1.0, switch Superwall Main to all users without an active entitlement immediately before the owner presses Release.
+- [ ] Production checkout and restore from the public App Store build. Verify the entitlement and purchase event on the production backend.

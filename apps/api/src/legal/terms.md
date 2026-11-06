@@ -11,7 +11,7 @@ Reading the Bible in Her Crown is free. **Her Crown Plus** is an optional subscr
 ## Subscriptions
 
 - Plus is offered as a yearly or weekly auto-renewing subscription, bought through your Apple ID. Prices are shown in the app before you buy, in your local currency.
-- **Free trial:** where offered, a free trial lasts 7 days. Unless you cancel at least 24 hours before it ends, it converts to a paid subscription and your Apple ID is charged. We'll send you a reminder before your trial ends if notifications are on.
+- **Free trial:** eligible subscribers on the yearly plan get 7 days free. The weekly plan has no free trial. Unless you cancel at least 24 hours before the trial ends, it converts to a paid yearly subscription and your Apple ID is charged. We'll send you a reminder before your trial ends if notifications are on.
 - **Introductory offer:** a discounted first year may be offered once. Apple allows one introductory offer per person per subscription group.
 - **Renewal:** subscriptions renew automatically at the same price and length unless you cancel at least 24 hours before the end of the current period.
 - **Cancelling:** in iPhone Settings → [your name] → Subscriptions, or from Settings → Subscription in the app. You keep access until the end of the paid period.
