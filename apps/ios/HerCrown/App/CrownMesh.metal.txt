@@ -1,0 +1,50 @@
+#include <metal_stdlib>
+using namespace metal;
+
+struct LogoVertex {
+    float4 position [[position]];
+    float2 uv;
+};
+
+// Port of the frozen logo-mesh.js study. Coordinates are in the approved 1024 px artwork.
+vertex LogoVertex crownVertex(uint id [[vertex_id]], constant float2 *vertices [[buffer(0)]],
+                              constant float4 &timing [[buffer(1)]]) {
+    constexpr float pi = 3.14159265359;
+    const float growth = timing.y;
+    const float bloom = timing.z;
+    const float layer = timing.w;
+    const float2 uv = vertices[id];
+    const float2 p = uv * 1024;
+    const float2 q = p - 512;
+    const float relative = fmod(atan2(q.y, q.x) - pi / 2 + 3 * pi, 2 * pi) - pi;
+    const float side = relative < 0 ? -1 : 1;
+    const float t = abs(relative) / pi;
+    const float width = max(smoothstep(0.0f, 0.13f, growth - t), smoothstep(0.92f, 1.0f, growth));
+    const float angle = pi / 2 + side * min(t, growth) * pi;
+    const float radius = 355 + (length(q) - 355) * width;
+    float2 target = 512 + float2(cos(angle), sin(angle)) * radius;
+    if (layer > 0.5) {
+        const float2 anchor = layer < 1.5 ? float2(260, 720) : float2(795, 270);
+        target = anchor + (p - anchor) * (0.65 + 0.35 * bloom);
+    }
+    return {float4(target.x / 512 - 1, 1 - target.y / 512, 0, 1), uv};
+}
+
+fragment float4 crownFragment(LogoVertex inVertex [[stage_in]], constant float4 &timing [[buffer(0)]],
+                              texture2d<float> artwork [[texture(0)]]) {
+    constexpr sampler textureSampler(coord::normalized, address::clamp_to_edge, filter::linear);
+    const float layer = timing.w;
+    const float2 p = inVertex.uv * 1024;
+    const float2 left = (p - float2(245, 665)) / float2(215, 245);
+    const float2 right = (p - float2(790, 235)) / float2(180, 175);
+    const float part = dot(left, left) < 1 ? 1 : (dot(right, right) < 1 ? 2 : 0);
+    if (layer > 0.5 && abs(part - layer) > 0.1) discard_fragment();
+    float4 color = artwork.sample(textureSampler, inVertex.uv);
+    if (layer < 0.5 && part > 0.5) {
+        color = artwork.sample(textureSampler, float2(1 - inVertex.uv.x, inVertex.uv.y));
+        const float start = part < 1.5 ? 1430 : 1510;
+        color.a *= 1 - smoothstep(start, start + 310, timing.x);
+    }
+    if (layer > 0.5) color.a *= timing.z;
+    return color;
+}

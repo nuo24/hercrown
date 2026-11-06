@@ -2,6 +2,10 @@ import SwiftUI
 import UIKit
 
 extension Image {
+    static func glyph(_ name: String) -> some View {
+        Image("glyph-\(name)").resizable().scaledToFit().accessibilityHidden(true)
+    }
+
     private static let illustrationCache = NSCache<NSString, UIImage>()
 
     /// Read the original mockup PNG independently of the device's compiled asset catalog.

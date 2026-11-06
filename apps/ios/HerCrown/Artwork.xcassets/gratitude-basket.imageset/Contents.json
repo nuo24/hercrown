@@ -2,7 +2,8 @@
   "images": [
     {
       "filename": "gratitude-basket.png",
-      "idiom": "universal"
+      "idiom": "universal",
+      "scale": "1x"
     }
   ],
   "info": {

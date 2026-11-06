@@ -4,59 +4,51 @@ enum AppTab: String, CaseIterable, Identifiable {
     case bible, community, discover, home
     var id: String { rawValue }
     var title: String { switch self { case .bible: "The Bible"; case .community: "Community"; case .discover: "Discover"; case .home: "Home" } }
-    var symbol: String { switch self { case .bible: "book"; case .community: "person.2"; case .discover: "safari"; case .home: "house" } }
+    var glyph: String {
+        switch self { case .bible: "book"; case .discover: "search"; default: rawValue }
+    }
 }
 
-/// .liquid-dock: 64 pt translucent glass capsule 14 pt from the screen edges, 3 pt inset, four 58 pt tabs, 20 pt icons,
-/// 11 pt labels; the active tab sits in a sliding glass pill (values from the mockup, light and dark).
 struct Dock: View {
     @Binding var selection: AppTab
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-    @Namespace private var pill
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        let dark = scheme == .dark
         HStack(spacing: 0) {
             ForEach(AppTab.allCases) { tab in
-                let active = tab == selection
+                let active = selection == tab
                 Button {
-                    withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) { selection = tab }
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) { selection = tab }
                 } label: {
                     VStack(spacing: 4) {
-                        Image(systemName: tab.symbol).font(.system(size: 20, weight: active ? .medium : .regular)).frame(height: 22)
-                        Text(tab.title).font(.system(size: 11, weight: active ? .semibold : .regular))
+                        Image.glyph(tab.glyph).frame(width: 25, height: 25)
+                        Text(tab.title).font(.ui(11.5, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8)
                     }
-                    .foregroundStyle(active ? (dark ? Color.white : Color(hex: 0x111111)) : (dark ? Color(hex: 0xC0C5C7) : Color(hex: 0x717177)))
-                    .frame(maxWidth: .infinity, minHeight: 58)
-                    .background {
-                        if active {
-                            Capsule()
-                                .fill(Color.white.opacity(dark ? 0.14 : 0.396))
-                                .overlay(Capsule().strokeBorder(LinearGradient(colors: [Color.white.opacity(dark ? 0.27 : 0.7), .clear], startPoint: .top, endPoint: .center), lineWidth: 1))
-                                .shadow(color: Color(red: 25 / 255, green: 61 / 255, blue: 73 / 255, opacity: dark ? 0 : 0.12), radius: 4, y: 3)
-                                .matchedGeometryEffect(id: "pill", in: pill)
-                        }
-                    }
-                    .contentShape(Capsule())
+                    .frame(maxWidth: .infinity, minHeight: 48)
+                    .foregroundStyle(Theme.text(scheme))
+                    .opacity(active ? 1 : scheme == .dark ? 0.48 : 0.58)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(tab.title)
                 .accessibilityAddTraits(active ? .isSelected : [])
             }
         }
-        .padding(3)
-        .frame(height: 64)
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
         .background {
-            Capsule()
-                .fill(reduceTransparency ? AnyShapeStyle(dark ? Color(hex: 0x292929) : Color(hex: 0xF7F7F8))
-                                         : AnyShapeStyle(.ultraThinMaterial))
-                .overlay(Capsule().fill(dark ? Color(red: 41 / 255, green: 41 / 255, blue: 41 / 255, opacity: 0.52) : Color.white.opacity(0.439)))
-                .overlay(Capsule().strokeBorder(Color.white.opacity(dark ? 0.28 : 0.59), lineWidth: 1))
-                .shadow(color: dark ? .black.opacity(0.6) : Color(red: 24 / 255, green: 45 / 255, blue: 60 / 255, opacity: 0.15), radius: 7, y: 6)
-                .shadow(color: dark ? .black.opacity(0.4) : Color(red: 35 / 255, green: 53 / 255, blue: 61 / 255, opacity: 0.15), radius: 3, y: 3)
+            let canvas = Theme.canvas(scheme)
+            if reduceTransparency {
+                canvas.ignoresSafeArea(edges: .bottom)
+            } else {
+                Rectangle().fill(.ultraThinMaterial)
+                    .mask(LinearGradient(colors: [.clear, .black, .black], startPoint: .top, endPoint: .bottom))
+                    .overlay(alignment: .bottom) {
+                        LinearGradient(colors: [.clear, canvas.opacity(0.85)], startPoint: .top, endPoint: .bottom)
+                    }
+                    .ignoresSafeArea(edges: .bottom)
+            }
         }
-        .frame(maxWidth: 412)
-        .padding(.horizontal, 14)
     }
 }

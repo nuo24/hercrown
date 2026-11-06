@@ -6,58 +6,83 @@ struct StreakSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var flicker = false
+    @Environment(AppModel.self) private var app
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    VStack(spacing: 10) {
-                        StreakFlame()
-                            .stroke(style: StrokeStyle(lineWidth: 1.8, lineCap: .round, lineJoin: .round))
-                            .foregroundStyle(Theme.streak(scheme))
-                            .frame(width: 34, height: 34)
-                            .scaleEffect(x: flicker ? 0.95 : 1, y: flicker ? 1.10 : 1, anchor: .bottom)
-                            .rotationEffect(.degrees(flicker ? -5 : 3), anchor: .bottom)
-                            .frame(width: 62, height: 62)
-                            .background(Theme.streak(scheme).opacity(0.09), in: Circle())
-                            .accessibilityHidden(true)
-                            .task(id: reduceMotion) {
-                                if reduceMotion {
-                                    flicker = false
-                                } else {
-                                    withAnimation(.easeInOut(duration: 1.2).repeatForever(autoreverses: true)) {
-                                        flicker = true
-                                    }
-                                }
-                            }
-                        Text("Your reading rhythm").font(.serif(32, relativeTo: .largeTitle))
-                        Text("Build a Bible habit, one day at a time.")
-                            .font(.subheadline).foregroundStyle(Theme.muted(scheme))
+                VStack(alignment: .leading, spacing: 22) {
+                    VStack(spacing: 9) {
+                        Text(model.streak.current.formatted())
+                            .font(.serif(76, relativeTo: .largeTitle)).monospacedDigit()
+                        Text("DAYS OF A LITTLE FAITHFULNESS").font(.ui(10, weight: .medium))
+                            .tracking(0.8).foregroundStyle(Theme.muted(scheme))
                     }
-                    .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 22)
-                    if let m = model.streak.milestone {
-                        HStack(spacing: 12) {
-                            Image.illustration("milestone").resizable().scaledToFit().frame(width: 56, height: 56).accessibilityHidden(true)
-                            Text("\(m) days in a row. What a faithful rhythm.").font(.serif(19))
-                        }
+                    .padding(.top, 12)
+                    week
+                    Text(model.streak.readToday
+                         ? "A little time in the Word goes a long way.\nYou’ve made room for it today."
+                         : "One quiet moment counts.\nMake a little room for the Word today.")
+                        .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                    Button(model.streak.readToday ? "Keep reading" : "Make time for today") {
+                        app.requestedTab = .bible
+                        dismiss()
                     }
-                    StreakCard(streak: model.streak, inDetail: true) { Task { await model.markTodayRead(ref: model.verse?.ref ?? "PSA.23.1"); await model.loadProgress() } }
-                    if let p = model.progress { progress(p) } else { ProgressView().frame(maxWidth: .infinity) }
-                    Text("One completed reading day counts once. Read on consecutive days to grow your streak. Missing a full day starts a new run; your personal best stays.")
-                        .font(.footnote).lineSpacing(4).foregroundStyle(.secondary)
-                        .padding(.horizontal, 4)
+                    .buttonStyle(CapsuleButtonStyle())
+                    Divider()
+                    HStack {
+                        Text("Your longest streak").font(.ui(13, weight: .medium))
+                        Spacer()
+                        Text("\(model.streak.best) \(model.streak.best == 1 ? "day" : "days")").font(.ui(13))
+                    }
+                    if let p = model.progress { progress(p) }
+                    else { ProgressView().frame(maxWidth: .infinity) }
                 }
-                .padding(Theme.Spacing.gutter)
+                .padding(22)
             }
+            .foregroundStyle(Theme.text(scheme))
+            .background(AppGradient())
+            .navigationTitle("Your reading rhythm")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
         .task {
             await model.loadProgress()
             await Analytics.shared.track("streak_viewed", ["current": .number(Double(model.streak.current))])
+        }
+    }
+
+    private var week: some View {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let offset = (calendar.component(.weekday, from: today) + 5) % 7
+        let monday = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd"
+        return HStack {
+            ForEach(0..<7, id: \.self) { index in
+                let date = calendar.date(byAdding: .day, value: index, to: monday) ?? monday
+                let read = date <= today && model.streak.week.contains { $0.day == formatter.string(from: date) && $0.read }
+                let weekday = date.formatted(.dateTime.weekday(.wide))
+                VStack(spacing: 8) {
+                    Text(String(weekday.prefix(1))).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    ZStack {
+                        Circle().strokeBorder(Theme.border(scheme))
+                        if read {
+                            Circle().fill(Theme.text(scheme))
+                            Image.glyph("check").frame(width: 15, height: 15).foregroundStyle(Theme.canvas(scheme))
+                        } else {
+                            Circle().fill(Theme.border(scheme)).frame(width: 3, height: 3)
+                        }
+                    }
+                    .frame(width: 32, height: 32)
+                }
+                .frame(maxWidth: .infinity)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(weekday), \(read ? "read" : "not read")")
+            }
         }
     }
 

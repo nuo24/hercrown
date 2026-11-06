@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Four tabs in the design's order (The Bible, Community, Discover, Home) above the floating dock. The Bible is the default.
+/// Four tabs in the design's order (The Bible, Community, Discover, Home) above the bottom navigation. The Bible is the default.
 struct RootView: View {
     @Environment(AppModel.self) private var app
     @State private var tab: AppTab = Self.startTab
@@ -19,6 +19,7 @@ struct RootView: View {
         Group {
             if app.onboardingCompleted || Self.skipOnboarding { tabs } else { OnboardingView() }
         }
+        .environment(\.font, .ui(14))
         // Settings can switch accounts and replace the content underneath it.
         .fullScreenCover(isPresented: $showingSettings) { SettingsView().environment(app) }
     }
@@ -34,7 +35,7 @@ struct RootView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            Dock(selection: $tab).padding(.bottom, 12) // 12 pt above the home indicator, as in the mockup
+            Dock(selection: $tab)
         }
         .onChange(of: tab) { _, new in Task { await Analytics.shared.track("tab_viewed", ["tab": .string(new.rawValue)]) } }
         .onChange(of: app.requestedTab) { _, new in if let new { tab = new; app.requestedTab = nil } }
@@ -57,26 +58,30 @@ struct CommunityView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     HStack(spacing: 4) {
-                        Text("Community").font(.system(size: 25)).tracking(-0.65)
+                        Text("Community").font(.serif(34, relativeTo: .largeTitle)).tracking(-0.65)
                             .foregroundStyle(Theme.text(scheme))
                             .accessibilityAddTraits(.isHeader)
                         Spacer()
-                        IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
-                        IconButton(systemName: "gearshape", label: "Settings", action: onOpenSettings)
+                        PageIconButton(glyph: "bookmark", label: "Saved passages") { showingSaved = true }
+                        PageIconButton(glyph: "gear", label: "Settings", action: onOpenSettings)
                     }
                     .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
 
                     VStack(spacing: 0) {
                         Image.illustration("community").resizable().scaledToFit()
-                            .frame(width: 180, height: 160).accessibilityHidden(true)
-                        Text("Community").font(.serif(27, relativeTo: .largeTitle))
+                            .frame(width: 156, height: 156).accessibilityHidden(true)
+                        Text("Coming soon").font(.serif(34, relativeTo: .largeTitle))
                             .foregroundStyle(Theme.text(scheme)).padding(.top, 36)
-                        Text("A place to connect and grow together.")
-                            .font(.system(size: 14)).frame(minHeight: 22.4).padding(.top, 8)
-                        Text("Community is coming soon.")
-                            .font(.system(size: 12)).frame(minHeight: 19.2).padding(.top, 12)
+                        Text("A place to connect, share encouragement,\nand grow in faith together.")
+                            .font(.ui(14)).frame(minHeight: 22.4).padding(.top, 8)
+                        Text("We’re making a little space for community.").font(.ui(12)).padding(.top, 12)
                         Button("Explore Scripture", action: onExplore)
-                            .buttonStyle(CapsuleButtonStyle()).frame(width: 240).padding(.top, 24)
+                            .font(.ui(14, weight: .medium))
+                            .foregroundStyle(Theme.canvas(scheme))
+                            .frame(maxWidth: 240, minHeight: 48)
+                            .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+                            .buttonStyle(.plain)
+                            .padding(.top, 24)
                     }
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Theme.muted(scheme))
@@ -89,24 +94,5 @@ struct CommunityView: View {
             .scrollIndicators(.hidden)
         }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.preferences.translation) }
-    }
-}
-
-private struct UpcomingTab: View {
-    let title: String
-    let artwork: String
-    let note: String
-    @Environment(\.colorScheme) private var scheme
-
-    var body: some View {
-        ZStack {
-            AppGradient()
-            VStack(spacing: 14) {
-                Image.illustration(artwork).resizable().scaledToFit().frame(height: 130).accessibilityHidden(true)
-                Text(title).font(.serif(30)).foregroundStyle(Theme.text(scheme))
-                Text(note).font(.system(size: 14)).foregroundStyle(Theme.muted(scheme))
-            }
-            .padding(.bottom, 80)
-        }
     }
 }

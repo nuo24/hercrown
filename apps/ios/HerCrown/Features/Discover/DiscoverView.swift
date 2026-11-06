@@ -39,6 +39,16 @@ struct DiscoverView: View {
     @State private var showingSaved = false
     @State private var studyRef: VerseRef?
     @State private var noteRef: VerseRef?
+    @State private var detail: DiscoverFeed.Card?
+    @State private var pendingDetailAction: DetailAction?
+    @State private var query = ""
+    @State private var searching = false
+    @FocusState private var searchFocused: Bool
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    private enum DetailAction {
+        case note(VerseRef), study(VerseRef)
+    }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(DiscoverStudied.storageKey) private var studiedData = Data()
 
@@ -48,41 +58,113 @@ struct DiscoverView: View {
     private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
     private static let themes = ["Peace", "Purpose", "Faith", "Relationships", "Identity", "Anxiety", "Gratitude", "Hope", "Wisdom"]
 
-    /// Artwork per filter (spec mapping).
-    private static let art = ["for-you": "lantern", "plan": "journal", "Peace": "olive", "Purpose": "purpose-compass", "Faith": "faith-hands",
-                              "Relationships": "relationship-hands", "Identity": "intention-heart", "Anxiety": "rest-stones",
-                              "Gratitude": "gratitude-basket", "Hope": "sunrise", "Wisdom": "wisdom-pearl"]
+    private static let editorial: [String: (title: String, art: String)] = [
+        "PSA.23.1": ("Rest for a restless heart.", "olive"),
+        "PRO.31.25": ("Clothed in quiet strength", "intention-heart"),
+        "MAT.11.28": ("Lay down what you carry", "rest-stones"),
+        "JER.29.11": ("Hope for the unfolding", "sunrise"),
+        "PRO.3.5": ("Trust the next small step", "faith-hands"),
+        "PSA.119.105": ("A little light for the way", "lantern"),
+        "PSA.107.1": ("Notice the ordinary gifts", "gratitude-basket"),
+        "PRO.17.17": ("Love that stays close", "relationship-hands"),
+        "JAS.1.5": ("Make room for wisdom", "wisdom-pearl")
+    ]
 
+    private static let artworkFamilies: [String: [String]] = [
+        "peace": ["olive", "dove", "rest-stones"], "identity": ["intention-heart", "milestone", "seedling"],
+        "anxiety": ["rest-stones", "dove", "reflection"], "hope": ["sunrise", "butterfly", "anchor"],
+        "faith": ["faith-hands", "anchor", "dove"], "purpose": ["lantern", "purpose-compass", "seedling"],
+        "gratitude": ["gratitude-basket", "cosmos", "sunrise"], "relationships": ["relationship-hands", "community", "intention-heart"],
+        "wisdom": ["wisdom-pearl", "open-book", "lantern"]
+    ]
+
+    private var requestedFilter: String { filter == "saved" ? "for-you" : filter }
     private var filters: [DiscoverFeed.Filter] {
-        feed?.filters ?? [.init(id: "for-you", title: "For you")] + Self.themes.map { .init(id: $0, title: $0) }
+        var result = feed?.filters ?? [.init(id: "for-you", title: "For you")] + Self.themes.map { .init(id: $0, title: $0) }
+        if !result.contains(where: { $0.id == "saved" }) { result.insert(.init(id: "saved", title: "Saved"), at: min(1, result.count)) }
+        return result
+    }
+
+    private func title(for card: DiscoverFeed.Card) -> String { Self.editorial[card.ref]?.title ?? card.label }
+
+    private func artwork(for card: DiscoverFeed.Card) -> String {
+        if let art = Self.editorial[card.ref]?.art { return art }
+        let family = Self.artworkFamilies[card.theme?.lowercased() ?? ""] ?? ["open-book", "olive", "lantern"]
+        let hash = card.ref.utf16.reduce(UInt32(0)) { $0 &* 31 &+ UInt32($1) }
+        return family[Int(hash % UInt32(family.count))]
     }
 
     var body: some View {
         ZStack {
             AppGradient()
             ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    // .app-header: 20/20/16, 28 pt title, 44 pt icon buttons
-                    HStack(spacing: 4) {
-                        Text("Discover").font(.system(size: 25)).tracking(-0.65).foregroundStyle(Theme.text(scheme))
+                LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                    HStack(spacing: 0) {
+                        Text("Discover").font(.serif(34, relativeTo: .largeTitle)).tracking(-0.65)
+                            .foregroundStyle(Theme.text(scheme)).accessibilityAddTraits(.isHeader)
                         Spacer()
-                        IconButton(systemName: "bookmark", label: "Saved passages") { showingSaved = true }
-                        IconButton(systemName: "gearshape", label: "Settings", action: onOpenSettings)
+                        PageIconButton(glyph: "search", label: "Search Discover") {
+                            searching.toggle()
+                            if searching { searchFocused = true } else { query = "" }
+                        }
+                        Menu {
+                            Button("Saved passages", systemImage: "bookmark") { showingSaved = true }
+                            Button("Settings", systemImage: "gearshape", action: onOpenSettings)
+                        } label: {
+                            Image(systemName: "ellipsis").font(.system(size: 20))
+                                .foregroundStyle(Theme.text(scheme)).frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel("Discover options")
                     }
-                    .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
-                    hero.padding(.horizontal, 24)
-                    chips.padding(.top, 22).padding(.bottom, 20)
-                    VStack(spacing: 16) { cards }.padding(.horizontal, 20)
+                    .padding(.horizontal, 22)
+                    .padding(.vertical, 12)
+
+                    if searching {
+                        HStack(spacing: 10) {
+                            Image.glyph("search").frame(width: 18, height: 18)
+                            TextField("Search passages or topics", text: $query).font(.ui(14)).focused($searchFocused)
+                        }
+                        .padding(.horizontal, 22).frame(minHeight: 44)
+                    }
+                    Section {
+                        VStack(alignment: .leading, spacing: 14) { cards }
+                            .padding(.horizontal, 22)
+                    } header: {
+                        chips
+                            .background {
+                                if reduceTransparency { Theme.canvas(scheme) }
+                                else { Rectangle().fill(.regularMaterial) }
+                            }
+                    }
                 }
-                .padding(.bottom, 124)
+                .padding(.bottom, 80)
             }
+            .scrollDismissesKeyboard(.interactively)
             .refreshable { await load() }
-            .clipped()
         }
         // Reload once she's signed in (a brand-new guest signs in while this tab may already be open).
-        .task(id: "\(filter)|\(app.me?.user.id ?? "")") { await load() }
+        .task(id: "\(filter)|\(translation)|\(app.me?.user.id ?? "")") { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
+        .sheet(item: $detail, onDismiss: openDetailAction) { card in
+            NavigationStack {
+                ScrollView {
+                    DiscoverCard(card: card, translation: feed?.translation ?? translation, onStudy: {
+                        if let ref = VerseRef(card.ref) { pendingDetailAction = .study(ref); detail = nil }
+                    }, onNote: {
+                        if let ref = VerseRef(card.ref) { pendingDetailAction = .note(ref); detail = nil }
+                    }, onComplete: { [accountKey] in
+                        markStudied(card.ref, accountKey: accountKey)
+                        detail = nil
+                    })
+                    .padding(22)
+                }
+                .background(AppGradient())
+                .navigationTitle(card.label)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { detail = nil } } }
+            }
+        }
         .sheet(item: $studyRef) { ref in
             NavigationStack {
                 AIStudyView(ref: ref, translation: feed?.translation ?? translation, tool: .deeper)
@@ -98,15 +180,29 @@ struct DiscoverView: View {
         }
     }
 
+    private func openDetailAction() {
+        switch pendingDetailAction {
+        case .study(let ref): studyRef = ref
+        case .note(let ref): noteRef = ref
+        case nil: break
+        }
+        pendingDetailAction = nil
+    }
+
     private func load() async {
-        let query = filter.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? filter
+        let selected = filter
+        let source = requestedFilter
+        let encoded = source.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? source
         do {
-            feed = try await app.api.get("/discover?filter=\(query)&translation=\(translation)")
+            let response: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(translation)")
+            guard !Task.isCancelled, filter == selected else { return }
+            feed = response
             failed = false
         } catch {
-            failed = feed?.filter != filter
+            guard !Task.isCancelled, filter == selected else { return }
+            failed = feed?.filter != source
         }
-        await Analytics.shared.track("discover_viewed", ["filter": .string(filter)])
+        await Analytics.shared.track("discover_viewed", ["filter": .string(selected)])
     }
 
     private func markStudied(_ ref: String, accountKey: String) {
@@ -118,84 +214,78 @@ struct DiscoverView: View {
         Task { await Analytics.shared.track("discover_card_read", ["ref": .string(ref)]) }
     }
 
-    // MARK: Hero
-
-    /// .discovery-illustrated-intro: 24 radius, 26/22 padding, sage-to-sky glass, 32 pt serif, 145×163 art.
-    private var hero: some View {
-        let dark = scheme == .dark
-        return HStack(alignment: .center, spacing: 2) {
-            VStack(alignment: .leading, spacing: 14) {
-                Text(heroTitle).font(.serif(28, relativeTo: .title)).tracking(-0.6).fixedSize(horizontal: false, vertical: true)
-                Text(heroSubtitle).font(.system(size: 13)).lineSpacing(5.3).foregroundStyle(dark ? Color(hex: 0xC4D3C9) : Color(hex: 0x51605A))
-            }
-            .frame(maxWidth: 180, alignment: .leading)
-            .foregroundStyle(Theme.text(scheme))
-            Spacer(minLength: 0)
-            Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(width: 124, height: 136).accessibilityHidden(true)
-        }
-        .padding(EdgeInsets(top: 22, leading: 22, bottom: 20, trailing: 4))
-        .frame(maxWidth: .infinity, minHeight: 178)
-        .background(
-            RoundedRectangle(cornerRadius: 24, style: .continuous).fill(LinearGradient(
-                stops: dark
-                    ? [.init(color: Color(red: 52 / 255, green: 72 / 255, blue: 61 / 255, opacity: 0.72), location: 0), .init(color: Color(red: 38 / 255, green: 51 / 255, blue: 61 / 255, opacity: 0.69), location: 0.65), .init(color: Color(red: 51 / 255, green: 66 / 255, blue: 86 / 255, opacity: 0.74), location: 1)]
-                    : [.init(color: Color(red: 230 / 255, green: 237 / 255, blue: 223 / 255, opacity: 0.7), location: 0), .init(color: Color.white.opacity(0.52), location: 0.58), .init(color: Color(red: 223 / 255, green: 234 / 255, blue: 244 / 255, opacity: 0.65), location: 1)],
-                startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay {
-                    if !dark {
-                        RoundedRectangle(cornerRadius: 24)
-                            .fill(LinearGradient(stops: [
-                                .init(color: .white.opacity(0.59), location: 0),
-                                .init(color: .white.opacity(0.08), location: 0.35),
-                                .init(color: .clear, location: 0.58),
-                                .init(color: .white.opacity(0.27), location: 1)
-                            ], startPoint: .topLeading, endPoint: .bottomTrailing))
+    private func feature(_ card: DiscoverFeed.Card) -> some View {
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title(for: card)).font(.serif(34, relativeTo: .title)).tracking(-0.6)
+                Text(card.ref == "PSA.23.1" ? "A moment in Psalm 23, just for you and God." : card.label)
+                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                Button { detail = card } label: {
+                    HStack(spacing: 9) {
+                        Text("Begin reading").font(.ui(12, weight: .medium))
+                        Image.glyph("arrow").frame(width: 16, height: 16)
                     }
+                    .frame(minHeight: 44)
                 }
-        )
-        .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .strokeBorder(Color.white.opacity(dark ? 0.15 : 0.78), lineWidth: 1)
-                .allowsHitTesting(false)
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Image.illustration(artwork(for: card)).resizable().scaledToFit()
+                .frame(maxWidth: 165, maxHeight: 182).rotationEffect(.degrees(12)).accessibilityHidden(true)
         }
-        .shadow(color: dark ? .black.opacity(0.533) : Color(red: 37 / 255, green: 61 / 255, blue: 76 / 255, opacity: 0.11), radius: 7, y: 7)
-        .shadow(color: dark ? .black.opacity(0.333) : Color(red: 33 / 255, green: 61 / 255, blue: 66 / 255, opacity: 0.07), radius: 2, y: 3)
-        .animation(.easeOut(duration: 0.2), value: filter)
+        .foregroundStyle(Theme.text(scheme))
+        .frame(minHeight: 219)
     }
 
-    private var heroTitle: String {
-        switch filter {
-        case "for-you": "For your everyday"
-        case "plan": filters.first { $0.id == "plan" }?.title ?? "Your plan"
-        default: "For \(filter.lowercased())"
+    private func entry(_ card: DiscoverFeed.Card) -> some View {
+        HStack(spacing: 6) {
+            Button { detail = card } label: {
+                HStack(spacing: 14) {
+                    Image.illustration(artwork(for: card)).resizable().scaledToFit()
+                        .padding(3).frame(width: 74, height: 86).accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(title(for: card)).font(.serif(23, relativeTo: .title3)).tracking(-0.3)
+                            .padding(.bottom, 5)
+                        Text(card.label.uppercased()).font(.ui(10)).tracking(0.35).foregroundStyle(Theme.muted(scheme))
+                        if let theme = card.theme { Text(theme.uppercased()).font(.ui(9)).tracking(0.4).foregroundStyle(Theme.muted(scheme)) }
+                    }
+                    Spacer(minLength: 0)
+                }
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, minHeight: 86, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            Menu {
+                Button(app.isSaved(card.ref) ? "Remove from saved" : "Save passage", systemImage: "heart") { app.toggleSave(card.ref) }
+                Button("Read in The Bible", systemImage: "book") { if let ref = VerseRef(card.ref) { app.openInReader(ref) } }
+                Button("Study passage", systemImage: "magnifyingglass") { studyRef = VerseRef(card.ref) }
+                Button("Write a note", systemImage: "message") { noteRef = VerseRef(card.ref) }
+            } label: {
+                Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 44, height: 44)
+            }
+            .accessibilityLabel("Actions for \(card.label)")
         }
-    }
-
-    private var heroSubtitle: String {
-        switch filter {
-        case "for-you": "Find Scripture for the season you’re in."
-        case "plan": "The passages in the plan you’re reading."
-        default: "Scripture to sit with, a little at a time."
-        }
+        .foregroundStyle(Theme.text(scheme))
     }
 
     // MARK: Filters
 
     /// .filterbar: 44 pt chips, 13 pt, 14 pt side padding, 8 apart; selected is ink.
     private var chips: some View {
-        let dark = scheme == .dark
-        return ScrollViewReader { proxy in
+        ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
                     ForEach(filters) { f in
                         let selected = f.id == filter
                         Button { filter = f.id } label: {
-                            Text(f.id == "plan" ? "Plan" : f.title).font(.system(size: 13))
-                                .padding(.horizontal, 14).frame(height: 44)
-                                .foregroundStyle(selected ? (dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme))
-                                .background(Capsule().fill(selected ? Theme.text(scheme) : (dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))))
-                                .overlay(Capsule().strokeBorder(selected ? .clear : Theme.border(scheme), lineWidth: 1))
-                                .shadow(color: .black.opacity(selected ? 0.08 : 0.03), radius: selected ? 2 : 1, y: selected ? 2 : 1)
+                            Text((f.id == "plan" ? "Plan" : f.title).uppercased())
+                                .font(.ui(10, weight: .medium)).tracking(0.45)
+                                .padding(.horizontal, 6).frame(minHeight: 44)
+                                .foregroundStyle(selected ? Theme.text(scheme) : Theme.muted(scheme))
+                                .overlay(alignment: .bottom) {
+                                    if selected { Rectangle().fill(Theme.text(scheme)).frame(height: 1) }
+                                }
                         }
                         .buttonStyle(.plain)
                         .id(f.id)
@@ -212,22 +302,35 @@ struct DiscoverView: View {
     // MARK: Cards
 
     @ViewBuilder private var cards: some View {
-        if let feed, feed.filter == filter {
-            let remaining = feed.cards.filter { !studied.contains($0.ref) }
+        if let feed, feed.filter == requestedFilter {
+            let search = query.trimmingCharacters(in: .whitespacesAndNewlines)
+            let remaining = feed.cards.filter { card in
+                if filter == "saved", !app.isSaved(card.ref) { return false }
+                if filter != "saved", studied.contains(card.ref) { return false }
+                return search.isEmpty || [card.label, card.text, card.theme ?? "", title(for: card)]
+                    .contains { $0.localizedCaseInsensitiveContains(search) }
+            }
             if remaining.isEmpty {
                 VStack(spacing: 10) {
-                    Image.illustration(Self.art[filter] ?? "lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
-                    Text(filter == "plan" ? "Start a reading plan from Home to see its passages here." : (feed.cards.isEmpty ? "Nothing here yet." : "You’ve studied every verse in this collection."))
-                        .font(.system(size: 15)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
+                    Image.illustration("lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
+                    Text(emptyMessage(searching: !search.isEmpty, sourceEmpty: feed.cards.isEmpty))
+                        .font(.ui(14)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity).padding(.vertical, 40)
             } else {
-                ForEach(remaining) { card in
-                    DiscoverCard(card: card, translation: feed.translation ?? translation,
-                                 onStudy: { studyRef = VerseRef(card.ref) },
-                                 onNote: { noteRef = VerseRef(card.ref) },
-                                 onComplete: { [accountKey] in markStudied(card.ref, accountKey: accountKey) })
-                        .transition(.asymmetric(insertion: .identity, removal: .opacity))
+                let featured = filter == "for-you" && search.isEmpty
+                    ? remaining.first(where: { $0.ref == "PSA.23.1" }) ?? remaining.first
+                    : nil
+                if let featured { feature(featured) }
+                HStack {
+                    Text("For your everyday").font(.ui(13, weight: .medium))
+                    Spacer()
+                    Text("Read at your own pace").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
+                }
+                .padding(.top, 19)
+                .overlay(alignment: .top) { Divider() }
+                ForEach(remaining.filter { $0.id != featured?.id }) { card in
+                    entry(card).transition(.opacity)
                 }
             }
         } else if failed {
@@ -240,6 +343,14 @@ struct DiscoverView: View {
             ProgressView().frame(maxWidth: .infinity).padding(.vertical, 40)
         }
     }
+
+    private func emptyMessage(searching: Bool, sourceEmpty: Bool) -> String {
+        if searching { return "No passages match your search." }
+        if filter == "saved" { return "Saved Discover passages will appear here." }
+        if filter == "plan" { return "Start a reading plan from Home to see its passages here." }
+        return sourceEmpty ? "Nothing here yet." : "You’ve studied every verse in this collection."
+    }
+
 }
 
 private struct DiscoverCard: View {

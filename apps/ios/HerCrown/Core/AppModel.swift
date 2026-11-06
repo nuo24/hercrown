@@ -17,6 +17,23 @@ final class AppModel {
     var showExistingAppleSubscription = false
     private var checkingPaywall = false
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
+    private var bookmarksByAccount = UserDefaults.standard.dictionary(forKey: "hc.readerBookmarks") as? [String: [String]] ?? [:]
+
+    private var bookmarkAccount: String {
+        me?.user.id ?? "offline"
+    }
+
+    var readerBookmarks: [String] { bookmarksByAccount[bookmarkAccount] ?? [] }
+
+    func toggleBookmark(_ ref: String) {
+        let account = bookmarkAccount
+        var refs = readerBookmarks
+        if let index = refs.firstIndex(of: ref) { refs.remove(at: index) }
+        else { refs.insert(ref, at: 0) }
+        bookmarksByAccount[account] = refs
+        UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
+    }
+
     var onboardingCompleted = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
     var offline = false
     /// Another tab asked to show this one (e.g. Home → read a verse in The Bible).
@@ -244,7 +261,10 @@ final class AppModel {
     func deleteAccount() async throws {
         await Analytics.shared.track("account_deleted")
         await Analytics.shared.flush()
+        let deletedAccount = bookmarkAccount
         try await api.send("POST", "/api/auth/delete-user", json: [String: Any]())
+        bookmarksByAccount.removeValue(forKey: deletedAccount)
+        UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil
         for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position"] { UserDefaults.standard.removeObject(forKey: key) }
         saved = []

@@ -129,3 +129,22 @@ struct InsightLens: Shape {
         return p
     }
 }
+
+struct PageIconButton: View {
+    let glyph: String
+    let label: String
+    let action: () -> Void
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
+        Button(action: action) {
+            Image.glyph(glyph)
+                .frame(width: 21, height: 21)
+                .frame(width: 44, height: 44)
+                .foregroundStyle(Theme.text(scheme))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+    }
+}

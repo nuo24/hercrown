@@ -6,6 +6,9 @@ struct VerseRail: View {
     let verses: [Int]
     @Binding var current: Int
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var focus: CGFloat?
+    @State private var feedback = UISelectionFeedbackGenerator()
 
     var body: some View {
         GeometryReader { geo in
@@ -20,19 +23,22 @@ struct VerseRail: View {
             ZStack(alignment: .topLeading) {
                 VStack(alignment: .leading, spacing: gap) {
                     ForEach(Array(verses.enumerated()), id: \.offset) { i, _ in
+                        let distance = (CGFloat(i) - (focus ?? CGFloat(index))) / 1.1
+                        let scale = reduceMotion ? 1 : 1 + 0.8 * exp(-0.5 * distance * distance)
                         RoundedRectangle(cornerRadius: 5)
-                            .fill(i == index ? (dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x152520)) : (dark ? Color(hex: 0x69736E, opacity: 0.62) : Color(hex: 0xB7BFC4, opacity: 0.65)))
+                            .fill(i == index ? Theme.text(scheme) : (dark ? Color(hex: 0x4D4D4D) : Color(hex: 0xD8D8DE)))
                             .frame(width: 4, height: segment)
-                            .scaleEffect(x: i == index ? 1.8 : 1, anchor: .leading)
+                            .scaleEffect(x: scale, y: 1 + (scale - 1) * 0.16, anchor: .leading)
+                            .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: scale)
                     }
                 }
                 Text("\(current)")
-                    .font(.system(size: 10, weight: .semibold)).monospacedDigit()
-                    .foregroundStyle(dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x263B32))
+                    .font(.ui(10, weight: .medium)).monospacedDigit()
+                    .foregroundStyle(dark ? Color(hex: 0xF5F5F5) : Theme.text(scheme))
                     .offset(x: 10, y: CGFloat(index) * (segment + gap) + segment / 2 - 6)
                 Text("\(verses.last ?? count)")
-                    .font(.system(size: 10)).monospacedDigit()
-                    .foregroundStyle(Color(hex: 0x707B77))
+                    .font(.ui(10)).monospacedDigit()
+                    .foregroundStyle(Theme.muted(scheme))
                     .offset(y: track + 12)
             }
             .frame(width: 24, height: geo.size.height, alignment: .topLeading)
@@ -40,8 +46,13 @@ struct VerseRail: View {
             .gesture(DragGesture(minimumDistance: 0).onChanged { value in
                 let y = min(max(value.location.y, 0), track)
                 let i = min(count - 1, Int(y / max(segment + gap, 0.1)))
-                if verses.indices.contains(i), verses[i] != current { current = verses[i]; UISelectionFeedbackGenerator().selectionChanged() }
-            })
+                focus = y / max(segment + gap, 0.1) - 0.5
+                if verses.indices.contains(i), verses[i] != current {
+                    current = verses[i]
+                    feedback.selectionChanged()
+                    feedback.prepare()
+                }
+            }.onEnded { _ in focus = nil })
         }
         .frame(width: 24)
         .accessibilityElement()

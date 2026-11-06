@@ -6,6 +6,19 @@ import UserNotifications
 struct OnboardingView: View {
     @Environment(AppModel.self) private var app
     @State private var step = 0
+    @State private var entrance = OnboardingEntrance()
+    @State private var playedStep: Int?
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var typingAvailable: Bool { !reduceMotion && scenePhase == .active }
+    private var characterCount: Int { Self.titles[step].filter { !$0.isWhitespace }.count }
+    private var copyDelay: Double { 0.22 + Double(characterCount) * 0.032 }
+    private static let titles = [
+        "Less scrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’s 14 hours a\nweek.",
+        "What brings\nyou here?", "Every journey\nbegins somewhere.", "What’s on your\nheart lately?",
+        "Make room\nfor the Word.", "A gentle\nreminder?", "You’re right where\nyou need to begin."
+    ]
     @State private var intention: String?
     @State private var familiarity: String?
     @State private var topics: [String] = []
@@ -17,7 +30,7 @@ struct OnboardingView: View {
     init() {
         #if DEBUG
         // Screenshots and UI review: `-hcOnboardingStep 5` opens a given step.
-        _step = State(initialValue: UserDefaults.standard.integer(forKey: "hcOnboardingStep"))
+        _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "hcOnboardingStep"), 0), 7))
         #endif
     }
 
@@ -29,22 +42,61 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             AppGradient().environment(\.colorScheme, .light)
-            if step > 0 { OnboardingClouds(isIntro: step == 1) }
-            switch step {
-            case 0: welcome
-            case 1: time
-            default: question
+            Group {
+                switch step {
+                case 0: welcome
+                case 1: time
+                default: question
+                }
             }
+            .id(step)
         }
         .ignoresSafeArea()
         .environment(\.colorScheme, .light) // onboarding is designed in the light palette
         .preferredColorScheme(.light)        // dark status bar text on the light background
-        .animation(.easeInOut(duration: 0.25), value: step)
+        .task(id: "\(step)-\(typingAvailable)") {
+            guard typingAvailable, playedStep != step else { entrance.settle(); return }
+            playedStep = step
+            entrance.begin()
+            let clock = ContinuousClock()
+            let start = clock.now
+            do {
+                for index in 0..<characterCount {
+                    try await clock.sleep(until: start.advanced(by: .milliseconds(220 + index * 32)))
+                    try Task.checkCancellation()
+                    entrance.reveal(index + 1)
+                }
+                try await clock.sleep(until: start.advanced(by: .milliseconds(300 + characterCount * 32)))
+                try Task.checkCancellation()
+                entrance.settle()
+            } catch { }
+        }
         .onChange(of: step) { _, s in Task { await Analytics.shared.track("onboarding_step", ["step": .string(Self.stepNames[s]), "index": .number(Double(s))]) } }
         .task { await Analytics.shared.track("onboarding_step", ["step": "welcome", "index": 0]) }
     }
 
     static let stepNames = ["welcome", "time", "intention", "familiarity", "topics", "rhythm", "reminder", "ready"]
+
+    private func advance(to page: Int) {
+        if !reduceMotion { entrance.confirm() }
+        if typingAvailable { entrance.begin() }
+        step = page
+    }
+
+    private func headline(_ text: String, after preceding: String = "", font: Font, color: Color = Self.ink) -> Text {
+        guard typingAvailable, let count = entrance.revealed ?? (playedStep == step ? nil : 0) else {
+            return Text(text).font(font).foregroundColor(color)
+        }
+        let limit = max(0, count - preceding.filter { !$0.isWhitespace }.count)
+        var seen = 0
+        let visibleEnd = text.firstIndex { character in
+            if character.isWhitespace { return false }
+            seen += 1
+            return seen > limit
+        } ?? text.endIndex
+        return (Text(String(text[..<visibleEnd])).foregroundColor(color) +
+                Text(String(text[visibleEnd...])).foregroundColor(.clear)).font(font)
+    }
 
     // Colours from the mockup's onboarding cascade.
     private static let ink = Color(hex: 0x111111)
@@ -63,24 +115,25 @@ struct OnboardingView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     VStack(spacing: -5) {
-                        Text("Less scrolling.").font(.serif(titleSize, relativeTo: .largeTitle))
-                        Text("More Scripture.").font(.serif(titleSize, italic: true, relativeTo: .largeTitle))
-                            .foregroundStyle(Color(hex: 0x263B32))
+                        headline("Less scrolling.", font: .serif(titleSize, relativeTo: .largeTitle))
+                        headline("More Scripture.", after: "Less scrolling.", font: .serif(titleSize, italic: true, relativeTo: .largeTitle), color: Color(hex: 0x263B32))
                     }
+                    .accessibilityElement(children: .ignore).accessibilityLabel(Self.titles[0]).accessibilityAddTraits(.isHeader)
                     .tracking(-titleSize * 0.025)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(Self.ink)
                     .frame(maxWidth: 350)
 
                     Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
-                        .font(.system(size: geometry.size.height <= 650 ? 13 : narrowScreen ? 14 : 15))
+                        .font(.ui(geometry.size.height <= 650 ? 13 : narrowScreen ? 14 : 15))
                         .lineSpacing(5.4)
                         .foregroundStyle(Color(hex: 0x65686A))
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: 265)
                         .padding(.top, 20)
+                        .modifier(OnboardingCopyEntry(delay: copyDelay + 0.08))
                     Spacer(minLength: 24)
-                    welcomeActions
+                    welcomeActions.modifier(OnboardingCopyEntry(delay: copyDelay + 0.18))
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, geometry.size.height * (shortScreen ? 0.30 : 0.38))
@@ -90,22 +143,20 @@ struct OnboardingView: View {
             .scrollBounceBehavior(.basedOnSize)
             .scrollIndicators(.hidden)
             .background(alignment: .top) {
-                Image.illustration("onboarding-collage").resizable()
-                    .frame(width: geometry.size.width * 1.04, height: geometry.size.height * 0.96)
-                    .frame(width: geometry.size.width)
-                    .accessibilityHidden(true)
+                OnboardingCollage(size: CGSize(width: geometry.size.width * 1.04, height: geometry.size.height * 0.96),
+                                  animate: !reduceMotion)
             }
         }
     }
 
     private var welcomeActions: some View {
         VStack(spacing: 0) {
-            Button { step = 1 } label: {
+            Button { advance(to: 1) } label: {
                 HStack(spacing: 8) {
                     Text("Get started")
-                    Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold))
+                    Image(systemName: "arrow.right").font(.ui(14, weight: .semibold))
                 }
-                .font(.system(size: 14, weight: .medium))
+                .font(.ui(14, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, minHeight: 52)
                 .background {
@@ -113,9 +164,9 @@ struct OnboardingView: View {
                         .shadow(color: .black.opacity(0.16), radius: 4, y: 3)
                 }
             }
-            Button { Task { await finish(guest: true) } } label: {
+            Button { if !reduceMotion { entrance.confirm() }; Task { await finish(guest: true) } } label: {
                 Text("Explore as a guest")
-                    .font(.system(size: 14, weight: .medium))
+                    .font(.ui(14, weight: .medium))
                     .foregroundStyle(Color(hex: 0x333333))
                     .frame(maxWidth: .infinity, minHeight: 44)
                     .background(.ultraThinMaterial, in: Capsule())
@@ -124,7 +175,7 @@ struct OnboardingView: View {
             }
             .padding(.top, 10)
             Text("Come as you are. No account needed.")
-                .font(.system(size: 11))
+                .font(.ui(11))
                 .foregroundStyle(Self.kicker)
                 .frame(minHeight: 16.5)
                 .padding(.top, 16)
@@ -141,32 +192,33 @@ struct OnboardingView: View {
                 VStack(spacing: 0) {
                     ZStack(alignment: .topLeading) {
                         Image.illustration("cosmos").resizable().scaledToFit().frame(width: 60, height: 68)
-                            .rotationEffect(.degrees(-18))
+                            .rotationEffect(.degrees(-18)).modifier(OnboardingArtEntry(delay: 0.28, x: -14, y: -12, rotation: -7))
                         Image.illustration("open-book").resizable().scaledToFit().frame(width: 164, height: 150)
-                            .rotationEffect(.degrees(7)).offset(x: 62, y: 9)
+                            .rotationEffect(.degrees(7)).modifier(OnboardingArtEntry(x: 0, y: 22, rotation: -5)).offset(x: 62, y: 9)
                         Image.illustration("hourglass").resizable().scaledToFit().frame(width: 82, height: 100)
-                            .rotationEffect(.degrees(-12)).offset(x: 25, y: 74)
+                            .rotationEffect(.degrees(-12)).modifier(OnboardingArtEntry(delay: 0.14, x: -18, y: 22, rotation: -8)).offset(x: 25, y: 74)
                         Image.illustration("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54)
-                            .rotationEffect(.degrees(14)).offset(x: 206, y: 106)
+                            .rotationEffect(.degrees(14)).modifier(OnboardingArtEntry(delay: 0.42, y: 22, rotation: 8)).offset(x: 206, y: 106)
                     }
                     .frame(width: 260, height: 174, alignment: .topLeading)
                     .accessibilityHidden(true)
 
                     VStack(spacing: 0) {
-                        Text("If you scroll for")
-                        Text("2 hours a day,").font(.serif(37, weight: .semibold, relativeTo: .largeTitle))
-                        (Text("that’s ") + Text("14 hours a\nweek.")
-                            .font(.serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle))
-                            .foregroundColor(Color(hex: 0x334B3E)))
+                        headline("If you scroll for", font: .serif(37, relativeTo: .largeTitle))
+                        headline("2 hours a day,", after: "If you scroll for", font: .serif(37, weight: .semibold, relativeTo: .largeTitle))
+                        (headline("that’s ", after: "If you scroll for 2 hours a day,", font: .serif(37, relativeTo: .largeTitle)) +
+                         headline("14 hours a\nweek.", after: "If you scroll for 2 hours a day, that’s", font: .serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle), color: Color(hex: 0x334B3E)))
                     }
-                    .font(.serif(37, relativeTo: .largeTitle)).tracking(-0.7)
+                    .accessibilityElement(children: .ignore).accessibilityLabel(Self.titles[1]).accessibilityAddTraits(.isHeader)
+                    .tracking(-0.7)
                     .multilineTextAlignment(.center).foregroundStyle(Self.ink)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 30)
 
                     Text("For the woman with a full day and a full heart: make a few of those minutes just you, God, and His Word.")
-                        .font(.system(size: 14)).lineSpacing(6.4).foregroundStyle(Color(hex: 0x59645E))
+                        .font(.ui(14)).lineSpacing(6.4).foregroundStyle(Color(hex: 0x59645E))
                         .multilineTextAlignment(.center).frame(maxWidth: 325).padding(.top, 24)
+                        .modifier(OnboardingCopyEntry(delay: copyDelay + 0.08))
                 }
                 .padding(.top, 61)
                 .padding(.bottom, 16)
@@ -185,9 +237,9 @@ struct OnboardingView: View {
             HStack(spacing: 0) {
                 backButton
                 Spacer()
-                Text("A moment for you").font(.system(size: 12)).foregroundStyle(Self.kicker)
+                Text("A moment for you").font(.ui(12)).foregroundStyle(Self.kicker)
                 Spacer()
-                if step < 7 { Button("Skip") { skip() }.font(.system(size: 12)).foregroundStyle(Self.body).frame(width: 44, height: 44) }
+                if step < 7 { Button("Skip") { skip() }.font(.ui(12)).foregroundStyle(Self.body).frame(width: 44, height: 44) }
                 else { Color.clear.frame(width: 44, height: 44) }
             }
             .frame(height: 48)
@@ -214,8 +266,8 @@ struct OnboardingView: View {
             case 6:
                 VStack(spacing: 0) {
                     footer(button: "Continue", caption: nil) { Task { await continueFromReminder() } }
-                    Button("Not now") { reminders = false; step = 7 }
-                        .font(.system(size: 14)).foregroundStyle(Color(hex: 0x333333)).frame(maxWidth: .infinity, minHeight: 48)
+                    Button("Not now") { reminders = false; advance(to: 7) }
+                        .font(.ui(14)).foregroundStyle(Color(hex: 0x333333)).frame(maxWidth: .infinity, minHeight: 48)
                 }
                 .padding(.bottom, 58)
             case 7: footer(button: finishing ? "Getting ready…" : "Start reading", caption: "A little space. An open heart.") { Task { await finish(guest: false) } }
@@ -235,17 +287,19 @@ struct OnboardingView: View {
 
     private func heading(_ title: String, art: String) -> some View {
         HStack(alignment: .center, spacing: 16) {
-            Text(title).font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
+            headline(title, font: .serif(32, relativeTo: .largeTitle)).tracking(-1)
+                .accessibilityLabel(title).accessibilityAddTraits(.isHeader)
                 .lineSpacing(-0.96)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
-            Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true)
+            Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtEntry()).accessibilityHidden(true)
         }
     }
 
     private func subtitle(_ text: String) -> some View {
-        Text(text).font(.system(size: 14)).lineSpacing(6.44).foregroundStyle(Self.body)
+        Text(text).font(.ui(14)).lineSpacing(6.44).foregroundStyle(Self.body)
             .padding(.vertical, 3.22).padding(.top, 18)
+            .modifier(OnboardingCopyEntry(delay: copyDelay + 0.08))
     }
 
     private func choice(title: String, art: String, sub: String, options: [String], selection: Binding<String?>, details: [String: String] = [:], note: String? = nil) -> some View {
@@ -253,9 +307,9 @@ struct OnboardingView: View {
             heading(title, art: art)
             subtitle(sub)
             VStack(spacing: 10) {
-                ForEach(options, id: \.self) { option in
+                ForEach(Array(options.enumerated()), id: \.element) { index, option in
                     let on = selection.wrappedValue == option
-                    Button { selection.wrappedValue = option } label: {
+                    Button { if !reduceMotion { entrance.confirm() }; selection.wrappedValue = option } label: {
                         HStack(spacing: 14) {
                             ZStack {
                                 Circle().fill(on ? Self.ink : .clear)
@@ -264,8 +318,8 @@ struct OnboardingView: View {
                             }
                             .frame(width: 19, height: 19)
                             VStack(alignment: .leading, spacing: 5) {
-                                Text(option).font(.system(size: 14))
-                                if let d = details[option] { Text(d).font(.system(size: 11)).foregroundStyle(Self.body) }
+                                Text(option).font(.ui(14))
+                                if let d = details[option] { Text(d).font(.ui(11)).foregroundStyle(Self.body) }
                             }
                             Spacer(minLength: 0)
                         }
@@ -276,10 +330,11 @@ struct OnboardingView: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
+                    .modifier(OnboardingCopyEntry(delay: copyDelay + 0.14 + Double(min(index, 8)) * 0.045, duration: 0.22))
                 }
             }
             .padding(.top, 28)
-            if let note { Text(note).font(.system(size: 11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 24) }
+            if let note { Text(note).font(.ui(11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 24) }
         }
     }
 
@@ -288,15 +343,16 @@ struct OnboardingView: View {
             heading("What’s on your\nheart lately?", art: "olive")
             subtitle("Choose any topics you might like to explore.")
             FlowLayout(spacing: 11) {
-                ForEach(Self.topicOptions, id: \.self) { topic in
+                ForEach(Array(Self.topicOptions.enumerated()), id: \.element) { index, topic in
                     let on = topics.contains(topic)
-                    Button { if on { topics.removeAll { $0 == topic } } else { topics.append(topic) } } label: {
-                        Text(topic).font(.system(size: 14)).foregroundStyle(Self.ink)
+                    Button { if !reduceMotion { entrance.confirm() }; if on { topics.removeAll { $0 == topic } } else { topics.append(topic) } } label: {
+                        Text(topic).font(.ui(14)).foregroundStyle(Self.ink)
                             .padding(.horizontal, 20).frame(height: 48)
                             .choiceSurface(selected: on)
                     }
                     .buttonStyle(.plain)
                     .accessibilityAddTraits(on ? .isSelected : [])
+                    .modifier(OnboardingCopyEntry(delay: copyDelay + 0.14 + Double(min(index, 8)) * 0.045, duration: 0.22))
                 }
             }
             .padding(.top, 32)
@@ -308,38 +364,54 @@ struct OnboardingView: View {
             heading("A gentle\nreminder?", art: "reminder-bell")
             subtitle("Optional reminders can help you make Bible reading part of your day.")
             VStack(alignment: .leading, spacing: 0) {
-                Toggle(isOn: $reminders) { Text("Daily reminder").font(.system(size: 14)) }.tint(Self.ink).frame(height: 44)
-                Text("A moment that works for you").font(.system(size: 12)).foregroundStyle(Self.body).padding(.top, 3)
-                if reminders {
-                    DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
-                        .frame(maxWidth: .infinity, minHeight: 49, alignment: .leading)
-                        .padding(.horizontal, 12)
-                        .background(RoundedRectangle(cornerRadius: 8).fill(.white))
-                        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(Self.line))
-                        .padding(.top, 16)
+                Divider()
+                Toggle(isOn: $reminders) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text("Daily reminder").font(.ui(15, weight: .medium))
+                        Text("A moment that works for you").font(.ui(11)).foregroundStyle(Self.body)
+                    }
                 }
+                .tint(Self.ink).frame(minHeight: 76)
+                if reminders {
+                    Divider()
+                    DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
+                        .font(.ui(13)).frame(minHeight: 68)
+                }
+                Divider()
             }
-            .padding(22)
-            .choiceSurface(selected: false, radius: 44)
             .padding(.top, 28)
-            VStack(alignment: .leading, spacing: 11) {
-                Text("HER CROWN · YOUR DAILY PAUSE").font(.system(size: 9)).tracking(1).foregroundStyle(Self.body)
-                Text("A moment in the Word?").font(.serif(24)).foregroundStyle(Self.ink)
+            .modifier(OnboardingCopyEntry(delay: copyDelay + 0.14, duration: 0.22))
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Notification preview").font(.ui(11)).foregroundStyle(Self.body)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 7) {
+                        Image("AppIcon-preview").resizable().frame(width: 22, height: 22)
+                            .clipShape(RoundedRectangle(cornerRadius: 5)).accessibilityHidden(true)
+                        Text("Her Crown").font(.system(size: 12, weight: .medium))
+                        Spacer()
+                        Text("now").font(.system(size: 12)).foregroundStyle(Self.body)
+                    }
+                    .padding(.bottom, 5)
+                    Text("A moment in the Word?").font(.system(size: 15, weight: .semibold))
+                    Text("Take a breath and spend a little time with Scripture.")
+                        .font(.system(size: 14)).lineSpacing(3)
+                }
+                .padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(hex: 0xF2F2F7).opacity(0.86), in: RoundedRectangle(cornerRadius: 22))
+                .shadow(color: .black.opacity(0.045), radius: 7, y: 3)
             }
-            .padding(18).frame(maxWidth: .infinity, alignment: .leading)
-            .choiceSurface(selected: false, radius: 47)
-            .padding(.top, 26)
+            .padding(.top, 28)
             .accessibilityElement(children: .combine)
-            .accessibilityLabel("Notification preview: A moment in the Word?")
+            .modifier(OnboardingCopyEntry(delay: copyDelay + 0.185, duration: 0.22))
             Text("You can change this any time in Settings.").font(.system(size: 11)).lineSpacing(5).foregroundStyle(Self.body).padding(.top, 20)
         }
     }
 
     private var readyStep: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Image.illustration("butterfly").resizable().scaledToFit().frame(width: 90, height: 74).accessibilityHidden(true)
-            Text("You’re right where\nyou need to begin.").font(.serif(32, relativeTo: .largeTitle)).tracking(-1).foregroundStyle(Self.ink)
+            Image.illustration("butterfly").resizable().scaledToFit().frame(width: 90, height: 74).modifier(OnboardingArtEntry()).accessibilityHidden(true)
+            headline(Self.titles[7], font: .serif(32, relativeTo: .largeTitle)).tracking(-1)
+                .accessibilityLabel(Self.titles[7]).accessibilityAddTraits(.isHeader)
                 .fixedSize(horizontal: false, vertical: true).padding(.top, 20)
             subtitle("Your Scripture feed is ready. You can change your preferences at any time.")
             VStack(spacing: 0) {
@@ -353,36 +425,38 @@ struct OnboardingView: View {
                 }
                 .font(.serif(27)).multilineTextAlignment(.center).foregroundStyle(Self.ink)
                 VStack(spacing: 0) { Text("PSALM 23:1").frame(height: 18); Text("King James Version").frame(height: 18) }
-                    .font(.system(size: 10)).foregroundStyle(Self.body).padding(.top, 23)
+                    .font(.ui(10)).foregroundStyle(Self.body).padding(.top, 23)
             }
             .padding(.vertical, 32).padding(.horizontal, 24).frame(maxWidth: .infinity)
             .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.white))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Self.line))
             .padding(.top, 36)
+            .modifier(OnboardingCopyEntry(delay: copyDelay + 0.14, duration: 0.22))
         }
     }
 
     // MARK: Pieces
 
     private var backButton: some View {
-        Button { step = max(0, step - 1) } label: { Image(systemName: "arrow.left").font(.system(size: 18)).foregroundStyle(Self.ink).frame(width: 44, height: 44) }
+        Button { advance(to: max(0, step - 1)) } label: { Image(systemName: "arrow.left").font(.ui(18)).foregroundStyle(Self.ink).frame(width: 44, height: 44) }
             .accessibilityLabel("Back")
     }
 
     /// Primary 48 pt (54 on the intro), then the 11 pt footnote; the footnote sits 68 pt above the screen bottom.
     private func footer(button: String, caption: String?, height: CGFloat = 48, captionSpacing: CGFloat = 10, action: @escaping () -> Void) -> some View {
         VStack(spacing: captionSpacing) {
-            Button(action: action) {
-                HStack(spacing: 8) { Text(button); Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
-                    .font(.system(size: 14)).foregroundStyle(.white)
+            Button { if !reduceMotion { entrance.confirm() }; action() } label: {
+                HStack(spacing: 8) { Text(button); Image(systemName: "arrow.right").font(.ui(14, weight: .semibold)) }
+                    .font(.ui(14)).foregroundStyle(.white)
                     .frame(maxWidth: .infinity, minHeight: height)
                     .background(Capsule().fill(Self.ink))
                     .shadow(color: .black.opacity(0.267), radius: 4, y: 3)
             }
             .buttonStyle(.plain)
             .disabled(finishing)
-            if let caption { Text(caption).font(.system(size: 11)).foregroundStyle(Self.body).frame(height: 18) }
+            if let caption { Text(caption).font(.ui(11)).foregroundStyle(Self.body).frame(height: 18) }
         }
+        .modifier(OnboardingCopyEntry(delay: copyDelay + 0.18))
         .padding(.top, 26)
         .padding(.bottom, caption == nil ? 0 : 68)
     }
@@ -396,11 +470,13 @@ struct OnboardingView: View {
         case 6: reminders = false
         default: break
         }
-        step += 1
+        advance(to: step + 1)
     }
 
     private func continueFromReminder() async {
-        if reminders { reminders = await DailyReminder.requestAndSchedule(at: reminderTime) }
+        let granted = reminders ? await DailyReminder.requestAndSchedule(at: reminderTime) : false
+        guard step == 6 else { return }
+        reminders = granted
         step = 7
     }
 
@@ -431,7 +507,7 @@ struct OnboardingView: View {
 
 /// "Continue →": text first, arrow after.
 struct TrailingIcon: LabelStyle {
-    func makeBody(configuration: Configuration) -> some View { HStack(spacing: 8) { configuration.title; configuration.icon.font(.system(size: 14, weight: .semibold)) } }
+    func makeBody(configuration: Configuration) -> some View { HStack(spacing: 8) { configuration.title; configuration.icon.font(.ui(14, weight: .semibold)) } }
 }
 
 /// Wrapping row layout for topic chips.
@@ -501,30 +577,4 @@ private extension View {
             }
             .overlay(shape.strokeBorder(selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7), lineWidth: 1))
     }
-}
-
-/// The mockup's onboarding clouds: cloud-bank at the top (150% wide) and bottom (170% wide), 16% opacity.
-struct OnboardingClouds: View {
-    var isIntro = false
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                Image.illustration("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.5)
-                    .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.5, alignment: isIntro ? 0.03 : 0.04))
-                Image.illustration("cloud-bank").resizable().scaledToFit().frame(width: geo.size.width * 1.7)
-                    .position(x: geo.size.width / 2, y: cloudCenter(in: geo.size, scale: 1.7, alignment: isIntro ? 0.94 : 0.92))
-            }
-            .opacity(isIntro ? 0.36 : 0.22)
-        }
-        .ignoresSafeArea()
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-    }
-
-    private func cloudCenter(in size: CGSize, scale: CGFloat, alignment: CGFloat) -> CGFloat {
-        let height = size.width * scale * 820 / 1918
-        return (size.height - height) * alignment + height / 2
-    }
-
 }

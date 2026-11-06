@@ -197,7 +197,24 @@ enum Push {
     }
 }
 
-final class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    static let externalOpen = Notification.Name("hercrown.externalOpen")
+    private(set) var openedExternally = false
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        openedExternally = options?[.url] != nil || options?[.remoteNotification] != nil || options?[.userActivityDictionary] != nil
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        await MainActor.run {
+            openedExternally = true
+            NotificationCenter.default.post(name: Self.externalOpen, object: nil)
+        }
+    }
+
+
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         Task { @MainActor in Push.didRegister(deviceToken) }
     }

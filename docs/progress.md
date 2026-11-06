@@ -185,3 +185,11 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [ ] Sandbox checkout and restore on the TestFlight release candidate. Use dedicated test accounts: the build writes those accounts and their purchases to production, with purchases flagged as sandbox. Verify the entitlement and purchase event on the production backend.
 - [ ] After Apple approves 1.0, switch Superwall Main to all users without an active entitlement immediately before the owner presses Release.
 - [ ] Production checkout and restore from the public App Store build. Verify the entitlement and purchase event on the production backend.
+
+## November 6 design handoff
+
+- Ported the new native Home, Discover, Community, reader chrome, dock, streak detail, app icons, and eight onboarding pages from `her-crown-full-handoff-2026-11-06.zip` onto the current release branch. Imported the supplied artwork, glyphs and DM Sans. Reader bookmarks now live on the device by Her Crown account, separately from the existing synced Saved passages.
+- Ported the onboarding artwork reveals, headline timing, and light haptic feedback, plus the crown growth and flower animation for subsequent cold launches. The crown uses the supplied composited artwork. The archive did not include the layered illustration master.
+- Built and ran the app on an iPhone 17 Pro simulator and installed and launched a signed staging Debug build on Nathan’s iPhone 2 (iPhone 14 Pro). Visually checked the four tabs in light and dark, the eight onboarding layouts, and the cold-launch animation in the simulator. Typecheck and all 175 API tests passed.
+- [ ] Review the onboarding haptics and cold-launch transitions on hardware. Compare secondary Settings and study sheets against the handoff before calling the design pass complete.
+- [ ] Polish the Main paywall separately using the approved launch prices and trial terms, then archive a clean TestFlight candidate and complete checkout, restore, and the launch sweep.

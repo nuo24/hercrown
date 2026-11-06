@@ -10,6 +10,12 @@ struct HerCrownApp: App {
     @State private var purchasingReturnOffer = false
     @State private var returnOfferMessage: String?
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var coldLaunch = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
+
+    private var showColdLaunch: Bool {
+        coldLaunch && !appDelegate.openedExternally && !reduceMotion
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -32,7 +38,14 @@ struct HerCrownApp: App {
     }
 
     private var appContent: some View {
-        RootView()
+        ZStack {
+            RootView()
+                .accessibilityHidden(showColdLaunch)
+                .allowsHitTesting(!showColdLaunch)
+            if showColdLaunch {
+                ColdLaunchView { coldLaunch = false }
+            }
+        }
             .environment(app)
             .preferredColorScheme(colorScheme)
             .task {
@@ -43,10 +56,11 @@ struct HerCrownApp: App {
                 await app.start()
                 await Push.registerIfAllowed()
             }
-            .task(id: scenePhase == .active && app.phase == .ready) {
-                guard scenePhase == .active && app.phase == .ready else { return }
+            .task(id: scenePhase == .active && app.phase == .ready && !showColdLaunch) {
+                guard scenePhase == .active, app.phase == .ready, !showColdLaunch else { return }
                 await app.refreshMembership()
                 guard !Task.isCancelled, checkingOnNextOpen else { return }
+                if showColdLaunch { return }
                 checkingOnNextOpen = false
                 await checkReturnOffer()
             }
@@ -82,7 +96,13 @@ struct HerCrownApp: App {
             )) {
                 Button("OK", role: .cancel) {}
             } message: { Text(returnOfferMessage ?? "") }
-            .onChange(of: scenePhase) { _, phase in
+            .onOpenURL { _ in coldLaunch = false }
+            .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { _ in coldLaunch = false }
+            .onReceive(NotificationCenter.default.publisher(for: AppDelegate.externalOpen)) { _ in coldLaunch = false }
+            .onChange(of: reduceMotion) { _, reduced in if reduced { coldLaunch = false } }
+            .onChange(of: app.requestedTab) { _, tab in if tab != nil { coldLaunch = false } }
+            .onChange(of: scenePhase) { previous, phase in
+                if previous == .active, phase != .active { coldLaunch = false }
                 if phase == .background {
                     checkingOnNextOpen = true
                     Task { await Analytics.shared.flush() }
@@ -107,7 +127,7 @@ struct HerCrownApp: App {
     }
 
     private func checkReturnOffer() async {
-        guard AppConfig.isStaging, #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
+        guard AppConfig.isStaging, Billing.shared.configured, #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
               canShowOffer(for: user.id), await Billing.isSandbox(),
               await Storefront.current?.countryCode == "USA" else { return }
         await Billing.shared.syncPendingDecline(for: user.id)

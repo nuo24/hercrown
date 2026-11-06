@@ -51,6 +51,8 @@ struct SettingsView: View {
                                 divider
                                 Menu { appearanceChoices } label: { row(scheme == .dark ? "moon" : "sun.max", "Appearance", appearanceTitle, chevron: "chevron.down") }.buttonStyle(.plain)
                                 divider
+                                NavigationLink { AppIconView() } label: { row("app", "App icon", nil) }.buttonStyle(.plain)
+                                divider
                                 NavigationLink { TopicsView() } label: { row("heart", "On your heart", app.preferences.topics.isEmpty ? "Choose topics" : app.preferences.topics.joined(separator: " · ")) }.buttonStyle(.plain)
                                 divider
                                 formRow("book", "Reading pace") {
@@ -160,9 +162,8 @@ struct SettingsView: View {
 
     private var header: some View {
         HStack {
-            IconButton(systemName: "arrow.left", label: "Close Settings") { dismiss() }
-            Spacer()
-            Text("Settings").font(.system(size: 16))
+            PageIconButton(glyph: "back", label: "Close Settings") { dismiss() }
+            Text("Settings").font(.serif(30, relativeTo: .title)).tracking(-0.65).accessibilityAddTraits(.isHeader)
             Spacer()
             Menu { appearanceChoices } label: {
                 HStack(spacing: 3) {
