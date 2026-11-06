@@ -30,6 +30,7 @@ export function trialInfo(env: Env, endsAt: number | null, willRenew: boolean) {
 
 const PLAN: Record<string, string> = {
   "hercrown.plus.yearly": "a yearly plan",
+  "hercrown.plus.monthly": "a monthly plan",
   "hercrown.plus.weekly": "a weekly plan",
 };
 

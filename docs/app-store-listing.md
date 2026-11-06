@@ -40,7 +40,7 @@ Copy for App Store Connect → Her Crown (app 6830437910). Draft, 2026-11-04: th
 > Explain Easier and Deeper Study give you clear commentary drawn from respected public-domain commentaries. Every answer cites its sources, appears separately from Scripture, and can be reported if something looks wrong.
 >
 > SUBSCRIPTION
-> Reading the Bible in Her Crown is always free. Her Crown Plus is $29.99 a year with a 7-day free trial for eligible subscribers, or $2.99 a week with no free trial. We'll send you a reminder before your free trial ends. Payment is charged to your Apple ID when you confirm the purchase, or when the free trial ends. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel any time in your App Store account settings.
+> Reading the Bible in Her Crown is always free. Her Crown Plus is $39.99 a year with a 7-day free trial for eligible subscribers, or $5.99 a month with no free trial. We'll send you a reminder before your free trial ends. Payment is charged to your Apple ID when you confirm the purchase, or when the free trial ends. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel any time in your App Store account settings.
 >
 > Terms of Use: https://bible-scroll-api.bible-scroll-api.workers.dev/legal/terms
 > Privacy Policy: https://bible-scroll-api.bible-scroll-api.workers.dev/legal/privacy
@@ -71,11 +71,11 @@ bible,women,devotional,scripture,verse,daily,christian,faith,prayer,kjv,study,re
 | Product | Display name | Description (45 max) |
 |---|---|---|
 | hercrown.plus.yearly | Her Crown Plus · Yearly | Reading plans and every study tool |
-| hercrown.plus.weekly | Her Crown Plus · Weekly | Reading plans and every study tool |
+| hercrown.plus.monthly | Her Crown Plus Monthly | Reading plans and every study tool |
 
 Recommended: turn on **Family Sharing** for the subscriptions. Its absence was a complaint in the competitor's reviews.
 
-Apple reviews the first subscriptions with the first app version. Attach the subscription group and the annual and weekly plans before submitting. The separate first-year offer is a sandbox test product and is excluded from this release.
+Apple reviews the first subscriptions with the first app version. Attach the subscription group and the annual and monthly plans before submitting. The separate first-year offer is a sandbox test product and is excluded from this release.
 
 ## App Privacy (the "nutrition label")
 

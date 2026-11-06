@@ -72,7 +72,7 @@ struct HerCrownApp: App {
                 if !Task.isCancelled { await app.refreshMembership() }
             }
             .sheet(item: $returnOffer) { offer in
-                ReturnOfferView(firstYear: offer.firstYear, renewal: offer.product.displayPrice, busy: purchasingReturnOffer) {
+                ReturnOfferView(firstYear: offer.firstYear, renewal: offer.product.displayPrice, savings: offer.savings, busy: purchasingReturnOffer) {
                     Task { await purchaseReturnOffer(offer) }
                 } onClose: {
                     returnOffer = nil
@@ -119,6 +119,7 @@ struct HerCrownApp: App {
         let kind: Kind
         let product: Product
         let firstYear: String
+        let savings: String
     }
 
     private func canShowOffer(for userID: String) -> Bool {
@@ -134,7 +135,7 @@ struct HerCrownApp: App {
         let products = (try? await Product.products(for: ["hercrown.plus.yearly", "hercrown.plus.yearly.offer"])) ?? []
         let candidate: ReturnOffer
         if let yearly = products.first(where: { $0.id == "hercrown.plus.yearly" }),
-           yearly.price == Decimal(string: "29.99"), let subscription = yearly.subscription,
+           let subscription = yearly.subscription,
            subscription.subscriptionPeriod.unit == .year, subscription.subscriptionPeriod.value == 1,
            let promo = subscription.promotionalOffers.first(where: { $0.id == returnOfferID && isFirstYear($0) }),
            let statuses = try? await subscription.status,
@@ -146,7 +147,8 @@ struct HerCrownApp: App {
                return (status.state == .subscribed && (tx.expirationDate ?? .distantPast) > Date()) ||
                    (status.state == .expired && renewal.expirationReason == .autoRenewDisabled)
            }) {
-            candidate = ReturnOffer(userID: user.id, kind: .trial, product: yearly, firstYear: promo.displayPrice)
+            candidate = ReturnOffer(userID: user.id, kind: .trial, product: yearly, firstYear: promo.displayPrice,
+                                    savings: (yearly.price - promo.price).formatted(yearly.priceFormatStyle))
         } else {
             guard !app.membership.premium,
                   let yearly = products.first(where: { $0.id == "hercrown.plus.yearly.offer" }),
@@ -160,7 +162,8 @@ struct HerCrownApp: App {
                     if AppModel.plusProducts.contains(tx.productID) { return }
                 }
             }
-            candidate = ReturnOffer(userID: user.id, kind: .decline, product: yearly, firstYear: intro.displayPrice)
+            candidate = ReturnOffer(userID: user.id, kind: .decline, product: yearly, firstYear: intro.displayPrice,
+                                    savings: (yearly.price - intro.price).formatted(yearly.priceFormatStyle))
         }
 
         guard canShowOffer(for: user.id) else { return }

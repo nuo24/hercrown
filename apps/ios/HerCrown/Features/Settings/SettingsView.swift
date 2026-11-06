@@ -633,6 +633,7 @@ struct SubscriptionView: View {
 
     private func planName(_ id: String?) -> String {
         switch id {
+        case "hercrown.plus.monthly": "Plus · monthly"
         case "hercrown.plus.weekly": "Plus · weekly"
         case "hercrown.plus.yearly", "hercrown.plus.yearly.offer": "Plus · yearly"
         default: "Plus"

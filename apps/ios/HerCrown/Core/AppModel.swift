@@ -316,7 +316,7 @@ final class AppModel {
         }
     }
 
-    static let plusProducts: Set<String> = ["hercrown.plus.yearly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"]
+    static let plusProducts: Set<String> = ["hercrown.plus.yearly", "hercrown.plus.monthly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"]
 
     // MARK: Navigation
 

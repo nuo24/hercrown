@@ -56,7 +56,7 @@ const PAYWALL: Record<string, PropRule> = {
   variant: ["A", "B", "C", "D", "control", "treatment", "holdout"],
   experiment_id: UUID,
 };
-const products = ["hercrown.plus.yearly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"];
+const products = ["hercrown.plus.yearly", "hercrown.plus.monthly", "hercrown.plus.weekly", "hercrown.plus.yearly.offer"];
 const plans = ["quiet", "peace", "strength"];
 const tabs = ["bible", "community", "discover", "home"];
 

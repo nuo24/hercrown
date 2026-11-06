@@ -217,11 +217,14 @@ struct HomeView: View {
 
     private var bookmarks: some View {
         VStack(alignment: .leading, spacing: 0) {
-            collectionHeading("Bookmarks")
+            collectionHeading(app.readerBookmarks.isEmpty ? "Keep your place." : "Your reading places")
             if app.readerBookmarks.isEmpty {
-                Text("Bookmark a verse in The Bible to pick up where you left off.")
-                    .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
-                Button("Open The Bible") { app.requestedTab = .bible }.font(.ui(14, weight: .medium)).frame(minHeight: 44)
+                Text("Bookmark a verse while reading.\nYou can return to it here.")
+                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                collectionAction("Open today’s reading") {
+                    if let ref = model.verse.flatMap({ VerseRef($0.ref) }) { app.openInReader(ref) }
+                    else { app.requestedTab = .bible }
+                }
             }
             ForEach(app.readerBookmarks.compactMap { VerseRef($0) }, id: \.self) { ref in
                 editorialRow(BibleStore.shared.label(ref), kicker: "Bookmarked verse", detail: BibleStore.offline[translation] ?? "KJV", art: "bookmark") {
@@ -236,14 +239,18 @@ struct HomeView: View {
 
     private var notesPanel: some View {
         VStack(alignment: .leading, spacing: 0) {
-            collectionHeading("Notes")
+            collectionHeading(notes?.isEmpty == true && !notesUnavailable ? "Your notes,\nbeside the Word." : "Your verse notes")
             if notesUnavailable {
                 Text("Connect to load your verse notes.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
                 Button("Try again") { Task { await loadNotes() } }.frame(minHeight: 44)
             } else if let notes {
                 if notes.isEmpty {
-                    Text("Your notes will gather here when you reflect on a verse.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
-                    Button("Open The Bible") { app.requestedTab = .bible }.frame(minHeight: 44)
+                    Text("Notes you leave on verses appear here, with their Scripture reference.")
+                        .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                    collectionAction("Read a verse & add a note") {
+                        if let ref = model.verse.flatMap({ VerseRef($0.ref) }) { noteRef = ref }
+                        else { app.requestedTab = .bible }
+                    }
                 }
                 ForEach(notes) { note in
                     if let ref = VerseRef(note.ref) {
@@ -274,6 +281,21 @@ struct HomeView: View {
     private func collectionHeading(_ title: String) -> some View {
         Text(title).font(.serif(30, relativeTo: .title)).accessibilityAddTraits(.isHeader)
             .padding(.vertical, 24)
+    }
+
+    private func collectionAction(_ title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 9) {
+                Text(title).font(.ui(12, weight: .medium))
+                Image.glyph("arrow").frame(width: 16, height: 16)
+                    .accessibilityHidden(true)
+            }
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Theme.text(scheme))
+        .padding(.top, 10)
     }
 
     private func loadNotes() async {

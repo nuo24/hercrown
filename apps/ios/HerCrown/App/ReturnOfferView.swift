@@ -3,6 +3,7 @@ import SwiftUI
 struct ReturnOfferView: View {
     let firstYear: String
     let renewal: String
+    var savings = "$10"
     var busy = false
     let onClaim: () -> Void
     let onClose: () -> Void
@@ -23,31 +24,32 @@ struct ReturnOfferView: View {
                 .padding(.horizontal, 24)
 
             ScrollView {
-                VStack(spacing: 18) {
-                    invitationArt
-                        .padding(.bottom, 8)
+                VStack(spacing: 14) {
+                    Image.illustration("open-book")
+                        .resizable().scaledToFit().frame(width: 100, height: 88)
+                        .accessibilityHidden(true)
 
-                    Text("A little room to grow.")
-                        .font(.serif(37, italic: true, relativeTo: .title))
+                    Text("A little more room to grow.")
+                        .font(.serif(32, relativeTo: .title))
                         .accessibilityAddTraits(.isHeader)
-                    Text("Save $10 on your first year")
-                        .font(.headline)
-                    Text("Make more room for the Word with guided reading and thoughtful study.")
-                        .font(.subheadline)
+                    Text("Reading plans and every study tool, made for your daily walk.")
+                        .font(.ui(14))
                         .foregroundStyle(Theme.muted(scheme))
-                        .frame(maxWidth: 270)
+                        .frame(maxWidth: 275)
 
-                    VStack(spacing: 5) {
+                    VStack(spacing: 6) {
+                        Text("Save \(savings) on your first year")
+                            .font(.ui(12, weight: .medium))
                         Text("\(firstYear) for your first year")
-                            .font(.serif(24, relativeTo: .title3))
+                            .font(.serif(23, relativeTo: .title3))
                         Text("Then \(renewal)/year. Auto-renews until canceled.")
-                            .font(.footnote)
+                            .font(.ui(12))
                             .foregroundStyle(Theme.muted(scheme))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(16)
-                    .surfaceCard(radius: 18)
-                    .padding(.top, 8)
+                    .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.border(scheme)))
+                    .padding(.top, 10)
                 }
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 430)
@@ -81,39 +83,6 @@ struct ReturnOfferView: View {
             .padding(.bottom, 6)
         }
         .foregroundStyle(Theme.text(scheme))
-        .background {
-            LinearGradient(colors: scheme == .dark ? [Color(hex: 0x202A26), Color(hex: 0x17191B)] :
-                [Color(hex: 0xE4EDDF), Color(hex: 0xFCFAF4), Color(hex: 0xE0EDF5)],
-                startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-        }
-    }
-
-    private var invitationArt: some View {
-        ZStack {
-            Image("cloud-bank")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 300)
-                .opacity(scheme == .dark ? 0.25 : 0.75)
-                .offset(y: 26)
-            RoundedRectangle(cornerRadius: 22)
-                .fill(Color(hex: 0xFCF6E6))
-                .frame(width: 146, height: 108)
-                .rotationEffect(.degrees(-9))
-                .shadow(color: .black.opacity(0.12), radius: 18, y: 9)
-            Image("open-book")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 160, height: 132)
-                .offset(x: 6, y: 3)
-            Image("cosmos")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 78, height: 80)
-                .offset(x: -64, y: 43)
-        }
-        .frame(height: 188)
-        .accessibilityHidden(true)
+        .background(Theme.canvas(scheme).ignoresSafeArea())
     }
 }
