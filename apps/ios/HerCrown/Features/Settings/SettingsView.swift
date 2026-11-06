@@ -367,6 +367,8 @@ struct SettingsView: View {
 struct AccountView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.dismiss) private var dismiss
+    @State private var showsAppleSignIn = false
     @State private var name = ""
     @State private var bio = ""
     @State private var photo: PhotosPickerItem?
@@ -375,72 +377,82 @@ struct AccountView: View {
     @State private var confirmingDelete = false
 
     var body: some View {
-        Form {
-            Section {
-                HStack {
-                    Spacer()
-                    VStack(spacing: 10) {
-                        Avatar(size: 112)
-                        PhotosPicker(selection: $photo, matching: .images) {
-                            Label(app.me?.profile.avatarUrl == nil ? "Upload photo" : "Change photo", systemImage: "camera")
-                        }
-                        .buttonStyle(CapsuleButtonStyle())
-                        if app.me?.profile.avatarUrl != nil {
-                            Button("Remove photo", role: .destructive) { run { try await app.removeAvatar() } }.font(.system(size: 14))
-                        }
-                    }
-                    Spacer()
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                photoControls
+                field("Name") {
+                    TextField("Your name", text: $name)
+                        .textContentType(.givenName)
+                        .accessibilityLabel("Name")
+                        .padding(.horizontal, 13)
+                        .frame(minHeight: 46)
                 }
-            }
-            .listRowBackground(Color.clear)
-
-            Section("Profile") {
-                TextField("Your name", text: $name).textContentType(.givenName)
-                TextField("A line about you (optional)", text: $bio, axis: .vertical).lineLimit(2...4)
-                Button("Save") { run { try await app.updateProfile(displayName: name.trimmingCharacters(in: .whitespaces), bio: bio); message = "Saved." } }
-                    .disabled(busy || name.trimmingCharacters(in: .whitespaces).isEmpty)
-            }
-
-            Section {
-                if app.isGuest {
-                    SignInWithAppleButton(.continue) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        guard case .success(let auth) = result, let credential = auth.credential as? ASAuthorizationAppleIDCredential,
-                              let data = credential.identityToken, let token = String(data: data, encoding: .utf8) else {
-                            if case .failure(let error) = result, (error as? ASAuthorizationError)?.code != .canceled { message = "Sign in with Apple didn’t work. Please try again." }
-                            return
-                        }
-                        let given = credential.fullName?.givenName
-                        run {
-                            try await app.signInWithApple(identityToken: token)
-                            if let given, app.displayName == nil || app.displayName == "Guest" { try await app.updateProfile(displayName: given, bio: bio) }
-                            message = "Your account is saved. Sign in with Apple on a new phone to bring everything with you."
-                        }
-                    }
-                    .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
-                    .frame(height: 50)
-                } else {
-                    Label("Signed in with Apple", systemImage: "checkmark.seal").foregroundStyle(Theme.text(scheme))
+                field("Bio") {
+                    TextEditor(text: $bio)
+                        .scrollContentBackground(.hidden)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .frame(minHeight: 160)
+                        .accessibilityLabel("Bio")
                 }
-            } header: { Text("Sign in") } footer: {
-                Text(app.isGuest ? "You’re reading as a guest. Save your account so your saves, notes and streak are safe if you change phones." : "Your reading is saved to your account.")
-            }
+                Button("Save") {
+                    run {
+                        try await app.updateProfile(displayName: trimmedName, bio: bio)
+                        message = "Saved."
+                    }
+                }
+                .buttonStyle(CapsuleButtonStyle())
+                .disabled(busy || trimmedName.isEmpty)
+                .opacity(trimmedName.isEmpty ? 0.55 : 1)
 
-            if let message { Section { Text(message).font(.system(size: 14)) } }
+                signInSection
+                    .padding(.top, 10)
+                if let message { Text(message).font(.ui(13)).accessibilityAddTraits(.updatesFrequently) }
 
-            Section {
-                Button("Delete account", role: .destructive) { confirmingDelete = true }
-            } footer: {
-                Text("Permanently deletes your profile, photo, saves, notes and reading history. If you subscribe, cancel in iPhone Settings too: deleting your account doesn’t stop Apple billing.")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Permanently deletes your profile, photo, saves, notes and reading history. Deleting your account doesn’t cancel Apple billing.")
+                        .font(.ui(12))
+                        .foregroundStyle(Theme.muted(scheme))
+                    Button(role: .destructive) { confirmingDelete = true } label: {
+                        Text("Delete account")
+                            .font(.ui(15, weight: .medium))
+                            .foregroundStyle(scheme == .dark ? Color(hex: 0xFF8D97) : Color(hex: 0xB12638))
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 12))
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 8)
             }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
         }
-        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
+        .foregroundStyle(Theme.text(scheme))
         .background(AppGradient())
-        .navigationTitle("Your account")
-        .navigationBarTitleDisplayMode(.inline)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            ZStack(alignment: .leading) {
+                Text("Your account")
+                    .font(.ui(16, weight: .medium))
+                    .accessibilityAddTraits(.isHeader)
+                    .frame(maxWidth: .infinity)
+                Button { dismiss() } label: {
+                    Image(systemName: "arrow.left")
+                        .font(.system(size: 17))
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Back")
+            }
+            .padding(.horizontal, 20)
+            .frame(minHeight: 58)
+            .background(Theme.canvas(scheme))
+        }
+        .toolbar(.hidden, for: .navigationBar)
         .disabled(busy)
         .overlay { if busy { ProgressView() } }
+        .sheet(isPresented: $showsAppleSignIn) { appleSignIn }
         .onAppear {
             name = app.displayName.flatMap { $0 == "Guest" ? nil : $0 } ?? ""
             bio = app.me?.profile.bio ?? ""
@@ -448,6 +460,7 @@ struct AccountView: View {
         .onChange(of: photo) { _, item in
             guard let item else { return }
             run {
+                defer { photo = nil }
                 guard let data = try await item.loadTransferable(type: Data.self), let jpeg = Self.squareJPEG(data) else { message = "We couldn’t read that photo."; return }
                 try await app.uploadAvatar(jpeg)
                 message = "Photo updated."
@@ -458,6 +471,119 @@ struct AccountView: View {
         } message: {
             Text("This can’t be undone.")
         }
+    }
+
+    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    private var photoControls: some View {
+        VStack(spacing: 14) {
+            Avatar(size: 110)
+            PhotosPicker(selection: $photo, matching: .images) {
+                Label("Choose photo", systemImage: "camera")
+            }
+            .buttonStyle(CapsuleButtonStyle(kind: .secondary))
+            .frame(width: 164)
+            if app.me?.profile.avatarUrl != nil {
+                Button("Remove photo") { run { try await app.removeAvatar(); message = "Photo removed." } }
+                    .font(.ui(13, weight: .medium))
+                    .frame(minHeight: 44)
+                    .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 15)
+    }
+
+    private func field<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.ui(13, weight: .medium))
+            content()
+                .font(.ui(16))
+                .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 10))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.muted(scheme).opacity(0.42))
+                        .allowsHitTesting(false)
+                }
+        }
+    }
+
+    private var signInSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Sign in").font(.ui(13, weight: .semibold))
+                .foregroundStyle(Theme.muted(scheme))
+                .accessibilityAddTraits(.isHeader)
+            if app.isGuest {
+                Button { showsAppleSignIn = true } label: { signInRow }
+                    .buttonStyle(.plain)
+            } else {
+                signInRow.accessibilityElement(children: .combine)
+            }
+            Text(app.isGuest ? "You’re reading as a guest. Save your account to keep your reading when you change phones." : "Your reading is saved to your account.")
+                .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+        }
+    }
+
+    private var signInRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: app.isGuest ? "shield" : "checkmark.shield").font(.system(size: 19))
+                .frame(width: 24)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(app.isGuest ? "Sign in with Apple" : "Signed in with Apple")
+                    .font(.ui(14, weight: .medium))
+                Text("Keep your saves, notes and reading history safe")
+                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+            }
+            Spacer(minLength: 0)
+            if app.isGuest {
+                Image(systemName: "chevron.right").font(.system(size: 12))
+                    .foregroundStyle(Theme.muted(scheme))
+                    .accessibilityHidden(true)
+            }
+        }
+        .padding(14)
+        .frame(minHeight: 58)
+        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
+        .contentShape(Rectangle())
+    }
+
+    private var appleSignIn: some View {
+        VStack(spacing: 16) {
+            Text("Save your account").font(.serif(28, relativeTo: .title2))
+                .accessibilityAddTraits(.isHeader)
+            Text("Keep your saves, notes and reading history when you change phones.")
+                .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+            SignInWithAppleButton(.signIn) { request in
+                request.requestedScopes = [.fullName, .email]
+            } onCompletion: { result in
+                guard case .success(let auth) = result, let credential = auth.credential as? ASAuthorizationAppleIDCredential,
+                      let data = credential.identityToken, let token = String(data: data, encoding: .utf8) else {
+                    if case .failure(let error) = result, (error as? ASAuthorizationError)?.code == .canceled { return }
+                    showsAppleSignIn = false
+                    message = "Sign in with Apple didn’t work. Please try again."
+                    return
+                }
+                showsAppleSignIn = false
+                let given = credential.fullName?.givenName
+                run {
+                    try await app.signInWithApple(identityToken: token)
+                    if let given, app.displayName == nil || app.displayName == "Guest" { try await app.updateProfile(displayName: given, bio: bio) }
+                    name = app.displayName.flatMap { $0 == "Guest" ? nil : $0 } ?? ""
+                    bio = app.me?.profile.bio ?? ""
+                    message = "Your account is saved."
+                }
+            }
+            .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
+            .frame(height: 48)
+            Button("Continue as a guest") { showsAppleSignIn = false }
+                .font(.ui(13, weight: .medium))
+                .frame(minHeight: 44)
+                .buttonStyle(.plain)
+        }
+        .multilineTextAlignment(.center)
+        .padding(24)
+        .foregroundStyle(Theme.text(scheme))
+        .presentationDetents([.medium, .large])
     }
 
     private func run(_ work: @escaping () async throws -> Void) {
