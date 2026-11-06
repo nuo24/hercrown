@@ -238,7 +238,8 @@ export function buildMessages(ctx: Context, tool: AiTool): ChatMessage[] {
   const sources = [
     ...ctx.notes.map((n) => `[${n.tag}] ${n.tag === "JFB" ? "Jamieson, Fausset & Brown (1871)" : n.tag === "Henry" ? "Matthew Henry (1706)" : "Adam Clarke (1831)"}:\n${n.text}`),
     ...(ctx.words.length ? [`[Lexicon] Original words in this verse (word · transliteration · gloss · dictionary meaning · grammar):\n${
-      ctx.words.map((w) => `${w.text} · ${w.transliteration} · ${w.gloss} · ${w.meaning} · ${w.parsing ?? ""}`).join("\n")}`] : []),
+      // The gloss uses brackets for supplied words (e.g. "teach [us]"). Reserve brackets for citations in the prompt.
+      ctx.words.map((w) => `${w.text} · ${w.transliteration} · ${w.gloss.replace(/\[([^\[\]]+)\]/g, "($1)")} · ${w.meaning} · ${w.parsing ?? ""}`).join("\n")}`] : []),
     ...(ctx.related.length ? [`[Cross-ref] Passages often read alongside this verse (BSB):\n${ctx.related.map((r) => `${r.label}: ${r.text}`).join("\n")}`] : []),
   ];
   const tags = [...(tool === "deeper" ? ["Passage"] : []), ...ctx.notes.map((n) => n.tag), ...(ctx.words.length ? ["Lexicon"] : []), ...(ctx.related.length ? ["Cross-ref"] : [])];

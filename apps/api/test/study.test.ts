@@ -2,7 +2,7 @@ import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { EventRow } from "../src/events";
 import { greekParsing, hebrewParsing } from "../src/morph";
-import { checkAnswer, excerpt } from "../src/study";
+import { buildMessages, checkAnswer, excerpt } from "../src/study";
 import { api, grantPremium, signInGuest } from "./helpers";
 
 const EXPLAIN = `## Simple explanation
@@ -308,6 +308,17 @@ What does it mean to you that God gave?`;
 describe("checks", () => {
   const ctx = { v: { book: "JHN", chapter: 3, verse: 16, ref: "JHN.3.16", label: "John 3:16" }, notes: [{ tag: "JFB" as const, text: "see Joh 1:14" }],
     related: [{ label: "Romans 5:8", text: "" }], words: [] };
+  it("distinguishes bracketed words in a Hebrew gloss from citation tags", () => {
+    const messages = buildMessages({
+      v: { book: "PSA", chapter: 90, verse: 12, ref: "PSA.90.12", label: "Psalm 90:12" },
+      bsb: "", kjv: null, nearby: "", notes: [], related: [],
+      words: [{ text: "הוֹדַע", transliteration: "hoda", gloss: "teach [us]", meaning: "to know", parsing: null }],
+    }, "deeper");
+    expect(messages[1]!.content).toContain("hoda · teach (us) · to know");
+    expect(messages[1]!.content).not.toContain("[us]");
+    expect(messages[1]!.content).toContain("[Lexicon] Original words");
+  });
+
   it("flags references the sources don't contain", () => {
     const c = checkAnswer(`## Simple explanation\nCompare Romans 5:8 and John 3:17 and Matthew 28:19 [JFB].\n\n## Key takeaway\nLove.`, "explain", ctx)!;
     expect(c.refsOutsideSources).toEqual(["Matthew 28:19"]);
