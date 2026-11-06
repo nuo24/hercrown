@@ -6,25 +6,39 @@ struct AIStudyView: View {
     let ref: VerseRef
     let translation: String
     let tool: StudyTool
-    @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var scheme
     @State private var state: StudyState<StudyAnswer> = .loading
     @State private var saved = false
     @State private var showingNotes = false
     @State private var copied = false
     @State private var reporting = false
     @State private var reported = false
+    @State private var attempt = 0
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text("\(BibleStore.shared.label(ref)) · \(BibleStore.offline[translation] ?? "KJV")").font(.system(size: 12, weight: .medium)).foregroundStyle(.secondary)
-                Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(20, relativeTo: .title3))
-                Divider()
+            VStack(alignment: .leading, spacing: 24) {
+                Text(tool.title).font(.ui(20, weight: .semibold))
+                    .accessibilityAddTraits(.isHeader)
+                VStack(spacing: 16) {
+                    Text(BibleStore.shared.label(ref)).font(.ui(21, weight: .semibold))
+                    Text(BibleStore.shared.text(translation, ref) ?? "")
+                        .font(.serif(25, relativeTo: .title2)).lineSpacing(4)
+                    Text(BibleStore.offline[translation] ?? translation.uppercased())
+                        .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                }
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, 10)
                 content
             }
-            .padding(24)
+            .padding(.horizontal, 22)
+            .padding(.top, 12)
+            .padding(.bottom, 44)
         }
-        .navigationTitle(tool.title)
+        .background(Theme.canvas(scheme))
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if case .loaded = state {
                 ToolbarItem(placement: .primaryAction) {
@@ -41,7 +55,10 @@ struct AIStudyView: View {
                 Button(title) { report(reason) }
             }
         }
-        .task { await StudyService.stream(ref, tool) { state = $0 } }
+        .task(id: attempt) {
+            state = .loading
+            await StudyService.stream(ref, tool) { state = $0 }
+        }
     }
 
     @ViewBuilder private var content: some View {
@@ -51,49 +68,58 @@ struct AIStudyView: View {
         case .partial(let text):
             ForEach(Self.liveSections(text), id: \.0) { title, body in section(title, body) }
         case .loaded(let answer):
+            Text("Study commentary · separate from Scripture")
+                .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(14)
+                .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 12))
             ForEach(answer.sections) { section($0.title, $0.text) }
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Sources").font(.system(size: 13, weight: .semibold))
-                ForEach(answer.sources) { s in
-                    Text("[\(s.tag)] \(s.author), \(s.name) (\(s.published)) · \(s.license)").font(.system(size: 12)).foregroundStyle(.secondary)
+            DisclosureGroup("Sources & study notice") {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(answer.sources) { source in
+                        Text("[\(source.tag)] \(source.author), \(source.name) (\(source.published)) · \(source.license)")
+                    }
                 }
-                Text("Study commentary · separate from Scripture").font(.system(size: 12)).foregroundStyle(.secondary).padding(.top, 4)
-                Button(reported ? "Thanks — we’ll take a look" : "Report a problem") { reporting = true }
-                    .font(.system(size: 13)).disabled(reported).padding(.top, 4)
+                .font(.ui(12))
+                .foregroundStyle(Theme.muted(scheme))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
             }
-            .padding(.top, 6)
+            .font(.ui(14, weight: .medium))
             let export = ([ "\(tool.title) · \(BibleStore.shared.label(ref))" ] +
                 answer.sections.map { "\($0.title)\n\($0.text)" } +
                 ["Sources\n" + answer.sources.map { "[\($0.tag)] \($0.author), \($0.name)" }.joined(separator: "\n")])
                 .joined(separator: "\n\n")
             HStack {
-                Button { toggleSave() } label: { Label(saved ? "Saved" : "Save", systemImage: saved ? "bookmark.fill" : "bookmark") }
+                Button { toggleSave() } label: { Text(saved ? "Saved" : "Save study") }
                 Spacer()
-                Button { showingNotes = true } label: { Label("Note", systemImage: "note.text") }
+                Button { showingNotes = true } label: { Text("Note") }
                 Spacer()
                 Button { UIPasteboard.general.string = export; copied = true } label: {
-                    Label(copied ? "Copied" : "Copy", systemImage: "doc.on.doc")
+                    Text(copied ? "Copied" : "Copy")
                 }
                 Spacer()
-                ShareLink(item: export) { Label("Share", systemImage: "square.and.arrow.up") }
+                ShareLink(item: export) { Text("Share") }
             }
-            .font(.system(size: 13, weight: .medium))
-            .labelStyle(.titleAndIcon)
-            .padding(.vertical, 12)
+            .font(.ui(13, weight: .medium))
+            .frame(minHeight: 44)
+            Button(reported ? "Thanks — we’ll take a look" : "Report a problem") { reporting = true }
+                .font(.ui(13))
+                .disabled(reported)
         case .needsPlus:
             PlusRequiredView(tool: tool)
         case .failed(let message):
             VStack(alignment: .leading, spacing: 12) {
                 Text(message).foregroundStyle(.secondary)
-                Button("Try again") { state = .loading; Task { await StudyService.stream(ref, tool) { state = $0 } } }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
+                Button("Try again") { attempt += 1 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             }
         }
     }
 
     private func section(_ title: String, _ body: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.system(size: 16, weight: .semibold))
-            CitedText(text: body).font(.system(size: 14)).lineSpacing(7.14)
+            Text(title).font(.ui(15, weight: .semibold)).accessibilityAddTraits(.isHeader)
+            CitedText(text: body).font(.ui(14)).lineSpacing(6)
         }
     }
 

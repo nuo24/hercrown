@@ -86,10 +86,12 @@ enum StudyService {
                 default: break
                 }
             }
+            if !Task.isCancelled { update(.failed("The study stopped before it finished. Please try again.")) }
         } catch let error as APIError {
+            guard !Task.isCancelled else { return }
             update(error.isPremiumRequired ? .needsPlus : .failed(error.message))
         } catch {
-            update(.failed(APIError.offline.message))
+            if !Task.isCancelled { update(.failed(APIError.offline.message)) }
         }
     }
 

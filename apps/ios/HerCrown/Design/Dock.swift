@@ -5,7 +5,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var title: String { switch self { case .bible: "The Bible"; case .community: "Community"; case .discover: "Discover"; case .home: "Home" } }
     var glyph: String {
-        switch self { case .bible: "book"; case .discover: "search"; default: rawValue }
+        self == .bible ? "dock-book" : "dock-\(rawValue)"
     }
 }
 
@@ -22,7 +22,7 @@ struct Dock: View {
                 Button {
                     withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) { selection = tab }
                 } label: {
-                    VStack(spacing: 4) {
+                    VStack(spacing: 7) {
                         Image.glyph(tab.glyph).frame(width: 25, height: 25)
                         Text(tab.title).font(.ui(11.5, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8)
                     }
@@ -35,7 +35,7 @@ struct Dock: View {
                 .accessibilityAddTraits(active ? .isSelected : [])
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, 18)
         .padding(.top, 8)
         .background {
             let canvas = Theme.canvas(scheme)
