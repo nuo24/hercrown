@@ -178,7 +178,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Owner applied all 11 production D1 migrations and seeded KJV, BSB, WEB, all four study datasets and 29 approved devotionals. Wrangler confirmed the initial production Worker secrets, including both Sign in with Apple settings.
 - [x] Owner deployed the production Worker on 2026-11-06 (version `af0c194b-8287-4c12-ad5a-b62675f18081`). Health, privacy, terms and support returned HTTP 200.
 - [x] Created the production Superwall V2 webhook at `/webhooks/superwall`.
-- [ ] Owner sets the production Superwall signing secret and verifies delivery.
+- [x] Owner uploaded the production Superwall signing secret. The endpoint returned `401 invalid_signature` for an unsigned request.
+- [ ] Verify a signed delivery after a sandbox purchase. The production webhook is active, with no delivery attempts yet. Superwall V2 does not send synthetic test events.
 - [x] Release now points at production and uses its legal and support URLs. The production build disables sandbox testing and both return offers.
 - [ ] Verify the production build on device and complete the production smoke checks.
 - [ ] Sandbox checkout and restore on the production-pointed TestFlight build. Verify the entitlement and purchase event on the production backend.
