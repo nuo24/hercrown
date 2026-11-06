@@ -15,7 +15,7 @@ export function markdownToHtml(md: string): string {
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/(^|[^\w*])_(.+?)_(?=[^\w]|$)/g, "$1<em>$2</em>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+|\/legal\/[a-z]+)\)/g, '<a href="$2">$1</a>');
   const out: string[] = [];
   let items: { text: string; children: string[] }[] = [];
   const flush = () => {

@@ -8,7 +8,7 @@ We're glad you're here. Write to us at **macnatephil@gmail.com**, or in the app 
 
 **How do I cancel?** In iPhone **Settings → [your name] → Subscriptions → Her Crown**. Cancel at least 24 hours before your trial or period ends. You keep Plus until the end of the time you paid for.
 
-**How do I get a refund?** Apple handles App Store payments, so refunds are requested at [reportaproblem.apple.com](https://reportaproblem.apple.com). See our [Refund Policy](https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/refunds).
+**How do I get a refund?** Apple handles App Store payments, so refunds are requested at [reportaproblem.apple.com](https://reportaproblem.apple.com). See our [Refund Policy](/legal/refunds).
 
 **I got a new phone.** Sign in with Apple on the new phone (Settings → Account) to bring your saves, notes and streak with you, then restore your purchase.
 
@@ -20,7 +20,7 @@ We're glad you're here. Write to us at **macnatephil@gmail.com**, or in the app 
 
 ## Policies
 
-- [Privacy Policy](https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/privacy)
-- [Terms of Use](https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/terms)
-- [Refund Policy](https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/refunds)
-- [Credits and Licenses](https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/credits)
+- [Privacy Policy](/legal/privacy)
+- [Terms of Use](/legal/terms)
+- [Refund Policy](/legal/refunds)
+- [Credits and Licenses](/legal/credits)

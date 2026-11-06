@@ -181,7 +181,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Owner uploaded the production Superwall signing secret. The endpoint returned `401 invalid_signature` for an unsigned request.
 - [ ] Verify a signed delivery after a sandbox purchase. The production webhook is active, with no delivery attempts yet. Superwall V2 does not send synthetic test events.
 - [x] Release now points at production and uses its legal and support URLs. The production build disables sandbox testing and both return offers.
-- [ ] Verify the production build on device and complete the production smoke checks.
-- [ ] Sandbox checkout and restore on the production-pointed TestFlight build. Verify the entitlement and purchase event on the production backend.
+- [ ] Verify first-run onboarding on an iPhone that has never had Her Crown installed. The Sandbox testing menu is hidden in production builds. Complete the production smoke checks.
+- [ ] Sandbox checkout and restore on the TestFlight release candidate. Use dedicated test accounts: the build writes those accounts and their purchases to production, with purchases flagged as sandbox. Verify the entitlement and purchase event on the production backend.
 - [ ] After Apple approves 1.0, switch Superwall Main to all users without an active entitlement immediately before the owner presses Release.
 - [ ] Production checkout and restore from the public App Store build. Verify the entitlement and purchase event on the production backend.

@@ -256,6 +256,10 @@ describe("legal pages", () => {
     }
     expect(await (await api("/legal/privacy")).text()).toContain("<h1>Privacy Policy</h1>");
     expect(await (await api("/legal/credits")).text()).toContain("CC BY 4.0");
+    const support = await (await api("/legal/support")).text();
+    for (const page of ["privacy", "terms", "refunds", "credits"]) {
+      expect(support).toContain(`href="/legal/${page}"`);
+    }
     expect(await (await api("/legal/terms?format=md")).text()).toMatch(/^# Terms of Use/);
     expect((await api("/legal/cookies")).status).toBe(404);
   });
