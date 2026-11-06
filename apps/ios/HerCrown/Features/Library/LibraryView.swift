@@ -64,7 +64,8 @@ struct SavedSheet: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $openStudy) { route in
-                AIStudyView(ref: route.ref, translation: translation, tool: route.tool).navigationBarTitleDisplayMode(.inline)
+                AIStudyView(ref: route.ref, translation: translation, tool: route.tool)
+                    .toolbar(.visible, for: .navigationBar)
             }
         }
         .sheet(item: $studyRef) { ref in
@@ -133,7 +134,13 @@ struct SavedSheet: View {
             if refs.isEmpty {
                 empty("Your saved passages will find a home here.", "Tap the heart on a verse to keep it close.")
             } else {
-                ForEach(refs, id: \.self) { ref in if let r = VerseRef(ref) { SavedVerseCard(ref: r, translation: translation, onStudy: { studyRef = r }, onRead: { dismiss(); app.openInReader(r) }) } }
+                ForEach(refs, id: \.self) { ref in
+                    if let verse = VerseRef(ref) {
+                        SavedVerseCard(ref: verse, translation: translation,
+                                       onNotes: { noteRef = verse },
+                                       onReadAndReflect: { openStudy = LibraryStudyRoute(ref: verse, tool: .deeper) })
+                    }
+                }
             }
         case .notes:
             if let notes {
@@ -212,8 +219,8 @@ struct SavedSheet: View {
 private struct SavedVerseCard: View {
     let ref: VerseRef
     let translation: String
-    let onStudy: () -> Void
-    let onRead: () -> Void
+    let onNotes: () -> Void
+    let onReadAndReflect: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
 
@@ -229,7 +236,7 @@ private struct SavedVerseCard: View {
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 32)
                 Text(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? "")
                     .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 28)
-                Button(action: onRead) {
+                Button(action: onReadAndReflect) {
                     HStack(spacing: 6) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold)) }
                         .font(.system(size: 12)).frame(maxWidth: .infinity, minHeight: 44)
                 }
@@ -238,7 +245,7 @@ private struct SavedVerseCard: View {
                 HStack(spacing: 0) {
                     Button { app.toggleSave(ref.description) } label: { Image(systemName: "heart.fill").frame(width: 58, height: 44) }.accessibilityLabel("Remove from saved")
                     Spacer()
-                    Button(action: onStudy) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Study this verse")
+                    Button(action: onNotes) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Write a note")
                     Spacer()
                     ShareLink(item: "“\(text)” — \(label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Share verse")
                 }

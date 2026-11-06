@@ -22,9 +22,9 @@ struct StreakSheet: View {
                     .padding(.top, 12)
                     week
                     Text(model.streak.readToday
-                         ? "A little time in the Word goes a long way.\nYou’ve made room for it today."
-                         : "One quiet moment counts.\nMake a little room for the Word today.")
-                        .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                         ? "You’ve made a little room for the Word today. Come back tomorrow and keep your rhythm growing."
+                         : "One quiet moment counts. Make a little room for the Word today.")
+                        .font(.ui(15)).foregroundStyle(Theme.muted(scheme))
                     Button(model.streak.readToday ? "Keep reading" : "Make time for today") {
                         app.requestedTab = .bible
                         dismiss()
@@ -91,9 +91,9 @@ struct StreakSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Through the Bible").font(.serif(25, relativeTo: .title2))
+                        Text("Through the Bible").font(.ui(15, weight: .semibold))
                         Text("\(p.bible.chaptersRead.formatted()) of \(p.bible.totalChapters.formatted()) chapters")
-                            .font(.subheadline).foregroundStyle(.secondary)
+                            .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
                     }
                     Spacer(minLength: 0)
                     Image.illustration("open-book").resizable().scaledToFit()
@@ -108,7 +108,7 @@ struct StreakSheet: View {
             .overlay { RoundedRectangle(cornerRadius: 20).strokeBorder(Theme.border(scheme)) }
 
             VStack(alignment: .leading, spacing: 0) {
-                Text("Your reading journal").font(.serif(26, relativeTo: .title2))
+                Text("Your reading journal").font(.ui(15, weight: .semibold))
                     .padding(.bottom, 8)
                 journalRow("Days read", detail: "\(p.daysThisYear.formatted()) this year", count: p.daysRead.total, art: "seedling")
                 Divider()
@@ -119,6 +119,8 @@ struct StreakSheet: View {
                 journalRow("Verses studied", count: p.versesStudied, art: "magnifier")
             }
             .padding(.horizontal, 4)
+            Text("One reading day counts once. Missing a full day starts a new run; your personal best stays.")
+                .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
         }
     }
 

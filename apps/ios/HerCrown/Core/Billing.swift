@@ -67,10 +67,7 @@ final class Billing: NSObject {
                 switch result {
                 case .purchased, .restored: await self.syncPurchase()
                 case .declined:
-                    guard let userID, let app = self.app, app.me?.user.id == userID, !app.membership.premium,
-                          AppConfig.isStaging else { return }
-                    UserDefaults.standard.set(true, forKey: self.pendingDeclineKey(userID))
-                    await self.syncPendingDecline(for: userID)
+                    if let userID { await self.scheduleReturnOffer(for: userID) }
                 }
             }
         }
@@ -94,6 +91,13 @@ final class Billing: NSObject {
             }
         }
         Superwall.shared.register(placement: placement, handler: handler)
+    }
+
+    func scheduleReturnOffer(for userID: String) async {
+        guard AppConfig.isStaging, configured, let app, app.me?.user.id == userID,
+              !app.membership.premium else { return }
+        UserDefaults.standard.set(true, forKey: pendingDeclineKey(userID))
+        await syncPendingDecline(for: userID)
     }
 
     private func pendingDeclineKey(_ userID: String) -> String { "hc.pendingPaywallDecline.\(userID)" }

@@ -184,20 +184,20 @@ struct VersePage: View {
             .padding(EdgeInsets(top: 100, leading: 44, bottom: 116, trailing: 44))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            VStack(spacing: 8) {
-                Button(action: onStudy) { Image.glyph("insights").frame(width: 25, height: 25).frame(width: 44, height: 44) }
+            VStack(spacing: 3) {
+                Button(action: onStudy) { Image.glyph("insights").frame(width: 21, height: 21).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .accessibilityLabel("Insights for \(chapter.book.displayName) \(chapter.number):\(verse.number)")
                 Button { app.toggleSave(ref) } label: {
                     Group {
-                        if app.isSaved(ref) { Image(systemName: "heart.fill").font(.system(size: 21)) }
-                        else { Image.glyph("heart").frame(width: 23, height: 23) }
-                    }.frame(width: 44, height: 44)
+                        if app.isSaved(ref) { Image(systemName: "heart.fill").font(.system(size: 19)) }
+                        else { Image.glyph("heart").frame(width: 20, height: 20) }
+                    }.frame(width: 44, height: 44).contentShape(Rectangle())
                 }
                     .accessibilityLabel(app.isSaved(ref) ? "Unsave" : "Save")
-                Button(action: onReflect) { Image.glyph("message").frame(width: 23, height: 23).frame(width: 44, height: 44) }
+                Button(action: onReflect) { Image.glyph("message").frame(width: 20, height: 20).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .accessibilityLabel("Reflect")
                 ShareLink(item: "“\(verse.text)” — \(chapter.book.displayName) \(chapter.number):\(verse.number) (\(BibleStore.offline[chapter.translation] ?? "KJV"))") {
-                    Image.glyph("share").frame(width: 23, height: 23).frame(width: 44, height: 44)
+                    Image.glyph("share").frame(width: 20, height: 20).frame(width: 44, height: 44).contentShape(Rectangle())
                 }
                 .accessibilityLabel("Share")
             }

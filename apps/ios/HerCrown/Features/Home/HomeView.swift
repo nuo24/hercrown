@@ -124,7 +124,7 @@ struct HomeView: View {
 
     private var header: some View {
         HStack(spacing: 0) {
-            Text("Home").font(.serif(34, relativeTo: .largeTitle)).tracking(-0.65)
+            Text("Home").font(.serif(32, relativeTo: .largeTitle)).tracking(-0.65)
                 .accessibilityAddTraits(.isHeader)
             Spacer()
             PageIconButton(glyph: "search", label: "Search Scripture") { showingSearch = true }
@@ -141,7 +141,7 @@ struct HomeView: View {
                     Avatar(size: 57)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(app.displayName.flatMap { $0.isEmpty || $0 == "Guest" ? nil : $0 } ?? "Welcome")
-                            .font(.serif(27, relativeTo: .title2)).lineLimit(1).minimumScaleFactor(0.75)
+                            .font(.serif(26, relativeTo: .title2)).lineLimit(1).minimumScaleFactor(0.75)
                         Text(app.me?.profile.bio.flatMap { $0.isEmpty ? nil : $0 } ?? "Make a little room for faith every day.")
                             .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                     }
@@ -153,7 +153,7 @@ struct HomeView: View {
                 VStack(spacing: 4) {
                     HStack(spacing: 6) {
                         Image.glyph("flame").frame(width: 19, height: 23)
-                        Text(model.streak.current.formatted()).font(.serif(27, relativeTo: .title2))
+                        Text(model.streak.current.formatted()).font(.serif(26, relativeTo: .title2))
                     }
                     Text("day streak").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                 }
@@ -306,7 +306,7 @@ struct HomeView: View {
             HStack(spacing: 16) {
                 Image.illustration(art).resizable().scaledToFit().frame(width: 72, height: 88).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 7) {
-                    Text(title).font(.serif(25, relativeTo: .title2)).tracking(-0.35)
+                    Text(title).font(.serif(24, relativeTo: .title2)).tracking(-0.35)
                     Text(kicker.uppercased()).font(.ui(9, weight: .medium)).tracking(0.55).foregroundStyle(Theme.muted(scheme))
                     Text(detail).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                 }
@@ -358,7 +358,7 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(app.isSaved(verse.ref) ? "Remove from saved" : "Save verse")
                 }
-                Text(verse.text ?? "").font(.serif(30, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
+                Text(verse.text ?? "").font(.serif(28, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 265, alignment: .leading)
                 HStack(spacing: 4) {
                     Text("\(verse.label.uppercased()) · \(BibleStore.offline[verse.translation] ?? verse.translation.uppercased())")

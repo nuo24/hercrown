@@ -22,9 +22,9 @@ struct Dock: View {
                 Button {
                     withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.16)) { selection = tab }
                 } label: {
-                    VStack(spacing: 7) {
-                        Image.glyph(tab.glyph).frame(width: 25, height: 25)
-                        Text(tab.title).font(.ui(11.5, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8)
+                    VStack(spacing: 5) {
+                        Image.glyph(tab.glyph).frame(width: 22, height: 22)
+                        Text(tab.title).font(.ui(11, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity, minHeight: 48)
                     .foregroundStyle(Theme.text(scheme))

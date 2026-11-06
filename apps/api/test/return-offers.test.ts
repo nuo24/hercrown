@@ -33,8 +33,8 @@ describe("sandbox return offer", () => {
     const reserve = async (at: number) => (await reserveReturnOffer(decline(), staging, userId, at)).json();
     expect(await reserve(now)).toEqual({ available: false });
     await recordOfferDecline(staging, userId, now);
-    expect(await reserve(now + 119_999)).toEqual({ available: false });
-    const first = now + 120_000;
+    expect(await reserve(now + 20 * 60_000 - 1)).toEqual({ available: false });
+    const first = now + 20 * 60_000;
     expect(await Promise.all([reserve(first), reserve(first)])).toEqual(expect.arrayContaining([
       { available: true }, { available: false },
     ]));
@@ -46,7 +46,7 @@ describe("sandbox return offer", () => {
     const { userId } = await signInGuest();
     await recordOfferDecline(staging, userId, now);
     await grantPremium(userId);
-    expect(await (await reserveReturnOffer(decline(), staging, userId, now + 120_000)).json()).toEqual({ available: false });
+    expect(await (await reserveReturnOffer(decline(), staging, userId, now + 20 * 60_000)).json()).toEqual({ available: false });
     const trial = new Request("http://localhost/me/return-offer/impression", { method: "POST", body: '{"kind":"trial"}' });
     expect(await (await reserveReturnOffer(trial, staging, userId)).json()).toEqual({ available: false });
   });

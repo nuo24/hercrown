@@ -4,8 +4,8 @@ import { badRequest, HttpError, notFound, readJson } from "./http";
 import { es256Jwt } from "./jwt";
 
 const DAY_MS = 86_400_000;
-// Short grace for TestFlight. Decide the production timing separately before launch.
-const SANDBOX_DECLINE_GRACE_MS = 120_000;
+// Offer on a subsequent open, with at least twenty minutes for free reading.
+const SANDBOX_DECLINE_GRACE_MS = 20 * 60_000;
 const YEARLY = "hercrown.plus.yearly";
 const RETURN_OFFER_ID = "trial_return_1999";
 

@@ -15,7 +15,7 @@ struct OnboardingView: View {
     private var characterCount: Int { Self.titles[step].filter { !$0.isWhitespace }.count }
     private var copyDelay: Double { 0.22 + Double(characterCount) * 0.032 }
     private static let titles = [
-        "Less scrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’s 14 hours a\nweek.",
+        "Less scrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’s 14 hours a week.",
         "What brings\nyou here?", "Every journey\nbegins somewhere.", "What’s on your\nheart lately?",
         "Make room\nfor the Word.", "A gentle\nreminder?", "You’re right where\nyou need to begin."
     ]
@@ -204,13 +204,15 @@ struct OnboardingView: View {
                     .accessibilityHidden(true)
 
                     VStack(spacing: 0) {
-                        headline("If you scroll for", font: .serif(37, relativeTo: .largeTitle))
-                        headline("2 hours a day,", after: "If you scroll for", font: .serif(37, weight: .semibold, relativeTo: .largeTitle))
-                        (headline("that’s ", after: "If you scroll for 2 hours a day,", font: .serif(37, relativeTo: .largeTitle)) +
-                         headline("14 hours a\nweek.", after: "If you scroll for 2 hours a day, that’s", font: .serif(37, italic: true, weight: .semibold, relativeTo: .largeTitle), color: Color(hex: 0x334B3E)))
+                        headline("If you scroll for", font: .serif(35, relativeTo: .largeTitle))
+                        headline("2 hours a day,", after: "If you scroll for", font: .serif(35, weight: .semibold, relativeTo: .largeTitle))
+                        (headline("that’s ", after: "If you scroll for 2 hours a day,", font: .serif(35, relativeTo: .largeTitle)) +
+                         headline("14 hours a week.", after: "If you scroll for 2 hours a day, that’s", font: .serif(35, italic: true, weight: .semibold, relativeTo: .largeTitle), color: Color(hex: 0x334B3E)))
                     }
                     .accessibilityElement(children: .ignore).accessibilityLabel(Self.titles[1]).accessibilityAddTraits(.isHeader)
                     .tracking(-0.7)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
                     .multilineTextAlignment(.center).foregroundStyle(Self.ink)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 30)
@@ -496,7 +498,11 @@ struct OnboardingView: View {
         await app.completeOnboarding()
         finishing = false
         // Decision 0003: the membership paywall follows onboarding; the guest path goes straight to reading.
-        if !guest { app.presentPaywall(placement: "onboarding_complete") }
+        if guest {
+            if let userID = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: userID) }
+        } else {
+            app.presentPaywall(placement: "onboarding_complete")
+        }
     }
 
     static func hhmm(_ date: Date) -> String {

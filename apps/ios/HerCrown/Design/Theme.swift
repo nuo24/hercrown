@@ -61,6 +61,6 @@ extension Font {
 /// Reader text sizes for Settings → Font size.
 enum ReaderFontSize: String, CaseIterable {
     case `default`, large, larger, largest
-    var points: CGFloat { switch self { case .default: 30; case .large: 34; case .larger: 38; case .largest: 43 } }
+    var points: CGFloat { switch self { case .default: 28; case .large: 34; case .larger: 38; case .largest: 43 } }
     var title: String { switch self { case .default: "Default"; case .large: "Large"; case .larger: "Larger"; case .largest: "Largest" } }
 }
