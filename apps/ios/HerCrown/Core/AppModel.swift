@@ -108,7 +108,7 @@ final class AppModel {
     var hasTestSessionBackup: Bool { Keychain.read(Self.testBackupToken) != nil }
 
     static func allowsTestSessions() async -> Bool {
-        guard AppConfig.apiBaseURL.host == "bible-scroll-api-staging.bible-scroll-api.workers.dev" else { return false }
+        guard AppConfig.isStaging else { return false }
         #if DEBUG
         return true
         #else

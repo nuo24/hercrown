@@ -2,8 +2,13 @@ import Foundation
 
 /// Build-time configuration. Secrets never live in the app: the server holds every key.
 enum AppConfig {
-    /// The API. Debug and TestFlight builds use staging until production is deployed (humans only).
+    #if DEBUG
+    static let isStaging = true
     static let apiBaseURL = URL(string: "https://bible-scroll-api-staging.bible-scroll-api.workers.dev")!
+    #else
+    static let isStaging = false
+    static let apiBaseURL = URL(string: "https://bible-scroll-api.bible-scroll-api.workers.dev")!
+    #endif
 
     /// Sent as `X-Build`: purchases and events from non-App Store builds are marked sandbox in analytics.
     static var buildChannel: String {

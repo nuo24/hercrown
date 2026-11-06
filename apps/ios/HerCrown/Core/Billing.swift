@@ -68,7 +68,7 @@ final class Billing: NSObject {
                 case .purchased, .restored: await self.syncPurchase()
                 case .declined:
                     guard let userID, let app = self.app, app.me?.user.id == userID, !app.membership.premium,
-                          AppConfig.apiBaseURL.host == "bible-scroll-api-staging.bible-scroll-api.workers.dev" else { return }
+                          AppConfig.isStaging else { return }
                     UserDefaults.standard.set(true, forKey: self.pendingDeclineKey(userID))
                     await self.syncPendingDecline(for: userID)
                 }

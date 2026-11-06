@@ -42,8 +42,8 @@ Copy for App Store Connect → Her Crown (app 6830437910). Draft, 2026-11-04: th
 > SUBSCRIPTION
 > Reading the Bible in Her Crown is always free. Her Crown Plus is $29.99 a year with a 7-day free trial for eligible subscribers, or $2.99 a week with no free trial. We'll send you a reminder before your free trial ends. Payment is charged to your Apple ID when you confirm the purchase, or when the free trial ends. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period. Manage or cancel any time in your App Store account settings.
 >
-> Terms of Use: https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/terms
-> Privacy Policy: https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/privacy
+> Terms of Use: https://bible-scroll-api.bible-scroll-api.workers.dev/legal/terms
+> Privacy Policy: https://bible-scroll-api.bible-scroll-api.workers.dev/legal/privacy
 
 ## Keywords (100 max, commas, no spaces)
 
@@ -55,11 +55,9 @@ bible,women,devotional,scripture,verse,daily,christian,faith,prayer,kjv,study,re
 
 | Field | Value |
 |---|---|
-| Support URL | https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/support |
-| Privacy Policy URL | https://bible-scroll-api-staging.bible-scroll-api.workers.dev/legal/privacy |
+| Support URL | https://bible-scroll-api.bible-scroll-api.workers.dev/legal/support |
+| Privacy Policy URL | https://bible-scroll-api.bible-scroll-api.workers.dev/legal/privacy |
 | Marketing URL | Leave empty until the website exists |
-
-These are the staging server's addresses. They must change to the production server, or the domain, before submitting, and the description's links must change with them.
 
 ## Category, rights, age
 
