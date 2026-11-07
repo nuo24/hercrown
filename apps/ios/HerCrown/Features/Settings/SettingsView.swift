@@ -212,7 +212,13 @@ struct SettingsView: View {
     }
 
     private var scheme: ColorScheme {
-        switch app.preferences.appearance {
+        #if DEBUG
+        if let appearance = UserDefaults.standard.string(forKey: "hcPreviewAppearance") {
+            if appearance == "dark" { return .dark }
+            if appearance == "light" { return .light }
+        }
+        #endif
+        return switch app.preferences.appearance {
         case "light": .light
         case "dark": .dark
         default: inheritedScheme
