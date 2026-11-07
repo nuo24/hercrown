@@ -26,6 +26,9 @@ struct OnboardingView: View {
     @State private var reminders = true
     @State private var reminderTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
     @State private var finishing = false
+    @State private var showingTutorial = false
+    @State private var tutorialGuest = false
+    @State private var tutorialFinished = false
 
     init() {
         #if DEBUG
@@ -70,6 +73,17 @@ struct OnboardingView: View {
                 try Task.checkCancellation()
                 entrance.settle()
             } catch { }
+        }
+        .sheet(isPresented: $showingTutorial, onDismiss: {
+            guard tutorialFinished else { return }
+            tutorialFinished = false
+            Task { await completeAfterTutorial(guest: tutorialGuest) }
+        }) {
+            ReaderTutorialView(entryPoint: "onboarding") { _ in
+                tutorialFinished = true
+                showingTutorial = false
+            }
+            .preferredColorScheme(.light)
         }
         .onChange(of: step) { _, s in Task { await Analytics.shared.track("onboarding_step", ["step": .string(Self.stepNames[s]), "index": .number(Double(s))]) } }
         .task { await Analytics.shared.track("onboarding_step", ["step": "welcome", "index": 0]) }
@@ -483,6 +497,11 @@ struct OnboardingView: View {
     }
 
     private func finish(guest: Bool) async {
+        tutorialGuest = guest
+        showingTutorial = true
+    }
+
+    private func completeAfterTutorial(guest: Bool) async {
         finishing = true
         let time = Self.hhmm(reminderTime)
         var patch: [String: Any] = ["topics": guest ? [] : topics, "remindersEnabled": guest ? false : reminders, "reminderTime": time, "timeZone": TimeZone.current.identifier]

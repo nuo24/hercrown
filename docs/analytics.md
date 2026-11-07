@@ -42,6 +42,8 @@ All props below are optional. Types are string unless marked number or bool. The
 | Event | Props kept | When |
 |---|---|---|
 | `app_opened` | — | App opens, including before sign-in |
+| `tutorial_step` | `index` (number), `entrypoint` (onboarding/settings) | A short app tutorial page appears |
+| `tutorial_finished` | `skipped` (boolean), `entrypoint` (onboarding/settings) | Tutorial finishes or is skipped |
 | `onboarding_step` | `step`, `index` (number) | An onboarding screen appears |
 | `paywall_requested` | `placement` | The app requests a paywall |
 | `paywall_viewed`, `paywall_declined` | Paywall props | Superwall opens a paywall or reports a decline |

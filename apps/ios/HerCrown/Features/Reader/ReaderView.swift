@@ -11,12 +11,14 @@ struct ReaderView: View {
     @State private var studyRef: VerseRef?
     @State private var reflectRef: VerseRef?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var dragging = false
-    @State private var dragBeganAtEnd = false
-    @State private var nextChapterRequest: VerseRef?
+    @State private var chapterWindow: ReaderChapterWindow?
+    @State private var visibleRef: String?
 
     init(app: AppModel) {
-        _model = State(initialValue: ReaderModel(app: app))
+        let model = ReaderModel(app: app)
+        _model = State(initialValue: model)
+        _chapterWindow = State(initialValue: model.chapter.map { ReaderChapterWindow(chapter: $0) })
+        _visibleRef = State(initialValue: model.currentRef?.description)
         #if DEBUG
         _showingChapters = State(initialValue: UserDefaults.standard.bool(forKey: "hcPreviewChapterPicker"))
         #endif
@@ -26,20 +28,22 @@ struct ReaderView: View {
         ZStack(alignment: .topLeading) {
             AppGradient()
             // .reader-pages: the top 670 pt of the 778 pt frame; the dock floats below.
-            pages.padding(.bottom, 54)
-            VerseRail(verses: model.verses.map(\.number), current: Binding(get: { model.current ?? 1 }, set: { model.current = $0 }))
+            pages.padding(.bottom, 54).clipped()
+            VerseRail(verses: model.verses.map(\.number), current: Binding(get: { model.current ?? 1 }, set: { verse in
+                if let chapter = model.chapter { jump(to: VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse)) }
+            }))
                 .padding(.top, 94)
                 .padding(.bottom, 65)
                 .padding(.leading, 10)
             toolbar
         }
         .sheet(isPresented: $showingChapters) {
-            ChapterPicker(current: model.chapter) { book, number in model.open(book, number); showingChapters = false }
+            ChapterPicker(current: model.chapter) { book, number in jump(to: VerseRef(book: book, chapter: number, verse: 1)); showingChapters = false }
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
         }
         .sheet(item: $studyRef) { ref in
-            InsightsSheet(ref: ref, translation: model.translation) { r in model.open(r.book, r.chapter, verse: r.verse) }
+            InsightsSheet(ref: ref, translation: model.translation) { r in jump(to: r) }
                 .presentationDetents([.large])
         }
         .sheet(item: $reflectRef) { ref in
@@ -48,26 +52,23 @@ struct ReaderView: View {
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
         .sheet(isPresented: $showingBookmarks) {
             ReaderBookmarks(current: model.currentRef) { ref in
-                model.open(ref.book, ref.chapter, verse: ref.verse)
+                jump(to: ref)
                 showingBookmarks = false
             }
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .onChange(of: model.current) { _, verse in model.didView(verse) }
-        .task(id: nextChapterRequest) {
-            guard let source = nextChapterRequest else { return }
-            do { try await Task.sleep(for: .milliseconds(450)) } catch { return }
-            guard model.currentRef == source, let next = model.nextChapter else {
-                nextChapterRequest = nil
-                return
-            }
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.7)) {
-                model.open(next.0, next.1)
-            }
-            nextChapterRequest = nil
+        .onChange(of: visibleRef) { _, value in
+            guard let value, let ref = VerseRef(value) else { return }
+            if model.chapter?.book.id != ref.book || model.chapter?.number != ref.chapter {
+                model.open(ref.book, ref.chapter, verse: ref.verse)
+            } else { model.current = ref.verse }
+            model.didView(ref.verse)
+            if let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
         }
-        .onDisappear { nextChapterRequest = nil }
+        .onChange(of: model.translation) { _, _ in
+            if let ref = model.currentRef { jump(to: ref, reset: true) }
+        }
         #if DEBUG
         .task {
             guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy") else { return }
@@ -129,47 +130,47 @@ struct ReaderView: View {
     private var pages: some View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
-                ForEach(model.verses) { verse in
-                    VersePage(verse: verse, chapter: model.chapter!, artwork: model.artwork(for: verse), isLast: verse.number == model.verses.last?.number,
-                              next: model.nextChapter.flatMap { n in BibleStore.shared.book(n.0).map { "\($0.displayName) \(n.1)" } },
-                              onStudy: { studyRef = ref(verse) }, onReflect: { reflectRef = ref(verse) },
-                              onNext: { if let n = model.nextChapter { model.open(n.0, n.1) } })
-                        .containerRelativeFrame(.vertical)
-                        .id(verse.number)
+                ForEach(chapterWindow?.chapters ?? [], id: \.label) { chapter in
+                    let next = ReaderChapterWindow.neighbour(of: chapter, direction: 1)
+                    ForEach(chapter.verses) { verse in
+                        let ref = VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number)
+                        VersePage(verse: verse, chapter: chapter, artwork: model.artwork(for: verse, in: chapter),
+                                  isLast: verse.number == chapter.verses.last?.number, next: next?.label,
+                                  onStudy: { studyRef = ref }, onReflect: { reflectRef = ref },
+                                  onNext: {
+                                      if let next, let first = next.verses.first {
+                                          jump(to: VerseRef(book: next.book.id, chapter: next.number, verse: first.number), animated: true)
+                                      }
+                                  })
+                            .containerRelativeFrame(.vertical)
+                            .id(ref.description)
+                    }
                 }
             }
             .scrollTargetLayout()
         }
         .scrollTargetBehavior(.paging)
-        .scrollPosition(id: Binding(get: { model.current }, set: { model.current = $0 }))
+        .scrollPosition(id: $visibleRef)
         .scrollIndicators(.hidden)
-        .id("\(model.translation)-\(model.chapter?.book.id ?? "")-\(model.chapter?.number ?? 0)")
-        .transition(reduceMotion ? .identity : .push(from: .bottom))
-        .simultaneousGesture(DragGesture(minimumDistance: 24)
-            .onChanged { _ in
-                if !dragging {
-                    dragging = true
-                    dragBeganAtEnd = model.current == model.verses.last?.number
-                }
-            }
-            .onEnded { drag in
-                dragging = false
-                if dragBeganAtEnd, drag.translation.height < -80,
-                   abs(drag.translation.width) < abs(drag.translation.height), model.nextChapter != nil {
-                    nextChapterRequest = model.currentRef
-                }
-                dragBeganAtEnd = false
-            })
     }
 
-    private func ref(_ verse: Verse) -> VerseRef { VerseRef(book: model.chapter!.book.id, chapter: model.chapter!.number, verse: verse.number) }
+    private func jump(to ref: VerseRef, reset: Bool = false, animated: Bool = false) {
+        model.open(ref.book, ref.chapter, verse: ref.verse)
+        guard let chapter = model.chapter, let destination = model.currentRef else { return }
+        if reset || chapterWindow?.contains(destination) != true {
+            chapterWindow = ReaderChapterWindow(chapter: chapter)
+        }
+        withAnimation(animated && !reduceMotion ? .easeInOut(duration: 0.45) : nil) {
+            visibleRef = destination.description
+        }
+    }
 
     private func shuffle() {
         Task {
             struct Random: Decodable { let ref: String }
             let ref: VerseRef? = (try? await app.api.get("/scripture/random?translation=\(model.translation)", as: Random.self)).flatMap { VerseRef($0.ref) }
             let fallback = ["PSA.23.1", "JHN.3.16", "PRO.3.5", "ISA.40.31", "MAT.11.28", "ROM.8.28", "PHP.4.7"].randomElement().flatMap(VerseRef.init)
-            if let r = ref ?? fallback { model.open(r.book, r.chapter, verse: r.verse) }
+            if let r = ref ?? fallback { jump(to: r) }
         }
     }
 }

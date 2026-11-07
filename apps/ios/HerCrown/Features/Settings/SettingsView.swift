@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var inheritedScheme
     @State private var legal: LegalPage?
+    @State private var showingTutorial = false
     @State private var showsTestSession = false
     @State private var changingTestSession = false
     @State private var testSessionError = false
@@ -121,6 +122,10 @@ struct SettingsView: View {
                             }
                             sectionTitle("Here for you")
                             group {
+                                Button { showingTutorial = true } label: {
+                                    row("hand.draw", "How Her Crown works", "A short tour of reading, saving and study")
+                                }.buttonStyle(.plain)
+                                divider
                                 NavigationLink { FeedbackView() } label: {
                                     row("bubble.left.and.text.bubble.right", "Suggestions & bugs", "Share an idea or tell us what needs fixing")
                                 }.buttonStyle(.plain)
@@ -171,6 +176,9 @@ struct SettingsView: View {
             #endif
         }
         .environment(\.colorScheme, scheme)
+        .sheet(isPresented: $showingTutorial) {
+            ReaderTutorialView(entryPoint: "settings") { _ in showingTutorial = false }
+        }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .task { showsTestSession = await AppModel.allowsTestSessions() }
         .alert("Couldn’t switch test accounts", isPresented: $testSessionError) {

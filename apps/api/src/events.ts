@@ -63,6 +63,8 @@ const tabs = ["bible", "community", "discover", "home"];
 /** Events the app may send to POST /events, with the only props kept for each. */
 export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   app_opened: {},
+  tutorial_step: { index: "number", entrypoint: ["onboarding", "settings"] },
+  tutorial_finished: { skipped: "boolean", entrypoint: ["onboarding", "settings"] },
   onboarding_step: { step: ["welcome", "time", "intention", "familiarity", "topics", "rhythm", "reminder", "ready"], index: "number" },
   paywall_requested: { placement },
   paywall_viewed: PAYWALL,
