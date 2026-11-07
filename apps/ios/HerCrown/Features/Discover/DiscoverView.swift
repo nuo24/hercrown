@@ -166,13 +166,13 @@ struct DiscoverView: View {
             NavigationStack {
                 AIStudyView(ref: ref, translation: feed?.translation ?? translation, tool: .deeper)
                     .toolbar {
-                        ToolbarItem(placement: .cancellationAction) { Button("Done") { studyRef = nil } }
+                        ToolbarItem(placement: .confirmationAction) { Button("Done") { studyRef = nil } }
                     }
             }
                 .presentationDetents([.large])
         }
         .sheet(item: $noteRef) { ref in
-            ReflectionSheet(ref: ref, translation: feed?.translation ?? translation, notesOnly: true)
+            ReflectionSheet(ref: ref, translation: feed?.translation ?? translation)
                 .presentationDetents([.large])
         }
     }

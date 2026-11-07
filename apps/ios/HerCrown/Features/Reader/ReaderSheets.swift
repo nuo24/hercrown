@@ -150,27 +150,42 @@ struct ReflectionSheet: View {
             GeometryReader { viewport in
                 content(viewportHeight: viewport.size.height)
             }
-                .navigationTitle(notesOnly ? "Verse notes" : "Reflection")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { Task { await finish() } }
-                            .disabled(!noteLoaded || finishing || saving)
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack {
+                            Button { Task { await finish() } } label: {
+                                Label("Back", systemImage: "arrow.left")
+                                    .font(.ui(13, weight: .medium))
+                            }
+                            Spacer()
+                            Button("Done") { Task { await finish() } }
+                                .font(.ui(13, weight: .semibold))
+                        }
+                        .buttonStyle(.plain)
+                        .frame(minHeight: 44)
+                        .disabled(!noteLoaded || finishing || saving)
+                        Text("Reflection").font(.ui(18, weight: .semibold))
+                            .accessibilityAddTraits(.isHeader)
                     }
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 12)
+                    .foregroundStyle(Theme.text(scheme))
+                    .background(Theme.canvas(scheme))
                 }
+                .toolbar(.hidden, for: .navigationBar)
         }
         .interactiveDismissDisabled(note != savedNote || finishing)
     }
 
     private func content(viewportHeight: CGFloat) -> some View {
-        let editorHeight = min(180, max(104, viewportHeight * 0.38))
+        let editorHeight: CGFloat = viewportHeight < 550 ? 104 : 180
         return VStack(spacing: 12) {
             ViewThatFits(in: .vertical) {
-                passage(fontSize: 26)
-                passage(fontSize: 22)
-                passage(fontSize: 19)
-                passage(fontSize: 17)
-                ScrollView { passage(fontSize: 17) }
+                passage(fontSize: 24, compact: false)
+                passage(fontSize: 22, compact: true)
+                passage(fontSize: 19, compact: true)
+                passage(fontSize: 17, compact: true)
+                ScrollView { passage(fontSize: 17, compact: true) }
                     .scrollDismissesKeyboard(.interactively)
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -178,8 +193,13 @@ struct ReflectionSheet: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 10)
+        .background(Theme.canvas(scheme))
         .task {
+            #if DEBUG
+            if !finishing && !UserDefaults.standard.bool(forKey: "hcPreviewReflectionNoKeyboard") { editing = true }
+            #else
             if !finishing { editing = true }
+            #endif
             struct Note: Decodable { let text: String }
             if let existing: Note = try? await app.api.get("/me/notes/\(ref.description)") {
                 savedNote = existing.text
@@ -195,23 +215,50 @@ struct ReflectionSheet: View {
         }
     }
 
-    private func passage(fontSize: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(BibleStore.shared.label(ref))
-                .font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
-            Text(BibleStore.shared.text(translation, ref) ?? "")
-                .font(.serif(fontSize, relativeTo: .title2))
+    private func passage(fontSize: CGFloat, compact: Bool) -> some View {
+        VStack(alignment: .leading, spacing: compact ? 8 : 24) {
+            VStack(spacing: compact ? 8 : 22) {
+                Image.illustration("intention-heart")
+                    .resizable().scaledToFit()
+                    .frame(width: compact ? 28 : 64, height: compact ? 24 : 64)
+                    .accessibilityHidden(true)
+                Text(BibleStore.shared.label(ref))
+                    .font(.ui(compact ? 16 : 20, weight: .semibold))
+                Text(BibleStore.shared.text(translation, ref) ?? "")
+                    .font(.serif(fontSize, relativeTo: .title2))
+                    .lineSpacing(max(0, fontSize * 0.15))
+                Text(translationName)
+                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+            }
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: .infinity)
+            .padding(.top, compact ? 0 : 20)
             if !notesOnly {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("A moment of reflection").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                Divider()
+                VStack(alignment: .leading, spacing: compact ? 4 : 12) {
+                    Text("A moment of reflection").font(.ui(compact ? 13 : 14, weight: .semibold))
                     Text("What stands out to you in this verse, and how might it shape your day?")
-                        .font(.system(size: 13)).lineSpacing(2)
-                    Text("Reflection prompt · not Scripture").font(.system(size: 11)).foregroundStyle(.secondary)
+                        .font(.ui(compact ? 12 : 14)).lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Reflection prompt · not Scripture")
+                        .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, compact ? 0 : 14)
             }
         }
         .fixedSize(horizontal: false, vertical: true)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var translationName: String {
+        switch translation.lowercased() {
+        case "kjv": "King James Version"
+        case "bsb": "Berean Standard Bible"
+        case "web": "World English Bible"
+        default: BibleStore.offline[translation] ?? translation.uppercased()
+        }
     }
 
     private func noteEditor(height: CGFloat) -> some View {
@@ -223,16 +270,16 @@ struct ReflectionSheet: View {
             }
             TextEditor(text: $note)
                 .focused($editing)
-                .font(.body)
+                .font(.ui(14))
                 .scrollContentBackground(.hidden)
                 .padding(10)
                 .frame(height: height)
-                .background(scheme == .dark ? Color(hex: 0x35363D) : .white, in: RoundedRectangle(cornerRadius: 14))
+                .background(scheme == .dark ? Color(hex: 0x171719) : .white, in: RoundedRectangle(cornerRadius: 14))
                 .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Color.primary.opacity(0.24)).allowsHitTesting(false) }
                 .overlay(alignment: .topLeading) {
                     if note.isEmpty {
                         Text("Write a thought, a prayer, a question…")
-                            .font(.body).foregroundStyle(.secondary)
+                            .font(.ui(14)).foregroundStyle(.secondary)
                             .padding(.leading, 15).padding(.top, 18)
                             .allowsHitTesting(false).accessibilityHidden(true)
                     }
