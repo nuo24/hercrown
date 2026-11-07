@@ -7,6 +7,7 @@ struct AIStudyView: View {
     let translation: String
     let tool: StudyTool
     @Environment(\.colorScheme) private var scheme
+    @Environment(AppModel.self) private var app
     @State private var state: StudyState<StudyAnswer> = .loading
     @State private var saved = false
     @State private var showingNotes = false
@@ -55,7 +56,8 @@ struct AIStudyView: View {
                 Button(title) { report(reason) }
             }
         }
-        .task(id: attempt) {
+        .task(id: "\(attempt)-\(app.membership.premium)") {
+            guard app.membership.premium else { state = .needsPlus; return }
             state = .loading
             await StudyService.stream(ref, tool) { state = $0 }
         }
@@ -165,6 +167,7 @@ struct CitedText: View {
 struct OriginalLanguageView: View {
     let ref: VerseRef
     let translation: String
+    @Environment(AppModel.self) private var app
     @State private var state: StudyState<OriginalWords> = .loading
     @State private var open: OriginalWords.Word?
 
@@ -216,7 +219,11 @@ struct OriginalLanguageView: View {
             }
             .presentationDetents([.medium, .large])
         }
-        .task { state = await StudyService.load(ref, .original, translation: translation) }
+        .task(id: app.membership.premium) {
+            guard app.membership.premium else { state = .needsPlus; return }
+            state = .loading
+            state = await StudyService.load(ref, .original, translation: translation)
+        }
     }
 
     /// STEPBible marks words English doesn't translate in angle brackets ("<obj.>", "<the>"): say what they do instead.
@@ -232,6 +239,7 @@ struct RelatedVersesView: View {
     let ref: VerseRef
     let translation: String
     let onOpen: (VerseRef) -> Void
+    @Environment(AppModel.self) private var app
     @State private var state: StudyState<RelatedVerses> = .loading
 
     var body: some View {
@@ -264,6 +272,10 @@ struct RelatedVersesView: View {
             .padding(24)
         }
         .navigationTitle("Related verses")
-        .task { state = await StudyService.load(ref, .related, translation: translation) }
+        .task(id: app.membership.premium) {
+            guard app.membership.premium else { state = .needsPlus; return }
+            state = .loading
+            state = await StudyService.load(ref, .related, translation: translation)
+        }
     }
 }

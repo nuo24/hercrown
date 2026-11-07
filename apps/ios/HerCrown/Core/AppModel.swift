@@ -202,8 +202,8 @@ final class AppModel {
         return nil
     }
 
-    func presentPaywall(placement: String, onExistingSubscription: (() -> Void)? = nil) {
-        guard !checkingPaywall, !membership.premium else { return }
+    func presentPaywall(placement: String, onComplete: (() -> Void)? = nil, onExistingSubscription: (() -> Void)? = nil) {
+        guard !checkingPaywall, !membership.premium else { onComplete?(); return }
         checkingPaywall = true
         let userID = me?.user.id
         Task {
@@ -216,13 +216,14 @@ final class AppModel {
                 isFreshTestOnboarding = false
             }
             let existing = isFreshTestOnboarding ? nil : await activeAppleSubscription()
-            guard me?.user.id == userID, !membership.premium else { return }
+            guard me?.user.id == userID, !membership.premium else { onComplete?(); return }
             if existing != nil {
                 if let onExistingSubscription { onExistingSubscription() }
                 else { showExistingAppleSubscription = true }
+                onComplete?()
                 return
             }
-            Billing.shared.present(placement: placement)
+            Billing.shared.present(placement: placement, onComplete: onComplete)
             await Analytics.shared.track("paywall_requested", ["placement": .string(placement)])
         }
     }

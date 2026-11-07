@@ -90,20 +90,21 @@ struct VerseQuote: View {
     }
 }
 
-/// Shown instead of a study when she isn't on Plus. The paywall itself (Superwall) opens from here once it's wired.
+/// A locked study opens its placement directly, without a membership introduction or Settings detour.
 struct PlusRequiredView: View {
     let tool: StudyTool
     @Environment(AppModel.self) private var app
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
-        VStack(spacing: 14) {
-            Image.illustration("butterfly").resizable().scaledToFit().frame(width: 90).accessibilityHidden(true)
-            Text("Go deeper with Plus").font(.serif(26))
-            Text("\(tool.title) is part of Her Crown Plus, along with reading plans and every study tool. Reading the Bible stays free.")
-                .multilineTextAlignment(.center).foregroundStyle(.secondary)
-            NavigationLink("See Her Crown Plus") { SubscriptionView() }
-                .buttonStyle(CapsuleButtonStyle()).padding(.top, 6)
-        }
-        .padding(28)
-        .task { await app.refreshMembership() }
+        ProgressView("Opening Plus…")
+            .frame(maxWidth: .infinity, minHeight: 80)
+            .task {
+                app.presentPaywall(placement: "study_\(tool.rawValue)", onComplete: {
+                    // Purchase/restore refreshes the server entitlement before this callback.
+                    // The parent reloads the chosen study when Plus becomes active.
+                    if !app.membership.premium { dismiss() }
+                })
+            }
     }
 }

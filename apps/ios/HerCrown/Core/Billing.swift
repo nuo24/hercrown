@@ -61,8 +61,8 @@ final class Billing: NSObject {
     }
 
     /// Shows the paywall campaign for this placement (onboarding_complete, study_explain, plan_start, settings…).
-    func present(placement: String) {
-        guard configured, !isPaywallBusy else { return }
+    func present(placement: String, onComplete: (() -> Void)? = nil) {
+        guard configured, !isPaywallBusy else { onComplete?(); return }
         let style: InterfaceStyle?
         switch placement == "onboarding_complete" ? "light" : app?.preferences.appearance {
         case "light": style = .light
@@ -89,12 +89,14 @@ final class Billing: NSObject {
                 case .declined:
                     if let userID { await self.scheduleReturnOffer(for: userID) }
                 }
+                onComplete?()
             }
         }
         handler.onError { [weak self] error in
             let message = error.localizedDescription
             Task { @MainActor in
                 if self?.presentingPlacement == requestID { self?.presentingPlacement = nil }
+                onComplete?()
                 await Analytics.shared.track("paywall_error", ["placement": .string(placement), "message": .string(message)])
                 #if DEBUG
                 await self?.reportPaywallDiagnostic(placement: placement, reason: message)
@@ -104,6 +106,7 @@ final class Billing: NSObject {
         handler.onSkip { [weak self] (reason: PaywallSkippedReason) in
             Task { @MainActor in
                 if self?.presentingPlacement == requestID { self?.presentingPlacement = nil }
+                onComplete?()
                 await Analytics.shared.track("paywall_skipped", ["placement": .string(placement), "reason": .string(reason.description)])
                 #if DEBUG
                 await self?.reportPaywallDiagnostic(placement: placement, reason: reason.description)
