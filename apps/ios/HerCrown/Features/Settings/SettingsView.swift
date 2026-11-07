@@ -121,6 +121,10 @@ struct SettingsView: View {
                             }
                             sectionTitle("Here for you")
                             group {
+                                NavigationLink { FeedbackView() } label: {
+                                    row("bubble.left.and.text.bubble.right", "Suggestions & bugs", "Share an idea or tell us what needs fixing")
+                                }.buttonStyle(.plain)
+                                divider
                                 Button { contactSupport() } label: { row("envelope", "Contact & Support", "Questions, ideas or a little help") }.buttonStyle(.plain)
                                 divider
                                 Button { legal = .support } label: { row("questionmark.circle", "Help & FAQs", "Let’s work it out together") }.buttonStyle(.plain)
@@ -153,6 +157,7 @@ struct SettingsView: View {
                 case "account": AccountView()
                 case "subscription": SubscriptionView()
                 case "topics": TopicsView()
+                case "feedback": FeedbackView()
                 default: EmptyView()
                 }
             }

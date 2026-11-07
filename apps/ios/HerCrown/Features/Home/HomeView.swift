@@ -394,10 +394,7 @@ struct HomeView: View {
                         .frame(minHeight: 44)
                     }
                     .buttonStyle(.plain)
-                    ShareLink(item: "“\(verse.text ?? "")” — \(verse.label) (\(BibleStore.offline[verse.translation] ?? ""))") {
-                        Image.glyph("share").frame(width: 19, height: 19).frame(width: 44, height: 44)
-                    }
-                    .accessibilityLabel("Share verse")
+                    VerseShareButton(text: verse.text ?? "", reference: verse.label, translation: verse.translation)
                 }
             }
             .foregroundStyle(Theme.text(scheme))

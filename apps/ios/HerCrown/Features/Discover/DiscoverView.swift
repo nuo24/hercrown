@@ -44,7 +44,6 @@ struct DiscoverView: View {
     @State private var query = ""
     @State private var searching = false
     @FocusState private var searchFocused: Bool
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     private enum DetailAction {
         case note(VerseRef), study(VerseRef)
@@ -59,7 +58,7 @@ struct DiscoverView: View {
     private static let themes = ["Peace", "Purpose", "Faith", "Relationships", "Identity", "Anxiety", "Gratitude", "Hope", "Wisdom"]
 
     private static let editorial: [String: (title: String, art: String)] = [
-        "PSA.23.1": ("Rest for a restless heart.", "olive"),
+        "PSA.23.1": ("A softer place to land", "olive"),
         "PRO.31.25": ("Clothed in quiet strength", "intention-heart"),
         "MAT.11.28": ("Lay down what you carry", "rest-stones"),
         "JER.29.11": ("Hope for the unfolding", "sunrise"),
@@ -85,7 +84,7 @@ struct DiscoverView: View {
         return result
     }
 
-    private func title(for card: DiscoverFeed.Card) -> String { Self.editorial[card.ref]?.title ?? card.label }
+    private func title(for card: DiscoverFeed.Card) -> String { Self.editorial[card.ref]?.title ?? DiscoverTitles.byReference[card.ref] ?? "A moment for \(card.theme?.lowercased() ?? "reflection")" }
 
     private func artwork(for card: DiscoverFeed.Card) -> String {
         if let art = Self.editorial[card.ref]?.art { return art }
@@ -131,14 +130,12 @@ struct DiscoverView: View {
                             .padding(.horizontal, 22)
                     } header: {
                         chips
-                            .background {
-                                if reduceTransparency { Theme.canvas(scheme) }
-                                else { Rectangle().fill(.regularMaterial) }
-                            }
+                            .background(scheme == .dark ? Theme.supporting(scheme) : Theme.canvas(scheme))
                     }
                 }
                 .padding(.bottom, 80)
             }
+            .clipped()
             .scrollDismissesKeyboard(.interactively)
             .refreshable { await load() }
         }
@@ -160,7 +157,7 @@ struct DiscoverView: View {
                     .padding(22)
                 }
                 .background(AppGradient())
-                .navigationTitle(card.label)
+                .navigationTitle(title(for: card))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { detail = nil } } }
             }
@@ -413,10 +410,7 @@ private struct DiscoverCard: View {
                     }
                     .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
                     Button(action: onNote) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Write a note")
-                    ShareLink(item: "“\(card.text)” — \(card.label) (\(BibleStore.offline[translation] ?? ""))") {
-                        Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44)
-                    }
-                    .accessibilityLabel("Share verse")
+                    VerseShareButton(text: card.text, reference: card.label, translation: translation)
                     Button { confirmStudied = true } label: {
                         Image(systemName: completing ? "checkmark.circle.fill" : "checkmark.circle")
                             .font(.system(size: 24, weight: .medium))

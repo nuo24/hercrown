@@ -60,6 +60,7 @@ All props below are optional. Types are string unless marked number or bool. The
 | `signed_in` | `method` | Sign in with Apple succeeds |
 | `profile_updated`, `avatar_updated`, `account_deleted` | — | The account action succeeds |
 | `settings_viewed`, `support_opened` | — | Settings or Support opens |
+| `verse_snapshot_opened` | — | Verse snapshot preview opens. No verse text or reference is collected. |
 | `setting_changed` | `setting`, `value` | Appearance changes |
 | `topics_updated` | `count` (number) | The number of selected topics changes |
 | `tab_viewed` | `tab` | The app switches tabs |

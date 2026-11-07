@@ -247,7 +247,7 @@ private struct SavedVerseCard: View {
                     Spacer()
                     Button(action: onNotes) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Write a note")
                     Spacer()
-                    ShareLink(item: "“\(text)” — \(label) (\(BibleStore.offline[translation] ?? ""))") { Image(systemName: "square.and.arrow.up").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Share verse")
+                    VerseShareButton(text: text, reference: label, translation: translation).frame(width: 58)
                 }
                 .font(.system(size: 17))
                 .frame(width: 236)

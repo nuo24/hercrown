@@ -112,6 +112,16 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 | `GET /me/support` · `POST /me/support` `{ category, message, contactEmail?, contactPreference? }` | Contact & Support. Returns reference `HC-XXXXXXXX`. 5 per day |
 | `GET /legal/{privacy\|terms\|refunds\|credits\|support}` | In-app reading pages (`?format=md` for Markdown) and the App Store URLs |
 
+Settings → Suggestions & bugs uses the existing `Feedback` and `Something isn't working` categories. Reports are saved in D1 `support_requests` with their reference, category, message, app version and status. The user's own history comes from authenticated `GET /me/support`. Message text is excluded from analytics. Email delivery requires `EMAIL_FROM` and `SUPPORT_INBOX`.
+
+The owner can export suggestions and bugs as a spreadsheet-compatible CSV. Run from `apps/api`, with Cloudflare authentication, and keep the output outside Git because it contains user messages.
+
+```sh
+node scripts/export-feedback.mjs staging /tmp/hercrown-feedback-staging.csv
+```
+
+After launch, the human operator can use `production` instead of `staging` to review production tickets.
+
 ## Analytics
 
 `POST /events` with `{ events: [{ id, name, at, props }] }`. See [analytics.md](analytics.md) for the event list and when to send each.

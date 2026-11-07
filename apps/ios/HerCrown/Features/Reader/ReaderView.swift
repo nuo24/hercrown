@@ -10,6 +10,10 @@ struct ReaderView: View {
     @State private var showingBookmarks = false
     @State private var studyRef: VerseRef?
     @State private var reflectRef: VerseRef?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var dragging = false
+    @State private var dragBeganAtEnd = false
+    @State private var nextChapterRequest: VerseRef?
 
     init(app: AppModel) {
         _model = State(initialValue: ReaderModel(app: app))
@@ -51,6 +55,19 @@ struct ReaderView: View {
             .presentationDragIndicator(.visible)
         }
         .onChange(of: model.current) { _, verse in model.didView(verse) }
+        .task(id: nextChapterRequest) {
+            guard let source = nextChapterRequest else { return }
+            do { try await Task.sleep(for: .milliseconds(450)) } catch { return }
+            guard model.currentRef == source, let next = model.nextChapter else {
+                nextChapterRequest = nil
+                return
+            }
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.7)) {
+                model.open(next.0, next.1)
+            }
+            nextChapterRequest = nil
+        }
+        .onDisappear { nextChapterRequest = nil }
         #if DEBUG
         .task {
             guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy") else { return }
@@ -127,6 +144,22 @@ struct ReaderView: View {
         .scrollPosition(id: Binding(get: { model.current }, set: { model.current = $0 }))
         .scrollIndicators(.hidden)
         .id("\(model.translation)-\(model.chapter?.book.id ?? "")-\(model.chapter?.number ?? 0)")
+        .transition(reduceMotion ? .identity : .push(from: .bottom))
+        .simultaneousGesture(DragGesture(minimumDistance: 24)
+            .onChanged { _ in
+                if !dragging {
+                    dragging = true
+                    dragBeganAtEnd = model.current == model.verses.last?.number
+                }
+            }
+            .onEnded { drag in
+                dragging = false
+                if dragBeganAtEnd, drag.translation.height < -80,
+                   abs(drag.translation.width) < abs(drag.translation.height), model.nextChapter != nil {
+                    nextChapterRequest = model.currentRef
+                }
+                dragBeganAtEnd = false
+            })
     }
 
     private func ref(_ verse: Verse) -> VerseRef { VerseRef(book: model.chapter!.book.id, chapter: model.chapter!.number, verse: verse.number) }
@@ -197,10 +230,9 @@ struct VersePage: View {
                     .accessibilityLabel(app.isSaved(ref) ? "Unsave" : "Save")
                 Button(action: onReflect) { Image.glyph("message").frame(width: 20, height: 20).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .accessibilityLabel("Reflect")
-                ShareLink(item: "“\(verse.text)” — \(chapter.book.displayName) \(chapter.number):\(verse.number) (\(BibleStore.offline[chapter.translation] ?? "KJV"))") {
-                    Image.glyph("share").frame(width: 20, height: 20).frame(width: 44, height: 44).contentShape(Rectangle())
-                }
-                .accessibilityLabel("Share")
+                VerseShareButton(text: verse.text,
+                                 reference: "\(chapter.book.displayName) \(chapter.number):\(verse.number)",
+                                 translation: chapter.translation)
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.trailing, 12)
@@ -210,7 +242,7 @@ struct VersePage: View {
                 if isLast, let next {
                     Button(action: onNext) {
                         HStack(spacing: 10) {
-                            Text("End of chapter · Next: \(next)").font(.system(size: 11))
+                            Text("Swipe up · Next: \(next)").font(.system(size: 11))
                             Text("↓").font(.system(size: 14)).accessibilityHidden(true)
                         }
                         .padding(.vertical, 14)

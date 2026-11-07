@@ -23,6 +23,12 @@ struct HerCrownApp: App {
             if ProcessInfo.processInfo.arguments.contains("--preview-return-offer") {
                 ReturnOfferView(firstYear: "$19.99", renewal: "$29.99", onClaim: {}, onClose: {}, onRestore: {})
                     .preferredColorScheme(colorScheme)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-snapshot"),
+                      let chapter = BibleStore.shared.chapter("kjv", book: "PSA", chapter: 23),
+                      let verse = chapter.verses.first {
+                VerseSnapshotView(text: verse.text, reference: "\(chapter.book.displayName) 23:\(verse.number)",
+                                  translation: "King James Version")
+                    .environment(app).preferredColorScheme(colorScheme)
             } else {
                 appContent.alert("Paywall test result", isPresented: Binding(
                     get: { app.paywallDiagnostic != nil },

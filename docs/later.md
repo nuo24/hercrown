@@ -7,7 +7,9 @@ Ideas and deferred work, parked so they don't derail the current phase.
 - **Web app** (`apps/web`, React + Vite) and **Android**.
 - **Search in online translations.** Search covers KJV only; modern wording ("love is patient") won't match KJV ("charity suffereth long").
 - **Original-language and version comparison** in insights (unavailable in the mockup; needs real sources).
-- **In-app support messages.** `POST /me/support` stores requests, but emailing them to the team needs `EMAIL_FROM` (a domain). Until then Settings → Contact & Support opens a pre-filled email to macnatephil@gmail.com. Switch to the in-app form once email works.
+- **Support email delivery.** Settings → Suggestions & bugs stores tickets through `POST /me/support` and shows the sender their ticket history. Team email delivery still needs `EMAIL_FROM` (a domain). The owner can export tickets to CSV with `apps/api/scripts/export-feedback.mjs`. Contact & Support also retains its email path.
+- **Achievements (V2).** Design the achievement system after the first release.
+- **Return-offer timing decision.** The current staging test waits 20 minutes after a declined paywall and caps impressions at one per rolling 24 hours. Consider a first offer after 48 hours and reading on two separate days, with a longer cooldown after dismissal. Discuss cancellation and never-subscribed audiences separately before changing eligibility. Both offers remain off for production 1.0.
 - **Plus reminders for free readers.** Keep “Explore as a guest” as a free path. Decide where occasional in-app Plus reminders belong and whether to offer opt-in subscription notifications.
 - **Push reminders** (APNs) once reminder opt-in ships in iOS.
 - **Bun** instead of npm, to match the playbook commands exactly.

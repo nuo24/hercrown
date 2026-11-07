@@ -99,6 +99,7 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   settings_viewed: {},
   setting_changed: { setting: ["appearance"], value: ["system", "light", "dark"] },
   support_opened: {},
+  verse_snapshot_opened: {},
   topics_updated: { count: "number" },
   tab_viewed: { tab: tabs },
   library_viewed: {},
