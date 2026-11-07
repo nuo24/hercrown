@@ -130,7 +130,7 @@ struct DiscoverView: View {
                             .padding(.horizontal, 22)
                     } header: {
                         chips
-                            .background(scheme == .dark ? Theme.supporting(scheme) : Theme.canvas(scheme))
+                            .background(Theme.canvas(scheme))
                     }
                 }
                 .padding(.bottom, 80)

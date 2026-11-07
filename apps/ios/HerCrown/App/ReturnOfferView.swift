@@ -9,12 +9,71 @@ struct ReturnOfferView: View {
     let onRestore: () -> Void
 
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var revealed: Bool = {
+        #if DEBUG
+        ProcessInfo.processInfo.arguments.contains("--preview-return-offer-revealed")
+        #else
+        false
+        #endif
+    }()
 
     var body: some View {
+        Group {
+            if revealed { offer }
+            else { invitation }
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Theme.text(scheme))
+        .background(Theme.canvas(scheme).ignoresSafeArea())
+    }
+
+    private var invitation: some View {
+        VStack(spacing: 24) {
+            HStack {
+                Text("Her Crown Plus").font(.ui(12, weight: .medium))
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark").font(.system(size: 16))
+                        .frame(width: 44, height: 44)
+                }
+                .accessibilityLabel("Continue with free reading")
+            }
+            Spacer(minLength: 16)
+            Image.illustration("prayer-envelope")
+                .resizable().scaledToFit()
+                .frame(maxWidth: 270, maxHeight: 230)
+                .accessibilityHidden(true)
+            VStack(spacing: 12) {
+                Text("A little room to grow.")
+                    .font(.serif(34, relativeTo: .largeTitle))
+                    .accessibilityAddTraits(.isHeader)
+                Text("An invitation to go deeper,\nat a gentler price.")
+                    .font(.ui(15)).lineSpacing(4)
+                    .foregroundStyle(Theme.muted(scheme))
+            }
+            .multilineTextAlignment(.center)
+            Spacer(minLength: 16)
+            Button("Reveal your invitation") {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) { revealed = true }
+            }
+            .buttonStyle(CapsuleButtonStyle())
+            Button("Continue with free reading", action: onClose)
+                .font(.ui(13)).foregroundStyle(Theme.muted(scheme))
+                .frame(minHeight: 44)
+        }
+        .padding(.horizontal, 24).padding(.top, 12).padding(.bottom, 24)
+        .frame(maxWidth: 430).frame(maxWidth: .infinity)
+        .transition(.opacity)
+    }
+
+    private var offer: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    Button(action: onClose) {
+                    Button {
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) { revealed = false }
+                    } label: {
                         Label("Back", systemImage: "arrow.left")
                             .frame(minWidth: 44, minHeight: 44, alignment: .leading)
                             .contentShape(Rectangle())
@@ -84,10 +143,8 @@ struct ReturnOfferView: View {
             .padding(.bottom, 24)
             .frame(maxWidth: .infinity)
         }
-        .buttonStyle(.plain)
         .disabled(busy)
-        .foregroundStyle(Theme.text(scheme))
-        .background(Theme.canvas(scheme).ignoresSafeArea())
+        .transition(.opacity)
     }
 
     private var introduction: some View {
