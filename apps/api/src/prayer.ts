@@ -46,7 +46,7 @@ export function validatePrayer(raw: string, answers: PrayerAnswers): string | nu
   if (words < 65 || words > 160 || p.length > 1800 || !/^Dear God,/i.test(p) || !/Amen\.$/i.test(p)) return null;
   if (/["“”<>]|https?:\/\/|\b(?:system prompt|ignore previous|as an ai|guarantee(?:d)?|you will be healed)\b/i.test(p)) return null;
   // Reject copying free-text sentences, rather than just removing their quotation marks.
-  for (const text of [answers.burden, answers.lovedOnes]) {
+  for (const text of [answers.burden]) {
     if (text.split(/\s+/).length >= 5 && p.toLowerCase().includes(text.toLowerCase())) return null;
   }
   return p;
@@ -59,23 +59,29 @@ export async function createPrayer(request: Request, env: Env, userId: string, t
   const claim = await env.DB.prepare(`INSERT INTO onboarding_prayer_limits (user_id, day, attempts) VALUES (?1, ?2, 1)
     ON CONFLICT(user_id, day) DO UPDATE SET attempts = attempts + 1 WHERE attempts < 3 RETURNING attempts`).bind(userId, day).first();
   if (!claim) throw new HttpError(429, "prayer_limit", "You can create another prayer tomorrow. Your saved prayer is still here.");
-  let usage: AiUsage | null = null;
-  let ok = false;
-  try {
-    let raw = "";
-    const stream = streamChat(env, prayerMessages(answers), { maxTokens: 650, temperature: 0.45, sensitive: true });
-    for (;;) {
-      const item = await stream.next();
-      if (item.done) { usage = item.value; break; }
-      raw += item.value;
-      if (raw.length > 8000) { await stream.return(undefined as never); throw new Error("invalid prayer output"); }
-    }
-    const prayer = validatePrayer(raw, answers);
-    if (!prayer) throw new Error("invalid prayer output");
-    ok = true;
-    return Response.json({ prayer, kind: "personal_prayer", version: 1 });
-  } catch {
-    // Do not log the prompt, provider text, names or personal concern.
-    throw new HttpError(503, "prayer_unavailable", "We couldn’t prepare your personal prayer. Try again, or continue with a simple prayer.");
-  } finally { await logAiCall(env, tracker, userId, "onboarding_prayer", usage, ok); }
+  // One repair attempt handles occasional format/copying failures without showing partial text.
+  // Each provider attempt is logged separately with its actual technical usage and cost.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let usage: AiUsage | null = null;
+    let ok = false;
+    try {
+      let raw = "";
+      const messages = prayerMessages(answers);
+      if (attempt) messages[0]!.content += " A previous attempt failed validation. Return valid JSON only; use 75–120 words, no quotation marks in the prayer, paraphrase concerns naturally, and end with Amen.";
+      const stream = streamChat(env, messages, { maxTokens: 650, temperature: attempt ? 0.25 : 0.4, sensitive: true });
+      for (;;) {
+        const item = await stream.next();
+        if (item.done) { usage = item.value; break; }
+        raw += item.value;
+        if (raw.length > 8000) { await stream.return(undefined as never); throw new Error("invalid prayer output"); }
+      }
+      const prayer = validatePrayer(raw, answers);
+      if (!prayer) continue;
+      ok = true;
+      return Response.json({ prayer, kind: "personal_prayer", version: 1 });
+    } catch {
+      // Provider text and personal context are never logged or returned on failure.
+    } finally { await logAiCall(env, tracker, userId, "onboarding_prayer", usage, ok); }
+  }
+  throw new HttpError(503, "prayer_unavailable", "We couldn’t prepare your personal prayer. Try again, or continue with a simple prayer.");
 }

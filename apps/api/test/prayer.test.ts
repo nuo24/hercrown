@@ -39,3 +39,11 @@ it('does not send invalid input to the model or return unvalidated model output'
  expect((await api('/me/onboarding/prayer',{token,method:'POST',body:JSON.stringify({heart:['spam']})})).status).toBe(400); expect(fetch).not.toHaveBeenCalled();
  expect((await api('/me/onboarding/prayer',{token,method:'POST',body:'{}'})).status).toBe(503);
 });
+it('repairs one invalid generation and logs each actual provider call separately', async () => {
+ const {token,userId} = await signInGuest();
+ const fetch = vi.spyOn(globalThis,'fetch').mockImplementationOnce(async () => provider('not json')).mockImplementationOnce(async () => provider());
+ const res = await api('/me/onboarding/prayer',{token,method:'POST',body:'{}'});
+ expect(res.status).toBe(200); expect(fetch).toHaveBeenCalledTimes(2);
+ const rows = await env.DB.prepare('SELECT cost_micros FROM usage_ledger WHERE user_id=?1').bind(userId).all();
+ expect(rows.results).toHaveLength(2);
+});

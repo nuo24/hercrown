@@ -70,7 +70,7 @@ struct CommunityView: View {
                             Spacer()
                             Text("\(state.causes.count) causes · 1 vote").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                         }.padding(.top, 17).padding(.bottom, 22)
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], alignment: .leading, spacing: 28) {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16, alignment: .top), GridItem(.flexible(), alignment: .top)], alignment: .leading, spacing: 28) {
                             ForEach(state.causes) { cause in causeTile(cause, selected: state.vote == cause.id) }
                         }
                         Text(state.vote == nil ? "One member. One vote. You can change your choice until \(deadline(round))." : "Your vote is saved. You can change it before \(deadline(round)).")
