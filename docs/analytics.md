@@ -140,3 +140,11 @@ Other endpoints: `installs.pipe` (top of funnel), `revenue.pipe` (daily trials, 
 - Real V2 payloads carry `is_trial_conversion`, `price` and `proceeds` as documented.
 - `identify(userId:)` makes webhooks land on the right person.
 - A staging run-through shows every funnel event in Tinybird, and a thrown test error appears there too.
+
+### November 8 onboarding and Community
+
+- `onboarding_step`: the new flow sends `welcome`, `time`, `demo`, `name`, `comparison`, `season`, `familiarity`, `topics`, `burden`, `loved_ones`, `rhythm`, `prayer`, `reminder`, `ready`; `index` is 0–13. Existing legacy step names remain accepted for older builds.
+- `prayer_prepared`: `generated` boolean distinguishes a validated model result from the reviewed simple fallback. `prayer_recited` has no properties. Names, choices, concerns, loved ones and prayer text never enter analytics.
+- Server `ai_call` feature `onboarding_prayer` records technical tokens, cost and success only, with a matching usage-ledger entry.
+- Server `community_vote_saved`: machine IDs `cause_id` and `round_id`, emitted on a changed vote only; duplicate retries do not create another event or ballot choice.
+- Server `community_cause_suggested`: no properties. Nomination names, location, website and reason stay in the authenticated review records, never the event stream.

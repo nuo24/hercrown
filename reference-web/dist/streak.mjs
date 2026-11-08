@@ -7,3 +7,9 @@ export function streakSummary(days=[],today=localDay()){
  return {current,best,readToday:set.has(now),week:Array.from({length:7},(_,i)=>{const n=now-6+i;return {day:new Date(n*86400000).toISOString().slice(0,10),read:set.has(n)}})}
 }
 export function recordDay(days,today=localDay()){return [...new Set([...(Array.isArray(days)?days:[]),today])].filter(d=>Number.isFinite(ordinal(d))).sort()}
+
+// Calendar week, Monday first; UTC ordinals avoid daylight-saving date shifts.
+export function calendarWeek(days=[],today=localDay()){
+ const now=ordinal(today),weekday=new Date(now*86400000).getUTCDay(),monday=now-((weekday+6)%7),read=new Set(days);
+ return Array.from({length:7},(_,i)=>{const n=monday+i,day=new Date(n*86400000).toISOString().slice(0,10);return {day,read:n<=now&&read.has(day),today:n===now,future:n>now}});
+}

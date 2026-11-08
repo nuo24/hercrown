@@ -1,0 +1,36 @@
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(assets/fonts/dm-sans-400.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(assets/fonts/dm-sans-500.ttf) format('truetype');
+}
+
+/* UI-only typography pass. Baskerville display and Scripture styles stay intact. */
+:root{--font-ui:'DM Sans',-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;--font-mono:var(--font-ui)}
+body.in-app{font-family:var(--font-ui);font-weight:400}
+.in-app :is(button,input,select,textarea){font-family:var(--font-ui)}
+.in-app .app-header h1,.in-app .discover-view .app-header h1{font:500 28px/1.15 var(--font-ui);letter-spacing:-.4px}
+.in-app nav.liquid-dock button,.in-app .discover-view nav.liquid-dock button{font:500 11.5px/1.25 var(--font-ui);letter-spacing:0}
+.in-app nav.liquid-dock button.active,.in-app .discover-view nav.liquid-dock button.active{font-weight:500}
+.in-app .primary,.in-app .screen .primary{font:500 15px/1.3 var(--font-ui);letter-spacing:0;text-transform:none}
+.in-app .secondary{font:500 14px/1.4 var(--font-ui);letter-spacing:0;text-transform:none}
+.in-app .textbtn{font-family:var(--font-ui);font-weight:500;letter-spacing:0}
+.in-app .nr-header h1{font:500 24px/1.2 var(--font-ui);letter-spacing:-.3px;min-width:0;text-wrap:balance}
+.in-app .nr-sheet-title{font:500 20px/1.3 var(--font-ui);letter-spacing:-.2px}
+.in-app :is(.nr-group-title,.nr-content h3,.nr-sheet h3,.settings-section-title){font-family:var(--font-ui)!important;font-weight:500!important;letter-spacing:0}
+.in-app :is(.nr-row,.nr-control,.settings-row-copy strong,.settings-field){font-family:var(--font-ui);font-size:14px;font-weight:400}
+.in-app :is(.nr-row strong,.settings-row-copy strong,.nr-field,.nr-choice-list button){font-weight:500}
+.in-app :is(.nr-content p,.nr-sheet p,.nr-field input,.nr-field textarea,.nr-field select){font-family:var(--font-ui)}
+.in-app :is(.streak-heading strong,.streak-header span,.nr-journal-row strong){font-family:var(--font-ui);font-weight:500}
+.in-app .streak-complete{font-size:14px!important;font-weight:500}
+.in-app :is(.filterbar button,.nr-segments button,.version-badge,.pill-control,.settings-restart){font-family:var(--font-ui);font-weight:500;letter-spacing:0}
+.in-app .nr-row small,.in-app .settings-row-copy small{font:400 12px/1.5 var(--font-ui)}
+@media(max-width:359px){.in-app .app-header h1,.in-app .discover-view .app-header h1{font-size:26px}.in-app .nr-header h1{font-size:22px}.in-app nav.liquid-dock button{font-size:11px}}

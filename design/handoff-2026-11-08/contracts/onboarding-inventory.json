@@ -1,0 +1,22 @@
+{
+  "flow": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "screenCount": 14,
+  "acknowledgementScenarios": 48,
+  "prayerScenarios": 46,
+  "sourceSha256": "c87abc2e48d4485a70ea2ea089a7f024d550304f185e348a6657602a0fae18b4"
+}

@@ -101,3 +101,7 @@ In the production-pointed TestFlight build, verify onboarding, free reading, san
 - Never run the `:staging` scripts with production ids or the other way round.
 - The owner runs the production smoke checks with dedicated test accounts. Never use real user data for testing.
 - `APP_STORE_ALLOW_SANDBOX` stays `"true"` in production: App Review and TestFlight purchases are sandbox purchases.
+
+## November 8 additions (staging first)
+
+Migrations now run through **0013**: 0012 adds only per-user prayer request counts; 0013 adds Community votes and private suggestions. No new secrets/vendors are required: personal prayers reuse OPENROUTER_API_KEY and the existing model configuration. Production does not expose the supplied fictional ballot profiles. Before enabling a live ballot, approve recipient identities, grant/tie rules, and a verified giving ledger. The owner reports $7,350 completed donations and a 30%-of-revenue commitment. Reconcile the financial records before launch. Review/publish the expanded App Privacy label for optional personal-prayer processing and private Community suggestions. This staging test release does not deploy these additions to production.

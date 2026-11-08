@@ -1,0 +1,32 @@
+/* Approved direction 01: artwork introduces a specific passage and action. */
+.in-app .discover-view .discover-editorial-header h1{font-size:28px}
+.in-app .discover-view .discover-feature.featured-passage{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:0;width:auto;height:auto;min-height:219px;padding:17px 22px 24px;margin:0;border-radius:0;background:transparent;box-shadow:none}
+.featured-passage-copy{position:relative;z-index:1;min-width:0}
+.in-app .discover-view .featured-passage h2{font:400 34px/1.02 var(--font-display);letter-spacing:-.6px;margin:0 0 13px;max-width:190px;text-wrap:balance}
+.in-app .discover-view .featured-passage p{font:400 12px/1.6 var(--font-ui);color:var(--text-muted);max-width:180px;margin:0 0 15px}
+.in-app .discover-view .featured-passage-action{display:inline-flex;align-items:center;gap:9px;padding:6px 0;min-height:44px;border:0;border-radius:0;background:none;color:var(--text-primary);font:500 12px/1.4 var(--font-ui);box-shadow:none}
+.featured-passage-action svg{width:16px;height:16px;flex-shrink:0}
+.in-app .discover-view .discover-feature.featured-passage>.featured-passage-art{display:block;width:100%;max-width:none;height:182px;object-fit:contain;transform:rotate(12deg);filter:drop-shadow(0 11px 12px #00000018);pointer-events:none}
+.in-app .discover-view .discover-section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 22px 15px;padding-top:19px;border-top:1px solid var(--border-subtle)}
+.discover-section-heading h2{font:500 13px/1.4 var(--font-ui);margin:0;color:var(--text-primary)}
+.discover-section-heading span{font:400 10px/1.4 var(--font-ui);color:var(--text-muted)}
+.in-app .discover-view .discovery-stack.discover-editorial-list{gap:19px}
+.in-app .discover-view .verse-card.discover-entry{min-height:86px}
+.in-app .discover-view .discover-entry-open{gap:14px}
+.in-app .discover-view .discover-thumb{width:74px;height:86px}
+.in-app .discover-view .discover-entry h2{font-size:23px;line-height:1.06;max-width:170px;margin-bottom:11px;letter-spacing:-.3px}
+.in-app .discover-view .discover-entry-reference{font-size:10px}
+.in-app .discover-view .discover-entry-topic{font-size:9px;margin-top:3px}
+.in-app .discover-view .discover-feature[hidden],.in-app .discover-view .discover-section-heading[hidden]{display:none!important}
+.in-app .discover-view:has(.nr-loading) .discover-section-heading,.in-app .discover-view:has(.discovery-stack>.nr-empty) .discover-section-heading{display:none}
+@media(max-width:359px){.in-app .discover-view .discover-feature.featured-passage{padding-inline:18px;min-height:205px}.in-app .discover-view .featured-passage h2{font-size:30px}.in-app .discover-view .featured-passage p{font-size:11px}.in-app .discover-view .discover-feature.featured-passage>.featured-passage-art{height:156px}.in-app .discover-view .discover-section-heading{margin-inline:18px}.in-app .discover-view .discover-entry-open{gap:10px}.in-app .discover-view .discover-thumb{width:62px;height:80px}.in-app .discover-view .discover-entry h2{font-size:21px}.in-app .discover-view .verse-card.discover-entry{min-height:80px}}
+
+/* Consistent contextual artwork on every passage, with no thumbnail tile. */
+.in-app .discover-view .discover-thumb{background:transparent!important;overflow:visible}
+.in-app .discover-view .discover-thumb img{padding:3px;filter:drop-shadow(0 5px 6px #00000012)}
+.passage-study-art{display:block;object-fit:contain;margin:4px auto 22px;filter:drop-shadow(0 6px 8px #00000012)}
+.passage-library-heading{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.passage-library-heading img{object-fit:contain;flex-shrink:0}
+.passage-library-heading h3{margin:0!important}
+
+.home-library-shortcuts{display:flex;gap:24px;margin:0 24px 16px;border-bottom:1px solid var(--border-subtle);padding-bottom:8px}.home-library-shortcuts button{display:inline-flex;align-items:center;gap:7px;min-height:44px;font:400 12px var(--font-ui);background:none;border:0;color:var(--text-primary)}.home-library-shortcuts svg{width:17px;height:17px}

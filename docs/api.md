@@ -125,3 +125,11 @@ After launch, the human operator can use `production` instead of `staging` to re
 ## Analytics
 
 `POST /events` with `{ events: [{ id, name, at, props }] }`. See [analytics.md](analytics.md) for the event list and when to send each.
+
+## Personal onboarding prayer and Community (November 8)
+
+- `POST /me/onboarding/prayer` (any authenticated reader, no Plus required): optional `name` (24), `season` (fixed choices), `heart` (up to 3 fixed topics), `familiarity`, `burden` (100), `lovedOnes` (60). Returns `{prayer,kind:"personal_prayer",version:1}` only after validation. Three attempts per user per UTC day; 429 at cap; 503 retry/simple-prayer fallback on invalid or unavailable generation. Input is neither stored nor logged; technical AI usage is recorded.
+- `GET /me/community`: owner-confirmed giving `{totalCents,currency,revenuePercent,reportedAt}`, server-owned `{id,title,closesAt,preview}` round or null, causes, and this member’s vote. Staging has the supplied preview profiles; production does not expose a fictional ballot.
+- `PUT /me/community/vote`: `{roundId,causeId}`; rejects stale/unknown round and candidate IDs, one atomic upsert per member/month, duplicate same-choice retry is idempotent. No purchase or payment.
+- `GET /me/community/suggestions`: this member’s private suggestions (up to 100).
+- `POST /me/community/suggestions`, `PATCH /me/community/suggestions/:id`: `{name,type,city,website,reason}`; name 2–90, type Charity/Local church/Community project, optional city <=90 and http(s) website <=500, reason 10–500. Five new suggestions/day; duplicate same-name/city retries return existing receipt; only owner/submitted records can be edited. No automatic publication or promise of funding.

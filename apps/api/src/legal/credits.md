@@ -22,3 +22,7 @@ Her Crown is built on the work of translators, scholars and open-data projects. 
 ## Devotionals and reflections
 
 Reflection prompts and devotionals are written for Her Crown. Devotionals drafted with AI assistance are reviewed and approved by our team before they appear.
+
+## Community photographs
+
+Representative stock photographs supplied with the November 8 design: [community volunteering](https://www.pexels.com/photo/6646918/), [classroom](https://www.pexels.com/photo/5212345/), [mother and baby](https://www.pexels.com/photo/3875225/), and [church cross](https://www.pexels.com/photo/208315/). They illustrate the preview profiles and do not identify beneficiaries or imply that the photographed people endorse these causes.

@@ -1,0 +1,21 @@
+/* The preview iframe fills the display. Insets protect content, not the canvas. */
+body.embedded-ios{--app-safe-top:62px;--app-safe-bottom:34px;--menu-bottom:12px}
+.embedded-ios.in-app .feed:not(.reader-view):not(.nr-full){padding-top:var(--app-safe-top);padding-bottom:calc(116px + var(--menu-bottom))}
+.embedded-ios.in-app .reader-toolbar{top:calc(var(--app-safe-top) + 12px)}
+.embedded-ios.in-app .reader-pages{margin-top:var(--app-safe-top);height:calc(100svh - var(--app-safe-top) - 100px - var(--menu-bottom))!important}
+.embedded-ios.in-app .verse-rail{top:calc(var(--app-safe-top) + 90px);bottom:calc(100px + var(--menu-bottom))}
+.embedded-ios.in-app nav.liquid-dock,.embedded-ios.in-app .discover-view nav.liquid-dock{bottom:var(--menu-bottom)!important}
+.embedded-ios.in-app nav.liquid-dock:before{bottom:calc(-1 * var(--menu-bottom))}
+.embedded-ios.in-app .nr-full .nr-content{padding-bottom:calc(40px + var(--app-safe-bottom))}
+.embedded-ios.in-app .dialog-inner{padding-bottom:calc(30px + var(--app-safe-bottom))}
+@media(max-height:700px){.embedded-ios.in-app .verse-rail{top:calc(var(--app-safe-top) + 76px)}}
+
+/* The reading canvas must continue behind the translucent menu. Keep controls
+   in the old safe content region while allowing scrolling verses beneath it. */
+body.in-app .reader-view{--reader-menu-reserve:calc(100px + var(--menu-bottom,0px))}
+body.in-app .reader-view .reader-pages{height:calc(100svh - var(--app-safe-top,0px))!important}
+body.in-app .reader-view .reader-page{padding-bottom:calc(116px + var(--reader-menu-reserve))}
+body.in-app .reader-view .reader-side-actions{bottom:calc(62px + var(--reader-menu-reserve))}
+body.in-app .reader-view .reader-hint{bottom:calc(24px + var(--reader-menu-reserve))}
+body.in-app .reader-view nav.liquid-dock:before{background:linear-gradient(to bottom,rgba(var(--menu-rgb),0),rgba(var(--menu-rgb),.18) 38%,rgba(var(--menu-rgb),.55) 100%);-webkit-backdrop-filter:blur(20px) saturate(1.05);backdrop-filter:blur(20px) saturate(1.05)}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){body.in-app .reader-view nav.liquid-dock:before{background:rgb(var(--menu-rgb));-webkit-backdrop-filter:none;backdrop-filter:none}}

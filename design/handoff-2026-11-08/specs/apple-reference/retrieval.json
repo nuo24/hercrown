@@ -1,0 +1,26 @@
+[
+  {
+    "id": "widgetkit",
+    "url": "https://developer.apple.com/documentation/widgetkit/creating-a-widget-extension.md",
+    "retrieved": false,
+    "reason": "URLError"
+  },
+  {
+    "id": "storekit",
+    "url": "https://developer.apple.com/documentation/storekit/in-app-purchase.md",
+    "retrieved": false,
+    "reason": "URLError"
+  },
+  {
+    "id": "alternate-icons",
+    "url": "https://developer.apple.com/documentation/uikit/uiapplication/setalternateiconname(_:completionhandler:).md",
+    "retrieved": false,
+    "reason": "URLError"
+  },
+  {
+    "id": "launching",
+    "url": "https://developer.apple.com/design/human-interface-guidelines/launching.md",
+    "retrieved": false,
+    "reason": "URLError"
+  }
+]

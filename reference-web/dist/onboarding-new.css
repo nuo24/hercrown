@@ -1,0 +1,51 @@
+/* The app's existing styles own typography, controls, colors and illustrations.
+   This file only contains the new flow's viewport and conversation mechanics. */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}body{display:block}body>.editorial{display:none}#app{width:100%;max-width:440px;height:var(--visible-height,100dvh);min-height:0;margin:auto;overflow:hidden;position:relative;background:#fff}
+.screen{height:var(--visible-height,100dvh);min-height:0!important;max-height:var(--visible-height,100dvh);overflow:hidden;box-sizing:border-box}.screen h2:focus{outline:none}
+.new-screen{display:flex;flex-direction:column}.new-screen>.top,.new-screen>.progress,.new-screen>.actions{flex:none}.new-screen .content{position:relative;flex:1;min-height:0}.new-screen .question-body{height:100%;min-height:0}.new-screen .top-spacer{width:44px}.new-screen .kicker{text-transform:none;letter-spacing:0;font-size:11px;font-weight:400}
+.new-screen .onboarding-heading{display:grid;grid-template-columns:minmax(0,1fr) 82px;gap:16px;align-items:center;margin:0 0 18px}.new-screen .onboarding-heading>img{display:block;width:82px;height:90px;object-fit:contain}.new-screen .onboarding-heading h2{margin:0!important}
+.new-screen .season-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px}.season-choices>.choice{margin:0}.limit{font:12px var(--font-ui);margin:4px 0;min-height:0}
+.text-screen .question-body{display:flex;flex-direction:column;justify-content:space-between}.text-screen .conversation{padding-top:20px}.input-dock{display:flex;align-items:center;gap:12px;border-bottom:1px solid #aab4bc;padding:8px 0;margin-bottom:8px}.input-dock input{width:100%;min-width:0;border:0;background:transparent;outline:none;font:400 25px/1.4 var(--font-display);color:#111;padding:6px 0}.input-dock button{flex:none;min-width:44px;min-height:44px;border:0;background:transparent;color:#111;font-size:30px}.text-screen .actions{display:none}
+.question-lead{position:absolute;inset:4px 0 auto;font:400 32px/1.12 var(--font-display);letter-spacing:-1px;color:var(--ink);margin:0;z-index:1}.question-body{will-change:transform,opacity}
+.new-screen .demo{width:210px;height:clamp(180px,34vh,270px);overflow:hidden;border:5px solid #252825;border-radius:25px;margin:24px auto;background:#fff}.demo video{width:100%;height:100%;object-fit:contain}.field{display:block;font-size:12px;margin-top:14px}.field input{display:block;width:100%;font:16px var(--font-ui);padding:12px;margin-top:8px;border:1px solid #e4e4e7;background:white;border-radius:12px}.switchrow{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:44px}.switchrow input{width:44px;height:26px;accent-color:#111}.notification small,.notification strong{display:block}.new-screen .notification{padding:16px;margin-top:18px}.notification strong{font-size:14px;margin-top:8px}.notification p{font-size:13px;line-height:1.5}.notification small{font-size:10px}.new-screen .reminder{padding:16px}.personal-prayer{font:400 20px/1.4 var(--font-display);margin:16px 0;border:0}.recite{user-select:none;-webkit-user-select:none;touch-action:none}.recite-status{font-size:12px;min-height:0;text-align:center;margin:0}.letter-copy{font:20px/1.5 var(--font-display)}
+.new-screen .actions{animation:none!important}.new-screen .question-body>.sub{animation:none!important}.screen.welcome{position:relative;isolation:isolate}.welcome .top{min-height:40px}
+.screen.scroll-intro .intro-content{position:relative;min-height:0;padding-bottom:12px}.screen.scroll-intro .intro-content>p:empty,.screen.scroll-intro .footnote:empty{display:none}.screen.scroll-intro .christ-moment{position:absolute;top:45%;left:0;right:0;width:100%;max-width:325px;margin:0 auto;will-change:transform}.screen.scroll-intro .christ-moment .cost-bridge{font:400 37px/1.12 var(--font-display);letter-spacing:-.7px;color:#111;margin:0;max-width:none;animation:none!important}.screen.scroll-intro .christ-art{display:block;width:100px;height:100px;object-fit:contain;margin:24px auto 0;opacity:0}
+@media(max-height:740px){.new-screen .actions{padding-top:12px}.new-screen .sub{margin-bottom:12px}.prayer-screen .sub{display:none}.prayer-screen .personal-prayer{margin:8px 0}.prayer-screen .recite{min-height:44px;padding:4px}.new-screen .demo{height:190px;margin:16px auto}.new-screen .progress{margin:14px 0 24px}}
+@media(max-height:720px){.screen.scroll-intro .christ-moment .cost-bridge{font-size:30px}.screen.scroll-intro .christ-art{width:80px;height:80px;margin-top:18px}}
+@media(max-height:600px){.text-screen .conversation{padding-top:0}.text-screen .progress{margin-bottom:12px}}
+@media(prefers-reduced-motion:reduce){.question-lead{display:none}.question-body{visibility:visible!important}.screen.scroll-intro .intro-art,.screen.scroll-intro .intro-content>h2{display:none}.screen.scroll-intro .christ-art{opacity:1}.screen.scroll-intro .christ-moment{position:static;margin-top:0}}
+
+/* Conversation handoffs never share the same visible heading area. */
+.new-screen .question-lead{max-width:100%;line-height:1.2;letter-spacing:-.6px}
+.new-screen .question-lead[hidden]{display:none!important}
+.new-screen .question-body[inert]{visibility:hidden;pointer-events:none}
+.screen .actions[aria-hidden="true"]{visibility:hidden!important;pointer-events:none;animation:none!important}
+.prayer-screen .personal-prayer .onboarding-word{display:inline}
+
+/* Phone demo: 10% larger than the previous 270px presentation. */
+.new-screen .demo.demo-iphone{position:relative;height:297px;width:auto;aspect-ratio:440/956;max-width:100%;margin:18px auto 12px;border:3px solid #252825;border-radius:24px;box-shadow:0 0 0 1px #8c8e8b,0 8px 16px #11111114;display:flex;flex-direction:column;background:#fff;box-sizing:border-box;overflow:hidden}
+.demo-iphone .demo-status{position:relative;flex:none;height:24px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;font:600 7px/1 var(--font-ui);color:#111}
+.demo-island{position:absolute;left:50%;top:4px;transform:translateX(-50%);height:13px;width:39px;border-radius:20px;background:#000}
+.demo-system{font-size:6px;letter-spacing:1px}.new-screen .demo-iphone video{display:block;width:100%;height:auto;flex:1;min-height:0;object-fit:contain;background:#fff}
+.demo-home{height:16px;flex:none;position:relative}.demo-home:after{content:"";position:absolute;bottom:5px;left:34%;width:32%;height:2px;border-radius:8px;background:#111}
+@media(max-height:740px){.new-screen .demo.demo-iphone{height:209px;margin:12px auto}.step-2 .question-body>h2{font-size:26px!important;line-height:1.14!important}}
+
+/* Second-page copy: 10% smaller, with a focused urgency accent. */
+.screen.scroll-intro .intro-content>h2,.screen.scroll-intro .christ-moment .cost-bridge{font-size:33.3px}
+.screen.scroll-intro .intro-content>h2 em{color:inherit}
+.screen.scroll-intro .scroll-time-warning{color:#A94F75}
+@media(max-width:359px){.screen.scroll-intro .intro-content>h2{font-size:27.9px}}
+@media(max-height:720px){.screen.scroll-intro .intro-content>h2,.screen.scroll-intro .christ-moment .cost-bridge{font-size:27px}}
+
+/* Remaining onboarding pages: reduce display copy by 10%. */
+.new-screen h2,.new-screen .question-lead{font-size:28.8px!important}
+@media(max-width:359px){.new-screen .onboarding-heading h2{font-size:31.5px!important}}
+@media(max-height:740px){.new-screen.step-2 .question-body>h2{font-size:23.4px!important}}
+
+/* Reuse the approved reminder controls and native notification surface. */
+.new-screen.reminder-screen .question-body>.sub{margin:0 0 24px}
+.new-screen.reminder-screen .reminder{padding:0}
+.new-screen.reminder-screen .reminder-preview{margin-top:24px}
+.new-screen.reminder-screen .notification{margin-top:0}
+.new-screen.reminder-screen .notification p{font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif}
+@media(max-height:740px){.new-screen.reminder-screen .question-body>.sub{margin-bottom:16px}.new-screen.reminder-screen .reminder-preview{margin-top:18px}}

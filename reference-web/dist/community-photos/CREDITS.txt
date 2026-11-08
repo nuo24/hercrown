@@ -1,0 +1,8 @@
+Representative stock photographs for fictional cause profiles. Photos do not identify or imply association with these sample charities.
+
+Community volunteering — https://www.pexels.com/photo/6646918/
+Classroom — https://www.pexels.com/photo/5212345/
+Mother and baby — https://www.pexels.com/photo/3875225/
+Church cross — https://www.pexels.com/photo/208315/
+
+Image files downloaded from the corresponding images.pexels.com/photos/{id}/pexels-photo-{id}.jpeg URLs, resized by the source CDN to 900px.

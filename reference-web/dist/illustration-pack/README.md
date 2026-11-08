@@ -1,4 +1,4 @@
-# Bible Scroll illustration pack · v5
+# Bible Scroll illustration pack · v6
 
 Twenty-five original generated assets: 24 photographic cutouts and one transparent cloud bank. Transparent PNG originals are kept at full resolution. Open `index.html` for a visual contact sheet; `manifest.json` includes stable asset names and generation prompts.
 
@@ -54,3 +54,8 @@ New subjects: faith-hands (Faith), purpose-compass (Purpose), relationship-hands
 ## Cloud background
 
 `cloud-bank.png` is a wide atmospheric background for onboarding and membership. Its feathered alpha edges intentionally have no paper contour. Render behind content at low opacity, preserve its aspect ratio, and keep copy legible. It is decorative and should be hidden from accessibility APIs.
+
+
+## Home refresh expansion · v6
+
+Ten new photographic cutouts are registered in manifest.json and the contact sheet. See HOME-REFRESH.md for semantic uses and manifest-home-refresh.json for dimensions/provenance. Home mockup previews use these assets without changing the main app layout.

@@ -2,8 +2,7 @@
   "images": [
     {
       "filename": "quiet-window.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "idiom": "universal"
     }
   ],
   "info": {

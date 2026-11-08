@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "style": "Photographic paper cutouts; transparent PNG; white contour; soft shadow; muted sage, cream and sky",
   "assets": [
     {
@@ -147,6 +147,116 @@
       "file": "cloud-bank.png",
       "use": "Soft onboarding and membership background",
       "prompt": "Create a reusable wide horizontal cloud illustration for the background of an elegant women's Bible reading app. A natural photographic cluster of soft luminous white cumulus clouds, with delicate pale sky-blue shadows and warm ivory highlights. Photorealistic cottony depth, sophisticated peaceful editorial feel. Wide landscape composition, cloud bank roughly along the bottom two-thirds, irregular organic cloud silhouette fully isolated on a true transparent background. Softly feathered semi-transparent edges, no hard rectangle or sticker outline. No sky background, no sun, no text, no sparkle, no people, no religious symbols, no watermark. Suitable as a subtle translucent background accent behind app copy; center has softly sparse cloud detail."
+    },
+    {
+      "id": "devotional-teacup",
+      "file": "devotional-teacup.png",
+      "prompt": "A cream porcelain teacup on a small saucer, pale sage tea, a tiny chamomile blossom resting beside it, no steam",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-53a4bf73-23ca-4146-8e78-e02b9ca81e31.png"
+    },
+    {
+      "id": "prayer-envelope",
+      "file": "prayer-envelope.png",
+      "prompt": "An ivory cotton-paper envelope partly open with a blank folded prayer note, delicate muted blue silk ribbon tied loosely around it, no writing",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-479542ee-944c-4af4-b497-c97341f4b4b2.png"
+    },
+    {
+      "id": "reflection-quill",
+      "file": "reflection-quill.png",
+      "prompt": "A natural ivory feather quill beside a small warm gray ceramic ink pot, refined and tactile",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-01abcbb4-dc69-4a0d-b9a4-ab11457f98a1.png"
+    },
+    {
+      "id": "growth-vase",
+      "file": "growth-vase.png",
+      "prompt": "Three delicate white lily-of-the-valley stems in a small pale sage ceramic bud vase",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-ee64e233-0d53-4f12-9acf-ca3ff2e0b0ee.png"
+    },
+    {
+      "id": "quiet-window",
+      "file": "quiet-window.png",
+      "prompt": "A small freestanding arched ivory window frame with translucent soft blue glass and warm morning light, no surrounding building",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-4218b725-7cde-437e-8146-3533b893547d.png"
+    },
+    {
+      "id": "faith-key",
+      "file": "faith-key.png",
+      "prompt": "A single vintage small brushed warm brass key on a loosely looped pale sage silk ribbon",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-ada3e25b-d36d-4f6f-a1ab-2b67513e9440.png"
+    },
+    {
+      "id": "wisdom-scroll",
+      "file": "wisdom-scroll.png",
+      "prompt": "A partly unrolled ivory parchment scroll, blank, two small natural wooden rollers, gently curled paper",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-ebbe1d65-6ab5-417c-a42f-446ab6d4e1bb.png"
+    },
+    {
+      "id": "grace-shell",
+      "file": "grace-shell.png",
+      "prompt": "One elegant pale ivory scallop seashell holding a small luminous natural pearl",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-e12ec024-b786-457c-ae8c-6d803ab65ba5.png"
+    },
+    {
+      "id": "hope-nest",
+      "file": "hope-nest.png",
+      "prompt": "A delicate tiny woven twig birds nest with two pale blue eggs and one small white feather",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-4ad1bde6-106f-42d7-999b-08b6b8066260.png"
+    },
+    {
+      "id": "gratitude-bowl",
+      "file": "gratitude-bowl.png",
+      "prompt": "A small handmade cream ceramic bowl with three ripe figs, one cut revealing muted dusty rose flesh, and a green fig leaf",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "usage": "Editorial illustration; not a control icon",
+      "source": "/Users/eyitomiokanlawon/.codex/generated_images/01a19056-04ca-7413-8b40-0c50067f208d/exec-fb85f119-b58b-44c5-9954-70e188acde73.png"
     }
   ]
 }

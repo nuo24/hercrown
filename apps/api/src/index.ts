@@ -1,3 +1,5 @@
+import { getCommunity, voteCommunity, listSuggestions, saveSuggestion } from "./community";
+import { createPrayer } from "./prayer";
 import { recordOfferDecline, reserveReturnOffer, signTrialReturnOffer } from "./return-offers";
 // The whole API as one fetch handler. No router framework (ai-app-playbook chapter 02).
 import { getAuth } from "./auth";
@@ -94,6 +96,8 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
   if (!session) return Response.json({ error: "unauthorized" }, { status: 401 });
   const user = session.user;
 
+  const suggestion = request.method === "PATCH" && /^\/me\/community\/suggestions\/([a-zA-Z0-9-]+)$/.exec(url.pathname);
+  if (suggestion) return saveSuggestion(request, env, user.id, tracker, suggestion[1]);
   switch (`${request.method} ${url.pathname}`) {
     case "GET /me":
       return getMe(env, user);
@@ -111,6 +115,16 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
       return updateProfile(request, env, user);
     case "PATCH /me/preferences":
       return updatePreferences(request, env, user);
+    case "GET /me/community":
+      return getCommunity(env, user.id);
+    case "PUT /me/community/vote":
+      return voteCommunity(request, env, user.id, tracker);
+    case "GET /me/community/suggestions":
+      return listSuggestions(env, user.id);
+    case "POST /me/community/suggestions":
+      return saveSuggestion(request, env, user.id, tracker);
+    case "POST /me/onboarding/prayer":
+      return createPrayer(request, env, user.id, tracker);
     case "POST /me/onboarding/complete":
       return completeOnboarding(env, user, tracker);
     case "GET /me/avatar":

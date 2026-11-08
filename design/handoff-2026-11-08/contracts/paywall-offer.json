@@ -1,0 +1,32 @@
+{
+  "membershipPlans": {
+    "annual": {
+      "name": "7-Day Full Access",
+      "price": 39.99,
+      "period": "year",
+      "detail": "Then $39.99/year",
+      "displayPrice": "$0.00",
+      "displayPeriod": "week"
+    },
+    "monthly": {
+      "name": "Monthly",
+      "price": 5.99,
+      "period": "month",
+      "detail": "$5.99 billed monthly",
+      "displayPrice": "$1.38",
+      "displayPeriod": "week*"
+    }
+  },
+  "annual": {
+    "cta": "Try for $0.00",
+    "payment": "✓ No payment due now",
+    "disclaimer": "7 days free, then $39.99/year. Your Apple Account will be charged when the trial ends. Renews automatically unless canceled at least 24 hours before the trial or subscription period ends. Free trial for eligible new subscribers only. Manage or cancel in Apple Settings. Prices in USD.",
+    "confirmation": "7 days free, then $39.99 per year. No payment due now."
+  },
+  "monthly": {
+    "cta": "Continue for $5.99",
+    "payment": "$5.99 due today",
+    "disclaimer": "$5.99/month, charged to your Apple Account at confirmation. No free trial. Renews automatically at $5.99/month unless canceled at least 24 hours before the current period ends. Manage or cancel in Apple Settings. Prices in USD. *About $1.38/week; billed monthly, not weekly.",
+    "confirmation": "$5.99 due today, then $5.99 per month. No free trial."
+  }
+}

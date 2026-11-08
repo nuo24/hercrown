@@ -2,8 +2,7 @@
   "images": [
     {
       "filename": "faith-hands.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "idiom": "universal"
     }
   ],
   "info": {

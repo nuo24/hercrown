@@ -1,0 +1,17 @@
+# State and native integration
+
+Preserve existing native AppModel/repositories/APIClient, Better Auth guest/Apple sessions, Keychain, verified entitlement state and analytics. Current web localStorage keys are a design reference, not the native storage architecture.
+
+Browser keys include bible-scroll-v1(preferences/legacy notes), her-crown-native-review-v1(review state, notes, saved studies, bookmarks, translation, profile/membership), bible-scroll-reading-days-v1(unique read days), onboarding prayer/reminder v2, her-crown-snapshot-studio-v1 and her-crown-widget-studio-v1(independent designs), IndexedDB her-crown-studio-media/photos, her-crown-community-ballot-v2 and her-crown-cause-suggestions-v1. Source inventory is in contracts/storage-keys.json. Do not migrate arbitrary preview trial/account fixtures into live accounts.
+
+Native source map: Core/APIClient, AppModel, Billing, WidgetBridge; Features/Reader models/views/rail; Study; Discover; Home; Library; Settings; Onboarding; App cold launch and return offers; Widget extension. Existing API uses Cloudflare Worker/D1/R2/KV/queue, Better Auth, Superwall verified entitlements, grounded study tools and bundled KJV/BSB/WEB. See native-baseline/docs/api.md and SOURCE-MAP.md. No new vendor is required by this kit.
+
+Canonical verse identity drives likes/saves, place bookmarks, notes, study, share and widget. Persist translation metadata and reopen exact reference. A personal note is not a public comment unless an actual sharing feature exists. Home Notes uses the same note repository as Bible reflection; no mock duplicate lists. Reading day/streak is computed from recorded activity; store calendar date with deliberate timezone semantics and unique-day constraint.
+
+Photo upload/account image uses native system picker and bounded processing. Snapshot/Widget media is separate from avatar/media API. Private prayer/relationship/heart/free-text answers need appropriate local/cloud storage choices; do not put raw text or third-party prayer names in analytics, error logs or community requests. Account deletion should clear relevant local/server data according to actual policy while preserving legally required billing records.
+
+Native permissions: reminder requests UNUserNotificationCenter only on explicit enabled save, handles already-granted/denied/provisional, schedules one chosen local reminder and cancels/replaces changes. Appearance and app icon changes never reset onboarding. UI selection of an alternate icon must follow actual system success; failure leaves the previous selected icon.
+
+Commerce: current annual$39.99,7-day full-access trial only if eligible, monthly$5.99,no trial. Annual eligible CTA Try for$0.00 / No payment due now; monthly Continue for$5.99 /$5.99due today. Reference$1.38/week is an approximate monthly equivalent, not a weekly plan. Localized StoreKit price/period and real eligibility override fixedUSD sample. Main native paywall is controlled by Superwall dashboard, so porting web CSS alone does not publish it. Purchase/restore pending/cancel/failure/grace/expired and free-reading exit must remain functional. Return offers stay off in production unless explicitly authorized; do not revive obsolete discounted pricing.
+
+No server calls, migrations or deployments were performed while creating this kit. The included source baseline may need reconciliation with the builder's newer checkout. No credentials, user storage or user-uploaded media were copied.

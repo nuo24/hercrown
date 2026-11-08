@@ -1,0 +1,62 @@
+{
+  "status": "Proposed integration contract; not deployed or a claim of existing endpoints",
+  "round": {
+    "id": "server-owned stable ID",
+    "startsAt": "ISO8601",
+    "endsAt": "ISO8601 server time",
+    "status": [
+      "upcoming",
+      "open",
+      "closed"
+    ],
+    "causes": "verified approved records",
+    "selectedCauseId": "authenticated member vote or null"
+  },
+  "voteCommand": {
+    "roundId": "string",
+    "causeId": "string",
+    "idempotencyKey": "string"
+  },
+  "serverConstraints": [
+    "authenticated eligible member",
+    "one unique vote per member per round",
+    "atomic change before deadline",
+    "cause belongs to round",
+    "server-owned deadline",
+    "retry-safe response"
+  ],
+  "nomination": {
+    "id": "server ID",
+    "name": "2..90",
+    "type": [
+      "Charity",
+      "Local church",
+      "Community project"
+    ],
+    "location": "optional up to90",
+    "website": "optional http/https URL",
+    "reason": "10..500",
+    "status": [
+      "submitted",
+      "under_review",
+      "approved",
+      "not_selected"
+    ],
+    "nextRoundId": "server derived"
+  },
+  "ownerDecisions": [
+    "voter eligibility",
+    "funding source/amount",
+    "tie policy",
+    "vetting/moderation",
+    "when/how results shown",
+    "privacy and retention"
+  ],
+  "givingSummary": {
+    "sampleAmountMinor": 6770000,
+    "currency": "USD",
+    "isSample": true,
+    "display": "$67,700 donated so far",
+    "productionSource": "server-verified aggregate of completed donations; define reporting rules with owner"
+  }
+}

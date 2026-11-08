@@ -37,7 +37,7 @@ const unavailable = () => new HttpError(503, "study_unavailable", "Study tools a
 export async function* streamChat(
   env: Env,
   messages: ChatMessage[],
-  opts: { maxTokens: number; temperature?: number },
+  opts: { maxTokens: number; temperature?: number; sensitive?: boolean },
 ): AsyncGenerator<string, AiUsage> {
   if (!aiConfigured(env)) throw new HttpError(503, "study_unavailable", "Study tools aren't configured on this server yet.");
   const started = Date.now();
@@ -69,7 +69,7 @@ export async function* streamChat(
       throw unavailable();
     }
     if (!res.ok || !res.body) {
-      console.error(`ai: OpenRouter ${res.status}`, (await res.text().catch(() => "")).slice(0, 300));
+      console.error(`ai: OpenRouter ${res.status}`, opts.sensitive ? "[personal request redacted]" : (await res.text().catch(() => "")).slice(0, 300));
       throw unavailable();
     }
 
@@ -97,7 +97,7 @@ export async function* streamChat(
         let json: any;
         try { json = JSON.parse(data); } catch { continue; }
         if (json.error) {
-          console.error("ai: provider error", JSON.stringify(json.error).slice(0, 300));
+          console.error("ai: provider error", opts.sensitive ? "[personal request redacted]" : JSON.stringify(json.error).slice(0, 300));
           throw unavailable();
         }
         if (typeof json.model === "string") usage.model = json.model;

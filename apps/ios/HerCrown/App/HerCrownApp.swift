@@ -20,9 +20,8 @@ struct HerCrownApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--preview-reader-tutorial") {
-                ReaderTutorialView(entryPoint: "settings", onFinish: { _ in })
-                    .environment(app).preferredColorScheme(colorScheme)
+            if ProcessInfo.processInfo.arguments.contains("--preview-onboarding") {
+                OnboardingView().environment(app).task { await app.start() }
             } else if ProcessInfo.processInfo.arguments.contains("--preview-return-offer") {
                 ReturnOfferView(firstYear: "$19.99", renewal: "$29.99", onClaim: {}, onClose: {}, onRestore: {})
                     .preferredColorScheme(colorScheme)

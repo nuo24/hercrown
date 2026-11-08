@@ -1,0 +1,37 @@
+{
+  "default": "white",
+  "icons": [
+    {
+      "id": "white",
+      "label": "Pure white",
+      "preview": "app-icons/white.png",
+      "assetCatalogName": "AppIcon",
+      "alternateIconName": null,
+      "default": true
+    },
+    {
+      "id": "cloud",
+      "label": "Cloud sky",
+      "preview": "app-icons/cloud.png",
+      "assetCatalogName": "HerCrownCloud",
+      "alternateIconName": "HerCrownCloud",
+      "default": false
+    },
+    {
+      "id": "sage",
+      "label": "Soft sage",
+      "preview": "app-icons/sage.png",
+      "assetCatalogName": "HerCrownSage",
+      "alternateIconName": "HerCrownSage",
+      "default": false
+    },
+    {
+      "id": "blue",
+      "label": "Powder blue",
+      "preview": "app-icons/blue.png",
+      "assetCatalogName": "HerCrownBlue",
+      "alternateIconName": "HerCrownBlue",
+      "default": false
+    }
+  ]
+}

@@ -41,6 +41,7 @@ export type ServerEvent =
   | "trial_reminder_sent"
   | "ai_call" | "study_viewed" | "study_reported"
   | "support_sent" | "note_saved" | "chapter_completed" | "devotional_read" | "study_saved"
+  | "community_vote_saved" | "community_cause_suggested"
   | "error";
 
 // String values must be known labels or machine IDs. A type check alone would let private text through.
@@ -63,9 +64,11 @@ const tabs = ["bible", "community", "discover", "home"];
 /** Events the app may send to POST /events, with the only props kept for each. */
 export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   app_opened: {},
+  prayer_prepared: { generated: "boolean" },
+  prayer_recited: {},
   tutorial_step: { index: "number", entrypoint: ["onboarding", "settings"] },
   tutorial_finished: { skipped: "boolean", entrypoint: ["onboarding", "settings"] },
-  onboarding_step: { step: ["welcome", "time", "intention", "familiarity", "topics", "rhythm", "reminder", "ready"], index: "number" },
+  onboarding_step: { step: ["welcome", "time", "demo", "name", "comparison", "season", "intention", "familiarity", "topics", "burden", "loved_ones", "rhythm", "prayer", "reminder", "ready"], index: "number" },
   paywall_requested: { placement },
   paywall_viewed: PAYWALL,
   paywall_closed: {},

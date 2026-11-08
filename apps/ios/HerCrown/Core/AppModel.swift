@@ -126,10 +126,10 @@ final class AppModel {
 
     static func allowsTestSessions() async -> Bool {
         guard AppConfig.isStaging else { return false }
-        #if DEBUG
+        #if DEBUG || HC_STAGING_TESTFLIGHT
         return true
         #else
-        return await Billing.isSandbox()
+        return false
         #endif
     }
 
@@ -234,9 +234,15 @@ final class AppModel {
 
     /// Sign in with Apple: links this guest's data to her Apple account (decision 0002), then refreshes.
     func signInWithApple(identityToken: String) async throws {
+        let guestPrayerID = isGuest ? me?.user.id : nil
         let (_, response) = try await api.send("POST", "/api/auth/sign-in/social", json: ["provider": "apple", "idToken": ["token": identityToken]])
         if let token = response.value(forHTTPHeaderField: "set-auth-token") { api.token = token }
         try await refresh()
+        if let guestPrayerID, let currentID = me?.user.id, currentID != guestPrayerID,
+           let prayer = PersonalPrayerStore.read(guestPrayerID) {
+            if PersonalPrayerStore.read(currentID) == nil { PersonalPrayerStore.save(prayer, userID: currentID) }
+            PersonalPrayerStore.remove(guestPrayerID)
+        }
         await Analytics.shared.track("signed_in", ["method": "apple"])
     }
 
@@ -260,6 +266,7 @@ final class AppModel {
     /// Deletes the account and everything in it on the server, then starts over as a new guest on this phone.
     /// Onboarding stays complete (Settings never sends her back through it).
     func deleteAccount() async throws {
+        let prayerUserID = me?.user.id
         await Analytics.shared.track("account_deleted")
         await Analytics.shared.flush()
         let deletedAccount = bookmarkAccount
@@ -267,6 +274,7 @@ final class AppModel {
         bookmarksByAccount.removeValue(forKey: deletedAccount)
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil
+        PersonalPrayerStore.remove(prayerUserID)
         for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position"] { UserDefaults.standard.removeObject(forKey: key) }
         saved = []
         preferences = .defaults

@@ -2,8 +2,7 @@
   "images": [
     {
       "filename": "intention-heart.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "idiom": "universal"
     }
   ],
   "info": {

@@ -89,7 +89,7 @@ Apple reviews the first subscriptions with the first app version. Attach the sub
 | Contact Info → Name | App Functionality | The display name she chooses |
 | User Content → Photos | App Functionality | Optional profile photo |
 | User Content → Customer Support | App Functionality | Support requests and replies |
-| User Content → Other User Content | App Functionality | Private notes on verses and optional profile or onboarding answers |
+| User Content → Other User Content | App Functionality | Private verse notes, optional profile/onboarding answers, personal prayers and Community suggestions |
 | Identifiers → User ID | App Functionality, Analytics | Her account id |
 | Identifiers → Device ID | Analytics, App Functionality | A random install ID and the push notification token for trial reminders |
 | Location → Coarse Location | Analytics | The country code Cloudflare provides with requests, stored with analytics events |
@@ -97,7 +97,9 @@ Apple reviews the first subscriptions with the first app version. Attach the sub
 | Usage Data → Product Interaction | Analytics, App Functionality | Events like "paywall viewed" and "study opened"; reading days and progress |
 | Diagnostics → Other Diagnostic Data | App Functionality | Error reports |
 
-**Not collected:** precise location, contacts, health, financial info (Apple handles payment), browsing history, search history, sensitive info, advertising data.
+**Not collected:** precise location, contacts, payment card details (Apple handles payment), browsing history, advertising data.
+
+**November 8 review required before production:** optional personal-prayer answers can describe religious beliefs or other sensitive concerns and are transmitted to OpenRouter/DeepSeek. Review Sensitive Info and Other User Content declarations in App Store Connect against that processing and the updated privacy policy. Do not leave the prior blanket “no sensitive info” claim in the launch label. Community nominations may include an optional city and website; they remain private review submissions.
 
 This must stay in step with the Privacy Policy. If a new SDK or data type is added, update both.
 

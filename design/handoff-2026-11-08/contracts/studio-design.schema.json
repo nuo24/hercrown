@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "her-crown-verse-design-v1",
+  "title": "Her Crown VerseDesign v1",
+  "type": "object",
+  "required": [
+    "version",
+    "kind",
+    "format",
+    "background",
+    "colors",
+    "third",
+    "intensity",
+    "angle",
+    "color",
+    "font",
+    "fontSize",
+    "align",
+    "art"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "kind": {
+      "enum": [
+        "snapshot",
+        "widget"
+      ]
+    },
+    "format": {
+      "enum": [
+        "portrait",
+        "square",
+        "story",
+        "small",
+        "medium",
+        "large"
+      ]
+    },
+    "background": {
+      "enum": [
+        "gradient",
+        "photo"
+      ]
+    },
+    "colors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "pattern": "^#[0-9A-Fa-f]{6}$"
+      }
+    },
+    "third": {
+      "type": "boolean"
+    },
+    "intensity": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "angle": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 360
+    },
+    "photoId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "photoShade": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 70
+    },
+    "photoFocus": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$"
+    },
+    "font": {
+      "enum": [
+        "baskerville",
+        "italic",
+        "avenir",
+        "dm"
+      ]
+    },
+    "fontSize": {
+      "type": "number",
+      "minimum": 22,
+      "maximum": 52
+    },
+    "align": {
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ]
+    },
+    "watermark": {
+      "type": "boolean"
+    },
+    "source": {
+      "enum": [
+        "chosen",
+        "daily"
+      ]
+    },
+    "art": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "asset",
+          "x",
+          "y",
+          "size",
+          "rotation"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "asset": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "x": {
+            "type": "number",
+            "minimum": 0.07,
+            "maximum": 0.93
+          },
+          "y": {
+            "type": "number",
+            "minimum": 0.06,
+            "maximum": 0.94
+          },
+          "size": {
+            "type": "number",
+            "minimum": 0.07,
+            "maximum": 0.5
+          },
+          "rotation": {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "snapshot"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "format": {
+            "enum": [
+              "portrait",
+              "square",
+              "story"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "widget"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "format": {
+            "enum": [
+              "small",
+              "medium",
+              "large"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

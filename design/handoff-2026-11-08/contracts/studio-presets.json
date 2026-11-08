@@ -1,0 +1,206 @@
+{
+  "FORMATS": {
+    "portrait": {
+      "label": "Portrait",
+      "w": 600,
+      "h": 800,
+      "exportW": 1080,
+      "exportH": 1440
+    },
+    "square": {
+      "label": "Square",
+      "w": 600,
+      "h": 600,
+      "exportW": 1080,
+      "exportH": 1080
+    },
+    "story": {
+      "label": "Story",
+      "w": 600,
+      "h": 1066.6667,
+      "exportW": 1080,
+      "exportH": 1920
+    },
+    "small": {
+      "label": "Small",
+      "w": 300,
+      "h": 300
+    },
+    "medium": {
+      "label": "Medium",
+      "w": 600,
+      "h": 300
+    },
+    "large": {
+      "label": "Large",
+      "w": 600,
+      "h": 630
+    }
+  },
+  "PRESETS": [
+    {
+      "id": "white",
+      "name": "Pure white",
+      "colors": [
+        "#FFFFFF",
+        "#FFFFFF",
+        "#FFFFFF"
+      ],
+      "intensity": 100,
+      "third": false
+    },
+    {
+      "id": "sky",
+      "name": "Soft sky",
+      "colors": [
+        "#FFFFFF",
+        "#C4DFF0",
+        "#E3EDDF"
+      ],
+      "intensity": 70,
+      "third": true
+    },
+    {
+      "id": "garden",
+      "name": "Quiet garden",
+      "colors": [
+        "#FFFFFF",
+        "#D6E4CD",
+        "#E1EDF4"
+      ],
+      "intensity": 70,
+      "third": true
+    },
+    {
+      "id": "rose",
+      "name": "Rose mist",
+      "colors": [
+        "#FFFFFF",
+        "#EBD6DC",
+        "#DEEAF2"
+      ],
+      "intensity": 65,
+      "third": true
+    },
+    {
+      "id": "night",
+      "name": "Evening",
+      "colors": [
+        "#132029",
+        "#344E62",
+        "#596D63"
+      ],
+      "intensity": 100,
+      "third": true
+    }
+  ],
+  "INKS": [
+    [
+      "Ink",
+      "#111111"
+    ],
+    [
+      "White",
+      "#FFFFFF"
+    ],
+    [
+      "Slate",
+      "#526D82"
+    ],
+    [
+      "Olive",
+      "#506554"
+    ],
+    [
+      "Rose",
+      "#8C5B6B"
+    ]
+  ],
+  "FONTS": {
+    "baskerville": {
+      "label": "Baskerville",
+      "css": "Baskerville, Georgia, serif"
+    },
+    "italic": {
+      "label": "Baskerville Italic",
+      "css": "Baskerville, Georgia, serif",
+      "italic": true
+    },
+    "avenir": {
+      "label": "Avenir Next",
+      "css": "\"Avenir Next\", Avenir, sans-serif"
+    },
+    "dm": {
+      "label": "DM Sans",
+      "css": "\"DM Sans\", sans-serif"
+    }
+  },
+  "defaults": {
+    "snapshot": {
+      "version": 1,
+      "kind": "snapshot",
+      "format": "portrait",
+      "background": "gradient",
+      "colors": [
+        "#FFFFFF",
+        "#DDEADA",
+        "#DCECF5"
+      ],
+      "third": true,
+      "intensity": 70,
+      "angle": 155,
+      "photoId": null,
+      "photoShade": 18,
+      "photoFocus": 50,
+      "color": "#111111",
+      "font": "baskerville",
+      "fontSize": 32,
+      "align": "center",
+      "watermark": true,
+      "source": "chosen",
+      "art": [
+        {
+          "id": "a1",
+          "asset": "cosmos",
+          "x": 0.5,
+          "y": 0.2,
+          "size": 0.19,
+          "rotation": 0
+        }
+      ]
+    },
+    "widget": {
+      "version": 1,
+      "kind": "widget",
+      "format": "medium",
+      "background": "gradient",
+      "colors": [
+        "#FFFFFF",
+        "#DDEADA",
+        "#DCECF5"
+      ],
+      "third": true,
+      "intensity": 70,
+      "angle": 155,
+      "photoId": null,
+      "photoShade": 18,
+      "photoFocus": 50,
+      "color": "#111111",
+      "font": "baskerville",
+      "fontSize": 32,
+      "align": "center",
+      "watermark": true,
+      "source": "chosen",
+      "art": [
+        {
+          "id": "a1",
+          "asset": "olive",
+          "x": 0.5,
+          "y": 0.17,
+          "size": 0.13,
+          "rotation": 0
+        }
+      ]
+    }
+  }
+}

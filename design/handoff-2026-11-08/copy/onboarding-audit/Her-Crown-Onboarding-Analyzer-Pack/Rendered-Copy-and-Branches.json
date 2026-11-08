@@ -1,0 +1,1070 @@
+{
+  "build": "flower25",
+  "extracted": "2026-11-08",
+  "flow": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "questions": {
+    "5": {
+      "title": "Which do you spend more time on?",
+      "sub": "Be honest\u2026",
+      "key": "comparison",
+      "options": [
+        "Social media",
+        "The Bible",
+        "About the same"
+      ],
+      "foot": "No judgment. Just a place to begin.",
+      "art": "hourglass"
+    },
+    "7": {
+      "title": "What season of life are you in?",
+      "sub": "Life doesn\u2019t fit in one box. Choose all that feel true.",
+      "key": "season",
+      "multi": true,
+      "options": [
+        "Single",
+        "Dating",
+        "Married",
+        "Motherhood",
+        "Separated or divorced",
+        "Prefer not to say"
+      ],
+      "foot": "You don\u2019t have to have it all figured out.",
+      "art": "cosmos"
+    },
+    "8": {
+      "title": "How familiar does the Bible feel?",
+      "sub": "We\u2019ll meet you at your starting point.",
+      "key": "familiarity",
+      "options": [
+        "Just starting",
+        "I know a little",
+        "I read regularly"
+      ],
+      "foot": "No test. No catching up.",
+      "art": "open-book"
+    },
+    "9": {
+      "title": "What\u2019s on your heart lately?",
+      "sub": "More than one feeling can be true. Choose up to three.",
+      "key": "heart",
+      "multi": true,
+      "options": [
+        "Peace",
+        "Purpose",
+        "Faith",
+        "Relationships",
+        "Identity",
+        "Anxiety",
+        "Gratitude",
+        "Hope",
+        "Wisdom"
+      ],
+      "foot": "Bring the whole of you.",
+      "art": "olive"
+    },
+    "12": {
+      "title": "How much time can you give to God each day?",
+      "sub": "A small moment is a beautiful beginning.",
+      "key": "pace",
+      "options": [
+        "2 minutes",
+        "5 minutes",
+        "10 minutes",
+        "No set goal"
+      ],
+      "foot": "Your pace. You can change it anytime.",
+      "art": "hourglass"
+    }
+  },
+  "screens": [
+    {
+      "step": 0,
+      "withoutNameHTML": "<section class=\"screen welcome\"><div class=\"top\"></div><div class=\"content\"><div class=\"welcome-intro\"><h2 class=\"brand-display\">Less doomscrolling.<br><em>More Scripture.</em></h2><p class=\"sub\">Discover the Bible one passage at a time. Make space for God\u2019s Word in your everyday life.</p></div><div class=\"welcome-photo\"><img src=\"assets/quiet-meadow.png\" alt=\"White wildflowers in a softly sunlit meadow\" fetchpriority=\"high\"></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Get started <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></button><button class=\"secondary\" data-action=\"guest\">Explore as a guest</button><p class=\"footnote\">Come as you are. No account needed.</p></div></section>",
+      "withNameHTML": "<section class=\"screen welcome\"><div class=\"top\"></div><div class=\"content\"><div class=\"welcome-intro\"><h2 class=\"brand-display\">Less doomscrolling.<br><em>More Scripture.</em></h2><p class=\"sub\">Discover the Bible one passage at a time. Make space for God\u2019s Word in your everyday life.</p></div><div class=\"welcome-photo\"><img src=\"assets/quiet-meadow.png\" alt=\"White wildflowers in a softly sunlit meadow\" fetchpriority=\"high\"></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Get started <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></button><button class=\"secondary\" data-action=\"guest\">Explore as a guest</button><p class=\"footnote\">Come as you are. No account needed.</p></div></section>"
+    },
+    {
+      "step": 1,
+      "withoutNameHTML": "<section class=\"screen scroll-intro\"><div class=\"intro-top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"sr-only\">Step 2 of 14</span></div><div class=\"intro-content\"><div class=\"intro-art\" aria-hidden=\"true\"><img class=\"intro-book\" src=\"illustration-pack/open-book.png\" alt=\"\" width=\"164\" height=\"164\"><img class=\"intro-hourglass\" src=\"illustration-pack/hourglass.png\" alt=\"\" width=\"82\" height=\"100\"><img class=\"intro-flower\" src=\"illustration-pack/cosmos.png\" alt=\"\" width=\"60\" height=\"68\"><img class=\"intro-heart\" src=\"illustration-pack/intention-heart.png\" alt=\"\" width=\"54\" height=\"54\"></div><h2>If you scroll for<br><strong>2 hours a day,</strong><br>that\u2019ll be <em><span class=\"scroll-time-warning\">10 years of your life</span> spent on social media.</em></h2><p></p><div class=\"christ-moment\"><p class=\"cost-bridge\">Let\u2019s show you how to turn some of that time toward Christ.</p><img class=\"christ-art\" src=\"illustration-pack/cosmos.png\" alt=\"\"></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></button><p class=\"footnote\"></p></div></section>",
+      "withNameHTML": "<section class=\"screen scroll-intro\"><div class=\"intro-top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"sr-only\">Step 2 of 14</span></div><div class=\"intro-content\"><div class=\"intro-art\" aria-hidden=\"true\"><img class=\"intro-book\" src=\"illustration-pack/open-book.png\" alt=\"\" width=\"164\" height=\"164\"><img class=\"intro-hourglass\" src=\"illustration-pack/hourglass.png\" alt=\"\" width=\"82\" height=\"100\"><img class=\"intro-flower\" src=\"illustration-pack/cosmos.png\" alt=\"\" width=\"60\" height=\"68\"><img class=\"intro-heart\" src=\"illustration-pack/intention-heart.png\" alt=\"\" width=\"54\" height=\"54\"></div><h2>If you scroll for<br><strong>2 hours a day,</strong><br>that\u2019ll be <em><span class=\"scroll-time-warning\">10 years of your life</span> spent on social media.</em></h2><p></p><div class=\"christ-moment\"><p class=\"cost-bridge\">Let\u2019s show you how to turn some of that time toward Christ.</p><img class=\"christ-art\" src=\"illustration-pack/cosmos.png\" alt=\"\"></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-7-7 7 7-7 7\"/></svg></button><p class=\"footnote\"></p></div></section>"
+    },
+    {
+      "step": 2,
+      "withoutNameHTML": "<section class=\"screen new-screen step-2 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"3\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><h2>We\u2019re going to help you spend less time scrolling social media and more time in the Bible.</h2><div class=\"demo demo-iphone\" aria-label=\"iPhone 17 Pro Max app demonstration\"><div class=\"demo-status\" aria-hidden=\"true\"><span>9:41</span><i class=\"demo-island\"></i><span class=\"demo-system\">\u2582\u2585\u2587 \u25b0</span></div><video src=\"onboarding-demo.webm\" autoplay muted loop playsinline aria-label=\"Reading and saving a Bible passage on iPhone\"></video><div class=\"demo-home\" aria-hidden=\"true\"></div></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">A little space for you and His Word.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-2 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"3\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><h2>We\u2019re going to help you spend less time scrolling social media and more time in the Bible.</h2><div class=\"demo demo-iphone\" aria-label=\"iPhone 17 Pro Max app demonstration\"><div class=\"demo-status\" aria-hidden=\"true\"><span>9:41</span><i class=\"demo-island\"></i><span class=\"demo-system\">\u2582\u2585\u2587 \u25b0</span></div><video src=\"onboarding-demo.webm\" autoplay muted loop playsinline aria-label=\"Reading and saving a Bible passage on iPhone\"></video><div class=\"demo-home\" aria-hidden=\"true\"></div></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">A little space for you and His Word.</p></div></section>"
+    },
+    {
+      "step": 4,
+      "withoutNameHTML": "<section class=\"screen new-screen text-screen step-4 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"4\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><p class=\"question-lead\">Now let\u2019s build a Bible experience that\u2019s for you.<br><br>We\u2019ll ask a few questions to shape your own For You page.</p><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>First, what should<br>we call you?</h2><img src=\"illustration-pack/intention-heart.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">Your first name</label><input id=\"answer\" name=\"name\" autocomplete=\"given-name\" autocapitalize=\"words\" enterkeyhint=\"next\" maxlength=\"24\" value=\"\" placeholder=\"Your first name\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen text-screen step-4 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"4\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><p class=\"question-lead\">Now let\u2019s build a Bible experience that\u2019s for you.<br><br>We\u2019ll ask a few questions to shape your own For You page.</p><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>First, what should<br>we call you?</h2><img src=\"illustration-pack/intention-heart.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">Your first name</label><input id=\"answer\" name=\"name\" autocomplete=\"given-name\" autocapitalize=\"words\" enterkeyhint=\"next\" maxlength=\"24\" value=\"Grace\" placeholder=\"Your first name\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>"
+    },
+    {
+      "step": 5,
+      "withoutNameHTML": "<section class=\"screen new-screen step-5 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"5\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Which do you spend more time on?</h2><img src=\"illustration-pack/hourglass.png\" alt=\"\"></div><p class=\"sub\">Be honest\u2026</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Social media</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>The Bible</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>About the same</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">No judgment. Just a place to begin.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-5 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"5\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, which do you spend more time on?</h2><img src=\"illustration-pack/hourglass.png\" alt=\"\"></div><p class=\"sub\">Be honest\u2026</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Social media</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>The Bible</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>About the same</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">No judgment. Just a place to begin.</p></div></section>"
+    },
+    {
+      "step": 7,
+      "withoutNameHTML": "<section class=\"screen new-screen step-7 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"6\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>What season of life are you in?</h2><img src=\"illustration-pack/cosmos.png\" alt=\"\"></div><p class=\"sub\">Life doesn\u2019t fit in one box. Choose all that feel true.</p><div class=\"choices season-choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Single</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Dating</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Married</span></button><button class=\"choice \" data-choice=\"3\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Motherhood</span></button><button class=\"choice \" data-choice=\"4\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Separated or divorced</span></button><button class=\"choice \" data-choice=\"5\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Prefer not to say</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You don\u2019t have to have it all figured out.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-7 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"6\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, what season of life are you in?</h2><img src=\"illustration-pack/cosmos.png\" alt=\"\"></div><p class=\"sub\">Life doesn\u2019t fit in one box. Choose all that feel true.</p><div class=\"choices season-choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Single</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Dating</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Married</span></button><button class=\"choice \" data-choice=\"3\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Motherhood</span></button><button class=\"choice \" data-choice=\"4\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Separated or divorced</span></button><button class=\"choice \" data-choice=\"5\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Prefer not to say</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You don\u2019t have to have it all figured out.</p></div></section>"
+    },
+    {
+      "step": 8,
+      "withoutNameHTML": "<section class=\"screen new-screen step-8 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"7\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>How familiar does the Bible feel?</h2><img src=\"illustration-pack/open-book.png\" alt=\"\"></div><p class=\"sub\">We\u2019ll meet you at your starting point.</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Just starting</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>I know a little</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>I read regularly</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">No test. No catching up.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-8 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"7\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, how familiar does the Bible feel?</h2><img src=\"illustration-pack/open-book.png\" alt=\"\"></div><p class=\"sub\">We\u2019ll meet you at your starting point.</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>Just starting</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>I know a little</span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>I read regularly</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">No test. No catching up.</p></div></section>"
+    },
+    {
+      "step": 9,
+      "withoutNameHTML": "<section class=\"screen new-screen step-9 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"8\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>What\u2019s on your heart lately?</h2><img src=\"illustration-pack/olive.png\" alt=\"\"></div><p class=\"sub\">More than one feeling can be true. Choose up to three.</p><div class=\"chips\"><button class=\"chip \" data-choice=\"0\" aria-pressed=\"false\"><span>Peace</span></button><button class=\"chip \" data-choice=\"1\" aria-pressed=\"false\"><span>Purpose</span></button><button class=\"chip \" data-choice=\"2\" aria-pressed=\"false\"><span>Faith</span></button><button class=\"chip \" data-choice=\"3\" aria-pressed=\"false\"><span>Relationships</span></button><button class=\"chip \" data-choice=\"4\" aria-pressed=\"false\"><span>Identity</span></button><button class=\"chip \" data-choice=\"5\" aria-pressed=\"false\"><span>Anxiety</span></button><button class=\"chip \" data-choice=\"6\" aria-pressed=\"false\"><span>Gratitude</span></button><button class=\"chip \" data-choice=\"7\" aria-pressed=\"false\"><span>Hope</span></button><button class=\"chip \" data-choice=\"8\" aria-pressed=\"false\"><span>Wisdom</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Bring the whole of you.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-9 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"8\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, what\u2019s on your heart lately?</h2><img src=\"illustration-pack/olive.png\" alt=\"\"></div><p class=\"sub\">More than one feeling can be true. Choose up to three.</p><div class=\"chips\"><button class=\"chip \" data-choice=\"0\" aria-pressed=\"false\"><span>Peace</span></button><button class=\"chip \" data-choice=\"1\" aria-pressed=\"false\"><span>Purpose</span></button><button class=\"chip \" data-choice=\"2\" aria-pressed=\"false\"><span>Faith</span></button><button class=\"chip \" data-choice=\"3\" aria-pressed=\"false\"><span>Relationships</span></button><button class=\"chip \" data-choice=\"4\" aria-pressed=\"false\"><span>Identity</span></button><button class=\"chip \" data-choice=\"5\" aria-pressed=\"false\"><span>Anxiety</span></button><button class=\"chip \" data-choice=\"6\" aria-pressed=\"false\"><span>Gratitude</span></button><button class=\"chip \" data-choice=\"7\" aria-pressed=\"false\"><span>Hope</span></button><button class=\"chip \" data-choice=\"8\" aria-pressed=\"false\"><span>Wisdom</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Bring the whole of you.</p></div></section>"
+    },
+    {
+      "step": 10,
+      "withoutNameHTML": "<section class=\"screen new-screen text-screen step-10 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"9\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>Tell us something<br>that\u2019s been<br>weighing you down.</h2><img src=\"illustration-pack/olive.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">In your own words\u2026</label><input id=\"answer\" name=\"more\" autocomplete=\"off\"  enterkeyhint=\"next\" maxlength=\"100\" value=\"\" placeholder=\"In your own words\u2026\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen text-screen step-10 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"9\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>Grace, tell us something<br>that\u2019s been<br>weighing you down.</h2><img src=\"illustration-pack/olive.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">In your own words\u2026</label><input id=\"answer\" name=\"more\" autocomplete=\"off\"  enterkeyhint=\"next\" maxlength=\"100\" value=\"\" placeholder=\"In your own words\u2026\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>"
+    },
+    {
+      "step": 11,
+      "withoutNameHTML": "<section class=\"screen new-screen text-screen step-11 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"10\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>Who\u2019s someone in your life<br><em>you\u2019d like to pray for?</em></h2><img src=\"illustration-pack/relationship-hands.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">My mom, Grace\u2026</label><input id=\"answer\" name=\"names\" autocomplete=\"off\"  enterkeyhint=\"next\" maxlength=\"60\" value=\"\" placeholder=\"My mom, Grace\u2026\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen text-screen step-11 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"10\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"conversation\"><div class=\"onboarding-heading\"><h2>Grace, who\u2019s someone in your life<br><em>you\u2019d like to pray for?</em></h2><img src=\"illustration-pack/relationship-hands.png\" alt=\"\"></div></div><div class=\"input-dock\"><label class=\"sr-only\" for=\"answer\">My mom, Grace\u2026</label><input id=\"answer\" name=\"names\" autocomplete=\"off\"  enterkeyhint=\"next\" maxlength=\"60\" value=\"\" placeholder=\"My mom, Grace\u2026\"><button data-action=\"next\" aria-label=\"Continue\">\u2192</button></div></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\"><span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\"></p></div></section>"
+    },
+    {
+      "step": 12,
+      "withoutNameHTML": "<section class=\"screen new-screen step-12 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"11\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>How much time can you give to God each day?</h2><img src=\"illustration-pack/hourglass.png\" alt=\"\"></div><p class=\"sub\">A small moment is a beautiful beginning.</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>2 minutes</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>5 minutes<small>A gentle place to start</small></span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>10 minutes</span></button><button class=\"choice \" data-choice=\"3\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>No set goal</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Your pace. You can change it anytime.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-12 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><button class=\"textbtn\" data-action=\"next\">Skip</button></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"11\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, how much time can you give to God each day?</h2><img src=\"illustration-pack/hourglass.png\" alt=\"\"></div><p class=\"sub\">A small moment is a beautiful beginning.</p><div class=\"choices\"><button class=\"choice \" data-choice=\"0\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>2 minutes</span></button><button class=\"choice \" data-choice=\"1\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>5 minutes<small>A gentle place to start</small></span></button><button class=\"choice \" data-choice=\"2\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>10 minutes</span></button><button class=\"choice \" data-choice=\"3\" aria-pressed=\"false\"><span class=\"radio\" aria-hidden=\"true\"></span><span>No set goal</span></button></div><p class=\"limit\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Continue<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Your pace. You can change it anytime.</p></div></section>"
+    },
+    {
+      "step": 13,
+      "withoutNameHTML": "<section class=\"screen new-screen step-13 prayer-screen\"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"12\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>A prayer for you.</h2><img src=\"illustration-pack/faith-hands.png\" alt=\"\"></div><p class=\"sub\">Your heart, held in prayer.</p><blockquote class=\"personal-prayer\">Dear God,<br><br>Thank You for Your daughter. Meet her right where she is. Give her rest for today and courage for tomorrow.<br><br> Let her feel loved and draw closer to You.<br><br>Amen.</blockquote><button class=\"recite secondary\" id=\"recite\">Hold to hear your prayer</button><p class=\"recite-status\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Keep this prayer<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You can come back to these words.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-13 prayer-screen\"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"12\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>A prayer for you,<br><em>Grace.</em></h2><img src=\"illustration-pack/faith-hands.png\" alt=\"\"></div><p class=\"sub\">Your heart, held in prayer.</p><blockquote class=\"personal-prayer\">Dear God,<br><br>Thank You for Grace. Meet her right where she is. Give her rest for today and courage for tomorrow.<br><br> Let her feel loved and draw closer to You.<br><br>Amen.</blockquote><button class=\"recite secondary\" id=\"recite\">Hold to hear your prayer</button><p class=\"recite-status\" role=\"status\"></p></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Keep this prayer<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You can come back to these words.</p></div></section>"
+    },
+    {
+      "step": 14,
+      "withoutNameHTML": "<section class=\"screen new-screen step-14 reminder-screen\"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"13\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Would a gentle<br><em>reminder help?</em></h2><img src=\"illustration-pack/reminder-bell.png\" alt=\"\"></div><p class=\"sub\">A quiet invitation to pause.</p><div class=\"reminder\"><label class=\"switchrow\"><span>Daily reminder<small>A quiet nudge, at your pace.</small></span><input type=\"checkbox\" name=\"reminder\" aria-label=\"Daily reminder\" ></label><div class=\"reminder-time-row\"><label for=\"reminder-time\">Remind me at</label><input type=\"time\" id=\"reminder-time\" name=\"time\" value=\"08:00\"></div></div><section class=\"reminder-preview\" aria-label=\"Example reminder\"><p class=\"reminder-preview-label\">A little preview</p><div class=\"notification\"><div class=\"reminder-notification-top\"><span><img src=\"assets/her-crown-app-icon.png\" alt=\"\" width=\"22\" height=\"22\">Her Crown</span><small>now</small></div><h3>A moment in the Word?</h3><p>Set the scroll aside. There\u2019s a little peace waiting for you.</p></div></section></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Save my choice<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You can change this anytime in Settings.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-14 reminder-screen\"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"13\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>Grace, would a gentle<br><em>reminder help?</em></h2><img src=\"illustration-pack/reminder-bell.png\" alt=\"\"></div><p class=\"sub\">A quiet invitation to pause.</p><div class=\"reminder\"><label class=\"switchrow\"><span>Daily reminder<small>A quiet nudge, at your pace.</small></span><input type=\"checkbox\" name=\"reminder\" aria-label=\"Daily reminder\" ></label><div class=\"reminder-time-row\"><label for=\"reminder-time\">Remind me at</label><input type=\"time\" id=\"reminder-time\" name=\"time\" value=\"08:00\"></div></div><section class=\"reminder-preview\" aria-label=\"Example reminder\"><p class=\"reminder-preview-label\">A little preview</p><div class=\"notification\"><div class=\"reminder-notification-top\"><span><img src=\"assets/her-crown-app-icon.png\" alt=\"\" width=\"22\" height=\"22\">Her Crown</span><small>now</small></div><h3>A moment in the Word?</h3><p>Set the scroll aside. There\u2019s a little peace waiting for you.</p></div></section></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"next\">Save my choice<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">You can change this anytime in Settings.</p></div></section>"
+    },
+    {
+      "step": 15,
+      "withoutNameHTML": "<section class=\"screen new-screen step-15 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"14\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>You don\u2019t have to<br>begin perfectly.</h2><img src=\"illustration-pack/cosmos.png\" alt=\"\"></div><p class=\"sub\">Just begin as you are. One passage. One prayer. A little room for God.</p><p class=\"letter-copy\">Your prayer is saved on this device.</p><button class=\"secondary\" data-action=\"download\">Save a copy of my prayer</button></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"restart\">Open my Bible<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Come as you are.</p></div></section>",
+      "withNameHTML": "<section class=\"screen new-screen step-15 \"><div class=\"top\"><button class=\"iconbtn\" data-action=\"back\" aria-label=\"Back\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.65\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m12 19-7-7 7-7M19 12H5\"/></svg></button><span class=\"kicker\" style=\"margin:0\">A moment for you</span><span class=\"top-spacer\"></span></div><div class=\"progress\" role=\"progressbar\" aria-label=\"Onboarding\" aria-valuemin=\"1\" aria-valuemax=\"14\" aria-valuenow=\"14\"><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i><i class=\"on\"></i></div><div class=\"content\"><div class=\"question-body\"><div class=\"onboarding-heading\"><h2>You don\u2019t have to<br>begin perfectly.</h2><img src=\"illustration-pack/cosmos.png\" alt=\"\"></div><p class=\"sub\">Just begin as you are, Grace. One passage. One prayer. A little room for God.</p><p class=\"letter-copy\">Your prayer is saved on this device.</p><button class=\"secondary\" data-action=\"download\">Save a copy of my prayer</button></div></div><div class=\"actions\"><button class=\"primary\" data-action=\"restart\">Open my Bible<span aria-hidden=\"true\"> \u2192</span></button><p class=\"footnote\">Come as you are.</p></div></section>"
+    }
+  ],
+  "acknowledgments": [
+    {
+      "step": 4,
+      "answers": {
+        "name": "Grace"
+      },
+      "text": "It\u2019s lovely to meet you, Grace."
+    },
+    {
+      "step": 5,
+      "answers": {
+        "comparison": "Social media"
+      },
+      "text": "Thank you for being honest. We can begin with one small moment."
+    },
+    {
+      "step": 5,
+      "answers": {
+        "comparison": "The Bible"
+      },
+      "text": "Let\u2019s make space for the time you already love in the Word."
+    },
+    {
+      "step": 5,
+      "answers": {
+        "comparison": "About the same"
+      },
+      "text": "Let\u2019s find a rhythm that feels right for you."
+    },
+    {
+      "step": 8,
+      "answers": {
+        "familiarity": "Just starting"
+      },
+      "text": "You don\u2019t have to know where everything is to begin."
+    },
+    {
+      "step": 8,
+      "answers": {
+        "familiarity": "I know a little"
+      },
+      "text": "There\u2019s room to grow, one passage at a time."
+    },
+    {
+      "step": 8,
+      "answers": {
+        "familiarity": "I read regularly"
+      },
+      "text": "Let\u2019s make space to go a little deeper."
+    },
+    {
+      "step": 12,
+      "answers": {
+        "pace": "2 minutes"
+      },
+      "text": "2 minutes is a gentle place to begin. Let\u2019s make those moments yours."
+    },
+    {
+      "step": 12,
+      "answers": {
+        "pace": "5 minutes"
+      },
+      "text": "5 minutes is a gentle place to begin. Let\u2019s make those moments yours."
+    },
+    {
+      "step": 12,
+      "answers": {
+        "pace": "10 minutes"
+      },
+      "text": "10 minutes is a gentle place to begin. Let\u2019s make those moments yours."
+    },
+    {
+      "step": 12,
+      "answers": {
+        "pace": "No set goal"
+      },
+      "text": "No clock to keep up with. Just a little space for God."
+    },
+    {
+      "step": 9,
+      "answers": {
+        "heart": [
+          "Peace",
+          "Hope",
+          "Wisdom"
+        ]
+      },
+      "text": "You\u2019re bringing peace, hope and wisdom into this space. There\u2019s room for all of it."
+    },
+    {
+      "step": 10,
+      "answers": {
+        "name": "Grace",
+        "more": "I worry about tomorrow."
+      },
+      "text": "\u201cI worry about tomorrow.\u201d Thank you for sharing that, Grace. We\u2019ll bring your words into your prayer."
+    },
+    {
+      "step": 10,
+      "answers": {
+        "more": "I worry about tomorrow."
+      },
+      "text": "\u201cI worry about tomorrow.\u201d Thank you for sharing that. We\u2019ll bring your words into your prayer."
+    },
+    {
+      "step": 11,
+      "answers": {
+        "names": "my mom"
+      },
+      "text": "We\u2019ll lift up my mom in your prayer, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": []
+      },
+      "text": ""
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single"
+        ]
+      },
+      "text": "In this season of being single, this can be a little space for your faith."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating"
+        ]
+      },
+      "text": "As you make room for love, let\u2019s make room for your faith, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating"
+        ]
+      },
+      "text": "As you make room for love, let\u2019s make room for your faith, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Married"
+        ]
+      },
+      "text": "Let\u2019s make room for your own walk with God alongside married life."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Married"
+        ]
+      },
+      "text": "Let\u2019s make room for your own walk with God alongside married life."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Married"
+        ]
+      },
+      "text": "Let\u2019s make room for your own walk with God alongside married life."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Married"
+        ]
+      },
+      "text": "Let\u2019s make room for your own walk with God alongside married life."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Motherhood"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Motherhood"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Motherhood"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Motherhood"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "After a separation, even familiar things can feel different. We\u2019ll begin gently."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Dating",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "You\u2019re making room for God in the midst of motherhood. There\u2019s room for you here, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Being single and raising children can hold so much. This space is for you, too."
+    },
+    {
+      "step": 7,
+      "answers": {
+        "season": [
+          "Prefer not to say"
+        ]
+      },
+      "text": ""
+    }
+  ],
+  "prayerScenarios": [
+    {
+      "answers": {
+        "name": "Grace",
+        "season": []
+      },
+      "text": "Dear God,\n\nThank You for Grace. Meet her right where she is. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Walk with her as she builds her life. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Guide her heart in love. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Walk with her as she builds her life. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Married"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Nurture tenderness in her marriage. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Married"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Walk with her as she builds her life. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Married"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Guide her heart in love. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Married"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Walk with her as she builds her life. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Motherhood"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Be near as she finds her footing after separation. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Dating",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Single",
+          "Dating",
+          "Married",
+          "Motherhood",
+          "Separated or divorced"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Hold her as she cares for her children. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "name": "Grace",
+        "season": [
+          "Prefer not to say"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Grace. Meet her right where she is. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {},
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her rest for today and courage for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Peace",
+          "Hope",
+          "Wisdom"
+        ],
+        "more": "I worry about tomorrow.",
+        "names": "my mom"
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her peace for her heart, hope for tomorrow, wisdom for her choices.\n\nPlease watch over my mom. Hear what weighs on her: \u201cI worry about tomorrow.\u201d Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Peace"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her peace for her heart.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Purpose"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her direction for her next step.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Faith"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her trust amid her questions.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Relationships"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her kindness in her relationships.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Identity"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her confidence in her worth.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Anxiety"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her calm in anxious moments.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Gratitude"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her eyes for everyday goodness.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Hope"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her hope for tomorrow.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "heart": [
+          "Wisdom"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her wisdom for her choices.\n\n Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "children": "Lily"
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her rest for today and courage for tomorrow.\n\nPlease watch over Lily. Let her feel loved and draw closer to You.\n\nAmen."
+    },
+    {
+      "answers": {
+        "people": [
+          "Family"
+        ]
+      },
+      "text": "Dear God,\n\nThank You for Your daughter. Meet her right where she is. Give her rest for today and courage for tomorrow.\n\nHold her loved ones close, too. Let her feel loved and draw closer to You.\n\nAmen."
+    }
+  ]
+}

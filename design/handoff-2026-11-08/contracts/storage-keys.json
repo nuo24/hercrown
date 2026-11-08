@@ -1,0 +1,37 @@
+{
+  "bible-scroll-profile-v1": [
+    "native-review.mjs",
+    "settings.mjs"
+  ],
+  "bible-scroll-reading-days-v1": [
+    "app.js"
+  ],
+  "bible-scroll-v1": [
+    "app.js"
+  ],
+  "her-crown-": [
+    "verse-studios.mjs"
+  ],
+  "her-crown-cause-suggestions-v1": [
+    "community-voting.mjs"
+  ],
+  "her-crown-community-ballot-v2": [
+    "community-voting.mjs"
+  ],
+  "her-crown-native-review-v1": [
+    "native-review.mjs"
+  ],
+  "her-crown-onboarding-prayer-v2": [
+    "onboarding-new.mjs"
+  ],
+  "her-crown-onboarding-reminder-v2": [
+    "onboarding-new.mjs"
+  ],
+  "her-crown-review": [
+    "native-review.mjs",
+    "review-desk.mjs"
+  ],
+  "her-crown-studio-media": [
+    "verse-studios.mjs"
+  ]
+}

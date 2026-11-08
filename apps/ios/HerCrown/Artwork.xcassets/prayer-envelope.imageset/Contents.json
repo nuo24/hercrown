@@ -2,8 +2,7 @@
   "images": [
     {
       "filename": "prayer-envelope.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "idiom": "universal"
     }
   ],
   "info": {

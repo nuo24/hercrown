@@ -2,8 +2,7 @@
   "images": [
     {
       "filename": "cloud-bank.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "idiom": "universal"
     }
   ],
   "info": {

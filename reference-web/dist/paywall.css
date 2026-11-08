@@ -26,3 +26,7 @@
 .membership-plan-copy b{color:var(--text-primary);background:var(--surface-secondary)}
 .membership-cta{color:var(--surface-primary)!important;background:var(--text-primary);box-shadow:0 7px 15px -9px #1116}
 .membership-free,.membership-links button{color:var(--text-muted)!important}
+
+.membership-payment-note{text-align:center;font:500 12px/1.5 var(--font-ui);color:var(--text-primary);margin:0 0 10px;min-height:18px}.membership-renewal{font-size:10px;line-height:1.5}.membership-plan-copy strong{flex-wrap:wrap}.membership-amount{flex-shrink:0}
+/* Reserve room for both offers and their terms within the existing composition. */
+@media(min-height:761px){.membership-art{height:100px}.membership-book{width:134px;height:112px}.membership-flower{width:64px;height:72px;top:30px}.membership-clouds{height:138px}.membership-sub{margin-bottom:12px}.membership-features{margin-bottom:10px}.membership-features li{min-height:32px}#membership-dialog h2{font-size:36px;margin-bottom:10px}}

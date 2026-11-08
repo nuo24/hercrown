@@ -1,0 +1,37 @@
+/* Shared onboarding choreography. The final composition and text wrapping stay unchanged. */
+.onboarding-motion.screen{animation:none}
+.welcome.onboarding-motion:after{display:none}
+.welcome-motion-art{position:absolute;inset:0 -2% 4%;pointer-events:none;z-index:-1}
+.welcome-art-piece{position:absolute;inset:0;background:url('assets/onboarding-collage.png') center/100% 100% no-repeat;animation:onboarding-art-settle 640ms ease-out both;animation-delay:var(--delay);transform-origin:var(--origin,50% 50%)}
+/* Transparent collage is segmented at empty regions, preserving the approved artwork. */
+.piece-0{clip-path:inset(0 60% 72% 0);--x:-18px;--y:-12px;--r:-4deg;--delay:0ms;--origin:15% 12%}
+.piece-1{clip-path:polygon(40% 0,100% 0,100% 24%,70% 24%,70% 17%,40% 17%);--x:18px;--y:-14px;--r:4deg;--delay:120ms;--origin:80% 10%}
+.piece-2{clip-path:inset(17% 30% 76% 40%);--x:0px;--y:16px;--r:8deg;--delay:240ms;--origin:60% 20%}
+.piece-3{clip-path:inset(24% 0 54% 60%);--x:18px;--y:8px;--r:4deg;--delay:480ms;--origin:90% 32%}
+.piece-4{clip-path:inset(28% 60% 54% 0);--x:-18px;--y:8px;--r:-5deg;--delay:360ms;--origin:10% 37%}
+.piece-5{clip-path:inset(46% 50% 18% 0);--x:-16px;--y:18px;--r:-3deg;--delay:600ms;--origin:15% 65%}
+.piece-6{clip-path:inset(46% 0 18% 50%);--x:18px;--y:14px;--r:3deg;--delay:720ms;--origin:85% 65%}
+.onboarding-motion .intro-art img{--x:0px;--y:22px;--r:0deg;animation:onboarding-art-settle 640ms ease-out both}
+.onboarding-motion .intro-art .intro-book{--rest:7deg;--r:-5deg;animation-delay:0ms}
+.onboarding-motion .intro-art .intro-hourglass{--rest:-12deg;--x:-18px;--r:-8deg;animation-delay:140ms}
+.onboarding-motion .intro-art .intro-flower{--rest:-18deg;--x:-14px;--y:-12px;--r:-7deg;animation-delay:280ms}
+.onboarding-motion .intro-art .intro-heart{--rest:14deg;--x:14px;--r:8deg;animation-delay:420ms}
+.onboarding-word{display:inline-block}
+.onboarding-letter{animation:onboarding-letter-in 1ms steps(1,end) both;animation-delay:calc(220ms + var(--letter)*32ms)}
+.onboarding-motion :is(.welcome-intro>.sub,.intro-content>p,.content>.sub){animation:onboarding-copy-in 240ms ease-out var(--copy-delay,850ms) both}
+.onboarding-motion :is(.actions,.ready>.primary,.ready>.footnote){animation:onboarding-copy-in 240ms ease-out var(--action-delay,1000ms) both}
+@keyframes onboarding-art-settle{0%{opacity:0;transform:translate(var(--x),var(--y)) rotate(calc(var(--rest,0deg) + var(--r))) scale(.94)}75%{opacity:1;transform:translate(0,-2px) rotate(var(--rest,0deg)) scale(1.012)}100%{opacity:1;transform:translate(0,0) rotate(var(--rest,0deg)) scale(1)}}
+@keyframes onboarding-word-in{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@keyframes onboarding-copy-in{from{opacity:.15;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.onboarding-motion *{animation:none!important}.welcome.onboarding-motion:after{display:block}.welcome-motion-art{display:none}}
+/* Programmatic heading focus announces the page without drawing a control outline. */
+.onboarding-motion h2:focus{outline:none}
+@media(prefers-reduced-motion:reduce){.screen.welcome,.screen.scroll-intro{animation:none!important}}
+
+.onboarding-motion .onboarding-heading>img{--x:14px;--y:12px;--r:6deg;animation:onboarding-art-settle 640ms ease-out both}
+.onboarding-motion .onboarding-enter{animation:onboarding-copy-in 220ms ease-out var(--item-delay,850ms) both}
+@keyframes onboarding-letter-in{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.screen,.screen *{animation:none!important}}
+
+/* Visible stagger, with overlapping settles: welcome completes in 1.28s; intro in 1.06s. */
+.welcome-art-piece{animation-duration:560ms}

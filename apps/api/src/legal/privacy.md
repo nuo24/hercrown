@@ -35,13 +35,21 @@ To provide the app: sync your reading across devices, keep your streak, unlock P
 
 When you open Explain Easier or Deeper Study for a verse, we send the verse and passages from public-domain commentaries and Bible-study datasets to an AI model provider. **We do not send your notes, your profile or anything that identifies you.** Answers are stored and shared with everyone who studies the same verse.
 
+## Personal onboarding prayer
+
+If you choose to prepare a personal prayer during onboarding, your first name, selected needs and life season, and any optional concern or loved one you enter are sent to OpenRouter and DeepSeek to write it. You can skip the optional text questions or use a simple prayer if generation is unavailable. These personal answers are not stored in our database or analytics. The saved prayer stays on your device, separately from Scripture, unless you choose to share it. We record only request counts, technical usage and cost for abuse prevention.
+
+## Community suggestions
+
+Cause suggestions and your ballot choices are stored with your account. Suggestions are private to you and our review team; they are not published automatically. A vote does not charge your account or make a donation. Deleting your account deletes these records.
+
 ## Who processes data for us
 
 - **Cloudflare:** hosting, database and file storage.
 - **Apple:** Sign in with Apple, payments, push notifications.
 - **Superwall:** subscription paywall and purchase events.
 - **Tinybird:** pseudonymous analytics and error reports.
-- **OpenRouter and the model provider it routes to (DeepSeek):** AI study tools, receiving only verse and source text.
+- **OpenRouter and the model provider it routes to (DeepSeek):** study tools (verse and source text) and optional personal prayers (the onboarding context described above).
 - **API.Bible:** if you read an online translation, it receives the passage request.
 
 They may only use the data to provide their service to us.

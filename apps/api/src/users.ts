@@ -108,6 +108,16 @@ export async function moveUserData(env: Env, from: string, to: string): Promise<
     db.prepare("DELETE FROM entitlements WHERE user_id = ?1").bind(from),
 
     db.prepare("UPDATE support_requests SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
+    db.prepare("UPDATE community_suggestions SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
+    db.prepare(`INSERT INTO community_votes(user_id,round_id,cause_id,updated_at)
+      SELECT ?2,round_id,cause_id,updated_at FROM community_votes WHERE user_id=?1
+      ON CONFLICT(user_id,round_id) DO UPDATE SET cause_id=excluded.cause_id,updated_at=excluded.updated_at
+      WHERE excluded.updated_at > community_votes.updated_at`).bind(from,to),
+    db.prepare("DELETE FROM community_votes WHERE user_id=?1").bind(from),
+    db.prepare(`INSERT INTO onboarding_prayer_limits(user_id,day,attempts)
+      SELECT ?2,day,attempts FROM onboarding_prayer_limits WHERE user_id=?1
+      ON CONFLICT(user_id,day) DO UPDATE SET attempts=attempts+excluded.attempts`).bind(from,to),
+    db.prepare("DELETE FROM onboarding_prayer_limits WHERE user_id=?1").bind(from),
     db.prepare("UPDATE usage_ledger SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
     db.prepare("UPDATE push_devices SET user_id = ?2 WHERE user_id = ?1").bind(from, to),
     // Notes: the more recently edited one wins.

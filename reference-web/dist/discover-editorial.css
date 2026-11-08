@@ -1,0 +1,44 @@
+/* Discover: one sculptural illustration and compact editorial reading rows. */
+.in-app .discover-view .discover-editorial-header{padding:20px 22px 16px;min-height:82px}
+.in-app .discover-view .discover-editorial-header h1{font:500 30px/1.15 var(--font-ui);letter-spacing:-.5px}
+.in-app .discover-view .discover-more svg{fill:currentColor;stroke:none}
+.in-app .discover-view .discover-editorial-tabs{padding:0 22px 10px;gap:12px;scrollbar-width:none}
+.in-app .discover-view .discover-editorial-tabs button{font:500 11px/1.3 var(--font-ui);letter-spacing:.25px;text-transform:uppercase;padding:0 8px;min-height:40px;flex-shrink:0;opacity:.65}
+.in-app .discover-view .discover-editorial-tabs button.selected{opacity:1;border-bottom-color:currentColor}
+.in-app .discover-view .discover-feature{position:relative;display:flex;align-items:center;justify-content:center;width:calc(100% - 44px);height:248px;margin:0 22px 24px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;isolation:isolate}
+.in-app .discover-view .discover-feature>img{width:300px;max-width:91%;height:248px;object-fit:contain;transform:rotate(-6deg);filter:drop-shadow(0 15px 15px #00000018)}
+.in-app .discover-view .discover-feature>img.discover-feature-flower{position:absolute;right:20px;bottom:16px;width:82px;height:82px;max-width:none;transform:rotate(17deg);filter:drop-shadow(0 7px 7px #0002)}
+.in-app .discover-view .discovery-stack.discover-editorial-list{display:grid;gap:19px;padding:0 22px;margin:0}
+.in-app .discover-view .verse-card.discover-entry{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:6px;padding:0;margin:0;min-height:98px;background:transparent;border:0;border-radius:0;box-shadow:none}
+.in-app .discover-view .discover-entry-open{display:flex;align-items:flex-start;gap:16px;min-width:0;padding:0;text-align:left;background:transparent;border:0;color:var(--text-primary)}
+.in-app .discover-view .discover-thumb{display:flex;align-items:center;justify-content:center;width:88px;height:98px;flex-shrink:0;background:#edf0eb;overflow:hidden;border-radius:1px}
+[data-theme=dark] .in-app .discover-view .discover-thumb{background:#181b18}
+.in-app .discover-view .discover-thumb img{display:block;width:100%;height:100%;object-fit:contain}
+.in-app .discover-view .discover-entry-copy{display:flex;flex-direction:column;min-width:0;align-self:stretch;padding:2px 0}
+.in-app .discover-view .discover-entry h2{font:400 25px/1.05 var(--font-display);letter-spacing:-.35px;margin:0 0 12px;max-width:175px;text-wrap:balance}
+.in-app .discover-view .discover-entry-reference{font:400 11px/1.4 var(--font-ui);letter-spacing:.35px;text-transform:uppercase;color:var(--text-muted);margin-top:auto}
+.in-app .discover-view .discover-entry-topic{font:400 10px/1.4 var(--font-ui);letter-spacing:.4px;text-transform:uppercase;color:var(--text-muted);margin-top:4px}
+.in-app .discover-view .discover-entry-more{display:grid;place-items:center;width:44px;height:44px;align-self:end;margin-bottom:1px;padding:0;border:0;background:none;color:var(--text-primary);opacity:.7}
+.in-app .discover-view .discover-entry-more svg{width:22px;height:22px;fill:currentColor;stroke:none}
+.in-app .discover-view .discover-entry>.nr-studied-button{display:none}
+.in-app .discover-view .discover-entry[hidden],.in-app .discover-view .discover-feature[hidden]{display:none}
+.in-app .discover-view .discover-entry-open:hover h2{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.in-app .discover-view .discover-entry-more:hover,.in-app .discover-view .discover-entry-more:focus-visible{opacity:1}
+.in-app .discover-view .discover-search{display:flex;align-items:center;gap:10px;margin:0 22px 16px;padding:10px 0;border-bottom:1px solid var(--border-subtle)}
+.in-app .discover-view .discover-search svg{width:18px;height:18px;color:var(--text-muted);flex-shrink:0}
+.in-app .discover-view .discover-search input{width:100%;min-width:0;min-height:30px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;font:400 14px/1.4 var(--font-ui);color:var(--text-primary)}
+.in-app .discover-view .discover-search input::placeholder{color:var(--text-muted);opacity:1}
+.in-app .discover-view .discover-search-empty{font:400 14px/1.6 var(--font-ui);color:var(--text-muted);padding:28px 22px;text-align:center}
+.discover-empty{padding:42px 12px;text-align:center}.discover-empty img{object-fit:contain;margin-bottom:16px}.discover-empty h2{font:400 30px var(--font-display);margin:0 0 14px}.discover-empty p{font:14px/1.6 var(--font-ui);color:var(--text-muted)}.discover-empty .textbtn{display:inline-flex;align-items:center;gap:8px}.discover-empty svg{width:16px}
+.discover-passage-menu h2{font:500 22px var(--font-ui);margin:28px 0 20px}.discover-passage-menu blockquote{font:400 27px/1.3 var(--font-display);margin:0}.discover-passage-menu .study-options button{font-size:15px}
+@media(max-width:359px){.in-app .discover-view .discover-editorial-header{padding-inline:18px}.in-app .discover-view .discover-editorial-tabs{padding-inline:18px;gap:6px}.in-app .discover-view .discover-feature{height:210px;margin:0 18px 20px;width:calc(100% - 36px)}.in-app .discover-view .discover-feature>img{height:210px;width:270px}.in-app .discover-view .discover-feature>img.discover-feature-flower{height:66px;width:66px;right:10px}.in-app .discover-view .discovery-stack.discover-editorial-list{padding-inline:18px;gap:18px}.in-app .discover-view .discover-entry-open{gap:12px}.in-app .discover-view .discover-thumb{width:74px;height:88px}.in-app .discover-view .discover-entry h2{font-size:23px}.in-app .discover-view .verse-card.discover-entry{min-height:88px;grid-template-columns:minmax(0,1fr) 44px;gap:2px}}
+@media(prefers-reduced-motion:reduce){.in-app .discover-view *{scroll-behavior:auto!important}}
+/* Review and recovery states replace the editorial feature as well as the list. */
+.in-app .discover-view:has(.nr-loading) .discover-feature,.in-app .discover-view:has(.discovery-stack>.nr-empty) .discover-feature{display:none!important}
+
+/* Topics stay available beneath the status area as the editorial list scrolls. */
+.in-app .discover-view{--discover-chrome-rgb:255,255,255}
+[data-theme=dark] .in-app .discover-view{--discover-chrome-rgb:0,0,0}
+.in-app .discover-view .discover-editorial-tabs{position:sticky;top:var(--app-safe-top,0px);z-index:12;background:rgba(var(--discover-chrome-rgb),.84);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.embedded-ios.in-app .discover-view:before{content:'';position:fixed;top:0;left:0;right:0;height:var(--app-safe-top);z-index:13;pointer-events:none;background:rgba(var(--discover-chrome-rgb),.84);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+@media(prefers-reduced-transparency:reduce),(prefers-contrast:more){.in-app .discover-view .discover-editorial-tabs,.embedded-ios.in-app .discover-view:before{background:rgb(var(--discover-chrome-rgb));-webkit-backdrop-filter:none;backdrop-filter:none}}

@@ -1,0 +1,15 @@
+/* Light appearance is strictly white. Dark appearance retains true-black canvases. */
+:root,[data-theme=light]{color-scheme:light;--bible-gradient-light:#fff!important;--bible-gradient-dark:#000!important;--bible-gradient:#fff!important;--canvas:#fff;--app-bg:#fff;--paper:#fff;--white:#fff;--surface-primary:#fff;--surface-secondary:#fff;--app-card:#fff;--app-chip:#fff;--text-primary:#111;--text-muted:#656565;--app-ink:#111;--app-muted:#656565;--ink:#111;--muted:#656565;--border-subtle:#e5e5e5;--line:#e5e5e5}
+html:not([data-theme=dark]):has(body.embedded-ios){background:#fff!important}
+html:not([data-theme=dark]) :is(body.embedded-ios,body.in-app,body.embedded-ios #app,.in-app #app,.in-app .feed,.in-app .reader-view,.in-app .reader-pages,.screen,.screen.welcome,body.embedded-ios .screen.welcome,.nr-full,.settings-page,dialog,#membership-dialog,.membership-paywall,.membership-confirm){background:#fff!important;background-image:none!important;color:var(--text-primary)}
+html:not([data-theme=dark]) .in-app :is(.surface,.verse-stage,.home-topic-card,.home-topic-card.purpose-topic,.nr-membership,.nr-profile,.nr-group,.nr-inset,.nr-progress,.nr-library-card,.nr-plan-card,.nr-widget,.nr-banner,.discover-thumb,.expressive-topic-hero,.reading-photo,.devotional-card,.notification,.reminder){background:#fff!important;background-image:none!important;color:var(--text-primary)}
+html:not([data-theme=dark]) .in-app .home-topic-card small{color:var(--text-muted)}
+.screen:not(.welcome):before,.expressive-topic-hero:before{display:none!important}
+html:not([data-theme=dark]) .in-app .discover-view{--discover-chrome-rgb:255,255,255!important}
+html:not([data-theme=dark]) .in-app nav.liquid-dock{--menu-rgb:255,255,255!important}
+.in-app :is(.nr-row,.nr-control,.nr-field,.nr-sheet){color:var(--text-primary)}
+.display:not(.preview-dark){background:#fff!important;background-image:none!important;color:#111}
+#gradient-editor form{display:none!important}
+[data-theme=dark]{color-scheme:dark;--bible-gradient:#000!important;--canvas:#000;--app-bg:#000;--paper:#000;--white:#131313;--surface-primary:#131313;--surface-secondary:#242424;--app-card:#131313;--app-chip:#242424;--text-primary:#f5f5f5;--text-muted:#b1b1b1;--app-ink:#f5f5f5;--app-muted:#b1b1b1;--ink:#f5f5f5;--muted:#b1b1b1;--border-subtle:#303030;--line:#303030}
+[data-theme=dark] .verse-stage{background:#000!important;background-image:none!important}
+.display.preview-dark{background:#000!important;background-image:none!important;color:#f5f5f5}

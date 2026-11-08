@@ -1,0 +1,16 @@
+/* Keep the product UI editorial; system chrome belongs to the preview frame. */
+.in-app .app-header .iconbtn,.in-app .reader-toolbar .iconbtn,.in-app .reader-toolbar .toolbar-group,.in-app .reader-toolbar .pill-control,.in-app .reader-toolbar .floating-control,.in-app .nr-header .iconbtn,.in-app .close-dialog{background:transparent!important;background-image:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.in-app .reader-toolbar .toolbar-group{padding:0;gap:0}
+.in-app .reader-toolbar select.pill-control{background-color:transparent!important;box-shadow:none!important;border-radius:0!important;font-weight:400}
+.in-app .app-header .iconbtn,.in-app .reader-toolbar .iconbtn{color:var(--text-primary);opacity:.62}
+.in-app .app-header .iconbtn:hover,.in-app .reader-toolbar .iconbtn:hover,.in-app .app-header .iconbtn:focus-visible,.in-app .reader-toolbar .iconbtn:focus-visible{opacity:1}
+.in-app .app-header .streak-header{color:var(--text-primary)!important;opacity:.75}
+.in-app .reader-side-actions button{background:transparent!important;box-shadow:none!important;border:0!important;border-radius:0!important;color:var(--text-primary);opacity:.64}
+.in-app .reader-side-actions button[aria-pressed=true],.in-app .reader-side-actions button:hover,.in-app .reader-side-actions button:focus-visible{opacity:1}
+.in-app .primary,.in-app .secondary,.in-app .screen .primary,.in-app .streak-complete{border-radius:8px!important}
+.in-app .filterbar button,.in-app .discover-view .filterbar button{border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--text-primary);opacity:.6;border-bottom:1px solid transparent}
+.in-app .filterbar button.selected,.in-app .discover-view .filterbar button.selected{background:transparent;color:var(--text-primary);opacity:1;border-bottom-color:currentColor}
+.in-app .version-badge{background:transparent;border:0;border-radius:0;padding-inline:0;opacity:.6}
+@media(prefers-contrast:more){.in-app .app-header .iconbtn,.in-app .reader-toolbar .iconbtn,.in-app .reader-side-actions button,.in-app .filterbar button,.in-app .discover-view .filterbar button{opacity:.8}}
+
+.in-app .discover-view .verse-card>.inline-action{border-radius:8px!important;font-weight:500}

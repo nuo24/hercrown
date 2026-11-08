@@ -1,0 +1,58 @@
+/* Reference-led streak summary; supporting statistics follow below the main action. */
+#detail-dialog:has(.nr-streak){background:var(--surface-primary);color:var(--text-primary)}
+#detail-dialog:has(.nr-streak) .dialog-inner{padding:30px 24px 32px}
+#detail-dialog .nr-streak{padding:0}
+#detail-dialog .nr-streak .nr-rhythm-title{font:500 18px/1.4 var(--font-ui);margin:0 42px 28px 0;text-align:left;letter-spacing:0}
+#detail-dialog:has(.nr-streak) .close-dialog{top:22px;right:16px;background:none;border:0}
+#detail-dialog .nr-streak .nr-rhythm-count{font:400 88px/1 var(--font-display);text-align:center;margin:0 0 12px;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+#detail-dialog .nr-streak .nr-rhythm-caption{font:400 11px/1.5 var(--font-ui);text-transform:uppercase;color:var(--text-muted);text-align:center;margin:0}
+.nr-rhythm-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin:30px 0 28px}
+.nr-rhythm-day{text-align:center;font:400 11px/1.4 var(--font-ui);color:var(--text-muted)}
+.nr-rhythm-day>span{display:block;margin-bottom:12px}
+.nr-rhythm-day i{display:grid;place-items:center;aspect-ratio:1;width:100%;max-width:36px;margin:auto;border:1px solid var(--border-subtle);border-radius:50%;background:var(--surface-secondary);font:400 16px/1 var(--font-ui);color:var(--text-muted)}
+.nr-rhythm-day i.is-read{background:var(--text-primary);color:var(--surface-primary);border-color:var(--text-primary)}
+#detail-dialog .nr-streak .nr-rhythm-copy{font:400 15px/1.6 var(--font-ui);color:var(--text-muted);margin:0 0 20px;text-align:left}
+.nr-rhythm-summary>.primary{min-height:52px;width:100%;margin:0}
+.nr-rhythm-details{border-top:1px solid var(--border-subtle);margin-top:28px;padding-top:22px}
+.nr-rhythm-best{display:flex;align-items:center;justify-content:space-between;gap:16px;font:400 13px/1.5 var(--font-ui)}
+.nr-rhythm-best strong{font-weight:500;font-variant-numeric:tabular-nums}
+.nr-rhythm-details .nr-progress{border-radius:12px;padding:16px;margin-top:22px;background:var(--surface-secondary)}
+.nr-rhythm-details .nr-progress h3{margin:0 0 8px}
+@media(max-width:359px){.nr-rhythm-week{gap:6px}.nr-rhythm-day i{max-width:32px}#detail-dialog:has(.nr-streak) .dialog-inner{padding-inline:20px}}
+
+.nr-rhythm-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 28px}
+#detail-dialog .nr-streak .nr-rhythm-header .nr-rhythm-title{margin:0;font-size:18px}
+.nr-rhythm-header>.iconbtn{display:grid;place-items:center;flex:none;width:40px;height:40px;background:none;border:0;color:var(--text-primary);margin-right:-8px}
+.nr-rhythm-header svg{width:22px;height:22px}
+#detail-dialog .nr-rhythm-summary>.primary,#detail-dialog .nr-rhythm-summary>.primary:before{border-radius:999px!important}
+/* GitHub-style reading activity, restored at the user's request. */
+.rhythm-ranges{display:flex;justify-content:center;gap:24px;margin:22px 0 24px;border-bottom:1px solid var(--border-subtle)}.rhythm-ranges button{min-height:44px;padding:8px 2px;background:transparent;border:0;border-bottom:1px solid transparent;color:var(--text-muted);font:400 12px var(--font-ui)}.rhythm-ranges button.selected{color:var(--text-primary);border-bottom-color:var(--text-primary)}.rhythm-ranges+.nr-rhythm-week{margin-top:0}.rhythm-activity{margin:0 0 24px}.activity-period{font:400 10px/1.5 var(--font-ui);color:var(--text-muted);margin-bottom:16px}.activity-calendar{display:flex;gap:8px;align-items:flex-start;min-width:0}.activity-weekdays{display:grid;grid-template-rows:repeat(7,10px);gap:3px;padding-top:22px;font:400 8px/10px var(--font-ui);color:var(--text-muted);flex:none;width:10px}.rhythm-activity:has(.activity-grid[style*="9px"]) .activity-weekdays{grid-template-rows:repeat(7,9px);line-height:9px}.activity-scroll{overflow-x:auto;min-width:0;flex:1;padding-bottom:5px;scrollbar-width:thin;overscroll-behavior-x:contain}.activity-grid{width:calc(var(--weeks) * (var(--cell) + 3px) - 3px);min-width:100%}.activity-months{display:grid;grid-template-columns:repeat(var(--weeks),minmax(var(--cell),1fr));gap:3px;height:22px;font:400 9px/1.4 var(--font-ui);color:var(--text-muted)}.activity-months span{overflow:visible;white-space:nowrap}.activity-months .near-edge{justify-self:end}.activity-map{display:grid;grid-template-columns:repeat(var(--weeks),minmax(var(--cell),1fr));gap:3px}.activity-week{display:grid;grid-template-rows:repeat(7,var(--cell));gap:3px}.activity-cell{display:block;border-radius:2px;background:var(--border-subtle);min-width:0;height:var(--cell)}.activity-cell.read{background:var(--text-primary)}.activity-cell.outside{visibility:hidden}.activity-cell.today{outline:1px solid var(--text-muted);outline-offset:1px}.activity-legend{display:flex;justify-content:flex-end;gap:14px;margin-top:12px;color:var(--text-muted);font:400 9px/1.4 var(--font-ui)}.activity-legend>span{display:flex;gap:5px;align-items:center}.activity-legend i{width:8px;height:8px;border-radius:2px;background:var(--border-subtle)}.activity-legend i.read{background:var(--text-primary)}.activity-scroll-hint{font:400 10px/1.5 var(--font-ui);color:var(--text-muted);margin:12px 0 0}.activity-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px;padding:18px 0;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}.activity-stats>div{display:flex;flex-direction:column;gap:7px}.activity-stats strong{font:400 26px/1 var(--font-display);font-variant-numeric:tabular-nums}.activity-stats span{font:400 9px/1.5 var(--font-ui);color:var(--text-muted)}.activity-empty{font:400 11px/1.6 var(--font-ui);color:var(--text-muted);margin:15px 0 0}
+
+/* Keep history and its primary action in the sheet without sideways scrolling. */
+.activity-panels{display:grid;gap:14px}
+.activity-calendar{align-items:stretch}
+.activity-grid{flex:1;width:auto;min-width:0}
+.activity-months{grid-template-columns:repeat(var(--weeks),minmax(0,1fr));height:18px}
+.activity-map{grid-template-columns:repeat(var(--weeks),minmax(0,1fr))}
+.activity-week{display:flex;flex-direction:column;gap:3px}
+.activity-cell{width:100%;height:auto;aspect-ratio:1}
+.activity-weekdays{grid-template-rows:repeat(7,minmax(0,1fr));height:auto;padding-top:18px;line-height:1;align-items:center}
+#detail-dialog:has(.rhythm-activity) .dialog-inner{padding-top:20px;padding-bottom:20px}
+#detail-dialog:has(.rhythm-activity) .nr-rhythm-header{margin-bottom:8px}
+#detail-dialog .nr-streak:has(.rhythm-activity) .nr-rhythm-count{font-size:50px;margin-bottom:6px}
+.nr-streak:has(.rhythm-activity) .rhythm-ranges{margin:12px 0 16px}
+.nr-streak:has(.rhythm-activity) .rhythm-activity{margin-bottom:14px}
+.nr-streak:has(.rhythm-activity) .activity-period{margin-bottom:10px}
+.nr-streak:has(.rhythm-activity) .activity-legend{margin-top:10px}
+.nr-streak:has(.rhythm-activity) .activity-scroll-hint{margin-top:6px}
+.nr-streak:has(.rhythm-activity) .activity-stats{margin-top:12px;padding:12px 0;gap:10px}
+.nr-streak:has(.rhythm-activity) .activity-stats strong{font-size:24px}
+.nr-streak:has(.rhythm-activity) .activity-stats>div{gap:5px}
+.nr-streak:has(.rhythm-activity) .activity-empty{margin:8px 0 0}
+#detail-dialog .nr-streak:has(.rhythm-activity) .nr-rhythm-copy{font-size:13px;line-height:1.5;margin-bottom:14px}
+.rhythm-more{margin-top:8px}
+.rhythm-more>summary{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font:400 12px var(--font-ui);color:var(--text-muted);list-style:none}
+.rhythm-more>summary::-webkit-details-marker{display:none}
+.rhythm-more>summary:after{content:'+';font-size:18px}
+.rhythm-more[open]>summary:after{content:'−'}
+.rhythm-more .nr-rhythm-details{margin-top:8px;padding-top:16px}
