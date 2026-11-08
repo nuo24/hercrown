@@ -222,8 +222,11 @@ struct OnboardingView: View {
 
     private var prayerPage: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90).frame(maxWidth: .infinity)
-            (Text(name.isEmpty ? "A prayer for you." : "A prayer for you,\n") + Text(name.isEmpty ? "" : name + ".").italic()).font(.serif(28.8)).tracking(-1).multilineTextAlignment(.center).frame(maxWidth: .infinity)
+            HStack(spacing: 16) {
+                (Text(name.isEmpty ? "A prayer for you." : "A prayer for you,\n") + Text(name.isEmpty ? "" : name + ".").italic())
+                    .font(.serif(28.8)).tracking(-1).frame(maxWidth: .infinity, alignment: .leading)
+                Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90)
+            }
             Text("Your heart, held in prayer.").font(.ui(14)).foregroundStyle(muted)
             if loadingPrayer { ProgressView("Preparing your prayer…").font(.ui(14)).frame(maxWidth: .infinity).padding(.vertical, 30) }
             else if prayerError {
