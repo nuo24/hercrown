@@ -367,7 +367,7 @@ struct OnboardingView: View {
             try await clock.sleep(until: start.advanced(by: .milliseconds(count * (prayer ? 40 : 48))))
             try Task.checkCancellation(); revealed = count
             if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
-                feedback.impactOccurred(intensity: prayer ? 0.3 : 0.5)
+                feedback.impactOccurred(intensity: prayer ? 0.5 : 0.7)
                 feedback.prepare()
                 lastPulse = Date()
             }

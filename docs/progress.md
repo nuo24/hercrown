@@ -365,3 +365,5 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Live staging smoke caught MSG lettered bridge endpoints (`PSA.4.6–7a`, `7b–8`) being discarded by the older parser. Numeric span parsing now accepts suffixes without changing the supplied words; added a regression for these groups and merged span extension.
 
 - Staging deployed from clean isolated source `512587d`: Worker version `477249e8-57e9-4fe4-8d85-96a7aa73bf3b`. Live authenticated smoke passed all four editions on Home, NLT Discover pagination (12 cards / nextOffset 12) and the NLT devotional passage. MSG Psalm 4:8 resolves to its intact 7–8 group with correct label/attribution. Temporary smoke account deleted (200). No production deploy and no new TestFlight archive.
+
+- Nov 9 owner adjustment: onboarding typing intensity raised to 0.7 and prayer to 0.5; pacing unchanged. Typecheck, all 198 API tests and iOS simulator build passed. Physical feel needs an iPhone check in the next build; not in TestFlight 19.
