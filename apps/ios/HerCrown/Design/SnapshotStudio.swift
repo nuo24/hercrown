@@ -100,16 +100,19 @@ struct VerseSnapshotView: View {
                                     design.art[i].x = min(0.93, max(0.07, dragOrigin!.x + value.translation.width / 600))
                                     design.art[i].y = min(0.94, max(0.06, dragOrigin!.y + value.translation.height / design.height))
                                 }.onEnded { _ in dragOrigin = nil })
-                                .simultaneousGesture(MagnifyGesture().onChanged { value in
-                                    guard let i = design.art.firstIndex(where: { $0.id == art.id }) else { return }
-                                    if pinchSize == nil { pinchSize = design.art[i].size }
-                                    selected = art.id
-                                    design.art[i].size = min(0.8, max(0.05, (pinchSize ?? art.size) * value.magnification))
-                                }.onEnded { _ in pinchSize = nil })
                                 .accessibilityLabel("\(art.asset.replacingOccurrences(of: "-", with: " ")) illustration")
                                 .accessibilityAddTraits(.isButton)
                         }
-                    }.frame(width: 600, height: design.height).clipShape(RoundedRectangle(cornerRadius: widgetMode ? 36 : 0)).scaleEffect(max(0.01, scale))
+                    }.frame(width: 600, height: design.height)
+                        .contentShape(Rectangle())
+                        // Keep resizing available across the canvas even when the selected cutout is tiny.
+                        .simultaneousGesture(MagnifyGesture().onChanged { value in
+                            guard let selected, let i = design.art.firstIndex(where: { $0.id == selected }) else { return }
+                            if pinchSize == nil { pinchSize = design.art[i].size }
+                            design.art[i].size = min(0.8, max(0.05, (pinchSize ?? design.art[i].size) * value.magnification))
+                        }.onEnded { _ in pinchSize = nil })
+                        .onChange(of: selected) { _, _ in pinchSize = nil }
+                        .clipShape(RoundedRectangle(cornerRadius: widgetMode ? 36 : 0)).scaleEffect(max(0.01, scale))
                         .frame(width: 600 * scale, height: design.height * scale).clipped().opacity(area.size.height < 120 ? 0 : 1).shadow(color: .black.opacity(0.12), radius: 12, y: 5)
                     Spacer(minLength: 0)
                 }.frame(maxWidth: .infinity).padding(.top, 10)

@@ -54,9 +54,9 @@ struct OnboardingView: View {
     private var isTextPage: Bool { [3, 8, 9].contains(step) }
     private var name: String { answers.normalizedName }
     private var title: String {
-        let titles = ["Less doomscrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’ll be 10 years of your life spent on social media.", "We’re going to help you spend less time scrolling social media and more time in the Bible.", "First, what should\nwe call you?", "Which do you spend more time on?", "What season of life are you in?", "How familiar does the Bible feel?", "What’s on your heart lately?", "Tell us something\nthat’s been\nweighing you down.", "Who’s someone in your life\nyou’d like to pray for?", "How much time can you give to God each day?", name.isEmpty ? "A prayer for you." : "A prayer for you,\n\(name).", "When would you like\na moment with God?", "A verse for what’s\non your heart."]
+        let titles = ["Less\ndoomscrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’ll be 10 years of your life spent on social media.", "We’re going to help you spend less time scrolling social media and more time in the Bible.", "First, what should\nwe call you?", "Which do you spend more time on?", "What season of life are you in?", "How familiar does the Bible feel?", "What’s on your heart lately?", "Tell us something\nthat’s been\nweighing you down.", "Who’s someone in your life\nyou’d like to pray for?", "How much time can you give to God each day?", name.isEmpty ? "A prayer for you." : "A prayer for you,\n\(name).", "When would you like\na moment with God?", "A verse for what’s\non your heart."]
         let base = titles[step]
-        if [5, 7, 9].contains(step), !name.isEmpty { return name + ", " + base.prefix(1).lowercased() + base.dropFirst() }
+        if [5, 7].contains(step), !name.isEmpty { return name + ", " + base.prefix(1).lowercased() + base.dropFirst() }
         return base
     }
     private var art: String {
@@ -169,7 +169,7 @@ struct OnboardingView: View {
     private var welcome: some View {
         GeometryReader { g in
             ZStack(alignment: .top) {
-                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion)).ignoresSafeArea()
+                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).ignoresSafeArea()
                 VStack(spacing: 0) {
                     Spacer().frame(height: g.size.height * 0.30)
                     animatedText(title).font(.serif(g.size.width < 380 ? 39 : 44)).tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
@@ -191,11 +191,11 @@ struct OnboardingView: View {
                 Image.illustration("cosmos").resizable().scaledToFit().frame(width: 100, height: 100).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
             } else {
                 ZStack {
-                    Image.illustration("open-book").resizable().scaledToFit().frame(width: 164, height: 150).rotationEffect(.degrees(7))
-                    Image.illustration("hourglass").resizable().scaledToFit().frame(width: 82, height: 100).offset(x: -65, y: 40)
-                    Image.illustration("grace-shell").resizable().scaledToFit().frame(width: 60, height: 68).offset(x: -105, y: -45)
-                    Image.illustration("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54).offset(x: 105, y: 55)
-                }.frame(height: 174).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
+                    Image.illustration("open-book").resizable().scaledToFit().frame(width: 164, height: 150).rotationEffect(.degrees(7)).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
+                    Image.illustration("hourglass").resizable().scaledToFit().frame(width: 82, height: 100).offset(x: -65, y: 40).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion, delay: 0.14))
+                    Image.illustration("grace-shell").resizable().scaledToFit().frame(width: 60, height: 68).offset(x: -105, y: -45).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion, delay: 0.28))
+                    Image.illustration("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54).offset(x: 105, y: 55).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion, delay: 0.42))
+                }.frame(height: 174)
                 animatedText(title).font(.serif(33.3)).tracking(-0.7)
             }
         }.multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 32)
@@ -399,7 +399,7 @@ struct OnboardingView: View {
         let characters = Array(text)
         var elapsed = 0
         for count in 1...max(1, text.count) {
-            elapsed += prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : 48
+            elapsed += prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : (step == 0 ? 32 : 48)
             try await clock.sleep(until: start.advanced(by: .milliseconds(elapsed)))
             try Task.checkCancellation(); revealed = count
             if step == 11 && !prayer && !showingAcknowledgement { prayerTitleRevealed = count }
@@ -605,11 +605,12 @@ private extension View {
 private struct OnboardingArtReveal: ViewModifier {
     let visible: Bool
     let reducedMotion: Bool
+    var delay = 0.0
     func body(content: Content) -> some View {
         content.opacity(visible || reducedMotion ? 1 : 0)
             .offset(y: visible || reducedMotion ? 0 : 14)
             .scaleEffect(visible || reducedMotion ? 1 : 0.96)
-            .animation(reducedMotion ? nil : .easeOut(duration: 0.45), value: visible)
+            .animation(reducedMotion ? nil : .easeOut(duration: 0.45).delay(visible ? delay : 0), value: visible)
     }
 }
 

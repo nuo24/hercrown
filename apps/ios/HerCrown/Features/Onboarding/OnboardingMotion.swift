@@ -98,7 +98,7 @@ struct OnboardingArtEntry: ViewModifier {
     @State private var completed = false
 
     func body(content: Content) -> some View {
-        let stable = completed || reduceMotion || scenePhase != .active
+        let stable = completed || reduceMotion
         content
             .opacity(stable || phase > 0 ? 1 : 0)
             .scaleEffect(stable || phase == 2 ? 1 : phase == 1 ? 1.012 : 0.94, anchor: pivot)
@@ -106,7 +106,8 @@ struct OnboardingArtEntry: ViewModifier {
             .offset(x: stable || phase > 0 ? 0 : x, y: stable || phase == 2 ? 0 : phase == 1 ? -2 : y)
             .task(id: scenePhase == .active && !reduceMotion) {
                 guard !completed else { return }
-                guard scenePhase == .active, !reduceMotion else { completed = true; return }
+                guard !reduceMotion else { completed = true; return }
+                guard scenePhase == .active else { return }
                 do {
                     try await Task.sleep(for: .seconds(delay))
                     withAnimation(.easeOut(duration: duration * 0.75)) { phase = 1 }

@@ -211,7 +211,10 @@ final class AppModel {
     }
 
     func presentPaywall(placement: String, onComplete: (() -> Void)? = nil, onExistingSubscription: (() -> Void)? = nil) {
-        guard !checkingPaywall, !membership.premium else { onComplete?(); return }
+        guard !checkingPaywall, !membership.premium else {
+            Billing.shared.recordPresentationOutcome(placement: placement, outcome: membership.premium ? "Server reports active Plus" : "A subscription check is already running")
+            onComplete?(); return
+        }
         checkingPaywall = true
         let userID = me?.user.id
         Task {
@@ -226,6 +229,7 @@ final class AppModel {
             let existing = isFreshTestOnboarding ? nil : await activeAppleSubscription()
             guard me?.user.id == userID, !membership.premium else { onComplete?(); return }
             if existing != nil {
+                Billing.shared.recordPresentationOutcome(placement: placement, outcome: "Apple reports an active subscription")
                 if let onExistingSubscription { onExistingSubscription() }
                 else { showExistingAppleSubscription = true }
                 onComplete?()

@@ -18,9 +18,9 @@ struct WidgetStudioView: View {
                     Text("Open a Bible passage and choose ‘Set as your widget verse’, or reconnect and try again.").font(.ui(13)).multilineTextAlignment(.center)
                     Button("Try again") { attempt += 1 }.buttonStyle(CapsuleButtonStyle())
                 }.padding(24)
-            } else { ProgressView("Loading your widget verse…") }
+            } else { ProgressView() }
         }.safeAreaInset(edge: .top) {
-            if passage == nil {
+            if passage == nil && failed {
                 HStack {
                     Button { dismiss() } label: { Image(systemName: "arrow.left").frame(width: 44, height: 44) }
                     Text("Widget Studio").font(.serif(26))
@@ -32,6 +32,13 @@ struct WidgetStudioView: View {
             .toolbar(.hidden, for: .navigationBar)
             .task(id: attempt) {
                 let owner = app.me?.user.id
+                // Open immediately with the saved verse for this owner and edition; don't
+                // hold the Studio behind an online refresh when a matching widget is present.
+                WidgetDesignStore.activate(owner: owner)
+                if let cached = WidgetBridge.current, cached.translation.lowercased() == app.preferences.translation.lowercased() {
+                    passage = cached
+                    return
+                }
                 await WidgetBridge.refresh(translation: app.preferences.translation, userID: owner)
                 guard !Task.isCancelled, owner == app.me?.user.id else { return }
                 passage = WidgetBridge.current
