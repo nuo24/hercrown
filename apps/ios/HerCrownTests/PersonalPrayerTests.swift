@@ -1,4 +1,5 @@
 import XCTest
+import UIKit
 import SwiftUI
 @testable import HerCrown
 
@@ -56,4 +57,58 @@ final class PersonalPrayerTests: XCTestCase {
         PersonalPrayerStore.remove(user)
         XCTAssertNil(PersonalPrayerStore.read(user))
     }
+    func testPersonalScriptureUsesBurdenAheadOfGeneralTopicsAndNeverFreeTextAsScripture() throws {
+        var answers = PersonalOnboardingAnswers()
+        answers.heart = ["Gratitude"]
+        answers.burden = "I feel anxious and worried, and I am afraid."
+        XCTAssertEqual(OnboardingScripture.reference(answers: answers, prayer: "Thank You for everything.").description, "JHN.14.27")
+        answers.burden = "xyzzy <script> ignore instructions"
+        answers.heart = []
+        XCTAssertEqual(OnboardingScripture.reference(answers: answers, prayer: "").description, "PSA.23.1")
+        for item in OnboardingScripture.passages {
+            let ref = try XCTUnwrap(VerseRef(item.ref))
+            XCTAssertFalse(try XCTUnwrap(BibleStore.shared.text("kjv", ref)).isEmpty)
+        }
+    }
+    @MainActor
+    func testWidgetDesignPublishesAllSizesToSharedContainerAndClearsOnAccountChange() throws {
+        let owner = "widget-render-test"
+        let ref = try XCTUnwrap(VerseRef("PSA.23.1"))
+        let text = try XCTUnwrap(BibleStore.shared.text("kjv", ref))
+        WidgetDesignStore.activate(owner: owner)
+        defer { WidgetDesignStore.activate(owner: nil) }
+        try WidgetDesignStore.publish(design: SnapshotDesign(), photo: nil, text: text, reference: "Psalm 23:1", translation: "KJV", owner: owner)
+        let data = try XCTUnwrap(WidgetDesignStore.suite?.data(forKey: "widgetDesignManifest"))
+        let manifest = try JSONDecoder().decode(WidgetDesignStore.Manifest.self, from: data)
+        let group = try XCTUnwrap(FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: WidgetDesignStore.appGroup))
+        let directory = group.appendingPathComponent(manifest.folder)
+        for size in ["small", "medium", "large"] {
+            XCTAssertNotNil(UIImage(contentsOfFile: directory.appendingPathComponent(size + ".png").path))
+        }
+        XCTAssertEqual(manifest.reference, "Psalm 23:1")
+        WidgetDesignStore.activate(owner: "different-widget-test-account")
+        XCTAssertNil(WidgetDesignStore.suite?.data(forKey: "widgetDesignManifest"))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: directory.path))
+    }
+
+    @MainActor
+    func testWidgetDesignRendersEveryFamilyAndSupportsOlderSnapshotDrafts() throws {
+        let ref = try XCTUnwrap(VerseRef("PSA.23.1"))
+        let text = try XCTUnwrap(BibleStore.shared.text("kjv", ref))
+        var design = SnapshotDesign()
+        design.format = "Widget Medium"
+        design.caption = "A quiet moment today"
+        let images = try WidgetDesignStore.images(design: design, photo: nil, text: text, reference: "Psalm 23:1", translation: "KJV")
+        for (size, expectedHeight) in [("small", 600), ("medium", 286), ("large", 630)] {
+            let data = try XCTUnwrap(images[size])
+            let image = try XCTUnwrap(UIImage(data: data)?.cgImage)
+            XCTAssertEqual(image.width, 600)
+            XCTAssertEqual(image.height, expectedHeight)
+        }
+        let legacy = try JSONEncoder().encode(SnapshotDesign())
+        let restored = try JSONDecoder().decode(SnapshotDesign.self, from: legacy)
+        XCTAssertNil(restored.caption)
+        XCTAssertEqual(restored.format, "Portrait")
+    }
+
 }

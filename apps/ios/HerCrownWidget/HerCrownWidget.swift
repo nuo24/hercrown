@@ -19,15 +19,30 @@ struct WidgetVerse: Codable {
 struct VerseEntry: TimelineEntry {
     let date: Date
     let verse: WidgetVerse?
+    var artwork: Data? = nil
+
+    static func load(family: WidgetFamily) -> VerseEntry {
+        let suite = UserDefaults(suiteName: WidgetVerse.appGroup)
+        var artwork: Data?
+        if let data = suite?.data(forKey: "widgetDesignManifest"),
+           let manifest = try? JSONDecoder().decode(WidgetArtwork.self, from: data), UUID(uuidString: manifest.folder) != nil,
+           let group = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: WidgetVerse.appGroup) {
+            let size = family == .systemSmall ? "small" : family == .systemMedium ? "medium" : "large"
+            artwork = try? Data(contentsOf: group.appendingPathComponent(manifest.folder).appendingPathComponent(size + ".png"))
+        }
+        return VerseEntry(date: .now, verse: WidgetVerse.load(), artwork: artwork)
+    }
 }
+private struct WidgetArtwork: Decodable { let folder: String }
+
 
 struct VerseProvider: TimelineProvider {
     func placeholder(in context: Context) -> VerseEntry { VerseEntry(date: .now, verse: nil) }
-    func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) { completion(VerseEntry(date: .now, verse: WidgetVerse.load())) }
+    func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) { completion(VerseEntry.load(family: context.family)) }
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
         // Today's verse changes at midnight; the app also reloads the widget when she opens it or picks a verse.
         let midnight = Calendar.current.nextDate(after: .now, matching: DateComponents(hour: 0, minute: 5), matchingPolicy: .nextTime) ?? .now.addingTimeInterval(86_400)
-        completion(Timeline(entries: [VerseEntry(date: .now, verse: WidgetVerse.load())], policy: .after(midnight)))
+        completion(Timeline(entries: [VerseEntry.load(family: context.family)], policy: .after(midnight)))
     }
 }
 
@@ -37,6 +52,16 @@ struct VerseWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     var body: some View {
+        Group {
+            if let data = entry.artwork, let image = UIImage(data: data) {
+                Image(uiImage: image).resizable().scaledToFill()
+                    .accessibilityLabel(entry.verse.map { "\($0.text) \($0.label)" } ?? "Your verse widget")
+                    .containerBackground(for: .widget) { Color.clear }
+            } else { defaultVerse }
+        }
+    }
+
+    private var defaultVerse: some View {
         VStack(alignment: .leading, spacing: 6) {
             if family == .systemLarge {
                 Label(entry.verse?.chosen == true ? "Your chosen verse" : "Verse of the day", systemImage: "book")
@@ -63,6 +88,7 @@ struct VerseWidgetView: View {
                 Text("Open the app to bring today’s verse here.").font(.system(size: 12)).foregroundStyle(.secondary)
             }
         }
+        .padding(16)
         .foregroundStyle(Color(red: 0.07, green: 0.07, blue: 0.07))
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .containerBackground(for: .widget) {
@@ -78,6 +104,7 @@ struct HerCrownWidget: Widget {
             .configurationDisplayName("Verse")
             .description("Your widget verse, or today’s verse.")
             .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+            .contentMarginsDisabled()
     }
 }
 
@@ -89,6 +116,7 @@ struct QuietVerseWidget: Widget {
         .configurationDisplayName("Quiet Verse")
         .description("A large verse widget with smaller type and more breathing room.")
         .supportedFamilies([.systemLarge])
+            .contentMarginsDisabled()
     }
 }
 

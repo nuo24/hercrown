@@ -45,7 +45,7 @@ struct StreakSheet: View {
             .background(AppGradient())
             .navigationTitle("Your reading rhythm")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button { dismiss() } label: { Image(systemName: "xmark").font(.ui(14)).frame(width: 44, height: 44) }.buttonStyle(.plain).accessibilityLabel("Close reading rhythm") } }
         }
         .task {
             await model.loadProgress()

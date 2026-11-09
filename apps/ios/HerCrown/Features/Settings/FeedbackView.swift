@@ -23,7 +23,7 @@ struct FeedbackView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Text("Help Her Crown grow.").font(.serif(30, relativeTo: .title))
+                Text("Help Her Crown grow.").font(.serif(23, relativeTo: .title3)).tracking(-0.4)
                 Text("Have an idea, or did something feel wrong? Tell us what happened and what you hoped to see.")
                     .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
                 Picker("Message type", selection: $category) {

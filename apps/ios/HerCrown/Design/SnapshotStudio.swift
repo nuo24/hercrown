@@ -13,6 +13,9 @@ enum SnapshotDraftStore {
     static func remove(_ userID: String?) {
         let id = userID ?? "local"
         UserDefaults.standard.removeObject(forKey: "hc.snapshotStudio.\(id)")
+        UserDefaults.standard.removeObject(forKey: "hc.widgetStudio.\(id)")
+        let widgetPhoto = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("widget-\(id).jpg")
+        try? FileManager.default.removeItem(at: widgetPhoto)
         let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("snapshot-\(id).jpg")
         try? FileManager.default.removeItem(at: url)
     }
@@ -30,8 +33,9 @@ struct SnapshotDesign: Codable, Equatable {
     var watermark = true
     var photoShade = 18.0
     var photoFocus = 50.0
+    var caption: String? = nil
     var art = [SnapshotArt(asset: "cosmos")]
-    var height: CGFloat { format == "Square" ? 600 : format == "Story" ? 1066.6667 : 800 }
+    var height: CGFloat { format == "Widget Medium" ? 286 : format == "Widget Large" ? 630 : format == "Widget Small" || format == "Square" ? 600 : format == "Story" ? 1066.6667 : 800 }
     var exportSize: String { format == "Square" ? "1080 × 1080" : format == "Story" ? "1080 × 1920" : "1080 × 1440" }
     var textAlignment: TextAlignment { alignment == "Left" ? .leading : alignment == "Right" ? .trailing : .center }
     static let assets = ["cosmos", "olive", "dove", "butterfly", "faith-hands", "open-book", "journal", "reflection-quill", "prayer-envelope", "faith-key", "hope-nest", "quiet-window", "growth-vase", "devotional-teacup", "wisdom-scroll", "grace-shell", "anchor", "bookmark", "community", "gratitude-basket", "gratitude-bowl", "hourglass", "intention-heart", "lantern", "magnifier", "milestone", "purpose-compass", "reflection", "relationship-hands", "reminder-bell", "rest-stones", "seedling", "sunrise", "wisdom-pearl"]
@@ -42,6 +46,7 @@ struct VerseSnapshotView: View {
     let text: String
     let reference: String
     let translation: String
+    var widgetMode = false
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
@@ -54,26 +59,28 @@ struct VerseSnapshotView: View {
     @State private var photoSelection: PhotosPickerItem?
     @State private var failure: String?
     @State private var sharing = false
+    @State private var widgetSaved = false
     @State private var dragOrigin: CGPoint?
     private var ink: Color { Theme.text(scheme) }
-    private var watermark: Bool { !app.membership.premium || design.watermark }
-    private var key: String { "hc.snapshotStudio.\(app.me?.user.id ?? "local")" }
-    private var photoURL: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("snapshot-\(app.me?.user.id ?? "local").jpg") }
+    private var watermark: Bool { !widgetMode && (!app.membership.premium || design.watermark) }
+    private var key: String { "hc.\(widgetMode ? "widgetStudio" : "snapshotStudio").\(app.me?.user.id ?? "local")" }
+    private var photoURL: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(widgetMode ? "widget" : "snapshot")-\(app.me?.user.id ?? "local").jpg") }
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Button { save(); dismiss() } label: { Image(systemName: "arrow.left").frame(width: 44, height: 44) }.accessibilityLabel("Close Snapshot Studio")
+                Button { close() } label: { Image(systemName: "arrow.left").frame(width: 44, height: 44) }.accessibilityLabel(widgetMode ? "Close Widget Studio" : "Close Snapshot Studio")
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Snapshot Studio").font(.serif(26))
+                    Text(widgetMode ? "Widget Studio" : "Snapshot Studio").font(.serif(26))
                     Text("\(reference) · \(translation)").font(.ui(11)).foregroundStyle(Theme.muted(scheme)).lineLimit(1)
                 }
                 Spacer()
-                Button("Done") { save(); dismiss() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
+                Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
             }.padding(.horizontal, 16).padding(.bottom, 8)
             GeometryReader { area in
                 let scale = min((area.size.width - 36) / 600, (area.size.height - 44) / design.height)
                 VStack(spacing: 8) {
                     Text("Tap an illustration to arrange it.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    if widgetMode { Spacer(minLength: 0) }
                     ZStack {
                         SnapshotCanvas(text: text, reference: reference, translation: translation, design: design, photo: photo, watermark: watermark)
                         ForEach(design.art) { art in
@@ -91,28 +98,35 @@ struct VerseSnapshotView: View {
                                 .accessibilityLabel("\(art.asset.replacingOccurrences(of: "-", with: " ")) illustration")
                                 .accessibilityAddTraits(.isButton)
                         }
-                    }.frame(width: 600, height: design.height).scaleEffect(max(0.01, scale))
+                    }.frame(width: 600, height: design.height).clipShape(RoundedRectangle(cornerRadius: widgetMode ? 36 : 0)).scaleEffect(max(0.01, scale))
                         .frame(width: 600 * scale, height: design.height * scale).clipped().shadow(color: .black.opacity(0.12), radius: 12, y: 5)
                     Spacer(minLength: 0)
                 }.frame(maxWidth: .infinity).padding(.top, 10)
-            }.background(Theme.supporting(scheme))
+            }.background(widgetMode ? (scheme == .dark ? Color(hex: 0x131316) : Color(hex: 0xF1F2F2)) : Theme.supporting(scheme))
             tools
             VStack(spacing: 6) {
                 if let failure { Text(failure).font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
-                Button { export() } label: { Label("Share snapshot", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity) }.buttonStyle(CapsuleButtonStyle())
-                Text("\(design.exportSize) PNG").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
+                Button { if widgetMode { saveWidget() } else { export() } } label: {
+                    Label(widgetMode ? (widgetSaved ? "Widget design saved" : "Save widget design") : "Share snapshot", systemImage: widgetMode ? "checkmark" : "square.and.arrow.up").frame(maxWidth: .infinity)
+                }.buttonStyle(CapsuleButtonStyle())
+                Text(widgetMode ? "\(design.format.replacingOccurrences(of: "Widget ", with: "")) widget · Your widget verse" : "\(design.exportSize) PNG").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
+                if widgetMode && widgetSaved { Text("Add Her Crown from your Home Screen’s widget gallery. iOS controls when saved widgets refresh.").font(.ui(10)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center) }
             }.padding(.horizontal, 18).padding(.vertical, 9).background(Theme.canvas(scheme))
         }
         .foregroundStyle(ink).background(Theme.canvas(scheme)).buttonStyle(.plain).tint(ink)
         .task {
             if let data = UserDefaults.standard.data(forKey: key), let saved = try? JSONDecoder().decode(SnapshotDesign.self, from: data) { design = saved }
+            else if widgetMode { design.format = "Widget Medium"; design.art = [SnapshotArt(asset: "olive", x: 0.5, y: 0.18, size: 0.12)] }
+            if widgetMode && !design.format.hasPrefix("Widget ") { design.format = "Widget Medium" }
             photo = UIImage(contentsOfFile: photoURL.path)
             #if DEBUG
             if let review = UserDefaults.standard.string(forKey: "hcStudioReview"), ["Background", "Text", "Illustrations"].contains(review) { tab = review; expanded = true }
             #endif
-            await Analytics.shared.track("verse_snapshot_opened")
+            if widgetMode { await Analytics.shared.track("widget_studio_opened") }
+            else { await Analytics.shared.track("verse_snapshot_opened") }
         }
-        .onDisappear { save() }
+        .onDisappear { if !widgetMode { save() } }
+        .onChange(of: design) { _, _ in widgetSaved = false }
         .onChange(of: photoSelection) { _, item in Task { await loadPhoto(item) } }
         .sheet(isPresented: $sharing) { if let rendered { SnapshotShareSheet(image: rendered) } }
         .presentationDetents([.large]).presentationDragIndicator(.hidden)
@@ -138,11 +152,17 @@ struct VerseSnapshotView: View {
                 Divider()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        Picker("Snapshot format", selection: $design.format) { ForEach(["Portrait", "Square", "Story"], id: \.self) { Text($0) } }.pickerStyle(.segmented)
+                        Picker(widgetMode ? "Widget size" : "Snapshot format", selection: $design.format) {
+                            ForEach(widgetMode ? ["Widget Small", "Widget Medium", "Widget Large"] : ["Portrait", "Square", "Story"], id: \.self) { Text($0.replacingOccurrences(of: "Widget ", with: "")) }
+                        }.pickerStyle(.segmented)
                         if tab == "Background" { backgroundTools }
                         if tab == "Text" { textTools }
                         if tab == "Illustrations" { artTools }
-                        Button("Reset design") { design = SnapshotDesign(); photo = nil; selected = nil }.font(.ui(12)).frame(maxWidth: .infinity, minHeight: 44)
+                        Button("Reset design") {
+                            design = SnapshotDesign()
+                            if widgetMode { design.format = "Widget Medium"; design.art = [SnapshotArt(asset: "olive", x: 0.5, y: 0.18, size: 0.12)] }
+                            photo = nil; selected = nil
+                        }.font(.ui(12)).frame(maxWidth: .infinity, minHeight: 44)
                     }.padding(22)
                 }.frame(height: 260)
             }
@@ -182,7 +202,11 @@ struct VerseSnapshotView: View {
             Picker("Typeface", selection: $design.font) { ForEach(["Baskerville", "Baskerville-Italic", "AvenirNext-Regular", "DMSans-Regular"], id: \.self) { Text($0.replacingOccurrences(of: "-Regular", with: "")) } }.font(.ui(14))
             control("Text size", value: $design.fontSize, range: 22...52)
             Picker("Alignment", selection: $design.alignment) { ForEach(["Left", "Center", "Right"], id: \.self) { Text($0) } }.pickerStyle(.segmented)
-            if app.membership.premium { Toggle("Her Crown watermark", isOn: $design.watermark).font(.ui(14)) }
+            if widgetMode {
+                TextField("Personal caption (optional)", text: Binding(get: { design.caption ?? "" }, set: { design.caption = String($0.prefix(80)) }))
+                    .font(.ui(14)).padding(12).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 8))
+                Text("Your caption appears separately beneath the Bible reference.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+            } else if app.membership.premium { Toggle("Her Crown watermark", isOn: $design.watermark).font(.ui(14)) }
             else { Text("Snapshots include the Her Crown watermark. Plus members can turn it off.").font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
             Text("Scripture stays exactly as supplied by your Bible translation.").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
         }
@@ -236,6 +260,18 @@ struct VerseSnapshotView: View {
             try? FileManager.default.createDirectory(at: photoURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try? data.write(to: photoURL, options: .atomic)
         } else { try? FileManager.default.removeItem(at: photoURL) }
+    }
+    @MainActor private func close() {
+        if widgetMode { if saveWidget() { dismiss() } }
+        else { save(); dismiss() }
+    }
+    @MainActor @discardableResult private func saveWidget() -> Bool {
+        do {
+            try WidgetDesignStore.publish(design: design, photo: photo, text: text, reference: reference, translation: translation, owner: app.me?.user.id)
+            save(); failure = nil; widgetSaved = true
+            Task { await Analytics.shared.track("widget_studio_saved", ["size": .string(design.format.replacingOccurrences(of: "Widget ", with: "").lowercased())]) }
+            return true
+        } catch { failure = "Your widget design couldn’t save. Please try again."; return false }
     }
     private func loadPhoto(_ item: PhotosPickerItem?) async {
         guard let item else { return }
@@ -300,6 +336,10 @@ struct SnapshotCanvas: View {
             Text("\(reference) · \(translation)").font(.custom("DMSans-Regular", fixedSize: 15)).multilineTextAlignment(design.textAlignment).frame(width: 504, alignment: design.alignment == "Left" ? .leading : design.alignment == "Right" ? .trailing : .center).position(x: 300, y: design.height * 0.84)
             ForEach(design.art) { art in
                 Image.illustration(art.asset).resizable().scaledToFit().frame(width: 600 * art.size, height: 600 * art.size).rotationEffect(.degrees(art.rotation)).position(x: art.x * 600, y: art.y * design.height)
+            }
+            if let caption = design.caption, !caption.isEmpty {
+                Text(caption).font(.custom("DMSans-Regular", fixedSize: 14)).multilineTextAlignment(design.textAlignment)
+                    .frame(width: 504).lineLimit(2).position(x: 300, y: design.height * 0.94)
             }
             if watermark { Text("Her Crown").font(.custom("Baskerville-Italic", fixedSize: 22)).position(x: 300, y: design.height * 0.94) }
         }.frame(width: 600, height: design.height).foregroundStyle(Color(studioHex: design.ink)).clipped()

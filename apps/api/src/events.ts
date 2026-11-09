@@ -104,6 +104,8 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   settings_viewed: {},
   setting_changed: { setting: ["appearance"], value: ["system", "light", "dark"] },
   support_opened: {},
+  widget_studio_opened: {},
+  widget_studio_saved: { size: ["small", "medium", "large"] },
   verse_snapshot_opened: {},
   verse_snapshot_shared: { format: ["portrait", "square", "story"] },
   topics_updated: { count: "number" },

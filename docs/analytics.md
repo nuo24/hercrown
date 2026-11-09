@@ -62,6 +62,8 @@ All props below are optional. Types are string unless marked number or bool. The
 | `signed_in` | `method` | Sign in with Apple succeeds |
 | `profile_updated`, `avatar_updated`, `account_deleted` | — | The account action succeeds |
 | `settings_viewed`, `support_opened` | — | Settings or Support opens |
+| `widget_studio_opened` | — | Widget Studio opens; no passage or design content is collected. |
+| `widget_studio_saved` | `size`: `small\|medium\|large` | A widget design saves to the shared App Group. |
 | `verse_snapshot_opened` | — | Verse snapshot preview opens. No verse text or reference is collected. |
 | `setting_changed` | `setting`, `value` | Appearance changes |
 | `topics_updated` | `count` (number) | The number of selected topics changes |

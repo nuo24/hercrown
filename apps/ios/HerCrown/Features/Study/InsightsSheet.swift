@@ -96,21 +96,21 @@ struct VerseQuote: View {
     }
 }
 
-/// A locked study opens its placement directly, without a membership introduction or Settings detour.
+/// A locked tool offers an explicit paywall action after the free insights menu.
 struct PlusRequiredView: View {
     let tool: StudyTool
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ProgressView("Opening Plus…")
-            .frame(maxWidth: .infinity, minHeight: 80)
-            .task {
-                app.presentPaywall(placement: "study_\(tool.rawValue)", onComplete: {
-                    // Purchase/restore refreshes the server entitlement before this callback.
-                    // The parent reloads the chosen study when Plus becomes active.
-                    if !app.membership.premium { dismiss() }
-                })
-            }
+        VStack(spacing: 14) {
+            Image.illustration("open-book").resizable().scaledToFit().frame(width: 72, height: 64).accessibilityHidden(true)
+            Text("A little deeper with Plus.").font(.serif(25))
+            Text("\(tool.title) is part of Her Crown Plus. Reading the Bible stays free.")
+                .font(.ui(13)).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            Button("Explore Her Crown Plus") {
+                app.presentPaywall(placement: "study_\(tool.rawValue)")
+            }.buttonStyle(CapsuleButtonStyle())
+        }.frame(maxWidth: .infinity).padding(.vertical, 16)
     }
 }

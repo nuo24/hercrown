@@ -178,8 +178,7 @@ struct DiscoverView: View {
     }
 
     private func openStudy(_ ref: VerseRef) {
-        if app.membership.premium { studyRef = ref }
-        else { app.presentPaywall(placement: "study_deeper", onComplete: { studyRef = ref }) }
+        studyRef = ref
     }
     private func openDetailAction() {
         switch pendingDetailAction {

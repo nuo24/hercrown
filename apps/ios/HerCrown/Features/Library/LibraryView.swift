@@ -34,27 +34,17 @@ struct SavedSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                AppGradient()
+                Theme.canvas(scheme)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        // .app-header: 28 pt title; a close button where the mockup has its icon buttons.
-                        HStack {
-                            Text("Saved passages").font(.system(size: 28)).tracking(-0.8)
+                        HStack(spacing: 18) {
+                            Button { dismiss() } label: { Image(systemName: "arrow.left").frame(width: 24, height: 44) }
+                            Text("Saved passages").font(.serif(28)).tracking(-0.5)
                             Spacer()
-                            IconButton(systemName: "xmark", label: "Close") { dismiss() }
-                        }
-                        .padding(EdgeInsets(top: 20, leading: 20, bottom: 18, trailing: 20))
-                        Text("Words to keep close.")
-                            .font(.system(size: 14))
-                            .frame(minHeight: 22.4)
-                            .foregroundStyle(Theme.muted(scheme))
-                            .padding(.horizontal, 20)
-                        // .saved-illustration-banner: 56×64 ribbon, 13 pt caption, 0/24/22 padding.
-                        HStack(spacing: 14) {
-                            Image.illustration("bookmark").resizable().scaledToFit().frame(width: 56, height: 64).accessibilityHidden(true)
-                            Text("Your collected passages").font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
-                        }
-                        .padding(EdgeInsets(top: 20, leading: 24, bottom: 22, trailing: 24))
+                            Button("Done") { dismiss() }.font(.ui(12, weight: .medium))
+                        }.buttonStyle(.plain).padding(20)
+                        Text("Words to keep close.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                            .padding(.horizontal, 20).padding(.vertical, 18)
                         sectionChips.padding(.bottom, 16)
                         VStack(spacing: 16) { content }.padding(.horizontal, 20)
                     }
@@ -81,21 +71,26 @@ struct SavedSheet: View {
 
     /// Sections as the mockup's filter chips (44 pt, 13 pt, ink when selected).
     private var sectionChips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(Section.allCases) { s in
-                    let on = s == section
-                    Button { section = s } label: {
-                        Text(title(s)).font(.system(size: 13)).padding(.horizontal, 14).frame(height: 44)
-                            .foregroundStyle(on ? (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme))
-                            .background(Capsule().fill(on ? Theme.text(scheme) : (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))))
-                            .overlay(Capsule().strokeBorder(on ? .clear : Theme.border(scheme), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(on ? .isSelected : [])
-                }
+        HStack(spacing: 4) {
+            ForEach(Section.allCases) { item in
+                Button { section = item } label: {
+                    VStack(spacing: 3) {
+                        Text(item.rawValue).font(.ui(12, weight: .medium))
+                        Text(count(item).formatted()).font(.ui(10))
+                    }.frame(maxWidth: .infinity, minHeight: 44)
+                        .foregroundStyle(item == section ? Theme.text(scheme) : Theme.muted(scheme))
+                        .background(item == section ? Theme.surface(scheme) : .clear, in: RoundedRectangle(cornerRadius: 9))
+                }.buttonStyle(.plain).accessibilityAddTraits(item == section ? .isSelected : [])
             }
-            .padding(.horizontal, 20)
+        }.padding(4).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 12)).padding(.horizontal, 20).padding(.vertical, 8)
+    }
+
+    private func count(_ section: Section) -> Int {
+        switch section {
+        case .verses: app.saved.count
+        case .notes: counts?.notes ?? notes?.count ?? 0
+        case .studies: counts?.studies ?? studies?.count ?? 0
+        case .studied: max(counts?.studied ?? studied?.count ?? 0, discoverStudied.count)
         }
     }
 
@@ -138,7 +133,7 @@ struct SavedSheet: View {
                     if let verse = VerseRef(ref) {
                         SavedVerseCard(ref: verse, translation: translation,
                                        onNotes: { noteRef = verse },
-                                       onReadAndReflect: { openStudy = LibraryStudyRoute(ref: verse, tool: .deeper) })
+                                       onReadAndReflect: { studyRef = verse })
                     }
                 }
             }
@@ -229,33 +224,20 @@ private struct SavedVerseCard: View {
     var body: some View {
         let text = BibleStore.shared.text(translation, ref) ?? ""
         let label = BibleStore.shared.label(ref)
-        Card(padding: EdgeInsets(top: 22, leading: 20, bottom: 14, trailing: 20)) {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(label).font(.serif(24, relativeTo: .title2)).tracking(-0.48).frame(minHeight: 28.8)
-                ScriptureText(text: "“\(text)”", reference: ref.description, translation: translation).font(.serif(28, relativeTo: .title2)).tracking(-0.56).lineSpacing(4.2)
-                    .fixedSize(horizontal: false, vertical: true).padding(.top, 32)
-                Text(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? "")
-                    .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 28)
-                Button(action: onReadAndReflect) {
-                    HStack(spacing: 6) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 10, weight: .semibold)) }
-                        .font(.system(size: 12)).frame(maxWidth: .infinity, minHeight: 44)
-                }
-                .buttonStyle(.plain)
-                .padding(.top, 8)
-                HStack(spacing: 0) {
-                    Button { app.toggleSave(ref.description) } label: { Image(systemName: "heart.fill").frame(width: 58, height: 44) }.accessibilityLabel("Remove from saved")
-                    Spacer()
-                    Button(action: onNotes) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 58, height: 44) }.accessibilityLabel("Write a note")
-                    Spacer()
-                    VerseShareButton(text: text, reference: label, translation: translation).frame(width: 58)
-                }
-                .font(.system(size: 17))
-                .frame(width: 236)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 24)
-                .overlay(alignment: .top) { Rectangle().fill(Theme.border(scheme)).frame(width: 200, height: 1).padding(.top, 8) }
+        VStack(alignment: .leading, spacing: 24) {
+            HStack(spacing: 16) {
+                Image.illustration("olive").resizable().scaledToFit().frame(width: 60, height: 64).accessibilityHidden(true)
+                Text(label).font(.ui(14, weight: .semibold))
             }
-            .foregroundStyle(Theme.text(scheme))
-        }
+            ScriptureText(text: text, reference: ref.description, translation: translation)
+                .font(.serif(25, relativeTo: .title2)).lineSpacing(3).fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Button("Read & reflect", action: onReadAndReflect)
+                Spacer()
+                Button("Remove") { app.toggleSave(ref.description) }
+            }.font(.ui(12, weight: .medium)).frame(minHeight: 44).buttonStyle(.plain)
+        }.padding(22).frame(maxWidth: .infinity, alignment: .leading)
+            .foregroundStyle(Theme.text(scheme)).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
+
     }
 }

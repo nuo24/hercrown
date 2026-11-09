@@ -113,6 +113,7 @@ struct HomeView: View {
         .task(id: model.loaded) {
             guard model.loaded else { return }
             switch UserDefaults.standard.string(forKey: "hcOpenHome") {
+            case "insights": if let verse = model.verse { studyRef = VerseRef(verse.ref) }
             case "streak": showingStreak = true
             case "devotional": openDevotional = model.devotional
             case "plan": openPlan = model.todaysPlan
@@ -251,8 +252,7 @@ struct HomeView: View {
                     Text("Notes you leave on verses appear here, with their Scripture reference.")
                         .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
                     collectionAction("Read a verse & add a note") {
-                        if let ref = model.verse.flatMap({ VerseRef($0.ref) }) { noteRef = ref }
-                        else { app.requestedTab = .bible }
+                        app.requestedTab = .bible
                     }
                 }
                 ForEach(notes) { note in

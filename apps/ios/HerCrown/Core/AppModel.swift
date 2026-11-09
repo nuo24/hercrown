@@ -77,7 +77,7 @@ final class AppModel {
             offline = true
         }
         phase = .ready
-        await WidgetBridge.refresh(translation: preferences.translation)
+        await WidgetBridge.refresh(translation: preferences.translation, userID: me?.user.id)
         await Analytics.shared.flush()
     }
 
@@ -175,7 +175,10 @@ final class AppModel {
         applySession(account)
         if preferences.remindersEnabled { DailyReminder.schedule(at: DailyReminder.time(from: preferences.reminderTime)) }
         else { DailyReminder.cancel() }
-        Task { await WidgetBridge.refresh(translation: account.preferences.translation) }
+        Task {
+            guard self.me?.user.id == account.user.id else { return }
+            await WidgetBridge.refresh(translation: account.preferences.translation, userID: account.user.id)
+        }
     }
 
     // MARK: Membership
@@ -276,6 +279,7 @@ final class AppModel {
         api.token = nil
         PersonalPrayerStore.remove(prayerUserID)
         SnapshotDraftStore.remove(prayerUserID)
+        WidgetDesignStore.activate(owner: nil)
         for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position"] { UserDefaults.standard.removeObject(forKey: key) }
         saved = []
         preferences = .defaults
@@ -372,7 +376,7 @@ final class AppModel {
         let translation = preferences.translation
         Task {
             _ = try? await api.send("PATCH", "/me/preferences", json: patch)
-            if patch["widgetRef"] != nil || patch["translation"] != nil || patch["topics"] != nil { await WidgetBridge.refresh(translation: translation) }
+            if patch["widgetRef"] != nil || patch["translation"] != nil || patch["topics"] != nil { await WidgetBridge.refresh(translation: translation, userID: self.me?.user.id) }
         }
     }
 

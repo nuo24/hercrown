@@ -199,6 +199,7 @@ struct OnboardingView: View {
         case 13:
             Text("Your prayer is saved on this device.").font(.serif(20)).lineSpacing(5)
             if !prayer.isEmpty { ShareLink(item: prayer) { Text("Save a copy of my prayer") }.buttonStyle(CapsuleButtonStyle(kind: .secondary)) }
+            OnboardingScriptureCard(answers: answers, prayer: prayer)
         default: EmptyView()
         }
     }

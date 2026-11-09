@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var inheritedScheme
     @State private var legal: LegalPage?
+    @State private var showingSaved = false
     @State private var showsTestSession = false
     @State private var changingTestSession = false
     @State private var testSessionError = false
@@ -68,11 +69,15 @@ struct SettingsView: View {
                             group {
                                 NavigationLink { AccountView() } label: { row("person", "Your account", accountSubtitle) }.buttonStyle(.plain)
                                 divider
+                                Button { showingSaved = true } label: { row("heart", "Saved passages", "Verses, notes and studies to keep close") }.buttonStyle(.plain)
+                                divider
                                 NavigationLink { SubscriptionView() } label: { row("bookmark", "Subscription", app.membership.premium ? "Her Crown Plus" : "Free plan · explore Plus") }.buttonStyle(.plain)
                                 divider
                                 Menu { appearanceChoices } label: { row(scheme == .dark ? "moon" : "sun.max", "Appearance", appearanceTitle, chevron: "chevron.down") }.buttonStyle(.plain)
                                 divider
                                 NavigationLink { AppIconView() } label: { row("app", "App icon", nil) }.buttonStyle(.plain)
+                                divider
+                                NavigationLink { WidgetStudioView() } label: { row("square.grid.2x2", "Widget Studio", "Make your Home Screen your own") }.buttonStyle(.plain)
                                 divider
                                 NavigationLink { TopicsView() } label: { row("heart", "On your heart", app.preferences.topics.isEmpty ? "Choose topics" : app.preferences.topics.joined(separator: " · ")) }.buttonStyle(.plain)
                                 divider
@@ -162,6 +167,7 @@ struct SettingsView: View {
                 case "subscription": SubscriptionView()
                 case "topics": TopicsView()
                 case "feedback": FeedbackView()
+                case "widget": WidgetStudioView()
                 default: EmptyView()
                 }
             }
@@ -176,6 +182,7 @@ struct SettingsView: View {
         }
         .environment(\.colorScheme, scheme)
 
+        .sheet(isPresented: $showingSaved) { SavedSheet(translation: BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation) }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .task { showsTestSession = await AppModel.allowsTestSessions() }
         .alert("Couldn’t switch test accounts", isPresented: $testSessionError) {
@@ -569,7 +576,7 @@ struct AccountView: View {
 
     private var signInRow: some View {
         HStack(spacing: 12) {
-            Image(systemName: app.isGuest ? "shield" : "checkmark.shield").font(.system(size: 19))
+            Image(systemName: "checkmark.shield").font(.system(size: 19))
                 .frame(width: 24)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
@@ -683,7 +690,6 @@ struct Avatar: View {
 /// settings.subscription: current plan, benefits, Explore Plus, Restore, Manage. Never claims Plus without a verified entitlement.
 struct SubscriptionView: View {
     #if DEBUG
-    @State private var openingSandboxCheckout = false
     #endif
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
@@ -801,18 +807,10 @@ struct SubscriptionView: View {
                      : "Reading the Bible is always free. Plus adds reading plans and every study tool.")
                     .font(.ui(14))
                     .foregroundStyle(Theme.muted(scheme))
-                if !appleSubscriptionFound {
-                    Button("Explore Her Crown Plus") {
-                        #if DEBUG
-                        guard !openingSandboxCheckout else { return }
-                        openingSandboxCheckout = true
-                        Task { await openSandboxCheckout() }
-                        #else
+                Button("Explore Her Crown Plus") {
                         app.presentPaywall(placement: "settings_subscription") { appleSubscriptionFound = true }
-                        #endif
                     }
                     .buttonStyle(CapsuleButtonStyle())
-                }
             }
             .padding(18)
         }
@@ -848,35 +846,7 @@ struct SubscriptionView: View {
         .contentShape(Rectangle())
     }
 
-    #if DEBUG
-    private func openSandboxCheckout() async {
-        defer { openingSandboxCheckout = false }
-        if await app.activeAppleSubscription() != nil {
-            appleSubscriptionFound = true
-            return
-        }
-        message = "Opening Apple sandbox checkout…"
-        do {
-            guard let product = try await Product.products(for: ["hercrown.plus.yearly"]).first else {
-                message = "Apple sandbox did not return the Her Crown yearly plan."
-                return
-            }
-            switch try await product.purchase() {
-            case .success(.verified(let transaction)):
-                message = await app.verifyPurchases()
-                await transaction.finish()
-            case .userCancelled:
-                message = nil
-            case .pending:
-                message = "Apple is waiting for purchase approval."
-            default:
-                message = "Apple could not verify the purchase."
-            }
-        } catch {
-            message = "Apple checkout could not open. \(error.localizedDescription)"
-        }
-    }
-    #endif
+
 
     private func planName(_ id: String?) -> String {
         switch id {
@@ -909,27 +879,24 @@ struct TopicsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
-                VStack(spacing: 10) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 16) {
                     ForEach(OnboardingView.topicOptions, id: \.self) { topic in
                         let selected = topics.contains(topic)
                         Button {
-                            if selected { topics.removeAll { $0 == topic } }
-                            else { topics.append(topic) }
+                            if selected { topics.removeAll { $0 == topic } } else { topics.append(topic) }
                         } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: selected ? "checkmark.square.fill" : "square")
-                                    .font(.system(size: 18))
-                                Text(topic).font(.system(size: 14))
-                                Spacer()
-                            }
-                            .foregroundStyle(Theme.text(scheme))
-                            .padding(16)
-                            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 12))
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityAddTraits(selected ? .isSelected : [])
+                            VStack(spacing: 5) {
+                                if selected { Image(systemName: "checkmark").font(.ui(10, weight: .semibold)) }
+                                Text(topic).font(.ui(11, weight: .medium)).lineLimit(1).minimumScaleFactor(0.7)
+                            }.padding(.horizontal, 10).frame(maxWidth: .infinity).frame(height: 96).offset(y: -4)
+                                .foregroundStyle(selected ? Theme.canvas(scheme) : Theme.text(scheme))
+                                .background(selected ? Theme.text(scheme) : Theme.surface(scheme), in: TopicHeart())
+                                .overlay(TopicHeart().strokeBorder(Theme.border(scheme), lineWidth: 1))
+                                .contentShape(TopicHeart())
+                        }.buttonStyle(.plain).accessibilityLabel(topic).accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
+
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(24)
@@ -964,4 +931,21 @@ struct SafariView: UIViewControllerRepresentable {
     let url: URL
     func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
+}
+
+private struct TopicHeart: InsettableShape {
+    var insetAmount: CGFloat = 0
+    func path(in rect: CGRect) -> Path {
+        let r = rect.insetBy(dx: insetAmount, dy: insetAmount)
+        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + r.width * x, y: r.minY + r.height * y) }
+        var path = Path()
+        path.move(to: p(0.5, 0.95))
+        path.addCurve(to: p(0.05, 0.32), control1: p(0.25, 0.76), control2: p(0.02, 0.57))
+        path.addCurve(to: p(0.5, 0.18), control1: p(0.06, 0.01), control2: p(0.37, 0.01))
+        path.addCurve(to: p(0.95, 0.32), control1: p(0.63, 0.01), control2: p(0.94, 0.01))
+        path.addCurve(to: p(0.5, 0.95), control1: p(0.98, 0.57), control2: p(0.75, 0.76))
+        path.closeSubpath()
+        return path
+    }
+    func inset(by amount: CGFloat) -> some InsettableShape { var shape = self; shape.insetAmount += amount; return shape }
 }
