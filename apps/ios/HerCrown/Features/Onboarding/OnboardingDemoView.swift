@@ -25,7 +25,7 @@ struct OnboardingDemoView: View {
         .onAppear { playback.setActive(isActive, autoplay: !reducedMotion) }
         .onChange(of: isActive) { _, active in playback.setActive(active, autoplay: !reducedMotion) }
         .onChange(of: reducedMotion) { _, reduced in playback.setActive(isActive, autoplay: !reduced) }
-        .onDisappear { playback.pause() }
+        .onDisappear { playback.setActive(false, autoplay: false) }
     }
 }
 
@@ -36,6 +36,8 @@ struct OnboardingDemoView: View {
     private var looper: AVPlayerLooper?
     private var status: NSKeyValueObservation?
     private var wantsPlayback = false
+    private var active = false
+    private var activation = UUID()
     init() {
         player.isMuted = true
         player.automaticallyWaitsToMinimizeStalling = false
@@ -53,7 +55,27 @@ struct OnboardingDemoView: View {
             }
         }
     }
-    func setActive(_ active: Bool, autoplay: Bool) { if active && autoplay { play() } else { pause() } }
+    func setActive(_ active: Bool, autoplay: Bool) {
+        let entering = active && !self.active
+        self.active = active
+        if !active {
+            activation = UUID()
+            pause()
+        } else if entering {
+            // Await an exact rewind before allowing the looper or autoplay to advance.
+            pause()
+            let request = UUID()
+            activation = request
+            player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] finished in
+                Task { @MainActor in
+                    guard let self, finished, self.active, self.activation == request else { return }
+                    if autoplay { self.play() }
+                }
+            }
+        } else if !autoplay {
+            pause()
+        }
+    }
     func play() { wantsPlayback = true; playing = true; player.playImmediately(atRate: 1.5) }
     func pause() { wantsPlayback = false; playing = false; player.pause() }
 }

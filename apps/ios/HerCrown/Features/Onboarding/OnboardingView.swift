@@ -192,7 +192,7 @@ struct OnboardingView: View {
     @ViewBuilder private var pageContent: some View {
         switch step {
         case 2:
-            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active).frame(width: 165, height: 165 * 2556 / 1180).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
+            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active && settled).frame(width: 165, height: 165 * 2556 / 1180).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
         case 4: choices(["Social media", "The Bible", "About the same"], selection: $answers.comparison)
         case 5:
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
