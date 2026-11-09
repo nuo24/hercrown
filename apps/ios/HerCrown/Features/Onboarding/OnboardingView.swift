@@ -270,6 +270,7 @@ struct OnboardingView: View {
                                                     .frame(width: 82, height: min(90, heading.size.height))
                                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                                                     .modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
+                                                    .id("heading-art-\(step)")
                                                     .accessibilityHidden(true)
                                             }
                                         }
@@ -445,7 +446,9 @@ struct OnboardingView: View {
             showingAcknowledgement = false
             acknowledgement = ""
             if step == 11 {
-                try await type(title); prayerTitleFinished = true; artVisible = true
+                artVisible = true
+                if !reduceMotion { try await Task.sleep(for: .milliseconds(120)) }
+                try await type(title); prayerTitleFinished = true
                 while loadingPrayer || (!prayerError && (preparedAnswers != prayerPreparation?.answers || preparedVersion != requestVersion)) {
                     try await Task.sleep(for: .milliseconds(100))
                 }
@@ -454,9 +457,9 @@ struct OnboardingView: View {
                 try await type(prayer, prayer: true)
             }
             else {
-                // The intro collage, demo, name journal and comparison magnifier lead
-                // their headings; the Christ flower and later question art follow text.
-                if [1, 2, 3, 4].contains(step) {
+                // Side illustrations enter just before typing on every question page.
+                // The collage/demo keep their established intro timing.
+                if step >= 1 {
                     artVisible = true
                     if !reduceMotion { try await Task.sleep(for: .milliseconds(220)) }
                 }
@@ -626,11 +629,20 @@ private struct OnboardingArtReveal: ViewModifier {
     let visible: Bool
     let reducedMotion: Bool
     var delay = 0.0
+    @State private var mounted = false
     func body(content: Content) -> some View {
-        content.opacity(visible || reducedMotion ? 1 : 0)
-            .offset(y: visible || reducedMotion ? 0 : 14)
-            .scaleEffect(visible || reducedMotion ? 1 : 0.96)
-            .animation(reducedMotion ? nil : .easeOut(duration: 0.45).delay(visible ? delay : 0), value: visible)
+        let shown = reducedMotion || (visible && mounted)
+        content.opacity(shown ? 1 : 0)
+            .offset(y: shown ? 0 : 14)
+            .scaleEffect(shown ? 1 : 0.96)
+            .animation(reducedMotion ? nil : .easeOut(duration: 0.45).delay(shown ? delay : 0), value: shown)
+            .task {
+                // Commit the hidden entrance frame before revealing. Without this, a new
+                // page can mount with visible=true and SwiftUI has no transition to animate.
+                try? await Task.sleep(for: .milliseconds(50))
+                guard !Task.isCancelled else { return }
+                mounted = true
+            }
     }
 }
 
