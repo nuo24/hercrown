@@ -19,7 +19,7 @@ struct ScriptureText: View {
                 else { ProgressView() }
             } else { Text(attributed) }
             if BibleStore.online[translation] != nil && !displayText.isEmpty {
-                Text("\(translation.uppercased()) ©").font(.system(size: 10)).foregroundStyle(.secondary)
+                Text("\(translation.uppercased()) ©").font(.system(size: 9)).foregroundStyle(.secondary)
             }
         }
         .task(id: "\(translation)|\(reference)|\(text.isEmpty)") {

@@ -237,7 +237,7 @@ struct VersePage: View {
                 Text(reference)
                     .font(.ui(13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 30)
                 if BibleStore.online[chapter.translation] != nil {
-                    Text("\(chapter.translation.uppercased()) ©").font(.system(size: 10))
+                    Text("\(chapter.translation.uppercased()) ©").font(.system(size: 9))
                         .foregroundStyle(Theme.muted(scheme)).padding(.top, 6)
                         .accessibilityLabel("\(BibleStore.names[chapter.translation] ?? chapter.translation). Copyright details in Settings, Credits and Licenses.")
                 }

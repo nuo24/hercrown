@@ -74,7 +74,10 @@ final class PersonalPrayerTests: XCTestCase {
         }
         defer { NotificationCenter.default.removeObserver(observer) }
         DispatchQueue.global(qos: .userInitiated).async {
-            delegate.receiveNotificationOpen { completed.fulfill() }
+            delegate.receiveNotificationOpen {
+                XCTAssertTrue(Thread.isMainThread, "UIKit completes notification state restoration here")
+                completed.fulfill()
+            }
         }
         await fulfillment(of: [completed, delivered], timeout: 3)
         XCTAssertTrue(delegate.openedExternally)

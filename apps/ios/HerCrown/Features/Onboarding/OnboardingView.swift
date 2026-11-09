@@ -167,7 +167,7 @@ struct OnboardingView: View {
     private var welcome: some View {
         GeometryReader { g in
             ZStack(alignment: .top) {
-                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).ignoresSafeArea()
+                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion)).ignoresSafeArea()
                 VStack(spacing: 0) {
                     Spacer().frame(height: g.size.height * 0.30)
                     animatedText(title).font(.serif(g.size.width < 380 ? 39 : 44)).tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)

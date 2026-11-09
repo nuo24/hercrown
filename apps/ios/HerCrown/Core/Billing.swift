@@ -274,9 +274,12 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     }
 
     nonisolated func receiveNotificationOpen(completionHandler: @escaping () -> Void) {
-        // Notification callbacks arrive on a system queue. Complete promptly and move UI state to MainActor.
-        Task { @MainActor [weak self] in self?.handleNotificationOpen() }
-        completionHandler()
+        // UIKit's response completion updates snapshots/state restoration and must also run on main.
+        // The async delegate bridge resumed that completion on a worker thread (build 20 crash reports).
+        Task { @MainActor [weak self] in
+            self?.handleNotificationOpen()
+            completionHandler()
+        }
     }
 
     @MainActor func handleNotificationOpen() {

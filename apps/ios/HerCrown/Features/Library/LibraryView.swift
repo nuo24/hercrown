@@ -200,7 +200,7 @@ struct SavedSheet: View {
                         Text(label).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
                         if let verse {
                             Text(verse).font(.serif(19)).lineLimit(3).multilineTextAlignment(.leading)
-                            Text(translation.uppercased() + (BibleStore.online[translation] == nil ? "" : " ©")).font(.system(size: 10)).foregroundStyle(.secondary)
+                            Text(translation.uppercased() + (BibleStore.online[translation] == nil ? "" : " ©")).font(.system(size: 9)).foregroundStyle(.secondary)
                         }
                         Text(detail).font(.system(size: 15)).lineLimit(4).multilineTextAlignment(.leading)
                     }
