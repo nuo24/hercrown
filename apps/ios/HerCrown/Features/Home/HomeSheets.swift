@@ -151,7 +151,7 @@ struct PlanSheet: View {
 
     private var plan: ReadingPlan? { model.plans?.plans.first { $0.id == planId } }
     private var locked: Bool { model.plans?.locked ?? !app.membership.premium }
-    private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
+    private var translation: String { app.readingTranslation }
 
     var body: some View {
         NavigationStack {

@@ -198,7 +198,10 @@ struct SavedSheet: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(label).font(.system(size: 14, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
-                        if let verse { Text(verse).font(.serif(19)).lineLimit(3).multilineTextAlignment(.leading) }
+                        if let verse {
+                            Text(verse).font(.serif(19)).lineLimit(3).multilineTextAlignment(.leading)
+                            Text(translation.uppercased() + (BibleStore.online[translation] == nil ? "" : " ©")).font(.system(size: 10)).foregroundStyle(.secondary)
+                        }
                         Text(detail).font(.system(size: 15)).lineLimit(4).multilineTextAlignment(.leading)
                     }
                     Spacer(minLength: 0)
@@ -223,11 +226,10 @@ private struct SavedVerseCard: View {
     /// Read & reflect, then the actions centred under a hairline.
     var body: some View {
         let text = BibleStore.shared.text(translation, ref) ?? ""
-        let label = BibleStore.shared.label(ref)
         VStack(alignment: .leading, spacing: 24) {
             HStack(spacing: 16) {
                 Image.illustration("olive").resizable().scaledToFit().frame(width: 60, height: 64).accessibilityHidden(true)
-                Text(label).font(.ui(14, weight: .semibold))
+                ScriptureReference(ref: ref, translation: translation).font(.ui(14, weight: .semibold))
             }
             ScriptureText(text: text, reference: ref.description, translation: translation)
                 .font(.serif(25, relativeTo: .title2)).lineSpacing(3).fixedSize(horizontal: false, vertical: true)

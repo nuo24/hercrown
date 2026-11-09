@@ -83,4 +83,14 @@ final class BibleStoreTests: XCTestCase {
         XCTAssertNil(ReaderChapterWindow.neighbour(of: end, direction: 1))
     }
 
+    func testOnlinePassageRetainsBridgeAndLabel() throws {
+        let book = try XCTUnwrap(BibleStore.shared.book("PSA"))
+        let chapter = Chapter(translation: "msg", book: book, number: 23, title: nil,
+            verses: [Verse(number: 1, text: "Provider bridge fixture.", wordsOfJesus: [], end: 3), Verse(number: 4, text: "Next fixture.", wordsOfJesus: [])])
+        let passage = try OnlineBible.passage(in: chapter, ref: VerseRef(book: "PSA", chapter: 23, verse: 2))
+        XCTAssertEqual(passage.text, "Provider bridge fixture.")
+        XCTAssertEqual(passage.label, "Psalm 23:1–3")
+        XCTAssertEqual(passage.reference.description, "PSA.23.1-3")
+    }
+
 }

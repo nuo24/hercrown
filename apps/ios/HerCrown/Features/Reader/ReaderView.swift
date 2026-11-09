@@ -64,7 +64,7 @@ struct ReaderView: View {
         .sheet(item: $reflectRef) { ref in
             ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.large])
         }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: BibleStore.offline[model.translation] == nil ? "kjv" : model.translation) }
+        .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
         .sheet(isPresented: $showingBookmarks) {
             ReaderBookmarks(current: model.currentRef) { ref in
                 jump(to: ref)
@@ -236,9 +236,10 @@ struct VersePage: View {
                     .foregroundStyle(Theme.text(scheme))
                 Text(reference)
                     .font(.ui(13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 30)
-                if let copyright = chapter.copyright {
-                    Text(copyright).font(.system(size: 8)).foregroundStyle(Theme.muted(scheme))
-                        .multilineTextAlignment(.center).padding(.top, 10)
+                if BibleStore.online[chapter.translation] != nil {
+                    Text("\(chapter.translation.uppercased()) ©").font(.system(size: 10))
+                        .foregroundStyle(Theme.muted(scheme)).padding(.top, 6)
+                        .accessibilityLabel("\(BibleStore.names[chapter.translation] ?? chapter.translation). Copyright details in Settings, Credits and Licenses.")
                 }
                 Spacer(minLength: 0)
             }

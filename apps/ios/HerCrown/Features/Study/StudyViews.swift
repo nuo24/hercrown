@@ -22,7 +22,7 @@ struct AIStudyView: View {
                 Text(tool.title).font(.ui(20, weight: .semibold))
                     .accessibilityAddTraits(.isHeader)
                 VStack(spacing: 16) {
-                    Text(BibleStore.shared.label(ref)).font(.ui(21, weight: .semibold))
+                    ScriptureReference(ref: ref, translation: translation).font(.ui(21, weight: .semibold))
                     ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation)
                         .font(.serif(25, relativeTo: .title2)).lineSpacing(4)
                     Text(BibleStore.offline[translation] ?? translation.uppercased())

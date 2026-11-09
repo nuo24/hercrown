@@ -91,6 +91,8 @@ final class HomeModel {
     }
 
     func load(translation: String) async {
+        if verse?.translation != translation { verse = nil }
+        if devotional?.translation != translation { devotional = nil }
         let day = AppModel.localDay()
         async let v: DayVerse? = try? api.get("/scripture/verse-of-the-day?date=\(day)&translation=\(translation)")
         async let d: Devotional? = try? api.get("/devotionals/today?date=\(day)&translation=\(translation)") // 404 = none approved: no card

@@ -182,7 +182,7 @@ struct SettingsView: View {
         }
         .environment(\.colorScheme, scheme)
 
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation) }
+        .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.readingTranslation) }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .task { showsTestSession = await AppModel.allowsTestSessions() }
         .alert("Couldn’t switch test accounts", isPresented: $testSessionError) {

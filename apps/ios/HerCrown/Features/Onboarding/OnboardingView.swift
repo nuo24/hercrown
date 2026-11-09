@@ -102,6 +102,7 @@ struct OnboardingView: View {
                         animatedText(acknowledgement).font(.serif(28.8)).tracking(-0.6).frame(maxWidth: .infinity, alignment: .leading)
                         Spacer()
                     } else {
+                        ScrollViewReader { prayerScroll in
                         ScrollView {
                             VStack(alignment: .leading, spacing: 18) {
                                 if step == 1 { timeIntro }
@@ -116,10 +117,19 @@ struct OnboardingView: View {
                                     if !subtitle.isEmpty { Text(subtitle).font(.ui(14)).lineSpacing(5).foregroundStyle(muted).opacity(settled ? 1 : 0) }
                                     pageContent.opacity(settled ? 1 : 0).allowsHitTesting(settled)
                                 }
+                                if step == 11 { Color.clear.frame(height: 18).id("prayer-bottom") }
                             }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, isTextPage ? 20 : 4)
                         }
                         .scrollBounceBehavior(.basedOnSize)
                         .scrollIndicators(.hidden)
+                        .clipped()
+                        .onChange(of: revealed) { _, count in
+                            if step == 11 && !loadingPrayer && count % 8 == 0 { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
+                        }
+                        .onChange(of: settled) { _, done in
+                            if step == 11 && done { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
+                        }
+                        }
                         if isTextPage { inputDock.opacity(settled ? 1 : 0).allowsHitTesting(settled) }
                         else { actions.opacity(settled && !loadingPrayer ? 1 : 0).allowsHitTesting(settled && !loadingPrayer) }
                     }
@@ -244,7 +254,9 @@ struct OnboardingView: View {
                     Task { await Analytics.shared.track("prayer_prepared", ["generated": false]) }
                 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             } else {
-                animatedText(prayer).font(.serif(20)).lineSpacing(5).textSelection(.enabled)
+                Text(settled || reduceMotion ? prayer : String(prayer.prefix(revealed)))
+                    .font(.serif(20)).lineSpacing(5).textSelection(.enabled)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
             }
         }

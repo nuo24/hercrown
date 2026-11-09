@@ -35,6 +35,11 @@ final class AppModel {
     }
 
     var onboardingCompleted = UserDefaults.standard.bool(forKey: "hc.onboardingCompleted")
+    var readingTranslation: String {
+        let selected = preferences.translation
+        if offline && BibleStore.online[selected] != nil { return "kjv" }
+        return BibleStore.names[selected] == nil ? "kjv" : selected
+    }
     var offline = false
     /// Another tab asked to show this one (e.g. Home → read a verse in The Bible).
     var requestedTab: AppTab?

@@ -15,6 +15,7 @@ struct DiscoverFeed: Decodable, Equatable {
     let filters: [Filter]
     let translation: String?
     let cards: [Card]
+    var nextOffset: Int? = nil
 }
 
 enum DiscoverStudied {
@@ -36,6 +37,8 @@ struct DiscoverView: View {
     @State private var filter = "for-you"
     @State private var feed: DiscoverFeed?
     @State private var failed = false
+    @State private var loadingMore = false
+    @State private var moreFailed = false
     @State private var showingSaved = false
     @State private var studyRef: VerseRef?
     @State private var noteRef: VerseRef?
@@ -54,7 +57,7 @@ struct DiscoverView: View {
     private var accountKey: String { DiscoverStudied.accountKey(app.me?.user.id) }
     private var studied: [String] { DiscoverStudied.byAccount(studiedData)[accountKey] ?? [] }
 
-    private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
+    private var translation: String { app.readingTranslation }
     private static let themes = ["Peace", "Purpose", "Faith", "Relationships", "Identity", "Anxiety", "Gratitude", "Hope", "Wisdom"]
 
     private static let editorial: [String: (title: String, art: String)] = [
@@ -126,7 +129,13 @@ struct DiscoverView: View {
                         .padding(.horizontal, 22).frame(minHeight: 44)
                     }
                     Section {
-                        VStack(alignment: .leading, spacing: 14) { cards }
+                        LazyVStack(alignment: .leading, spacing: 14) {
+                            cards
+                            if feed?.nextOffset != nil {
+                                if moreFailed { Button("Try loading more") { Task { await loadMore() } }.font(.ui(13)) }
+                                else { ProgressView().frame(maxWidth: .infinity).task(id: feed?.nextOffset) { await loadMore() } }
+                            }
+                        }
                             .padding(.horizontal, 22)
                     } header: {
                         chips
@@ -190,6 +199,7 @@ struct DiscoverView: View {
     }
 
     private func load() async {
+        if feed?.translation != translation { feed = nil }
         let selected = filter
         let source = requestedFilter
         let encoded = source.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? source
@@ -203,6 +213,20 @@ struct DiscoverView: View {
             failed = feed?.filter != source
         }
         await Analytics.shared.track("discover_viewed", ["filter": .string(selected)])
+    }
+
+    private func loadMore() async {
+        guard !loadingMore, let previous = feed, let offset = previous.nextOffset else { return }
+        loadingMore = true; moreFailed = false
+        defer { loadingMore = false }
+        let selected = filter; let edition = translation
+        let encoded = requestedFilter.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? requestedFilter
+        do {
+            let next: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(edition)&offset=\(offset)")
+            guard !Task.isCancelled, filter == selected, translation == edition else { return }
+            feed = DiscoverFeed(filter: next.filter, filters: next.filters, translation: next.translation,
+                cards: previous.cards + next.cards.filter { c in !previous.cards.contains { $0.id == c.id } }, nextOffset: next.nextOffset)
+        } catch { if !Task.isCancelled { moreFailed = true } }
     }
 
     private func markStudied(_ ref: String, accountKey: String) {
@@ -367,7 +391,7 @@ private struct DiscoverCard: View {
     @State private var completing = false
 
     private var translationName: String {
-        ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? translation.uppercased()
+        BibleStore.names[translation] ?? translation.uppercased()
     }
 
     /// .verse-card: meta (11 pt tag · reference), 29 pt serif verse, translation, a reflection block under a hairline,

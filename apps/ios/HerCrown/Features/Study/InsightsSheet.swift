@@ -83,13 +83,18 @@ struct InsightsSheet: View {
 struct VerseQuote: View {
     let ref: VerseRef
     let translation: String
+    @State private var passage: OnlineBible.Passage?
     var body: some View {
         VStack(spacing: 14) {
-            Text(BibleStore.shared.label(ref)).font(.system(size: 22, weight: .semibold))
-            ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation).font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
+            Text(passage?.label ?? BibleStore.shared.label(ref)).font(.system(size: 22, weight: .semibold))
+            ScriptureText(text: passage?.text ?? BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation).font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
             Text(BibleStore.names[translation] ?? translation.uppercased()).font(.system(size: 12)).foregroundStyle(.secondary)
         }
         .multilineTextAlignment(.center)
+        .task(id: "\(translation)|\(ref)") {
+            passage = nil
+            if BibleStore.online[translation] != nil { passage = try? await OnlineBible.passage(translation, ref: ref) }
+        }
     }
     private func translationName(_ abbreviation: String) -> String {
         ["KJV": "King James Version", "BSB": "Berean Standard Bible", "WEB": "World English Bible"][abbreviation] ?? abbreviation

@@ -31,9 +31,10 @@ struct HomeView: View {
     @State private var showingPlans = false
     @State private var pendingPlan: ReadingPlan?
     @State private var openDevotional: Devotional?
+    @State private var searchChapterRevision = 0
     @State private var searchRef = VerseRef(book: "PSA", chapter: 23, verse: 1)
 
-    private var translation: String { BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation }
+    private var translation: String { app.readingTranslation }
 
     var body: some View {
         ZStack {
@@ -107,6 +108,12 @@ struct HomeView: View {
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
         }
         .sheet(item: $openPlan) { plan in PlanSheet(planId: plan.id, model: model).presentationDetents([.large]) }
+        .task(id: "\(translation)|\(searchRef.book)|\(searchRef.chapter)") {
+            if BibleStore.online[translation] != nil {
+                _ = try? await OnlineBible.chapter(translation, book: searchRef.book, number: searchRef.chapter)
+                searchChapterRevision += 1
+            }
+        }
         .sheet(item: $openDevotional) { d in DevotionalSheet(devotional: d, model: model).presentationDetents([.large]) }
         #if DEBUG
         // Review switch: `-hcOpenHome streak|devotional|plan|plans|saved|settings`.
@@ -409,6 +416,7 @@ struct HomeView: View {
     // MARK: Verse search (.search-card)
 
     private var verseSearch: some View {
+        let _ = searchChapterRevision
         let books = BibleStore.shared.books
         let chapters = books.first { $0.id == searchRef.book }?.chapterCount ?? 0
         let verses = BibleStore.shared.chapter(translation, book: searchRef.book, chapter: searchRef.chapter)?.verses ?? []
