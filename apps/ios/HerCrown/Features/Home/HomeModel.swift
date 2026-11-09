@@ -96,6 +96,7 @@ final class HomeModel {
         async let d: Devotional? = try? api.get("/devotionals/today?date=\(day)&translation=\(translation)") // 404 = none approved: no card
         async let p: PlanList? = try? api.get("/plans")
         let (verse, devotional, plans) = await (v, d, p)
+        guard !Task.isCancelled else { return }
         if let verse { self.verse = verse }
         if let devotional { self.devotional = devotional }
         if let plans { self.plans = plans }

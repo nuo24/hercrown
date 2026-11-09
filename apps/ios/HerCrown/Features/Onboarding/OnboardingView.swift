@@ -178,7 +178,7 @@ struct OnboardingView: View {
     @ViewBuilder private var pageContent: some View {
         switch step {
         case 2:
-            OnboardingDemoView(reducedMotion: reduceMotion || scenePhase != .active).frame(width: 165, height: 297).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
+            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active).frame(width: 165, height: 297).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
         case 4: choices(["Social media", "The Bible", "About the same"], selection: $answers.comparison)
         case 5:
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -240,13 +240,14 @@ struct OnboardingView: View {
                 animatedText(prayer).font(.serif(20)).lineSpacing(5).textSelection(.enabled)
                 Button {} label: { Text(reciter.speaking ? "Release to pause" : "Hold to hear your prayer").frame(maxWidth: .infinity, minHeight: 48) }
                     .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                    .onLongPressGesture(minimumDuration: 0.15, pressing: { holding in
+                    .onLongPressGesture(minimumDuration: .infinity, maximumDistance: 30, pressing: { holding in
                         if holding && settled { reciter.start(prayer, haptics: !reduceMotion) } else { reciter.stop() }
                     }, perform: {})
                     .accessibilityAction(named: reciter.speaking ? "Stop reading" : "Read prayer aloud") {
                         if reciter.speaking { reciter.stop() } else { reciter.start(prayer, haptics: !reduceMotion) }
                     }
                     .disabled(!settled)
+                if let error = reciter.audioError { Text(error).font(.ui(12)).foregroundStyle(muted) }
             }
         }
     }
@@ -386,7 +387,7 @@ struct OnboardingView: View {
             struct Reply: Decodable { let prayer: String }
             let reply: Reply = try await app.api.call("POST", "/me/onboarding/prayer", json: answers.prayerInput)
             try Task.checkCancellation()
-            prayer = reply.prayer; generated = true; preparedAnswers = answers; preparedVersion = requestVersion
+            prayer = PrayerParagraphs.two(reply.prayer); generated = true; preparedAnswers = answers; preparedVersion = requestVersion
             await Analytics.shared.track("prayer_prepared", ["generated": true])
         } catch { if !Task.isCancelled { prayerError = true } }
     }
@@ -406,6 +407,11 @@ struct OnboardingView: View {
         app.updatePreferences(patch) { p in
             p.topics = guest ? [] : answers.heart; p.remindersEnabled = !guest && reminders; p.reminderTime = time; p.timeZone = TimeZone.current.identifier
             if !guest { p.familiarity = familiarity; p.routine = routine.isEmpty ? nil : routine }
+        }
+        // Persist the chosen topics before Home asks for its first matching daily passage.
+        if !guest {
+            do { _ = try await app.api.send("PATCH", "/me/preferences", json: patch) }
+            catch { saveError = true; return }
         }
         await app.completeOnboarding()
         if guest { if let id = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: id) } }

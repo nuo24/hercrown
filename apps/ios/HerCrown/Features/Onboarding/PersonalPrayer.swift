@@ -29,7 +29,21 @@ struct PersonalOnboardingAnswers: Codable, Equatable {
         paragraphs.append(gifts.isEmpty ? "Give me rest for today and courage for tomorrow." : "Please give me \(gifts.joined(separator: ", ")).")
         paragraphs.append("Hold the people I love close. Help me notice the support around me, receive care when I need it, and offer love to others. Guide me gently, one small step at a time.")
         paragraphs.append("Amen.")
-        return paragraphs.joined(separator: "\n\n")
+        return PrayerParagraphs.two(paragraphs.joined(separator: " "))
+    }
+}
+
+/// Keep the original words intact while giving both generated and saved prayers two readable paragraphs.
+enum PrayerParagraphs {
+    static func two(_ prayer: String) -> String {
+        let flat = prayer.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
+        let boundaries = flat.indices.filter { flat[$0] == "." || flat[$0] == "!" || flat[$0] == "?" }
+        let middle = flat.count / 2
+        let split = boundaries.filter { flat.distance(from: flat.startIndex, to: $0) > flat.count / 4 && flat.distance(from: flat.startIndex, to: $0) < flat.count * 3 / 4 }
+            .min { abs(flat.distance(from: flat.startIndex, to: $0) - middle) < abs(flat.distance(from: flat.startIndex, to: $1) - middle) }
+        guard let split else { return flat }
+        let after = flat.index(after: split)
+        return String(flat[...split]) + "\n\n" + flat[after...].trimmingCharacters(in: .whitespaces)
     }
 }
 
@@ -43,6 +57,8 @@ enum PersonalPrayerStore {
 /// Speech and feedback share one lifecycle. Haptics occur at slow phrase intervals, never for every character.
 @MainActor final class PrayerReciter: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published private(set) var speaking = false
+    @Published private(set) var audioError: String?
+    private var activeUtterance: AVSpeechUtterance?
     private let speech = AVSpeechSynthesizer()
     private let feedback = UIImpactFeedbackGenerator(style: .soft)
     private var lastPulse = Date.distantPast
@@ -50,7 +66,11 @@ enum PersonalPrayerStore {
     override init() { super.init(); speech.delegate = self }
     func start(_ prayer: String, haptics: Bool) {
         guard !speaking else { return }
-        speaking = true
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch { audioError = "Audio couldn’t start. Please try holding again."; return }
+        speaking = true; audioError = nil
         Task { await Analytics.shared.track("prayer_recited") }
         allowHaptics = haptics
         lastPulse = .distantPast
@@ -58,22 +78,26 @@ enum PersonalPrayerStore {
         utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
         utterance.rate = 0.42
         utterance.preUtteranceDelay = 0.15
+        activeUtterance = utterance
         speech.speak(utterance)
     }
     private var allowHaptics = true
-    func stop() { speech.stopSpeaking(at: .immediate); speaking = false }
+    func stop() {
+        activeUtterance = nil; speech.stopSpeaking(at: .immediate); speaking = false
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString range: NSRange, utterance: AVSpeechUtterance) {
         Task { @MainActor [weak self] in
-            guard let self, speaking, allowHaptics, Date().timeIntervalSince(lastPulse) >= 1.6 else { return }
+            guard let self, activeUtterance === utterance, speaking, allowHaptics, Date().timeIntervalSince(lastPulse) >= 1.6 else { return }
             feedback.impactOccurred(intensity: 0.35)
             lastPulse = Date()
         }
     }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.speaking = false }
+        Task { @MainActor [weak self] in if self?.activeUtterance === utterance { self?.stop() } }
     }
     nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in self?.speaking = false }
+        Task { @MainActor [weak self] in if self?.activeUtterance === utterance { self?.stop() } }
     }
 }
 
@@ -86,7 +110,7 @@ struct SavedPersonalPrayerView: View {
                 Image.illustration("faith-hands").resizable().scaledToFit().frame(height: 90).frame(maxWidth: .infinity)
                 Text("A prayer for you.").font(.serif(30))
                 if let prayer = PersonalPrayerStore.read(app.me?.user.id) {
-                    Text(prayer).font(.serif(21)).lineSpacing(6).textSelection(.enabled)
+                    Text(PrayerParagraphs.two(prayer)).font(.serif(21)).lineSpacing(6).textSelection(.enabled)
                     ShareLink(item: prayer) { Label("Save or share your prayer", systemImage: "square.and.arrow.up") }.buttonStyle(CapsuleButtonStyle())
                 } else { Text("Your saved onboarding prayer will appear here.").font(.ui(14)).foregroundStyle(Theme.muted(scheme)) }
                 Text("Personal prayer · separate from Scripture").font(.ui(11)).foregroundStyle(Theme.muted(scheme))

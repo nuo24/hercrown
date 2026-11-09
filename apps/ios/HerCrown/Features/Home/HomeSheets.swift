@@ -251,7 +251,8 @@ struct DevotionalSheet: View {
                         Text("\(devotional.minutes ?? 1) min read").font(.system(size: 12))
                     }
                     .foregroundStyle(Theme.muted(scheme))
-                    Text(devotional.title).font(.serif(32, relativeTo: .largeTitle))
+                    Text(devotional.title).font(.ui(20, weight: .semibold)).tracking(-0.4)
+                    Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90).frame(maxWidth: .infinity)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("“\(devotional.passage ?? "")”")
                             .font(.serif(28, relativeTo: .title2)).lineSpacing(4.2)
@@ -262,7 +263,7 @@ struct DevotionalSheet: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 14))
                     ForEach(Array(devotional.body.components(separatedBy: "\n\n").enumerated()), id: \.offset) { _, paragraph in
-                        Text(paragraph).font(.system(size: 14)).lineSpacing(7.14)
+                        Text(paragraph).font(.ui(14)).lineSpacing(7.14).fixedSize(horizontal: false, vertical: true)
                     }
                     if let reflection = devotional.reflection {
                         VStack(alignment: .leading, spacing: 8) {
@@ -276,7 +277,10 @@ struct DevotionalSheet: View {
                     Button("Read \(devotional.label) in context") {
                         if let ref = VerseRef(devotional.ref) { dismiss(); app.openInReader(ref) }
                     }
-                    .buttonStyle(CapsuleButtonStyle(kind: .secondary))
+                    .buttonStyle(CapsuleButtonStyle())
+                    if let ref = VerseRef(devotional.ref), let passage = BibleStore.shared.text(devotional.translation, ref) {
+                        VerseShareButton(text: passage, reference: devotional.label, translation: devotional.translation)
+                    }
                     Text(attribution).font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
                 }
                 .foregroundStyle(Theme.text(scheme))
@@ -295,9 +299,7 @@ struct DevotionalSheet: View {
         let names = ["Henry": "Matthew Henry", "Clarke": "Adam Clarke", "JFB": "Jamieson, Fausset & Brown"]
         let sources = devotional.sources.map { names[$0] ?? $0 }
         let drawn = sources.isEmpty ? "" : " drawing on \(ListFormatter.localizedString(byJoining: sources))"
-        return devotional.origin == "ai-draft-reviewed"
-            ? "Devotional written with AI assistance\(drawn), and reviewed by our team. Only the quoted passage is Scripture."
-            : "Devotional written by Her Crown\(drawn). Only the quoted passage is Scripture."
+        return "Reflection · separate from Scripture.\(drawn.isEmpty ? "" : " Commentary" + drawn + ".")"
     }
 }
 

@@ -133,3 +133,5 @@ After launch, the human operator can use `production` instead of `staging` to re
 - `PUT /me/community/vote`: `{roundId,causeId}`; rejects stale/unknown round and candidate IDs, one atomic upsert per member/month, duplicate same-choice retry is idempotent. No purchase or payment.
 - `GET /me/community/suggestions`: this member’s private suggestions (up to 100).
 - `POST /me/community/suggestions`, `PATCH /me/community/suggestions/:id`: `{name,type,city,website,reason}`; name 2–90, type Charity/Local church/Community project, optional city <=90 and http(s) website <=500, reason 10–500. Five new suggestions/day; duplicate same-name/city retries return existing receipt; only owner/submitted records can be edited. No automatic publication or promise of funding.
+
+Daily passage personalization: `/scripture/verse-of-the-day` rotates among curated references matching the signed-in reader’s saved topics. No matching topics uses the shared daily pool. `/me/widget` uses the same selection unless an explicit widget verse is set. Scripture text still comes from the selected licensed translation.

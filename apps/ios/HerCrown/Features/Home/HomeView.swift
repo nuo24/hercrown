@@ -66,7 +66,7 @@ struct HomeView: View {
             }
         }
         // Reload once she's signed in (a brand-new guest signs in while Home is already on screen).
-        .task(id: app.me?.user.id) { await model.load(translation: translation) }
+        .task(id: "\(app.me?.user.id ?? "")|\(translation)|\(app.preferences.topics.joined(separator: ","))") { await model.load(translation: translation) }
         .onChange(of: app.me?.user.id) { _, _ in
             notes = nil
             notesUnavailable = false

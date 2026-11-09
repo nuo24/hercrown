@@ -139,6 +139,14 @@ describe("verse of the day, random verse, widget", () => {
     expect(VOTD_POOL.length).toBeGreaterThan(100);
   });
 
+  it("matches the daily passage to selected topics and keeps the widget consistent", async () => {
+    await json("/me/preferences", "PATCH", {topics:["Peace"]});
+    const v = await json("/scripture/verse-of-the-day?date=2026-11-08");
+    expect(v.theme).toBe("Peace");
+    expect(v.ref).toBe(verseOfTheDayRef("2026-11-08", ["Peace"]));
+    expect((await json("/me/widget?date=2026-11-08")).ref).toBe(v.ref);
+    expect(verseOfTheDayRef("2026-11-08", ["unrecognized"])).toBe(verseOfTheDayRef("2026-11-08"));
+  });
   it("gives a random curated verse, and the widget's verse", async () => {
     expect(VOTD_POOL).toContain((await json("/scripture/random")).ref);
     const widget = await json("/me/widget");

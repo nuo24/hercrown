@@ -148,3 +148,5 @@ Other endpoints: `installs.pipe` (top of funnel), `revenue.pipe` (daily trials, 
 - Server `ai_call` feature `onboarding_prayer` records technical tokens, cost and success only, with a matching usage-ledger entry.
 - Server `community_vote_saved`: machine IDs `cause_id` and `round_id`, emitted on a changed vote only; duplicate retries do not create another event or ballot choice.
 - Server `community_cause_suggested`: no properties. Nomination names, location, website and reason stay in the authenticated review records, never the event stream.
+
+- `verse_snapshot_shared`: native Snapshot Studio opened the iOS image share sheet; `format` is `portrait`, `square` or `story`. No Scripture, image, name, note or photo is sent to analytics. Opening the share sheet is not proof the user completed sharing.

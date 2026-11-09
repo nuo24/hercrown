@@ -275,6 +275,7 @@ final class AppModel {
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil
         PersonalPrayerStore.remove(prayerUserID)
+        SnapshotDraftStore.remove(prayerUserID)
         for key in ["hc.saved", "hc.preferences", "hc.streak", "hc.position"] { UserDefaults.standard.removeObject(forKey: key) }
         saved = []
         preferences = .defaults
@@ -371,7 +372,7 @@ final class AppModel {
         let translation = preferences.translation
         Task {
             _ = try? await api.send("PATCH", "/me/preferences", json: patch)
-            if patch["widgetRef"] != nil || patch["translation"] != nil { await WidgetBridge.refresh(translation: translation) }
+            if patch["widgetRef"] != nil || patch["translation"] != nil || patch["topics"] != nil { await WidgetBridge.refresh(translation: translation) }
         }
     }
 

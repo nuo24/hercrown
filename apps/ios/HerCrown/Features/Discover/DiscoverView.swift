@@ -177,9 +177,13 @@ struct DiscoverView: View {
         }
     }
 
+    private func openStudy(_ ref: VerseRef) {
+        if app.membership.premium { studyRef = ref }
+        else { app.presentPaywall(placement: "study_deeper", onComplete: { studyRef = ref }) }
+    }
     private func openDetailAction() {
         switch pendingDetailAction {
-        case .study(let ref): studyRef = ref
+        case .study(let ref): openStudy(ref)
         case .note(let ref): noteRef = ref
         case nil: break
         }
@@ -256,7 +260,7 @@ struct DiscoverView: View {
             Menu {
                 Button(app.isSaved(card.ref) ? "Remove from saved" : "Save passage", systemImage: "heart") { app.toggleSave(card.ref) }
                 Button("Read in The Bible", systemImage: "book") { if let ref = VerseRef(card.ref) { app.openInReader(ref) } }
-                Button("Study passage", systemImage: "magnifyingglass") { studyRef = VerseRef(card.ref) }
+                Button("Study passage", systemImage: "magnifyingglass") { if let ref = VerseRef(card.ref) { openStudy(ref) } }
                 Button("Write a note", systemImage: "message") { noteRef = VerseRef(card.ref) }
             } label: {
                 Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 44, height: 44)

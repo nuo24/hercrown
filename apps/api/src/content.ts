@@ -49,10 +49,12 @@ const label = (ref: string) => {
 
 // ── Verse of the Day, random verse, widget ─────────────────────────────────
 
-/** The same verse for everyone on a given calendar day. */
-export function verseOfTheDayRef(day: string): string {
+/** Rotate daily within her selected topics; readers with no topics retain the shared daily pool. */
+export function verseOfTheDayRef(day: string, topics: string[] = []): string {
+  const related = CARDS.filter(c => topics.includes(c.theme)).map(c => c.ref);
+  const pool = related.length ? related : VOTD_POOL;
   const n = dayOrdinal(day);
-  return VOTD_POOL[((n % VOTD_POOL.length) + VOTD_POOL.length) % VOTD_POOL.length]!;
+  return pool[((n % pool.length) + pool.length) % pool.length]!;
 }
 
 async function verseCard(env: Env, translation: string, ref: string, userId: string) {
@@ -67,7 +69,7 @@ async function verseCard(env: Env, translation: string, ref: string, userId: str
 /** GET /scripture/verse-of-the-day?date=YYYY-MM-DD&translation= (date defaults to her today). */
 export async function getVerseOfTheDay(url: URL, env: Env, user: SessionUser) {
   const day = await resolveToday(env, user.id, url.searchParams.get("date"));
-  return Response.json({ date: day, ...(await verseCard(env, await translationFor(env, user, url), verseOfTheDayRef(day), user.id)) });
+  return Response.json({ date: day, ...(await verseCard(env, await translationFor(env, user, url), verseOfTheDayRef(day, JSON.parse((await preferencesRow(env, user.id)).topics) as string[]), user.id)) });
 }
 
 /** GET /scripture/random?translation=: the reader's random-verse button, from the curated verses. */
@@ -80,7 +82,7 @@ export async function getRandomVerse(url: URL, env: Env, user: SessionUser) {
 export async function getWidget(url: URL, env: Env, user: SessionUser) {
   const prefs = await preferencesRow(env, user.id);
   const day = await resolveToday(env, user.id, url.searchParams.get("date"));
-  const ref = prefs.widget_ref ?? verseOfTheDayRef(day);
+  const ref = prefs.widget_ref ?? verseOfTheDayRef(day, JSON.parse(prefs.topics) as string[]);
   return Response.json({ source: prefs.widget_ref ? "chosen" : "verse_of_the_day", date: day, ...(await verseCard(env, await translationFor(env, user, url), ref, user.id)) });
 }
 
