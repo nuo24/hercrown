@@ -4,6 +4,12 @@ import SwiftUI
 @testable import HerCrown
 
 final class PersonalPrayerTests: XCTestCase {
+    func testDisplayQuotationsPreserveCanonicalWordsAndDoNotDoubleQuote() {
+        let passage = "Come unto me, all ye that labour and are heavy laden, and I will give you rest."
+        XCTAssertEqual(ScriptureQuotation.enclosing(passage), "“" + passage + "”")
+        XCTAssertEqual(ScriptureQuotation.enclosing("“" + passage + "”"), "“" + passage + "”")
+        XCTAssertEqual(ScriptureQuotation.enclosing(""), "")
+    }
     func testNamesAreNormalizedWithoutAcceptingMarkup() {
         var answers = PersonalOnboardingAnswers()
         answers.name = "  nate  "

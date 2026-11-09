@@ -254,7 +254,7 @@ struct DevotionalSheet: View {
                         .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                     Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90).frame(maxWidth: .infinity)
                     VStack(alignment: .leading, spacing: 8) {
-                        ScriptureText(text: devotional.passage ?? "", reference: devotional.ref, translation: devotional.translation)
+                        ScriptureText(text: ScriptureQuotation.enclosing(devotional.passage ?? ""), reference: devotional.ref, translation: devotional.translation)
                             .font(.serif(20, relativeTo: .title3)).lineSpacing(3)
                         Text("\(devotional.label) · \(BibleStore.offline[devotional.translation] ?? devotional.translation.uppercased())")
                             .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.muted(scheme))

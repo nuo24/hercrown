@@ -45,3 +45,12 @@ struct SheetControls: View {
         .buttonStyle(.plain).foregroundStyle(.primary).frame(minHeight: 44)
     }
 }
+
+/// Quotation marks belong to the presentation; the source passage is never rewritten.
+enum ScriptureQuotation {
+    static func enclosing(_ text: String) -> String {
+        guard !text.isEmpty else { return text }
+        if (text.hasPrefix("“") && text.hasSuffix("”")) || (text.hasPrefix("\"") && text.hasSuffix("\"")) { return text }
+        return "“" + text + "”"
+    }
+}

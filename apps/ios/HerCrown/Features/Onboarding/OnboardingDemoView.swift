@@ -7,7 +7,7 @@ struct OnboardingDemoView: View {
     let isActive: Bool
     @StateObject private var playback = DemoPlayback()
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack(alignment: .center) {
             DemoPlayerLayer(player: playback.player)
             if let error = playback.error {
                 Text(error).font(.ui(11)).padding(12).frame(maxWidth: .infinity).background(.white)
@@ -43,7 +43,7 @@ struct OnboardingDemoView: View {
             error = "The demonstration could not load."; return
         }
         let item = AVPlayerItem(url: url)
-        // Play the full new recording, including the reader, Community and Home.
+        // The supplied reader, notes and study demonstration keeps its complete sequence.
         looper = AVPlayerLooper(player: player, templateItem: item)
         status = player.observe(\.currentItem, options: [.initial, .new]) { [weak self] _, _ in
             Task { @MainActor in

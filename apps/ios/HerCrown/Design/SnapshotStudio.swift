@@ -54,6 +54,8 @@ struct VerseSnapshotView: View {
     @State private var selected: UUID?
     @State private var tab = "Background"
     @State private var expanded = false
+    @GestureState private var drawerDrag: CGFloat = 0
+    @FocusState private var captionFocused: Bool
     @State private var studioHeight: CGFloat = 800
     @State private var rendered: UIImage?
     @State private var photo: UIImage?
@@ -78,7 +80,7 @@ struct VerseSnapshotView: View {
                 Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
             }.padding(.horizontal, 16).padding(.bottom, 8)
             GeometryReader { area in
-                let scale = min((area.size.width - 36) / 600, (area.size.height - 44) / design.height)
+                let scale = max(0.01, min((area.size.width - 36) / 600, (area.size.height - 44) / design.height))
                 VStack(spacing: 8) {
                     Text("Tap an illustration to arrange it.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                     if widgetMode { Spacer(minLength: 0) }
@@ -100,14 +102,19 @@ struct VerseSnapshotView: View {
                                 .accessibilityAddTraits(.isButton)
                         }
                     }.frame(width: 600, height: design.height).clipShape(RoundedRectangle(cornerRadius: widgetMode ? 36 : 0)).scaleEffect(max(0.01, scale))
-                        .frame(width: 600 * scale, height: design.height * scale).clipped().shadow(color: .black.opacity(0.12), radius: 12, y: 5)
+                        .frame(width: 600 * scale, height: design.height * scale).clipped().opacity(area.size.height < 120 ? 0 : 1).shadow(color: .black.opacity(0.12), radius: 12, y: 5)
                     Spacer(minLength: 0)
                 }.frame(maxWidth: .infinity).padding(.top, 10)
             }.background(widgetMode ? (scheme == .dark ? Color(hex: 0x131316) : Color(hex: 0xF1F2F2)) : Theme.supporting(scheme))
             tools
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 6) {
+                if captionFocused {
+                    HStack { Spacer(); Button("Done typing") { captionFocused = false }.font(.ui(12, weight: .medium)).frame(minHeight: 32) }
+                }
                 if let failure { Text(failure).font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
-                Button { if widgetMode { saveWidget() } else { export() } } label: {
+                Button { captionFocused = false; if widgetMode { saveWidget() } else { export() } } label: {
                     Label(widgetMode ? (widgetSaved ? "Widget design saved" : "Save widget design") : "Share snapshot", systemImage: widgetMode ? "checkmark" : "square.and.arrow.up").frame(maxWidth: .infinity)
                 }.buttonStyle(CapsuleButtonStyle())
                 Text(widgetMode ? "\(design.format.replacingOccurrences(of: "Widget ", with: "")) widget · Your widget verse" : "\(design.exportSize) PNG").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
@@ -122,16 +129,21 @@ struct VerseSnapshotView: View {
             photo = UIImage(contentsOfFile: photoURL.path)
             #if DEBUG
             if let review = UserDefaults.standard.string(forKey: "hcStudioReview"), ["Background", "Text", "Illustrations"].contains(review) { tab = review; expanded = true }
+            if UserDefaults.standard.bool(forKey: "hcStudioCaptionFocus") { tab = "Text"; expanded = true; captionFocused = true }
             #endif
             if widgetMode { await Analytics.shared.track("widget_studio_opened") }
             else { await Analytics.shared.track("verse_snapshot_opened") }
         }
         .onDisappear { if !widgetMode { save() } }
         .onChange(of: design) { _, _ in widgetSaved = false }
-        .background(GeometryReader { geometry in Color.clear.onAppear { studioHeight = geometry.size.height + geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom }.onChange(of: geometry.size.height) { _, height in studioHeight = height + geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom } })
+        .background(GeometryReader { geometry in Color.clear.onAppear { studioHeight = geometry.size.height }.onChange(of: geometry.size.height) { _, height in studioHeight = height } })
         .onChange(of: photoSelection) { _, item in Task { await loadPhoto(item) } }
         .sheet(isPresented: $sharing) { if let rendered { SnapshotShareSheet(image: rendered) } }
         .presentationDetents([.large]).presentationDragIndicator(.hidden)
+    }
+    private var trayHeight: CGFloat {
+        let available = max(96, studioHeight - 180)
+        return min(available, captionFocused ? 150 : max(160, min(540, studioHeight * 0.54) - 102))
     }
     private var tools: some View {
         VStack(spacing: 0) {
@@ -141,6 +153,17 @@ struct VerseSnapshotView: View {
                     Text(expanded ? "Slide down to arrange" : "Swipe up for tools").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                 }.frame(maxWidth: .infinity).frame(height: 44)
             }.accessibilityLabel(expanded ? "Collapse design tools" : "Expand design tools")
+                .simultaneousGesture(DragGesture(minimumDistance: 8)
+                    .updating($drawerDrag) { value, state, _ in state = -value.translation.height }
+                    .onEnded { value in
+                        let upward = -value.predictedEndTranslation.height
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            if abs(upward) > 30 { expanded = upward > 0; if !expanded { captionFocused = false } }
+                        }
+                    })
+                .accessibilityAdjustableAction { direction in
+                    withAnimation { expanded = direction == .increment }
+                }
             HStack(spacing: 0) {
                 ForEach(["Background", "Text", "Illustrations"], id: \.self) { name in
                     Button { tab = name; expanded = true } label: {
@@ -150,8 +173,9 @@ struct VerseSnapshotView: View {
                     }
                 }
             }.padding(.horizontal, 12).padding(.bottom, 8)
-            if expanded {
+            if expanded || drawerDrag > 0 {
                 Divider()
+                ScrollViewReader { reader in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(spacing: 5) {
@@ -173,7 +197,12 @@ struct VerseSnapshotView: View {
                             photo = nil; selected = nil
                         }.font(.ui(12)).frame(maxWidth: .infinity, minHeight: 44)
                     }.padding(.horizontal, 22).padding(.top, 16).padding(.bottom, 20)
-                }.frame(height: max(200, min(540, studioHeight * 0.54) - 102))
+                }.scrollDismissesKeyboard(.interactively)
+                    .onChange(of: captionFocused) { _, focused in
+                        if focused { withAnimation { reader.scrollTo("studio-caption", anchor: .bottom) } }
+                    }
+                }.frame(height: max(0, min(trayHeight, (expanded ? trayHeight : 0) + drawerDrag)))
+                    .clipped()
             }
         }.background(Theme.canvas(scheme)).clipShape(UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
     }
@@ -260,6 +289,7 @@ struct VerseSnapshotView: View {
             if widgetMode {
                 TextField("Personal caption (optional)", text: Binding(get: { design.caption ?? "" }, set: { design.caption = String($0.prefix(80)) }))
                     .font(.ui(14)).padding(12).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 8))
+                    .focused($captionFocused).submitLabel(.done).onSubmit { captionFocused = false }.id("studio-caption")
                 Text("Your caption appears separately beneath the Bible reference.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
             } else if app.membership.premium { Toggle("Her Crown watermark", isOn: $design.watermark).font(.ui(14)) }
             else { Text("Snapshots include the Her Crown watermark. Plus members can turn it off.").font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }

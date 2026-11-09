@@ -131,6 +131,13 @@ struct OnboardingView: View {
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
         .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
+        .onChange(of: scenePhase) { _, phase in
+            // Returning from a system interruption shows the complete page, never a hidden Continue.
+            // Prayer generation must finish or offer its retry/fallback before it can advance.
+            if phase != .active && step != 11 {
+                settled = true; showingAcknowledgement = false; acknowledgement = ""
+            }
+        }
         .alert("Couldn’t save your name", isPresented: $saveError) { Button("OK", role: .cancel) {} } message: { Text("Your onboarding answers are still here. Check your connection and try again.") }
     }
 
@@ -150,7 +157,7 @@ struct OnboardingView: View {
                     Button { next() } label: { Label("Get started", systemImage: "arrow.right").labelStyle(TrailingIcon()) }.buttonStyle(CapsuleButtonStyle())
                     Button("Explore as a guest") { Task { await complete(guest: true) } }.buttonStyle(CapsuleButtonStyle(kind: .secondary)).padding(.top, 10)
                     Text("Come as you are. No account needed.").font(.ui(11)).foregroundStyle(muted).padding(.top, 16)
-                }.padding(.horizontal, 24).padding(.bottom, 24)
+                }.padding(.horizontal, 24).padding(.bottom, 36)
             }
         }
     }
@@ -158,7 +165,7 @@ struct OnboardingView: View {
     private var timeIntro: some View {
         VStack(spacing: 26) {
             if bridge {
-                Text("Let’s show you how to turn some of that time toward Christ.").font(.serif(33.3)).tracking(-0.7)
+                animatedText("Let’s show you how to turn some of that time toward Christ.").font(.serif(33.3)).tracking(-0.7)
                 Image.illustration("cosmos").resizable().scaledToFit().frame(width: 100, height: 100)
             } else {
                 ZStack {
@@ -175,7 +182,7 @@ struct OnboardingView: View {
     @ViewBuilder private var pageContent: some View {
         switch step {
         case 2:
-            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active).frame(width: 165, height: 297).clipShape(RoundedRectangle(cornerRadius: 22)).overlay(RoundedRectangle(cornerRadius: 22).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
+            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active).frame(width: 165, height: 165 * 2556 / 1180).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
         case 4: choices(["Social media", "The Bible", "About the same"], selection: $answers.comparison)
         case 5:
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -190,7 +197,9 @@ struct OnboardingView: View {
                             .foregroundStyle(answers.heart.contains(value) ? .white : ink)
                             .background(answers.heart.contains(value) ? ink : Color.white, in: Capsule())
                             .overlay(Capsule().strokeBorder(Color(hex: 0xE4E4E7)))
-                    }.accessibilityAddTraits(answers.heart.contains(value) ? .isSelected : [])
+                    }.disabled(answers.heart.count >= 3 && !answers.heart.contains(value))
+                        .opacity(answers.heart.count >= 3 && !answers.heart.contains(value) ? 0.35 : 1)
+                        .accessibilityAddTraits(answers.heart.contains(value) ? .isSelected : [])
                 }
             }
             Text("Choose up to three. Tap one again to make room.").font(.ui(11)).foregroundStyle(muted)
@@ -300,7 +309,9 @@ struct OnboardingView: View {
         return text.enumerated().reduce(Text("")) { result, entry in
             let index = text.index(text.startIndex, offsetBy: entry.offset)
             let accent = warning?.contains(index) == true
-            return result + Text(String(entry.element)).foregroundColor(entry.offset < visible ? (accent ? Color(hex: 0xA94F75) : ink) : .clear)
+            let emphasized = step == 1 && !bridge && ["2 hours a day", "10 years of your life", "spent on social media."].contains { text.range(of: $0)?.contains(index) == true }
+            let glyph = emphasized ? Text(String(entry.element)).font(.serif(33.3, weight: .semibold)) : Text(String(entry.element))
+            return result + glyph.foregroundColor(entry.offset < visible ? (accent ? Color(hex: 0xA94F75) : ink) : .clear)
         }
     }
     private func toggleSeason(_ value: String) {
@@ -336,14 +347,15 @@ struct OnboardingView: View {
     private func type(_ text: String, prayer: Bool = false) async throws {
         revealed = 0
         if reduceMotion || scenePhase != .active { revealed = text.count; return }
-        let feedback = UIImpactFeedbackGenerator(style: .soft)
+        let feedback = UIImpactFeedbackGenerator(style: .light)
+        feedback.prepare()
         let clock = ContinuousClock(); let start = clock.now
         var lastPulse = Date.distantPast
         for count in 1...max(1, text.count) {
             try await clock.sleep(until: start.advanced(by: .milliseconds(count * (prayer ? 40 : 48))))
             try Task.checkCancellation(); revealed = count
             if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
-                feedback.impactOccurred(intensity: prayer ? 0.16 : 0.22)
+                feedback.impactOccurred(intensity: prayer ? 0.3 : 0.5)
                 feedback.prepare()
                 lastPulse = Date()
             }
@@ -351,7 +363,16 @@ struct OnboardingView: View {
     }
     private func enterPage() async {
         guard scenePhase == .active, !settled else { return }
-        await Analytics.shared.track("onboarding_step", ["step": .string(Self.stepNames[step]), "index": .number(Double(step))])
+        let enteredStep = step
+        Task { await Analytics.shared.track("onboarding_step", ["step": .string(Self.stepNames[enteredStep]), "index": .number(Double(enteredStep))]) }
+        // Navigation stays available while typing. An interrupted reveal must never strand the footer.
+        defer {
+            if step == enteredStep && scenePhase == .active && !Task.isCancelled {
+                showingAcknowledgement = false
+                settled = true
+            }
+        }
+        if step == 1 { bridge = false }
         guard step > 0 else { settled = true; return }
         do {
             if !acknowledgement.isEmpty, !reduceMotion, scenePhase == .active {

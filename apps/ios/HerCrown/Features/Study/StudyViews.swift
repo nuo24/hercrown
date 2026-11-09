@@ -38,6 +38,7 @@ struct AIStudyView: View {
             .padding(.bottom, 44)
         }
         .background(Theme.canvas(scheme))
+        .tint(Theme.text(scheme)).foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -93,15 +94,15 @@ struct AIStudyView: View {
                 ["Sources\n" + answer.sources.map { "[\($0.tag)] \($0.author), \($0.name)" }.joined(separator: "\n")])
                 .joined(separator: "\n\n")
             HStack {
-                Button { toggleSave() } label: { Text(saved ? "Saved" : "Save study") }
+                Button { toggleSave() } label: { studyAction(saved ? "Saved" : "Save study", icon: saved ? "bookmark.fill" : "bookmark") }
                 Spacer()
-                Button { showingNotes = true } label: { Text("Note") }
+                Button { showingNotes = true } label: { studyAction("Note", icon: "square.and.pencil") }
                 Spacer()
                 Button { UIPasteboard.general.string = export; copied = true } label: {
-                    Text(copied ? "Copied" : "Copy")
+                    studyAction(copied ? "Copied" : "Copy", icon: "doc.on.doc")
                 }
                 Spacer()
-                ShareLink(item: export) { Text("Share") }
+                ShareLink(item: export) { studyAction("Share", icon: "square.and.arrow.up") }
             }
             .font(.ui(13, weight: .medium))
             .frame(minHeight: 44)
@@ -116,6 +117,13 @@ struct AIStudyView: View {
                 Button("Try again") { attempt += 1 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             }
         }
+    }
+
+    private func studyAction(_ title: String, icon: String) -> some View {
+        VStack(spacing: 7) {
+            Image(systemName: icon).font(.system(size: 22, weight: .regular))
+            Text(title).font(.ui(11, weight: .medium))
+        }.frame(minWidth: 52, minHeight: 52).foregroundStyle(Theme.text(scheme))
     }
 
     private func section(_ title: String, _ body: String) -> some View {

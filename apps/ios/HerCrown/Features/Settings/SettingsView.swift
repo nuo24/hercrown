@@ -808,7 +808,7 @@ struct SubscriptionView: View {
                     .font(.ui(14))
                     .foregroundStyle(Theme.muted(scheme))
                 Button("Explore Her Crown Plus") {
-                        app.presentPaywall(placement: "settings_subscription") { appleSubscriptionFound = true }
+                        app.presentPaywall(placement: "settings_subscription", onExistingSubscription: { appleSubscriptionFound = true })
                     }
                     .buttonStyle(CapsuleButtonStyle())
             }
@@ -879,23 +879,24 @@ struct TopicsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 3), spacing: 16) {
+                VStack(spacing: 0) {
                     ForEach(OnboardingView.topicOptions, id: \.self) { topic in
                         let selected = topics.contains(topic)
                         Button {
                             if selected { topics.removeAll { $0 == topic } } else { topics.append(topic) }
                         } label: {
-                            VStack(spacing: 5) {
-                                if selected { Image(systemName: "checkmark").font(.ui(10, weight: .semibold)) }
-                                Text(topic).font(.ui(11, weight: .medium)).lineLimit(1).minimumScaleFactor(0.7)
-                            }.padding(.horizontal, 10).frame(maxWidth: .infinity).frame(height: 96).offset(y: -4)
-                                .foregroundStyle(selected ? Theme.canvas(scheme) : Theme.text(scheme))
-                                .background(selected ? Theme.text(scheme) : Theme.surface(scheme), in: TopicHeart())
-                                .overlay(TopicHeart().strokeBorder(Theme.border(scheme), lineWidth: 1))
-                                .contentShape(TopicHeart())
+                            HStack(spacing: 14) {
+                                Image(systemName: selected ? "heart.fill" : "heart")
+                                    .font(.system(size: 19, weight: .regular)).frame(width: 24)
+                                Text(topic).font(.ui(14, weight: .medium))
+                                Spacer()
+                                if selected { Image(systemName: "checkmark").font(.ui(12, weight: .semibold)) }
+                            }.padding(.horizontal, 16).frame(minHeight: 54)
+                                .foregroundStyle(Theme.text(scheme)).contentShape(Rectangle())
                         }.buttonStyle(.plain).accessibilityLabel(topic).accessibilityAddTraits(selected ? .isSelected : [])
+                        if topic != OnboardingView.topicOptions.last { Divider().padding(.leading, 54) }
                     }
-                }
+                }.background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
 
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -931,21 +932,4 @@ struct SafariView: UIViewControllerRepresentable {
     let url: URL
     func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
-}
-
-private struct TopicHeart: InsettableShape {
-    var insetAmount: CGFloat = 0
-    func path(in rect: CGRect) -> Path {
-        let r = rect.insetBy(dx: insetAmount, dy: insetAmount)
-        func p(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + r.width * x, y: r.minY + r.height * y) }
-        var path = Path()
-        path.move(to: p(0.5, 0.95))
-        path.addCurve(to: p(0.05, 0.32), control1: p(0.25, 0.76), control2: p(0.02, 0.57))
-        path.addCurve(to: p(0.5, 0.18), control1: p(0.06, 0.01), control2: p(0.37, 0.01))
-        path.addCurve(to: p(0.95, 0.32), control1: p(0.63, 0.01), control2: p(0.94, 0.01))
-        path.addCurve(to: p(0.5, 0.95), control1: p(0.98, 0.57), control2: p(0.75, 0.76))
-        path.closeSubpath()
-        return path
-    }
-    func inset(by amount: CGFloat) -> some InsettableShape { var shape = self; shape.insetAmount += amount; return shape }
 }
