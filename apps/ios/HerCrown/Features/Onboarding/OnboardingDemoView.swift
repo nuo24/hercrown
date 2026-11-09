@@ -9,6 +9,17 @@ struct OnboardingDemoView: View {
     var body: some View {
         ZStack(alignment: .center) {
             DemoPlayerLayer(player: playback.player)
+                .overlay(alignment: .top) {
+                    HStack(spacing: 4) {
+                        Text("9:41").font(.system(size: 6, weight: .semibold))
+                        Spacer(minLength: 0)
+                        Capsule().fill(.black).frame(width: 51, height: 13)
+                        Spacer(minLength: 0)
+                        Image(systemName: "wifi").font(.system(size: 6))
+                        Image(systemName: "battery.100").font(.system(size: 7))
+                    }.padding(.horizontal, 10).frame(height: 25).background(.white)
+                        .allowsHitTesting(false).accessibilityHidden(true)
+                }
             if let error = playback.error {
                 Text(error).font(.ui(11)).padding(12).frame(maxWidth: .infinity).background(.white)
             } else {

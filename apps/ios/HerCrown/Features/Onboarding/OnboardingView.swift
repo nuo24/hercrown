@@ -12,6 +12,10 @@ struct OnboardingView: View {
     @State private var showingAcknowledgement = false
     @State private var revealed = 0
     @State private var settled = false
+    @State private var artVisible = false
+    @State private var prayerTitleFinished = false
+    @State private var prayerErrorMessage = ""
+    @State private var prayerRequest: UUID?
     @State private var prayer = ""
     @State private var prayerError = false
     @State private var generated = false
@@ -48,7 +52,7 @@ struct OnboardingView: View {
     private var title: String {
         let titles = ["Less doomscrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’ll be 10 years of your life spent on social media.", "We’re going to help you spend less time scrolling social media and more time in the Bible.", "First, what should\nwe call you?", "Which do you spend more time on?", "What season of life are you in?", "How familiar does the Bible feel?", "What’s on your heart lately?", "Tell us something\nthat’s been\nweighing you down.", "Who’s someone in your life\nyou’d like to pray for?", "How much time can you give to God each day?", name.isEmpty ? "A prayer for you." : "A prayer for you,\n\(name).", "When would you like\na moment with God?", "You don’t have to\nbegin perfectly."]
         let base = titles[step]
-        if [4, 5, 6, 7, 8, 9, 10, 12].contains(step), !name.isEmpty { return name + ", " + base.prefix(1).lowercased() + base.dropFirst() }
+        if [5, 7, 9].contains(step), !name.isEmpty { return name + ", " + base.prefix(1).lowercased() + base.dropFirst() }
         return base
     }
     private var art: String {
@@ -103,15 +107,17 @@ struct OnboardingView: View {
                         Spacer()
                     } else {
                         ScrollViewReader { prayerScroll in
+                        GeometryReader { page in
                         ScrollView {
                             VStack(alignment: .leading, spacing: 18) {
                                 if step == 1 { timeIntro }
                                 else if step == 11 { prayerPage }
+                                else if step == 2 { demoPage(height: page.size.height) }
                                 else {
                                     HStack(spacing: 16) {
                                         animatedText(title).font(.serif(28.8)).tracking(-1).lineSpacing(0)
                                             .frame(maxWidth: .infinity, alignment: .leading)
-                                        if step != 2 { Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).accessibilityHidden(true) }
+                                        if step != 2 { Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion)).accessibilityHidden(true) }
                                     }
                                     .accessibilityAddTraits(.isHeader)
                                     if !subtitle.isEmpty { Text(subtitle).font(.ui(14)).lineSpacing(5).foregroundStyle(muted).opacity(settled ? 1 : 0) }
@@ -130,8 +136,9 @@ struct OnboardingView: View {
                             if step == 11 && done { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
                         }
                         }
+                        }
                         if isTextPage { inputDock.opacity(settled ? 1 : 0).allowsHitTesting(settled) }
-                        else { actions.opacity(settled && !loadingPrayer ? 1 : 0).allowsHitTesting(settled && !loadingPrayer) }
+                        else if !(step == 11 && prayerError) { actions.opacity(settled && !loadingPrayer ? 1 : 0).allowsHitTesting(settled && !loadingPrayer) }
                     }
                 }
                 .padding(.horizontal, 28).padding(.top, 12).padding(.bottom, 24)
@@ -145,7 +152,7 @@ struct OnboardingView: View {
             // Returning from a system interruption shows the complete page, never a hidden Continue.
             // Prayer generation must finish or offer its retry/fallback before it can advance.
             if phase != .active && step != 11 {
-                settled = true; showingAcknowledgement = false; acknowledgement = ""
+                settled = true; artVisible = true; showingAcknowledgement = false; acknowledgement = ""
             }
         }
         .alert("Couldn’t save your name", isPresented: $saveError) { Button("OK", role: .cancel) {} } message: { Text("Your onboarding answers are still here. Check your connection and try again.") }
@@ -157,17 +164,14 @@ struct OnboardingView: View {
                 OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).ignoresSafeArea()
                 VStack(spacing: 0) {
                     Spacer().frame(height: g.size.height * 0.30)
-                    VStack(spacing: -4) {
-                        Text("Less doomscrolling.").font(.serif(g.size.width < 380 ? 39 : 44))
-                        Text("More Scripture.").font(.serif(48, italic: true)).foregroundStyle(Color(hex: 0x263B32))
-                    }.tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
+                    animatedText(title).font(.serif(g.size.width < 380 ? 39 : 44)).tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
                     Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
                         .font(.ui(15)).lineSpacing(5).foregroundStyle(muted).multilineTextAlignment(.center).frame(maxWidth: 280).padding(.top, 20)
                     Spacer(minLength: 20)
                     Button { next() } label: { Label("Get started", systemImage: "arrow.right").labelStyle(TrailingIcon()) }.buttonStyle(CapsuleButtonStyle())
                     Button("Explore as a guest") { Task { await complete(guest: true) } }.buttonStyle(CapsuleButtonStyle(kind: .secondary)).padding(.top, 10)
                     Text("Come as you are. No account needed.").font(.ui(11)).foregroundStyle(muted).padding(.top, 16)
-                }.padding(.horizontal, 24).padding(.bottom, 36)
+                }.padding(.horizontal, 24).padding(.bottom, 54)
             }
         }
     }
@@ -176,17 +180,27 @@ struct OnboardingView: View {
         VStack(spacing: 26) {
             if bridge {
                 animatedText("Let’s show you how to turn some of that time toward Christ.").font(.serif(33.3)).tracking(-0.7)
-                Image.illustration("cosmos").resizable().scaledToFit().frame(width: 100, height: 100)
+                Image.illustration("cosmos").resizable().scaledToFit().frame(width: 100, height: 100).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
             } else {
                 ZStack {
                     Image.illustration("open-book").resizable().scaledToFit().frame(width: 164, height: 150).rotationEffect(.degrees(7))
                     Image.illustration("hourglass").resizable().scaledToFit().frame(width: 82, height: 100).offset(x: -65, y: 40)
                     Image.illustration("grace-shell").resizable().scaledToFit().frame(width: 60, height: 68).offset(x: -105, y: -45)
                     Image.illustration("intention-heart").resizable().scaledToFit().frame(width: 54, height: 54).offset(x: 105, y: 55)
-                }.frame(height: 174)
+                }.frame(height: 174).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
                 animatedText(title).font(.serif(33.3)).tracking(-0.7)
             }
         }.multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 32)
+    }
+
+    private func demoPage(height: CGFloat) -> some View {
+        VStack(spacing: 0) {
+            animatedText(title).font(.serif(28.8)).tracking(-1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 20)
+            pageContent.opacity(settled ? 1 : 0).allowsHitTesting(settled)
+            Spacer(minLength: 20)
+        }.frame(minHeight: max(0, height - 8))
     }
 
     @ViewBuilder private var pageContent: some View {
@@ -240,14 +254,14 @@ struct OnboardingView: View {
     private var prayerPage: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 16) {
-                (Text(name.isEmpty ? "A prayer for you." : "A prayer for you,\n") + Text(name.isEmpty ? "" : name + ".").italic())
+                animatedText(title)
                     .font(.serif(28.8)).tracking(-1).frame(maxWidth: .infinity, alignment: .leading)
-                Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90)
+                Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
             }
             Text("Your heart, held in prayer.").font(.ui(14)).foregroundStyle(muted)
             if loadingPrayer { ProgressView("Preparing your prayer…").font(.ui(14)).frame(maxWidth: .infinity).padding(.vertical, 30) }
             else if prayerError {
-                Text("We couldn’t prepare your personal prayer right now.").font(.ui(14)).foregroundStyle(muted)
+                Text(prayerErrorMessage.isEmpty ? "We couldn’t prepare your personal prayer right now." : prayerErrorMessage).font(.ui(14)).foregroundStyle(muted)
                 Button("Try again") { settled = false; requestVersion += 1 }.buttonStyle(CapsuleButtonStyle())
                 Button("Use a simple prayer") {
                     prayer = answers.simplePrayer; generated = false; prayerError = false; settled = true; preparedAnswers = answers; preparedVersion = requestVersion
@@ -316,14 +330,15 @@ struct OnboardingView: View {
         }.accessibilityAddTraits(selected ? .isSelected : [])
     }
     private func animatedText(_ text: String) -> Text {
-        let visible = settled || reduceMotion ? text.count : min(revealed, text.count)
+        let visible = settled || reduceMotion || (step == 11 && prayerTitleFinished && text == title) ? text.count : min(revealed, text.count)
         let warning = step == 1 && !bridge ? text.range(of: "10 years of your life") : nil
         return text.enumerated().reduce(Text("")) { result, entry in
             let index = text.index(text.startIndex, offsetBy: entry.offset)
             let accent = warning?.contains(index) == true
             let emphasized = step == 1 && !bridge && ["2 hours a day", "10 years of your life", "spent on social media."].contains { text.range(of: $0)?.contains(index) == true }
-            let glyph = emphasized ? Text(String(entry.element)).font(.serif(33.3, weight: .semibold)) : Text(String(entry.element))
-            return result + glyph.foregroundColor(entry.offset < visible ? (accent ? Color(hex: 0xA94F75) : ink) : .clear)
+            let welcomeAccent = step == 0 && text.range(of: "More Scripture.")?.contains(index) == true
+            let glyph = welcomeAccent ? Text(String(entry.element)).font(.serif(48, italic: true)) : emphasized ? Text(String(entry.element)).font(.serif(33.3, weight: .semibold)) : Text(String(entry.element))
+            return result + glyph.foregroundColor(entry.offset < visible ? (welcomeAccent ? Color(hex: 0x263B32) : accent ? Color(hex: 0xA94F75) : ink) : .clear)
         }
     }
     private func toggleSeason(_ value: String) {
@@ -338,10 +353,10 @@ struct OnboardingView: View {
         if step == 3 { answers.name = name }
         if step == 11, !prayer.isEmpty { PersonalPrayerStore.save(prayer, userID: app.me?.user.id) }
         acknowledgement = skipping ? "" : response(for: step)
-        settled = false; revealed = 0; bridge = false
+        settled = false; artVisible = false; prayerTitleFinished = false; revealed = 0; bridge = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; revealed = 0; bridge = false; step = max(0, step - 1) }
+    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; revealed = 0; bridge = false; step = max(0, step - 1) }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."
@@ -385,7 +400,7 @@ struct OnboardingView: View {
             }
         }
         if step == 1 { bridge = false }
-        guard step > 0 else { settled = true; return }
+        artVisible = reduceMotion
         do {
             if !acknowledgement.isEmpty, !reduceMotion, scenePhase == .active {
                 showingAcknowledgement = true
@@ -394,11 +409,11 @@ struct OnboardingView: View {
             }
             showingAcknowledgement = false
             acknowledgement = ""
-            if step == 11 { await preparePrayer(); if prayerError { settled = true; return }; try Task.checkCancellation(); try await type(prayer, prayer: true) }
-            else { try await type(title) }
+            if step == 11 { try await type(title); prayerTitleFinished = true; artVisible = true; await preparePrayer(); if prayerError { settled = true; return }; try Task.checkCancellation(); try await type(prayer, prayer: true) }
+            else { try await type(title); artVisible = true }
             if step == 1 {
-                try await Task.sleep(for: .milliseconds(1200)); bridge = true
-                try await type("Let’s show you how to turn some of that time toward Christ.")
+                try await Task.sleep(for: .milliseconds(1200)); artVisible = false; bridge = true
+                try await type("Let’s show you how to turn some of that time toward Christ."); artVisible = true
             }
             try Task.checkCancellation(); settled = true
         } catch { }
@@ -411,15 +426,29 @@ struct OnboardingView: View {
             await Analytics.shared.track("prayer_prepared", ["generated": false])
             return
         }
-        loadingPrayer = true; prayerError = false
-        defer { loadingPrayer = false }
+        loadingPrayer = true; prayerError = false; prayerErrorMessage = ""
+        let request = UUID()
+        let submittedAnswers = answers
+        prayerRequest = request
+        defer { if prayerRequest == request { loadingPrayer = false } }
         do {
-            struct Reply: Decodable { let prayer: String }
-            let reply: Reply = try await app.api.call("POST", "/me/onboarding/prayer", json: answers.prayerInput)
+            // Fast onboarding must wait for the initial anonymous session before its authenticated request.
+            while app.phase == .launching {
+                try await Task.sleep(for: .milliseconds(100))
+            }
             try Task.checkCancellation()
-            prayer = PrayerParagraphs.two(reply.prayer); generated = true; preparedAnswers = answers; preparedVersion = requestVersion
+            struct Reply: Decodable { let prayer: String }
+            let reply: Reply = try await app.api.call("POST", "/me/onboarding/prayer", json: submittedAnswers.prayerInput)
+            try Task.checkCancellation()
+            guard prayerRequest == request, step == 11, answers == submittedAnswers else { return }
+            prayer = PrayerParagraphs.two(reply.prayer); generated = true; preparedAnswers = submittedAnswers; preparedVersion = requestVersion
             await Analytics.shared.track("prayer_prepared", ["generated": true])
-        } catch { if !Task.isCancelled { prayerError = true } }
+        } catch {
+            if !Task.isCancelled && prayerRequest == request && step == 11 {
+                prayerError = true
+                prayerErrorMessage = (error as? APIError)?.message ?? "We couldn’t prepare your personal prayer right now. Please try again."
+            }
+        }
     }
     private func complete(guest: Bool) async {
         guard !finishing else { return }; finishing = true
@@ -520,5 +549,16 @@ private extension View {
                     .shadow(color: .black.opacity(0.08), radius: 3, y: 2)
             }
             .overlay(shape.strokeBorder(selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7), lineWidth: 1))
+    }
+}
+
+private struct OnboardingArtReveal: ViewModifier {
+    let visible: Bool
+    let reducedMotion: Bool
+    func body(content: Content) -> some View {
+        content.opacity(visible || reducedMotion ? 1 : 0)
+            .offset(y: visible || reducedMotion ? 0 : 14)
+            .scaleEffect(visible || reducedMotion ? 1 : 0.96)
+            .animation(reducedMotion ? nil : .easeOut(duration: 0.45), value: visible)
     }
 }

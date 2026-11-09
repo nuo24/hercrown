@@ -2,6 +2,8 @@ import Foundation
 
 /// Build-time configuration. Secrets never live in the app: the server holds every key.
 enum AppConfig {
+    /// Parked for launch, including staging. Keep the preview available for design review.
+    static let returnOffersEnabled = false
     #if DEBUG || HC_STAGING_TESTFLIGHT
     static let isStaging = true
     static let apiBaseURL = URL(string: "https://bible-scroll-api-staging.bible-scroll-api.workers.dev")!

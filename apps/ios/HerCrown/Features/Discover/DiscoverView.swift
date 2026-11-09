@@ -153,31 +153,14 @@ struct DiscoverView: View {
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .sheet(item: $detail, onDismiss: openDetailAction) { card in
-            NavigationStack {
-                ScrollView {
-                    DiscoverCard(card: card, translation: feed?.translation ?? translation, onStudy: {
-                        if let ref = VerseRef(card.ref) { pendingDetailAction = .study(ref); detail = nil }
-                    }, onNote: {
-                        if let ref = VerseRef(card.ref) { pendingDetailAction = .note(ref); detail = nil }
-                    }, onComplete: { [accountKey] in
-                        markStudied(card.ref, accountKey: accountKey)
-                        detail = nil
-                    })
-                    .padding(22)
-                }
-                .background(AppGradient())
-                .navigationTitle(title(for: card))
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { detail = nil } } }
+            if let ref = VerseRef(card.ref) {
+                ReflectionSheet(ref: ref, translation: feed?.translation ?? translation, autofocus: false,
+                    onStudy: { pendingDetailAction = .study(ref); detail = nil },
+                    onComplete: { [accountKey] in markStudied(card.ref, accountKey: accountKey); detail = nil })
             }
         }
         .sheet(item: $studyRef) { ref in
-            NavigationStack {
-                AIStudyView(ref: ref, translation: feed?.translation ?? translation, tool: .deeper)
-                    .toolbar {
-                        ToolbarItem(placement: .confirmationAction) { Button("Done") { studyRef = nil } }
-                    }
-            }
+            InsightsSheet(ref: ref, translation: feed?.translation ?? translation) { app.openInReader($0) }
                 .presentationDetents([.large])
         }
         .sheet(item: $noteRef) { ref in

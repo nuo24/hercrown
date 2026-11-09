@@ -117,7 +117,7 @@ final class Billing: NSObject {
     }
 
     func scheduleReturnOffer(for userID: String) async {
-        guard AppConfig.isStaging, configured, let app, app.me?.user.id == userID,
+        guard AppConfig.returnOffersEnabled, AppConfig.isStaging, configured, let app, app.me?.user.id == userID,
               !app.membership.premium else { return }
         UserDefaults.standard.set(true, forKey: pendingDeclineKey(userID))
         await syncPendingDecline(for: userID)
@@ -127,7 +127,7 @@ final class Billing: NSObject {
 
     func syncPendingDecline(for userID: String) async {
         let key = pendingDeclineKey(userID)
-        guard UserDefaults.standard.bool(forKey: key), let app, app.me?.user.id == userID,
+        guard AppConfig.returnOffersEnabled, UserDefaults.standard.bool(forKey: key), let app, app.me?.user.id == userID,
               let token = app.api.token, await Self.isSandbox() else { return }
         do {
             _ = try await app.api.send("POST", "/me/return-offer/decline", authentication: .bearer(token))
@@ -269,11 +269,19 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         return true
     }
 
-    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        await MainActor.run {
-            openedExternally = true
-            NotificationCenter.default.post(name: Self.externalOpen, object: nil)
-        }
+    nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        receiveNotificationOpen(completionHandler: completionHandler)
+    }
+
+    nonisolated func receiveNotificationOpen(completionHandler: @escaping () -> Void) {
+        // Notification callbacks arrive on a system queue. Complete promptly and move UI state to MainActor.
+        Task { @MainActor [weak self] in self?.handleNotificationOpen() }
+        completionHandler()
+    }
+
+    @MainActor func handleNotificationOpen() {
+        openedExternally = true
+        NotificationCenter.default.post(name: Self.externalOpen, object: nil)
     }
 
 

@@ -54,7 +54,7 @@ struct VerseWidgetView: View {
     var body: some View {
         Group {
             if let data = entry.artwork, let image = UIImage(data: data) {
-                Image(uiImage: image).resizable().scaledToFill()
+                Image(uiImage: image).resizable().interpolation(.high).scaledToFill()
                     .accessibilityLabel(entry.verse.map { "\($0.text) \($0.label)" } ?? "Your verse widget")
                     .containerBackground(for: .widget) { Color.clear }
             } else { defaultVerse }

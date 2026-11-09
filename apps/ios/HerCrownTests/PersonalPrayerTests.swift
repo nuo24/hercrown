@@ -35,6 +35,29 @@ final class PersonalPrayerTests: XCTestCase {
         XCTAssertEqual(formatted.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }, text.split(separator: " ").map(String.init))
         XCTAssertEqual(PrayerParagraphs.two(formatted), formatted)
     }
+    @MainActor func testNotificationOpenBypassesColdLaunchForRepeatedTaps() {
+        let delegate = AppDelegate()
+        XCTAssertFalse(delegate.openedExternally)
+        delegate.handleNotificationOpen()
+        XCTAssertTrue(delegate.openedExternally)
+        delegate.handleNotificationOpen()
+        XCTAssertTrue(delegate.openedExternally)
+    }
+    @MainActor func testNotificationTapFromBackgroundQueueCompletesAndDeliversOnMainThread() async {
+        let delegate = AppDelegate()
+        let completed = expectation(description: "System callback acknowledged")
+        let delivered = expectation(description: "Open delivered on main thread")
+        let observer = NotificationCenter.default.addObserver(forName: AppDelegate.externalOpen, object: nil, queue: nil) { _ in
+            XCTAssertTrue(Thread.isMainThread)
+            delivered.fulfill()
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+        DispatchQueue.global(qos: .userInitiated).async {
+            delegate.receiveNotificationOpen { completed.fulfill() }
+        }
+        await fulfillment(of: [completed, delivered], timeout: 3)
+        XCTAssertTrue(delegate.openedExternally)
+    }
     @MainActor func testBundledOnboardingRecordingActuallyAdvances() async throws {
         let playback = DemoPlayback()
         XCTAssertNil(playback.error)
@@ -129,8 +152,8 @@ final class PersonalPrayerTests: XCTestCase {
         for (size, expectedHeight) in [("small", 600), ("medium", 286), ("large", 630)] {
             let data = try XCTUnwrap(images[size])
             let image = try XCTUnwrap(UIImage(data: data)?.cgImage)
-            XCTAssertEqual(image.width, 600)
-            XCTAssertEqual(image.height, expectedHeight)
+            XCTAssertEqual(image.width, 1200)
+            XCTAssertEqual(image.height, expectedHeight * 2)
         }
         let legacy = try JSONEncoder().encode(SnapshotDesign())
         let restored = try JSONDecoder().decode(SnapshotDesign.self, from: legacy)

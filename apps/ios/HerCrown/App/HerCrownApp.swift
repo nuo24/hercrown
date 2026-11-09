@@ -138,7 +138,7 @@ struct HerCrownApp: App {
     }
 
     private func checkReturnOffer() async {
-        guard AppConfig.isStaging, Billing.shared.configured, #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
+        guard AppConfig.returnOffersEnabled, AppConfig.isStaging, Billing.shared.configured, #available(iOS 17.2, *), let user = app.me?.user, app.onboardingCompleted,
               canShowOffer(for: user.id), await Billing.isSandbox(),
               await Storefront.current?.countryCode == "USA" else { return }
         await Billing.shared.syncPendingDecline(for: user.id)

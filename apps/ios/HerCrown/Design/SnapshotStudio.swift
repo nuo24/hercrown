@@ -64,6 +64,7 @@ struct VerseSnapshotView: View {
     @State private var sharing = false
     @State private var widgetSaved = false
     @State private var dragOrigin: CGPoint?
+    @State private var pinchSize: Double?
     private var ink: Color { Theme.text(scheme) }
     private var watermark: Bool { !widgetMode && (!app.membership.premium || design.watermark) }
     private var key: String { "hc.\(widgetMode ? "widgetStudio" : "snapshotStudio").\(app.me?.user.id ?? "local")" }
@@ -73,12 +74,12 @@ struct VerseSnapshotView: View {
             HStack(spacing: 8) {
                 Button { close() } label: { Image(systemName: "arrow.left").frame(width: 44, height: 44) }.accessibilityLabel(widgetMode ? "Close Widget Studio" : "Close Snapshot Studio")
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(widgetMode ? "Widget Studio" : "Snapshot Studio").font(.serif(26))
+                    Text(widgetMode ? "Widget Studio" : "Snapshot Studio").font(.serif(26)).lineLimit(1).minimumScaleFactor(0.8)
                     Text("\(reference) · \(translation)").font(.ui(11)).foregroundStyle(Theme.muted(scheme)).lineLimit(1)
                 }
                 Spacer()
                 Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
-            }.padding(.horizontal, 16).padding(.bottom, 8)
+            }.padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 14)
             GeometryReader { area in
                 let scale = max(0.01, min((area.size.width - 36) / 600, (area.size.height - 44) / design.height))
                 VStack(spacing: 8) {
@@ -98,6 +99,12 @@ struct VerseSnapshotView: View {
                                     design.art[i].x = min(0.93, max(0.07, dragOrigin!.x + value.translation.width / 600))
                                     design.art[i].y = min(0.94, max(0.06, dragOrigin!.y + value.translation.height / design.height))
                                 }.onEnded { _ in dragOrigin = nil })
+                                .simultaneousGesture(MagnifyGesture().onChanged { value in
+                                    guard let i = design.art.firstIndex(where: { $0.id == art.id }) else { return }
+                                    if pinchSize == nil { pinchSize = design.art[i].size }
+                                    selected = art.id
+                                    design.art[i].size = min(0.8, max(0.05, (pinchSize ?? art.size) * value.magnification))
+                                }.onEnded { _ in pinchSize = nil })
                                 .accessibilityLabel("\(art.asset.replacingOccurrences(of: "-", with: " ")) illustration")
                                 .accessibilityAddTraits(.isButton)
                         }
@@ -139,6 +146,7 @@ struct VerseSnapshotView: View {
         .background(GeometryReader { geometry in Color.clear.onAppear { studioHeight = geometry.size.height }.onChange(of: geometry.size.height) { _, height in studioHeight = height } })
         .onChange(of: photoSelection) { _, item in Task { await loadPhoto(item) } }
         .sheet(isPresented: $sharing) { if let rendered { SnapshotShareSheet(image: rendered) } }
+        .toolbar(.hidden, for: .navigationBar)
         .presentationDetents([.large]).presentationDragIndicator(.hidden)
     }
     private var trayHeight: CGFloat {

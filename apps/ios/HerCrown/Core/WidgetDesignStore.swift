@@ -39,7 +39,8 @@ import WidgetKit
             var variant = design; variant.format = "Widget " + size
             if size == "Small" { variant.fontSize = max(40, variant.fontSize) }
             let renderer = ImageRenderer(content: SnapshotCanvas(text: text, reference: reference, translation: translation, design: variant, photo: photo, watermark: false).environment(\.colorScheme, .light))
-            renderer.scale = 1
+            // 600 logical canvas points need enough pixels for large @3x widgets.
+            renderer.scale = 2
             guard let data = renderer.uiImage?.pngData() else { throw StoreError.rendering }
             result[size.lowercased()] = data
         }

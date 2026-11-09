@@ -129,11 +129,14 @@ struct ChapterPicker: View {
     }
 }
 
-/// Reflection: the verse, a prompt clearly marked as not Scripture, her own note (auto-saved), and a way to mark today as read.
+/// Reflection keeps Scripture separate from the prompt and her saved note; Discover can also offer study actions.
 struct ReflectionSheet: View {
     let ref: VerseRef
     let translation: String
     var notesOnly = false
+    var autofocus = true
+    var onStudy: (() -> Void)? = nil
+    var onComplete: (() -> Void)? = nil
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
@@ -141,6 +144,9 @@ struct ReflectionSheet: View {
     @State private var noteLoaded = false
     @State private var noteStatus = ""
     @State private var savedNote = ""
+    @State private var onlinePassage: OnlineBible.Passage?
+    @State private var passageError: String?
+    @State private var confirmStudied = false
     @State private var finishing = false
     @State private var saving = false
     @FocusState private var editing: Bool
@@ -174,6 +180,20 @@ struct ReflectionSheet: View {
                 }
                 .toolbar(.hidden, for: .navigationBar)
         }
+        .confirmationDialog("Mark as studied?", isPresented: $confirmStudied, titleVisibility: .visible) {
+            Button("Mark as Studied") { Task { if note == savedNote { onComplete?() } else if await saveNote() { onComplete?() } } }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("You won’t see this study in Discover again. It will be saved under Saved → Studied, including any notes you’ve written.")
+        }
+        .task(id: "\(translation)|\(ref)") {
+            guard BibleStore.online[translation] != nil else { return }
+            do {
+                let loaded = try await OnlineBible.passage(translation, ref: ref)
+                if !Task.isCancelled { onlinePassage = loaded; passageError = nil }
+            } catch { if !Task.isCancelled { passageError = "This passage couldn’t load. Reconnect and reopen it to try again." } }
+        }
+        .presentationDetents([.large]).presentationDragIndicator(.visible)
         .interactiveDismissDisabled(note != savedNote || finishing)
     }
 
@@ -190,15 +210,23 @@ struct ReflectionSheet: View {
             }
             .frame(maxHeight: .infinity, alignment: .topLeading)
             noteEditor(height: editorHeight)
+            if let onStudy {
+                HStack {
+                    Button("Read & reflect") { Task { if note == savedNote { onStudy() } else if await saveNote() { onStudy() } } }.font(.ui(13, weight: .medium))
+                    Spacer()
+                    if onComplete != nil { Button("Mark as studied") { confirmStudied = true }.font(.ui(12)) }
+                }.buttonStyle(.plain).foregroundStyle(Theme.text(scheme)).frame(minHeight: 44)
+                    .disabled(!noteLoaded || saving || finishing)
+            }
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 10)
         .background(Theme.canvas(scheme))
         .task {
             #if DEBUG
-            if !finishing && !UserDefaults.standard.bool(forKey: "hcPreviewReflectionNoKeyboard") { editing = true }
+            if autofocus && !finishing && !UserDefaults.standard.bool(forKey: "hcPreviewReflectionNoKeyboard") { editing = true }
             #else
-            if !finishing { editing = true }
+            if autofocus && !finishing { editing = true }
             #endif
             struct Note: Decodable { let text: String }
             if let existing: Note = try? await app.api.get("/me/notes/\(ref.description)") {
@@ -224,9 +252,13 @@ struct ReflectionSheet: View {
                     .accessibilityHidden(true)
                 ScriptureReference(ref: ref, translation: translation)
                     .font(.ui(compact ? 16 : 20, weight: .semibold))
-                ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation)
-                    .font(.serif(fontSize, relativeTo: .title2))
-                    .lineSpacing(max(0, fontSize * 0.15))
+                if let text = onlinePassage?.text ?? BibleStore.shared.text(translation, ref) {
+                    ScriptureText(text: text, reference: ref.description, translation: translation)
+                        .font(.serif(fontSize, relativeTo: .title2))
+                        .lineSpacing(max(0, fontSize * 0.15))
+                } else if let passageError {
+                    Text(passageError).font(.ui(13)).foregroundStyle(Theme.muted(scheme))
+                } else { ProgressView("Loading passage…").font(.ui(12)) }
                 Text(translationName)
                     .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
             }
