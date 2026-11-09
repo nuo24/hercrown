@@ -10,6 +10,27 @@ final class PersonalPrayerTests: XCTestCase {
         XCTAssertEqual(ScriptureQuotation.enclosing("“" + passage + "”"), "“" + passage + "”")
         XCTAssertEqual(ScriptureQuotation.enclosing(""), "")
     }
+    func testPrayerPreparationIgnoresPaceButTracksRelevantAnswersAndRetry() {
+        var answers = PersonalOnboardingAnswers()
+        answers.lovedOnes = "My mother"
+        let first = PrayerPreparation(answers: answers, version: 0, simple: false)
+        answers.pace = "5 minutes"
+        XCTAssertEqual(first, PrayerPreparation(answers: answers, version: 0, simple: false))
+        answers.lovedOnes = "My sister"
+        XCTAssertNotEqual(first, PrayerPreparation(answers: answers, version: 0, simple: false))
+        XCTAssertNotEqual(first, PrayerPreparation(answers: first.answers, version: 1, simple: false))
+        XCTAssertNotEqual(first, PrayerPreparation(answers: first.answers, version: 0, simple: true))
+    }
+    func testPrayerRevealPausesAtSentencesAndBeforeAmen() {
+        let text = Array("Lord, give me peace. Amen.")
+        XCTAssertEqual(PrayerReadingPace.delay(before: 1, in: text), 55)
+        let afterComma = text.firstIndex(of: ",")! + 1
+        XCTAssertGreaterThan(PrayerReadingPace.delay(before: afterComma, in: text), 55)
+        let afterSentence = text.firstIndex(of: ".")! + 1
+        XCTAssertGreaterThan(PrayerReadingPace.delay(before: afterSentence, in: text), 175)
+        let amen = text.firstIndex(of: "A")!
+        XCTAssertGreaterThanOrEqual(PrayerReadingPace.delay(before: amen, in: text), 1000)
+    }
     func testNamesAreNormalizedWithoutAcceptingMarkup() {
         var answers = PersonalOnboardingAnswers()
         answers.name = "  nate  "

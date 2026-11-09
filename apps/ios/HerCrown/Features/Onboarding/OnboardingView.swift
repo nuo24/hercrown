@@ -10,6 +10,8 @@ struct OnboardingView: View {
     @State private var answers = PersonalOnboardingAnswers()
     @State private var acknowledgement = ""
     @State private var showingAcknowledgement = false
+    @State private var acknowledgementOpacity = 1.0
+    @State private var prayerRevealing = false
     @State private var revealed = 0
     @State private var settled = false
     @State private var artVisible = false
@@ -50,7 +52,7 @@ struct OnboardingView: View {
     private var isTextPage: Bool { [3, 8, 9].contains(step) }
     private var name: String { answers.normalizedName }
     private var title: String {
-        let titles = ["Less doomscrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’ll be 10 years of your life spent on social media.", "We’re going to help you spend less time scrolling social media and more time in the Bible.", "First, what should\nwe call you?", "Which do you spend more time on?", "What season of life are you in?", "How familiar does the Bible feel?", "What’s on your heart lately?", "Tell us something\nthat’s been\nweighing you down.", "Who’s someone in your life\nyou’d like to pray for?", "How much time can you give to God each day?", name.isEmpty ? "A prayer for you." : "A prayer for you,\n\(name).", "When would you like\na moment with God?", "You don’t have to\nbegin perfectly."]
+        let titles = ["Less doomscrolling.\nMore Scripture.", "If you scroll for\n2 hours a day,\nthat’ll be 10 years of your life spent on social media.", "We’re going to help you spend less time scrolling social media and more time in the Bible.", "First, what should\nwe call you?", "Which do you spend more time on?", "What season of life are you in?", "How familiar does the Bible feel?", "What’s on your heart lately?", "Tell us something\nthat’s been\nweighing you down.", "Who’s someone in your life\nyou’d like to pray for?", "How much time can you give to God each day?", name.isEmpty ? "A prayer for you." : "A prayer for you,\n\(name).", "When would you like\na moment with God?", "A verse for what’s\non your heart."]
         let base = titles[step]
         if [5, 7, 9].contains(step), !name.isEmpty { return name + ", " + base.prefix(1).lowercased() + base.dropFirst() }
         return base
@@ -67,7 +69,7 @@ struct OnboardingView: View {
         case 10: "A small moment is a beautiful beginning."
         case 11: "Your heart, held in prayer."
         case 12: "A quiet invitation to pause."
-        case 13: "Just begin as you are\(name.isEmpty ? "" : ", " + name). One passage. One prayer. A little room for God."
+        case 13: "Chosen with what you shared in mind. Carry these words into your day."
         default: ""
         }
     }
@@ -78,7 +80,8 @@ struct OnboardingView: View {
         case 5: "You don’t have to have it all figured out."
         case 6: "No test. No catching up."
         case 7: "Bring the whole of you."
-        case 10: "Your optional answers are sent securely to our model provider to prepare your prayer. They aren’t added to analytics."
+        case 8, 9: "Optional. Your answers are sent securely to our prayer provider to prepare your prayer. They aren’t added to analytics."
+        case 10: "A prayer shaped around what’s on your heart."
         case 11: "You can come back to these words."
         case 12: "You can change this anytime in Settings."
         default: "Come as you are."
@@ -103,7 +106,7 @@ struct OnboardingView: View {
                     }.padding(.top, 18).padding(.bottom, 28)
                         .accessibilityElement(children: .ignore).accessibilityLabel("Step \(step + 1) of 14")
                     if showingAcknowledgement {
-                        animatedText(acknowledgement).font(.serif(28.8)).tracking(-0.6).frame(maxWidth: .infinity, alignment: .leading)
+                        animatedText(acknowledgement).font(.serif(28.8)).tracking(-0.6).frame(maxWidth: .infinity, alignment: .leading).opacity(acknowledgementOpacity)
                         Spacer()
                     } else {
                         ScrollViewReader { prayerScroll in
@@ -148,6 +151,9 @@ struct OnboardingView: View {
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
         .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
+        .task(id: prayerPreparation) {
+            if let preparation = prayerPreparation { await preparePrayer(preparation) }
+        }
         .onChange(of: scenePhase) { _, phase in
             // Returning from a system interruption shows the complete page, never a hidden Continue.
             // Prayer generation must finish or offer its retry/fallback before it can advance.
@@ -240,15 +246,18 @@ struct OnboardingView: View {
     private var inputDock: some View {
         let value: Binding<String> = step == 3 ? $answers.name : step == 8 ? $answers.burden : $answers.lovedOnes
         let placeholder = step == 3 ? "Your first name" : step == 8 ? "In your own words…" : "My mom, Grace…"
-        return HStack(spacing: 12) {
-            TextField(placeholder, text: value).font(.serif(25)).textContentType(step == 3 ? .givenName : nil).textInputAutocapitalization(.sentences)
-                .submitLabel(.next).focused($textFocused).onSubmit { next() }
-                .onChange(of: value.wrappedValue) { _, text in
-                    let max = step == 3 ? 24 : step == 8 ? 100 : 60
-                    if text.count > max { value.wrappedValue = String(text.prefix(max)) }
-                }
-            Button { next() } label: { Image(systemName: "arrow.right").font(.system(size: 24)).frame(width: 44, height: 44) }.accessibilityLabel("Continue")
-        }.padding(.vertical, 8).overlay(alignment: .bottom) { Rectangle().fill(Color(hex: 0xAAB4BC)).frame(height: 1) }
+        return VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                TextField(placeholder, text: value).font(.serif(25)).textContentType(step == 3 ? .givenName : nil).textInputAutocapitalization(.sentences)
+                    .submitLabel(.next).focused($textFocused).onSubmit { next() }
+                    .onChange(of: value.wrappedValue) { _, text in
+                        let max = step == 3 ? 24 : step == 8 ? 100 : 60
+                        if text.count > max { value.wrappedValue = String(text.prefix(max)) }
+                    }
+                Button { next() } label: { Image(systemName: "arrow.right").font(.system(size: 24)).frame(width: 44, height: 44) }.accessibilityLabel("Continue")
+            }.padding(.vertical, 8).overlay(alignment: .bottom) { Rectangle().fill(Color(hex: 0xAAB4BC)).frame(height: 1) }
+            if [8, 9].contains(step) { Text(footnote).font(.ui(10)).foregroundStyle(muted).fixedSize(horizontal: false, vertical: true) }
+        }
     }
 
     private var prayerPage: some View {
@@ -264,11 +273,10 @@ struct OnboardingView: View {
                 Text(prayerErrorMessage.isEmpty ? "We couldn’t prepare your personal prayer right now." : prayerErrorMessage).font(.ui(14)).foregroundStyle(muted)
                 Button("Try again") { settled = false; requestVersion += 1 }.buttonStyle(CapsuleButtonStyle())
                 Button("Use a simple prayer") {
-                    prayer = answers.simplePrayer; generated = false; prayerError = false; settled = true; preparedAnswers = answers; preparedVersion = requestVersion
-                    Task { await Analytics.shared.track("prayer_prepared", ["generated": false]) }
+                    simplePrayerRequested = true; settled = false; prayerRevealing = false; requestVersion += 1
                 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             } else {
-                Text(settled || reduceMotion ? prayer : String(prayer.prefix(revealed)))
+                Text(settled || reduceMotion ? prayer : prayerRevealing ? String(prayer.prefix(revealed)) : "")
                     .font(.serif(20)).lineSpacing(5).textSelection(.enabled)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -279,7 +287,10 @@ struct OnboardingView: View {
     private var reminder: some View {
         VStack(alignment: .leading, spacing: 20) {
             Divider()
-            Toggle(isOn: $reminders) { VStack(alignment: .leading, spacing: 5) { Text("Daily reminder").font(.ui(14)); Text("A quiet nudge, at your pace.").font(.ui(11)).foregroundStyle(muted) } }.tint(ink)
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 5) { Text("Daily reminder").font(.ui(14)); Text("A quiet nudge, at your pace.").font(.ui(11)).foregroundStyle(muted) }.frame(maxWidth: .infinity, alignment: .leading)
+                Toggle("Daily reminder", isOn: $reminders).labelsHidden().fixedSize().tint(ink)
+            }.padding(.trailing, 4)
             Divider()
             DatePicker("Remind me at", selection: $reminderTime, displayedComponents: .hourAndMinute).font(.ui(13))
             Text("A little preview").font(.ui(11)).foregroundStyle(muted).padding(.top, 8)
@@ -312,7 +323,7 @@ struct OnboardingView: View {
                 Button("Use a simple prayer instead") { simplePrayerRequested = true; next() }
                     .font(.ui(12)).frame(minHeight: 44).foregroundStyle(muted)
             }
-            Text(step == 10 ? "Continue prepares your prayer using OpenRouter/DeepSeek. Your optional answers are used only for this request; the prayer saves on this device." : footnote).font(.ui(step == 10 ? 10 : 11)).foregroundStyle(muted).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+            Text(footnote).font(.ui([8, 9].contains(step) ? 10 : 11)).foregroundStyle(muted).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
         }.padding(.top, 22)
     }
 
@@ -353,10 +364,10 @@ struct OnboardingView: View {
         if step == 3 { answers.name = name }
         if step == 11, !prayer.isEmpty { PersonalPrayerStore.save(prayer, userID: app.me?.user.id) }
         acknowledgement = skipping ? "" : response(for: step)
-        settled = false; artVisible = false; prayerTitleFinished = false; revealed = 0; bridge = false
+        settled = false; artVisible = false; prayerTitleFinished = false; prayerRevealing = false; revealed = 0; bridge = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; revealed = 0; bridge = false; step = max(0, step - 1) }
+    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerRevealing = false; revealed = 0; bridge = false; step = max(0, step - 1) }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."
@@ -378,8 +389,11 @@ struct OnboardingView: View {
         feedback.prepare()
         let clock = ContinuousClock(); let start = clock.now
         var lastPulse = Date.distantPast
+        let characters = Array(text)
+        var elapsed = 0
         for count in 1...max(1, text.count) {
-            try await clock.sleep(until: start.advanced(by: .milliseconds(count * (prayer ? 40 : 48))))
+            elapsed += prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : 48
+            try await clock.sleep(until: start.advanced(by: .milliseconds(elapsed)))
             try Task.checkCancellation(); revealed = count
             if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
                 feedback.impactOccurred(intensity: prayer ? 0.5 : 0.7)
@@ -403,13 +417,24 @@ struct OnboardingView: View {
         artVisible = reduceMotion
         do {
             if !acknowledgement.isEmpty, !reduceMotion, scenePhase == .active {
+                acknowledgementOpacity = 1
                 showingAcknowledgement = true
                 try await type(acknowledgement)
                 try await Task.sleep(for: .milliseconds(650))
+                withAnimation(.easeOut(duration: 0.35)) { acknowledgementOpacity = 0 }
+                try await Task.sleep(for: .milliseconds(350))
             }
             showingAcknowledgement = false
             acknowledgement = ""
-            if step == 11 { try await type(title); prayerTitleFinished = true; artVisible = true; await preparePrayer(); if prayerError { settled = true; return }; try Task.checkCancellation(); try await type(prayer, prayer: true) }
+            if step == 11 {
+                try await type(title); prayerTitleFinished = true; artVisible = true
+                while loadingPrayer || (!prayerError && (preparedAnswers != prayerPreparation?.answers || preparedVersion != requestVersion)) {
+                    try await Task.sleep(for: .milliseconds(100))
+                }
+                if prayerError { settled = true; return }
+                try Task.checkCancellation(); revealed = 0; prayerRevealing = true
+                try await type(prayer, prayer: true)
+            }
             else { try await type(title); artVisible = true }
             if step == 1 {
                 try await Task.sleep(for: .milliseconds(1200)); artVisible = false; bridge = true
@@ -418,17 +443,21 @@ struct OnboardingView: View {
             try Task.checkCancellation(); settled = true
         } catch { }
     }
-    private func preparePrayer() async {
-        guard prayer.isEmpty || preparedAnswers != answers || preparedVersion != requestVersion else { return }
-        if simplePrayerRequested {
-            prayer = answers.simplePrayer; generated = false; prayerError = false
-            preparedAnswers = answers; preparedVersion = requestVersion
+    private var prayerPreparation: PrayerPreparation? {
+        guard step >= 10 else { return nil }
+        return PrayerPreparation(answers: answers, version: requestVersion, simple: simplePrayerRequested)
+    }
+    private func preparePrayer(_ preparation: PrayerPreparation) async {
+        let submittedAnswers = preparation.answers
+        guard prayer.isEmpty || preparedAnswers != submittedAnswers || preparedVersion != preparation.version || generated == preparation.simple else { return }
+        if preparation.simple {
+            prayer = submittedAnswers.simplePrayer; generated = false; prayerError = false
+            preparedAnswers = submittedAnswers; preparedVersion = preparation.version
             await Analytics.shared.track("prayer_prepared", ["generated": false])
             return
         }
         loadingPrayer = true; prayerError = false; prayerErrorMessage = ""
         let request = UUID()
-        let submittedAnswers = answers
         prayerRequest = request
         defer { if prayerRequest == request { loadingPrayer = false } }
         do {
@@ -440,11 +469,11 @@ struct OnboardingView: View {
             struct Reply: Decodable { let prayer: String }
             let reply: Reply = try await app.api.call("POST", "/me/onboarding/prayer", json: submittedAnswers.prayerInput)
             try Task.checkCancellation()
-            guard prayerRequest == request, step == 11, answers == submittedAnswers else { return }
-            prayer = PrayerParagraphs.two(reply.prayer); generated = true; preparedAnswers = submittedAnswers; preparedVersion = requestVersion
+            guard prayerRequest == request, prayerPreparation == preparation else { return }
+            prayer = PrayerParagraphs.two(reply.prayer); generated = true; preparedAnswers = submittedAnswers; preparedVersion = preparation.version
             await Analytics.shared.track("prayer_prepared", ["generated": true])
         } catch {
-            if !Task.isCancelled && prayerRequest == request && step == 11 {
+            if !Task.isCancelled && prayerRequest == request && prayerPreparation == preparation {
                 prayerError = true
                 prayerErrorMessage = (error as? APIError)?.message ?? "We couldn’t prepare your personal prayer right now. Please try again."
             }

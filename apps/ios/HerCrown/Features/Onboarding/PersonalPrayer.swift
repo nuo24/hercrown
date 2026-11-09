@@ -70,3 +70,31 @@ struct SavedPersonalPrayerView: View {
         }.background(Theme.canvas(scheme)).foregroundStyle(Theme.text(scheme)).navigationTitle("Your prayer").navigationBarTitleDisplayMode(.inline)
     }
 }
+
+/// Reading pace is not prayer context. Moving through that question must not restart the request.
+struct PrayerPreparation: Equatable {
+    var answers: PersonalOnboardingAnswers
+    let version: Int
+    let simple: Bool
+    init(answers: PersonalOnboardingAnswers, version: Int, simple: Bool) {
+        self.answers = answers
+        self.answers.pace = ""
+        self.version = version
+        self.simple = simple
+    }
+}
+
+/// Milliseconds per character, with breathing room at punctuation and before the closing Amen.
+enum PrayerReadingPace {
+    static func delay(before index: Int, in characters: [Character]) -> Int {
+        guard index > 0, index < characters.count else { return 55 }
+        let remainder = String(characters[index...]).trimmingCharacters(in: .whitespacesAndNewlines)
+        if characters[index] == "A", remainder == "Amen." || remainder == "Amen" { return 1055 }
+        switch characters[index - 1] {
+        case ".", "!", "?": return 405
+        case ",", ";", ":": return 175
+        case "\n": return 305
+        default: return 55
+        }
+    }
+}

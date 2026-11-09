@@ -48,7 +48,7 @@ struct OnboardingScriptureCard: View {
     var body: some View {
         VStack(spacing: 13) {
             Image.illustration("olive").resizable().scaledToFit().frame(width: 36, height: 42).accessibilityHidden(true)
-            Text("A little word for this season").font(.ui(10)).tracking(0.6).foregroundStyle(Color(hex: 0x716550))
+            Text("Chosen for what’s on your heart").font(.ui(10)).tracking(0.6).foregroundStyle(Color(hex: 0x716550))
             Text(BibleStore.shared.text("kjv", ref) ?? "")
                 .font(.serif(20)).lineSpacing(4).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
             Text("\(BibleStore.shared.label(ref)) · KJV").font(.ui(10)).foregroundStyle(Color(hex: 0x716550))
