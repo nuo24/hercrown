@@ -54,6 +54,7 @@ struct VerseSnapshotView: View {
     @State private var selected: UUID?
     @State private var tab = "Background"
     @State private var expanded = false
+    @State private var studioHeight: CGFloat = 800
     @State private var rendered: UIImage?
     @State private var photo: UIImage?
     @State private var photoSelection: PhotosPickerItem?
@@ -127,6 +128,7 @@ struct VerseSnapshotView: View {
         }
         .onDisappear { if !widgetMode { save() } }
         .onChange(of: design) { _, _ in widgetSaved = false }
+        .background(GeometryReader { geometry in Color.clear.onAppear { studioHeight = geometry.size.height + geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom }.onChange(of: geometry.size.height) { _, height in studioHeight = height + geometry.safeAreaInsets.top + geometry.safeAreaInsets.bottom } })
         .onChange(of: photoSelection) { _, item in Task { await loadPhoto(item) } }
         .sheet(isPresented: $sharing) { if let rendered { SnapshotShareSheet(image: rendered) } }
         .presentationDetents([.large]).presentationDragIndicator(.hidden)
@@ -144,7 +146,7 @@ struct VerseSnapshotView: View {
                     Button { tab = name; expanded = true } label: {
                         Label(name, systemImage: name == "Background" ? "photo" : name == "Text" ? "textformat" : "sparkles")
                             .font(.ui(13)).frame(maxWidth: .infinity, minHeight: 44)
-                            .background(tab == name ? Theme.supporting(scheme) : .clear, in: RoundedRectangle(cornerRadius: 12))
+                            .background(tab == name ? studioPanel : .clear, in: RoundedRectangle(cornerRadius: 12))
                     }
                 }
             }.padding(.horizontal, 12).padding(.bottom, 8)
@@ -152,9 +154,16 @@ struct VerseSnapshotView: View {
                 Divider()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        Picker(widgetMode ? "Widget size" : "Snapshot format", selection: $design.format) {
-                            ForEach(widgetMode ? ["Widget Small", "Widget Medium", "Widget Large"] : ["Portrait", "Square", "Story"], id: \.self) { Text($0.replacingOccurrences(of: "Widget ", with: "")) }
-                        }.pickerStyle(.segmented)
+                        HStack(spacing: 5) {
+                            ForEach(widgetMode ? ["Widget Small", "Widget Medium", "Widget Large"] : ["Portrait", "Square", "Story"], id: \.self) { format in
+                                Button { design.format = format } label: {
+                                    Text(format.replacingOccurrences(of: "Widget ", with: "")).font(.ui(13))
+                                        .foregroundStyle(design.format == format ? ink : Theme.muted(scheme))
+                                        .frame(maxWidth: .infinity, minHeight: 44)
+                                        .background(design.format == format ? Theme.canvas(scheme) : .clear, in: RoundedRectangle(cornerRadius: 9))
+                                }.buttonStyle(.plain).accessibilityAddTraits(design.format == format ? .isSelected : [])
+                            }
+                        }.padding(3).background(studioPanel, in: RoundedRectangle(cornerRadius: 12))
                         if tab == "Background" { backgroundTools }
                         if tab == "Text" { textTools }
                         if tab == "Illustrations" { artTools }
@@ -163,8 +172,8 @@ struct VerseSnapshotView: View {
                             if widgetMode { design.format = "Widget Medium"; design.art = [SnapshotArt(asset: "olive", x: 0.5, y: 0.18, size: 0.12)] }
                             photo = nil; selected = nil
                         }.font(.ui(12)).frame(maxWidth: .infinity, minHeight: 44)
-                    }.padding(22)
-                }.frame(height: 260)
+                    }.padding(.horizontal, 22).padding(.top, 16).padding(.bottom, 20)
+                }.frame(height: max(200, min(540, studioHeight * 0.54) - 102))
             }
         }.background(Theme.canvas(scheme)).clipShape(UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
     }
@@ -186,22 +195,68 @@ struct VerseSnapshotView: View {
                     preset("Rose mist", colors: ["FFFFFF", "EBD6DC", "DEEAF2"])
                     preset("Evening", colors: ["132029", "344E62", "596D63"])
                 }
-                HStack {
-                    ForEach(0..<(design.third ? 3 : 2), id: \.self) { i in ColorPicker("Color \(i + 1)", selection: Binding(get: { Color(studioHex: design.colors[i]) }, set: { design.colors[i] = $0.studioHex }), supportsOpacity: false).font(.ui(11)) }
+                HStack(alignment: .center, spacing: 14) {
+                    ForEach(0..<(design.third ? 3 : 2), id: \.self) { i in
+                        VStack(spacing: 6) {
+                            Text("Color \(i + 1)").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                            colorWell("Gradient color \(i + 1)", color: Binding(get: { design.colors[i] }, set: { design.colors[i] = $0 }), size: 44)
+                        }
+                    }
+                    Spacer(minLength: 0)
+                    Button { design.third.toggle() } label: {
+                        Label(design.third ? "Third on" : "Third color", systemImage: design.third ? "xmark" : "plus")
+                            .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                    }.buttonStyle(.plain)
                 }
-                Toggle("Third gradient color", isOn: $design.third).font(.ui(13))
                 control("Intensity", value: $design.intensity, range: 0...100)
                 control("Direction", value: $design.angle, range: 0...360)
             }
         }
     }
     private var textTools: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 12) {
             Text("Let the words lead.").font(.serif(23))
-            ColorPicker("Text color", selection: Binding(get: { Color(studioHex: design.ink) }, set: { design.ink = $0.studioHex }), supportsOpacity: false).font(.ui(14))
-            Picker("Typeface", selection: $design.font) { ForEach(["Baskerville", "Baskerville-Italic", "AvenirNext-Regular", "DMSans-Regular"], id: \.self) { Text($0.replacingOccurrences(of: "-Regular", with: "")) } }.font(.ui(14))
+            HStack(alignment: .top, spacing: 5) {
+                ForEach(["Ink", "White", "Slate", "Olive", "Rose"], id: \.self) { name in
+                    let hex = ["Ink": "111111", "White": "FFFFFF", "Slate": "526D82", "Olive": "506554", "Rose": "8C5B6B"][name]!
+                    Button { design.ink = hex } label: {
+                        VStack(spacing: 7) {
+                            Circle().fill(Color(studioHex: hex)).overlay(Circle().stroke(Theme.border(scheme), lineWidth: 1))
+                                .overlay { if design.ink == hex { Image(systemName: "checkmark").font(.system(size: 14)).foregroundStyle(name == "White" ? .black : .white) } }
+                                .frame(width: 40, height: 40)
+                            Text(name).font(.ui(11))
+                        }.frame(maxWidth: .infinity)
+                    }.buttonStyle(.plain).accessibilityLabel("\(name) text").accessibilityAddTraits(design.ink == hex ? .isSelected : [])
+                }
+                VStack(spacing: 7) { colorWell("Custom text color", color: $design.ink, size: 40); Text("Custom").font(.ui(11)) }.frame(maxWidth: .infinity)
+            }
+            HStack {
+                Text("Typeface").font(.ui(14))
+                Spacer()
+                Menu {
+                    ForEach(["Baskerville", "Baskerville-Italic", "AvenirNext-Regular", "DMSans-Regular"], id: \.self) { font in
+                        Button { design.font = font } label: { Label(fontLabel(font), systemImage: design.font == font ? "checkmark" : "") }
+                    }
+                } label: {
+                    HStack(spacing: 12) { Text(fontLabel(design.font)); Image(systemName: "chevron.down").font(.system(size: 10)) }
+                        .font(.ui(14)).padding(.horizontal, 12).frame(minHeight: 44)
+                        .background(studioPanel, in: RoundedRectangle(cornerRadius: 8))
+                }.buttonStyle(.plain).accessibilityLabel("Typeface, \(fontLabel(design.font))")
+            }.padding(.bottom, 4).overlay(alignment: .bottom) { Rectangle().fill(Theme.border(scheme)).frame(height: 1) }
             control("Text size", value: $design.fontSize, range: 22...52)
-            Picker("Alignment", selection: $design.alignment) { ForEach(["Left", "Center", "Right"], id: \.self) { Text($0) } }.pickerStyle(.segmented)
+            HStack {
+                Text("Alignment").font(.ui(14)); Spacer()
+                HStack(spacing: 3) {
+                    ForEach(["Left", "Center", "Right"], id: \.self) { alignment in
+                        Button { design.alignment = alignment } label: {
+                            Text(alignment).font(.ui(12)).padding(.horizontal, 8).frame(minHeight: 44)
+                                .foregroundStyle(design.alignment == alignment ? Theme.canvas(scheme) : ink)
+                                .background(design.alignment == alignment ? ink : .clear, in: RoundedRectangle(cornerRadius: 7))
+                                .overlay(RoundedRectangle(cornerRadius: 7).stroke(Theme.border(scheme), lineWidth: 1))
+                        }.buttonStyle(.plain).accessibilityAddTraits(design.alignment == alignment ? .isSelected : [])
+                    }
+                }
+            }
             if widgetMode {
                 TextField("Personal caption (optional)", text: Binding(get: { design.caption ?? "" }, set: { design.caption = String($0.prefix(80)) }))
                     .font(.ui(14)).padding(12).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 8))
@@ -213,7 +268,17 @@ struct VerseSnapshotView: View {
     }
     private var artTools: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack { Text("Illustrations").font(.serif(23)); Spacer(); Text("\(design.art.count) / 6").font(.ui(12)) }
+            HStack { Text("A little illustration.").font(.serif(23)); Spacer(); Text("\(design.art.count) / 6").font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(design.art) { art in
+                        Button { selected = selected == art.id ? nil : art.id } label: {
+                            Image.illustration(art.asset).resizable().scaledToFit().padding(4).frame(width: 58, height: 58)
+                                .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected == art.id ? ink : Theme.border(scheme), lineWidth: 1))
+                        }.buttonStyle(.plain).accessibilityLabel("Arrange \(art.asset.replacingOccurrences(of: "-", with: " "))")
+                    }
+                }.padding(3)
+            }
             if let index = design.art.firstIndex(where: { $0.id == selected }) {
                 let layer = design.art[index]
                 VStack(spacing: 12) {
@@ -231,13 +296,14 @@ struct VerseSnapshotView: View {
                     }.font(.ui(12)).frame(minHeight: 44)
                 }.padding(14).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 13))
             }
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 20) {
-                ForEach(SnapshotDesign.assets, id: \.self) { asset in
+            HStack { Text("Illustration library").font(.serif(20)); Spacer(); Text("34 illustrations").font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 18), count: 3), spacing: 21) {
+                ForEach(libraryAssets, id: \.self) { asset in
                     Button {
                         guard design.art.count < 6 else { return }
                         let art = SnapshotArt(asset: asset); design.art.append(art); selected = art.id
                     } label: {
-                        VStack(spacing: 7) { Image.illustration(asset).resizable().scaledToFit().frame(height: 70); Text(asset.replacingOccurrences(of: "-", with: " ").capitalized).font(.ui(11)) }
+                        VStack(spacing: 7) { Image.illustration(asset).resizable().scaledToFit().frame(height: 88); Text(asset.replacingOccurrences(of: "-", with: " ").capitalized).font(.ui(11)) }
                     }.disabled(design.art.count >= 6)
                 }
             }
@@ -247,12 +313,34 @@ struct VerseSnapshotView: View {
         Binding(get: { design.art.first(where: { $0.id == id })?[keyPath: path] ?? 0 }, set: { value in if let i = design.art.firstIndex(where: { $0.id == id }) { design.art[i][keyPath: path] = value } })
     }
     private func preset(_ name: String, colors: [String]) -> some View {
-        Button { design.colors = colors; design.intensity = name == "Evening" || name == "Pure white" ? 100 : 70 } label: {
-            VStack(spacing: 7) { LinearGradient(colors: colors.map { Color(studioHex: $0) }, startPoint: .topLeading, endPoint: .bottomTrailing).frame(height: 48).clipShape(RoundedRectangle(cornerRadius: 12)); Text(name).font(.ui(9)) }
+        Button { design.colors = colors; design.third = name != "Pure white"; design.intensity = name == "Evening" || name == "Pure white" ? 100 : name == "Rose mist" ? 65 : 70; design.ink = name == "Evening" ? "FFFFFF" : "111111" } label: {
+            VStack(spacing: 7) { LinearGradient(colors: colors.map { Color(studioHex: $0) }, startPoint: .topLeading, endPoint: .bottomTrailing).frame(height: 55).clipShape(RoundedRectangle(cornerRadius: 12)).overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.border(scheme), lineWidth: 1)); Text(name).font(.ui(10)).lineLimit(1).minimumScaleFactor(0.8) }
         }.frame(maxWidth: .infinity)
     }
+    private var libraryAssets: [String] {
+        return ["cosmos", "olive", "journal", "open-book", "magnifier", "bookmark", "reflection", "community", "milestone", "sunrise", "anchor", "dove", "intention-heart", "seedling", "hourglass", "reminder-bell", "butterfly", "lantern", "faith-hands", "purpose-compass", "relationship-hands", "gratitude-basket", "wisdom-pearl", "rest-stones", "devotional-teacup", "prayer-envelope", "reflection-quill", "growth-vase", "quiet-window", "faith-key", "wisdom-scroll", "grace-shell", "hope-nest", "gratitude-bowl"]
+    }
+    private var studioPanel: Color { scheme == .dark ? Color(hex: 0x141416) : Color(hex: 0xF5F6F7) }
+    private func fontLabel(_ font: String) -> String {
+        ["Baskerville": "Baskerville", "Baskerville-Italic": "Baskerville Italic", "AvenirNext-Regular": "Avenir Next", "DMSans-Regular": "DM Sans"][font] ?? font
+    }
+    private func colorWell(_ label: String, color: Binding<String>, size: CGFloat) -> some View {
+        ColorPicker(label, selection: Binding(get: { Color(studioHex: color.wrappedValue) }, set: { color.wrappedValue = $0.studioHex }), supportsOpacity: false)
+            .labelsHidden().frame(width: size, height: size)
+            .overlay { Circle().fill(Color(studioHex: color.wrappedValue)).padding(4).overlay(Circle().stroke(Theme.border(scheme), lineWidth: 1)).allowsHitTesting(false) }
+            .accessibilityLabel(label)
+    }
     private func control(_ label: String, value: Binding<Double>, range: ClosedRange<Double>) -> some View {
-        VStack(spacing: 4) { HStack { Text(label); Spacer(); Text(value.wrappedValue, format: .number.precision(.fractionLength(range.upperBound <= 1 ? 2 : 0))) }; Slider(value: value, in: range) }.font(.ui(13)).tint(ink)
+        VStack(spacing: 3) {
+            HStack {
+                Text(label); Spacer()
+                Text(value.wrappedValue, format: .number.precision(.fractionLength(range.upperBound <= 1 ? 2 : 0)))
+                    .foregroundStyle(Theme.muted(scheme))
+                    + Text(label == "Intensity" || label == "Photo shade" || label == "Photo position" ? "%" : label == "Direction" || label == "Rotation" ? "°" : "").foregroundStyle(Theme.muted(scheme))
+            }
+            StudioSlider(value: value, range: range, ink: UIColor(ink), track: UIColor(Theme.border(scheme)))
+                .frame(height: 36).accessibilityLabel(label)
+        }.font(.ui(13))
     }
     private func save() {
         UserDefaults.standard.set(try? JSONEncoder().encode(design), forKey: key)
@@ -363,5 +451,38 @@ private extension Color {
         var br: CGFloat = 0, bg: CGFloat = 0, bb: CGFloat = 0, ba: CGFloat = 0
         top.getRed(&r, green: &g, blue: &b, alpha: &a); bottom.getRed(&br, green: &bg, blue: &bb, alpha: &ba)
         return Color(red: r * a + br * (1-a), green: g * a + bg * (1-a), blue: b * a + bb * (1-a))
+    }
+}
+
+/// The mockup's thin track and circular thumb, with native drag and accessibility behavior.
+private struct StudioSlider: UIViewRepresentable {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let ink: UIColor
+    let track: UIColor
+    func makeCoordinator() -> Coordinator { Coordinator(value: $value) }
+    func makeUIView(context: Context) -> UISlider {
+        let slider = UISlider()
+        slider.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .valueChanged)
+        return slider
+    }
+    func updateUIView(_ slider: UISlider, context: Context) {
+        context.coordinator.value = $value
+        slider.minimumValue = Float(range.lowerBound); slider.maximumValue = Float(range.upperBound)
+        slider.value = Float(value)
+        slider.minimumTrackTintColor = track; slider.maximumTrackTintColor = track
+        let line = UIGraphicsImageRenderer(size: CGSize(width: 3, height: 3)).image { context in
+            track.setFill(); context.fill(CGRect(x: 0, y: 0, width: 3, height: 3))
+        }.resizableImage(withCapInsets: .zero)
+        slider.setMinimumTrackImage(line, for: .normal); slider.setMaximumTrackImage(line, for: .normal)
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 23, height: 23))
+        let thumb = renderer.image { _ in ink.setFill(); UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: 23, height: 23)).fill() }
+        slider.setThumbImage(thumb, for: .normal)
+        slider.setThumbImage(thumb, for: .highlighted)
+    }
+    final class Coordinator: NSObject {
+        var value: Binding<Double>
+        init(value: Binding<Double>) { self.value = value }
+        @objc func changed(_ slider: UISlider) { value.wrappedValue = Double(slider.value) }
     }
 }

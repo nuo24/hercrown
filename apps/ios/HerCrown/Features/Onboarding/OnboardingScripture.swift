@@ -55,14 +55,14 @@ struct OnboardingScriptureCard: View {
         }
         .foregroundStyle(Color(hex: 0x302A23)).padding(.horizontal, 28).padding(.vertical, 25)
         .frame(maxWidth: .infinity)
-        .background(LinearGradient(colors: [Color(hex: 0xFBF7EF), Color(hex: 0xF0E7D6), Color(hex: 0xFBF7EF)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 10))
+        .background(LinearGradient(colors: [Color(hex: 0xFEFDF9), Color(hex: 0xF8F5EE), Color(hex: 0xFEFDF9)], startPoint: .leading, endPoint: .trailing), in: RoundedRectangle(cornerRadius: 10))
         .overlay(alignment: .top) { scrollEdge }
         .overlay(alignment: .bottom) { scrollEdge }
         .padding(.horizontal, 3).padding(.top, 14)
         .accessibilityElement(children: .combine)
     }
     private var scrollEdge: some View {
-        Capsule().fill(LinearGradient(colors: [Color(hex: 0xE4D4B7), Color(hex: 0xFFFDF6), Color(hex: 0xDDCAA8)], startPoint: .top, endPoint: .bottom))
-            .frame(height: 8).padding(.horizontal, -5).shadow(color: Color(hex: 0x9B8056).opacity(0.12), radius: 3, y: 2)
+        Capsule().fill(LinearGradient(colors: [Color(hex: 0xEFE9DD), Color(hex: 0xFFFEFC), Color(hex: 0xE9E1D2)], startPoint: .top, endPoint: .bottom))
+            .frame(height: 8).padding(.horizontal, -5).shadow(color: Color(hex: 0x9B8056).opacity(0.06), radius: 3, y: 2)
     }
 }
