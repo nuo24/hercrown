@@ -502,6 +502,7 @@ struct OnboardingView: View {
             catch { saveError = true; return }
         }
         await app.completeOnboarding()
+        await OnboardingNotificationTest.scheduleIfAllowed()
         if guest { if let id = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: id) } }
         else { app.presentPaywall(placement: "onboarding_complete") }
     }
@@ -589,5 +590,24 @@ private struct OnboardingArtReveal: ViewModifier {
             .offset(y: visible || reducedMotion ? 0 : 14)
             .scaleEffect(visible || reducedMotion ? 1 : 0.96)
             .animation(reducedMotion ? nil : .easeOut(duration: 0.45), value: visible)
+    }
+}
+
+/// A single delayed notification for the staging crash-retest workflow only.
+@MainActor
+enum OnboardingNotificationTest {
+    static let id = "hc.onboardingNotificationTest"
+    static func scheduleIfAllowed() async {
+        guard AppConfig.isStaging else { return }
+        let center = UNUserNotificationCenter.current()
+        let settings = await center.notificationSettings()
+        guard settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional else { return }
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+        let content = UNMutableNotificationContent()
+        content.title = "Her Crown notification test"
+        content.body = "Tap to return to Her Crown and check that it opens smoothly."
+        content.sound = .default
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 60, repeats: false))
+        try? await center.add(request)
     }
 }
