@@ -105,3 +105,7 @@ In the production-pointed TestFlight build, verify onboarding, free reading, san
 ## November 8 additions (staging first)
 
 Migrations now run through **0013**: 0012 adds only per-user prayer request counts; 0013 adds Community votes and private suggestions. No new secrets/vendors are required: personal prayers reuse OPENROUTER_API_KEY and the existing model configuration. Production does not expose the supplied fictional ballot profiles. Before enabling a live ballot, approve recipient identities, grant/tie rules, and a verified giving ledger. The owner reports $7,350 completed donations and a 30%-of-revenue commitment. Reconcile the financial records before launch. Review/publish the expanded App Privacy label for optional personal-prayer processing and private Community suggestions. This staging test release does not deploy these additions to production.
+
+## Licensed online translations (build 18; production pending)
+
+Migrations now run through **0014**. For production, the owner must apply 0014 and set `API_BIBLE_KEY` using `npx wrangler secret put API_BIBLE_KEY --env production`, then deploy a clean committed checkout. Use a regenerated key before launch because the original was shared in chat. Do not seed NKJV/MSG/AMP/NLT text into D1 or bundle it. The reader fetches chapters through the Worker; existing Home/Discover editorial selections remain explicitly labeled bundled editions. Verify publisher permissions for each intended sharing/widget usage before production launch. NIV and ESV are not enabled.
