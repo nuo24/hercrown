@@ -49,12 +49,12 @@ struct OnboardingDemoView: View {
             Task { @MainActor in
                 guard let self else { return }
                 if self.player.currentItem?.status == .failed { self.error = "The demonstration could not play." }
-                else if self.wantsPlayback { self.player.play() }
+                else if self.wantsPlayback { self.player.playImmediately(atRate: 1.5) }
             }
         }
     }
     func setActive(_ active: Bool, autoplay: Bool) { if active && autoplay { play() } else { pause() } }
-    func play() { wantsPlayback = true; playing = true; player.play() }
+    func play() { wantsPlayback = true; playing = true; player.playImmediately(atRate: 1.5) }
     func pause() { wantsPlayback = false; playing = false; player.pause() }
 }
 private struct DemoPlayerLayer: UIViewRepresentable {

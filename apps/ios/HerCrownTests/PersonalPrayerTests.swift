@@ -41,8 +41,13 @@ final class PersonalPrayerTests: XCTestCase {
         playback.setActive(true, autoplay: true)
         try await Task.sleep(for: .seconds(3))
         XCTAssertGreaterThan(playback.player.currentTime().seconds, 0.2)
+        XCTAssertEqual(playback.player.rate, 1.5)
         playback.pause()
         XCTAssertFalse(playback.playing)
+        XCTAssertEqual(playback.player.rate, 0)
+        playback.play()
+        XCTAssertEqual(playback.player.rate, 1.5)
+        playback.pause()
     }
     @MainActor func testSnapshotProducesTheRequestedImageSizesFromBundledScripture() throws {
         let chapter = try XCTUnwrap(BibleStore.shared.chapter("kjv", book: "PSA", chapter: 23))
