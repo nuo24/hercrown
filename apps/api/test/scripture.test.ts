@@ -194,6 +194,13 @@ describe("online translations (API.Bible)", () => {
     ] },
   ];
 
+  it("keeps a space between provider paragraphs within one verse", () => {
+    expect(versesFromContent([
+      { name: "para", items: [{ type: "text", text: "First fixture!", attrs: { verseId: "GEN.1.31" } }] },
+      { name: "para", items: [{ type: "text", text: "Second fixture.", attrs: { verseId: "GEN.1.31" } }] },
+    ], "GEN", 1)).toEqual([{ verse: 31, text: "First fixture! Second fixture." }]);
+  });
+
   it("preserves provider verse bridges without splitting or repeating text", () => {
     expect(versesFromContent([
       { type: "text", text: "Provider bridge ", attrs: { verseId: "PSA.23.1-PSA.23.3" } },

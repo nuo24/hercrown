@@ -23,6 +23,7 @@ const unavailable = (message: string) => new HttpError(503, "translation_unavail
 export function versesFromContent(content: ContentNode[], book: string, chapter: number) {
   const byVerse = new Map<number, { end?: number; parts: string[] }>();
   const prefix = `${book}.${chapter}.`;
+  let lastVerse: number | undefined;
   const walk = (nodes: ContentNode[]) => {
     for (const node of nodes) {
       if (node.name === "note") continue;
@@ -33,10 +34,12 @@ export function versesFromContent(content: ContentNode[], book: string, chapter:
         const end = range[1] ? Number(range[1].startsWith(prefix) ? range[1].slice(prefix.length) : range[1]) : undefined;
         if (Number.isInteger(n) && n > 0 && (end === undefined || (Number.isInteger(end) && end >= n))) {
           const group = byVerse.get(n) ?? { end, parts: [] };
-          group.parts.push(node.text); byVerse.set(n, group);
+          group.parts.push(node.text); byVerse.set(n, group); lastVerse = n;
         }
       }
       if (node.items) walk(node.items);
+      // Block boundaries separate sentences; inline formatting must concatenate verbatim.
+      if (node.name === "para" && lastVerse !== undefined) byVerse.get(lastVerse)?.parts.push(" ");
     }
   };
   walk(content);
