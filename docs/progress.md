@@ -478,3 +478,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - Owner confirmed build 23 heading/icon alignment and notification taps work. Restored a visible fade, 14-point upward entrance and subtle scale-in for side illustrations on every onboarding question page, including prayer. Art leads the heading slightly and continues entering while text types. Each heading illustration has page-specific identity and commits a hidden mounted frame before revealing, preventing SwiftUI from mounting it already fully visible. Alignment and existing intro collage/Christ bridge choreography remain intact; Reduce Motion remains immediate.
 - Version 1.0 (24). Required check, 198 API tests and all 24 native tests passed. Simulator recording `/tmp/hc24-art-entry.mp4` and frame contact sheet `/tmp/hc24-art-entry-frames.jpg` visually confirm the entrance on the familiarity page during typing. No production changes. Clean archive/upload identifiers will follow delivery.
+
+### Nov 9: build 24 delivered to TestFlight
+
+- Clean archive source `348121c6e43c4e6f42ae61026041edb0617b7ad3` at `/private/tmp/hercrown-build24-source`; Release + HC_STAGING_TESTFLIGHT archive `/private/tmp/hercrown-build24/HerCrown.xcarchive`. Verified Info.plist version 1.0 (24). Xcode Organizer confirmed successful upload after owner unlocked the Mac.
+- Apple build `a2296ad6-d813-4268-9b6a-3d49cd048e26` processed VALID, APP_STORE_ELIGIBLE. Build-specific test notes saved, tester notifications enabled and existing internal/external Beta groups assigned. Submitted beta review; final API status internal IN_BETA_TESTING and external IN_BETA_TESTING. No production deployment or App Store release.
