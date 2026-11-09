@@ -57,9 +57,9 @@ struct SheetControls: View {
     let done: () -> Void
     var body: some View {
         HStack {
-            Button(action: back) { Label("Back", systemImage: "arrow.left").font(.ui(12, weight: .medium)) }
+            Button(action: back) { Label("Back", systemImage: "arrow.left").font(.ui(12, weight: .medium)).frame(minWidth: 44, minHeight: 44, alignment: .leading) }
             Spacer()
-            Button("Done", action: done).font(.ui(12, weight: .medium))
+            Button("Done", action: done).font(.ui(12, weight: .medium)).frame(minWidth: 44, minHeight: 44, alignment: .trailing)
         }
         .buttonStyle(.plain).foregroundStyle(.primary).frame(minHeight: 44)
     }
@@ -86,5 +86,24 @@ struct ScriptureReference: View {
                 label = nil
                 if BibleStore.online[translation] != nil { label = try? await OnlineBible.passage(translation, ref: ref).label }
             }
+    }
+}
+
+/// One fixed, safe-area-aware control row for content sheets, independent of scroll padding.
+private struct SheetControlInset: ViewModifier {
+    let back: () -> Void
+    let done: () -> Void
+    @Environment(\.colorScheme) private var scheme
+    func body(content: Content) -> some View {
+        content.safeAreaInset(edge: .top, spacing: 0) {
+            SheetControls(back: back, done: done)
+                .padding(.horizontal, 22)
+                .background(Theme.canvas(scheme))
+        }
+    }
+}
+extension View {
+    func sheetControls(back: @escaping () -> Void, done: @escaping () -> Void) -> some View {
+        modifier(SheetControlInset(back: back, done: done))
     }
 }

@@ -158,7 +158,6 @@ struct PlanSheet: View {
             ScrollView {
                 if let plan {
                     VStack(alignment: .leading, spacing: 16) {
-                        SheetControls(back: { dismiss() }, done: { dismiss() })
                         VStack(spacing: 16) {
                             Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90).padding(.vertical, 12)
                             Text(plan.title).font(.serif(28, relativeTo: .title))
@@ -175,6 +174,7 @@ struct PlanSheet: View {
                     .padding(Theme.Spacing.gutter)
                 }
             }
+            .sheetControls(back: { dismiss() }, done: { dismiss() })
             .toolbar(.hidden, for: .navigationBar)
             .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme))
         }
@@ -248,7 +248,6 @@ struct DevotionalSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    SheetControls(back: { dismiss() }, done: { dismiss() })
                     Text(devotional.title).font(.ui(20, weight: .semibold)).tracking(-0.4)
                     Text("\(devotional.minutes ?? 1) min read" + (devotional.tag.map { " · " + $0 } ?? ""))
                         .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
@@ -286,6 +285,7 @@ struct DevotionalSheet: View {
                 .foregroundStyle(Theme.text(scheme))
                 .padding(Theme.Spacing.gutter)
             }
+            .sheetControls(back: { dismiss() }, done: { dismiss() })
             .toolbar(.hidden, for: .navigationBar)
             .background(Theme.canvas(scheme))
         }
@@ -318,7 +318,7 @@ struct PlansListSheet: View {
                 Text("Reading Plans").font(.serif(28)).tracking(-0.5)
                 Spacer()
                 Button("Done") { dismiss() }.font(.ui(12, weight: .medium))
-            }.buttonStyle(.plain).padding(.horizontal, 22).padding(.top, 12)
+            }.buttonStyle(.plain).padding(.horizontal, 22)
             ScrollView {
                 VStack(spacing: 16) {
                     VStack(spacing: 16) {

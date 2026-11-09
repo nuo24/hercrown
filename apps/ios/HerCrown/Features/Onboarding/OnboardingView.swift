@@ -108,7 +108,7 @@ struct OnboardingView: View {
                     }.padding(.top, 18).padding(.bottom, 28)
                         .accessibilityElement(children: .ignore).accessibilityLabel("Step \(step + 1) of 14")
                     if showingAcknowledgement {
-                        animatedText(acknowledgement).font(.serif(28.8)).tracking(-0.6).frame(maxWidth: .infinity, alignment: .leading).opacity(acknowledgementOpacity)
+                        animatedText(acknowledgement).font(.serif(28.8)).tracking(-0.6).frame(maxWidth: .infinity, alignment: .leading).opacity(acknowledgementOpacity).padding(.top, 20)
                         Spacer()
                     } else {
                         ScrollViewReader { prayerScroll in
@@ -119,12 +119,7 @@ struct OnboardingView: View {
                                 else if step == 11 { prayerPage }
                                 else if step == 2 { demoPage(height: page.size.height) }
                                 else {
-                                    HStack(alignment: .top, spacing: 16) {
-                                        animatedText(title).font(.serif(28.8)).tracking(-1).lineSpacing(0)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                        if step != 2 { Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion)).accessibilityHidden(true) }
-                                    }
-                                    .accessibilityAddTraits(.isHeader)
+                                    questionHeading
                                     if !subtitle.isEmpty { Text(subtitle).font(.ui(14)).lineSpacing(5).foregroundStyle(muted).opacity(settled ? 1 : 0) }
                                     pageContent.opacity(settled ? 1 : 0).allowsHitTesting(settled)
                                 }
@@ -262,13 +257,25 @@ struct OnboardingView: View {
         }
     }
 
+    private var questionHeading: some View {
+                                    animatedText(title).font(.serif(28.8)).tracking(-1).lineSpacing(0)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.trailing, 98)
+                                        .overlay(alignment: .bottomTrailing) {
+                                            GeometryReader { heading in
+                                                Image.illustration(step == 11 ? "faith-hands" : art).resizable().scaledToFit()
+                                                    .frame(width: 82, height: min(90, heading.size.height))
+                                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                                                    .modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
+                                                    .accessibilityHidden(true)
+                                            }
+                                        }
+                                    .accessibilityAddTraits(.isHeader)
+    }
+
     private var prayerPage: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 16) {
-                animatedText(title)
-                    .font(.serif(28.8)).tracking(-1).frame(maxWidth: .infinity, alignment: .leading)
-                Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
-            }
+            questionHeading
             Text("Your heart, held in prayer.").font(.ui(14)).foregroundStyle(muted)
             if loadingPrayer { ProgressView("Preparing your prayer…").font(.ui(14)).frame(maxWidth: .infinity).padding(.vertical, 30) }
             else if prayerError {
@@ -519,6 +526,7 @@ struct OnboardingView: View {
             catch { saveError = true; return }
         }
         if guest {
+            Billing.shared.recordPresentationOutcome(placement: "onboarding_complete", outcome: "Guest path intentionally skips paywall")
             await app.completeOnboarding()
             await OnboardingNotificationTest.scheduleIfAllowed()
             if let id = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: id) }

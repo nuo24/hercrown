@@ -227,7 +227,10 @@ final class AppModel {
                 isFreshTestOnboarding = false
             }
             let existing = isFreshTestOnboarding ? nil : await activeAppleSubscription()
-            guard me?.user.id == userID, !membership.premium else { onComplete?(); return }
+            guard me?.user.id == userID, !membership.premium else {
+                Billing.shared.recordPresentationOutcome(placement: placement, outcome: membership.premium ? "Server reports active Plus after subscription check" : "App account changed during subscription check")
+                onComplete?(); return
+            }
             if existing != nil {
                 Billing.shared.recordPresentationOutcome(placement: placement, outcome: "Apple reports an active subscription")
                 if let onExistingSubscription { onExistingSubscription() }

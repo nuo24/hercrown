@@ -52,7 +52,6 @@ struct ChapterPicker: View {
             }
         }
         .padding(.horizontal, 22)
-        .padding(.top, 16)
         .foregroundStyle(Theme.text(scheme))
         .background(Theme.canvas(scheme).ignoresSafeArea())
     }
@@ -158,18 +157,8 @@ struct ReflectionSheet: View {
             }
                 .safeAreaInset(edge: .top, spacing: 0) {
                     VStack(alignment: .leading, spacing: 14) {
-                        HStack {
-                            Button { Task { await finish() } } label: {
-                                Label("Back", systemImage: "arrow.left")
-                                    .font(.ui(13, weight: .medium))
-                            }
-                            Spacer()
-                            Button("Done") { Task { await finish() } }
-                                .font(.ui(13, weight: .semibold))
-                        }
-                        .buttonStyle(.plain)
-                        .frame(minHeight: 44)
-                        .disabled(!noteLoaded || finishing || saving)
+                        SheetControls(back: { Task { await finish() } }, done: { Task { await finish() } })
+                            .disabled(!noteLoaded || finishing || saving)
                         Text("Reflection").font(.ui(18, weight: .semibold))
                             .accessibilityAddTraits(.isHeader)
                     }

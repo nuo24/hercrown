@@ -42,7 +42,7 @@ struct SavedSheet: View {
                             Text("Saved passages").font(.serif(28)).tracking(-0.5)
                             Spacer()
                             Button("Done") { dismiss() }.font(.ui(12, weight: .medium))
-                        }.buttonStyle(.plain).padding(20)
+                        }.buttonStyle(.plain).padding(.horizontal, 22)
                         Text("Words to keep close.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
                             .padding(.horizontal, 20).padding(.vertical, 18)
                         sectionChips.padding(.bottom, 16)

@@ -17,7 +17,10 @@ final class Billing: NSObject {
     private(set) var configured = false
     private var presentingPlacement: UUID?
     #if HC_STAGING_TESTFLIGHT
-    private var lastPaywallTrialResult: String?
+    private var lastPaywallTrialResult: String? {
+        get { UserDefaults.standard.string(forKey: "hc.lastPaywallTrialResult") }
+        set { UserDefaults.standard.set(newValue, forKey: "hc.lastPaywallTrialResult") }
+    }
     #endif
     var isPaywallBusy: Bool {
         configured && (presentingPlacement != nil || Superwall.shared.isPaywallPresented)
@@ -177,9 +180,8 @@ final class Billing: NSObject {
     #endif
 
     func logOut() {
-        #if HC_STAGING_TESTFLIGHT
-        lastPaywallTrialResult = nil
-        #endif
+        // Retain the staging outcome across relaunches/account switches so a
+        // tester can report the last attempt after leaving fresh onboarding.
         if configured { Superwall.shared.reset() }
     }
 

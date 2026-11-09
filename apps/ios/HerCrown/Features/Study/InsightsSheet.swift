@@ -27,7 +27,6 @@ struct InsightsSheet: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 0) {
-                    SheetControls(back: { dismiss() }, done: { dismiss() }).padding(.bottom, 20)
                     Image.illustration("open-book").resizable().scaledToFit().frame(width: 68, height: 58).accessibilityHidden(true)
                     VerseQuote(ref: ref, translation: translation).padding(.top, 8)
                     Divider().padding(.top, 26)
@@ -64,6 +63,7 @@ struct InsightsSheet: View {
                 }
                 .padding(24)
             }
+            .sheetControls(back: { dismiss() }, done: { dismiss() })
             .navigationDestination(for: StudyTool.self) { tool in
                 Group {
                     switch tool {
@@ -72,10 +72,7 @@ struct InsightsSheet: View {
                     case .related: RelatedVersesView(ref: ref, translation: translation) { r in dismiss(); onOpen(r) }
                     }
                 }
-                .safeAreaInset(edge: .top) {
-                    SheetControls(back: { if !path.isEmpty { path.removeLast() } }, done: { dismiss() })
-                        .padding(.horizontal, 24).background(Theme.canvas(scheme))
-                }
+                .sheetControls(back: { if !path.isEmpty { path.removeLast() } }, done: { dismiss() })
                 .toolbar(.hidden, for: .navigationBar)
                 .task { await Analytics.shared.track("study_opened", ["tool": .string(tool.rawValue)]) }
             }

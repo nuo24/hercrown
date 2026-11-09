@@ -1,9 +1,33 @@
+import AVFoundation
 import XCTest
 import UIKit
 import SwiftUI
 @testable import HerCrown
 
 final class PersonalPrayerTests: XCTestCase {
+    @MainActor
+    func testDemoAutoplaysAfterReadinessAndRewindsOnReentry() async throws {
+        let playback = DemoPlayback()
+        playback.setActive(true, autoplay: true)
+        for _ in 0..<80 {
+            if playback.player.currentTime().seconds > 0.2 { break }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        XCTAssertNil(playback.error)
+        XCTAssertGreaterThan(playback.player.currentTime().seconds, 0.2)
+        playback.setActive(false, autoplay: false)
+        XCTAssertEqual(playback.player.rate, 0)
+        await playback.player.seek(to: CMTime(seconds: 8, preferredTimescale: 600))
+        playback.setActive(true, autoplay: true)
+        for _ in 0..<80 {
+            let seconds = playback.player.currentTime().seconds
+            if seconds > 0 && seconds < 3 && playback.player.rate > 0 { break }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        XCTAssertGreaterThan(playback.player.rate, 0)
+        XCTAssertLessThan(playback.player.currentTime().seconds, 3)
+        playback.setActive(false, autoplay: false)
+    }
     func testDisplayQuotationsPreserveCanonicalWordsAndDoNotDoubleQuote() {
         let passage = "Come unto me, all ye that labour and are heavy laden, and I will give you rest."
         XCTAssertEqual(ScriptureQuotation.enclosing(passage), "“" + passage + "”")
