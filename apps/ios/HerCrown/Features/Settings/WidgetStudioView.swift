@@ -26,7 +26,7 @@ struct WidgetStudioView: View {
                     Text("Widget Studio").font(.serif(26))
                     Spacer()
                     Button("Done") { dismiss() }.font(.ui(14)).frame(minHeight: 44)
-                }.buttonStyle(.plain).padding(.horizontal, 16)
+                }.buttonStyle(.plain).padding(.horizontal, 22)
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity).background(Theme.canvas(scheme))
             .toolbar(.hidden, for: .navigationBar)

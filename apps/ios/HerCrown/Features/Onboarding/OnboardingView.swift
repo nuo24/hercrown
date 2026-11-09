@@ -148,6 +148,9 @@ struct OnboardingView: View {
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
         .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
+        .task(id: "paywall-\(step)-\(app.me?.user.id ?? "")") {
+            if step == 13 { Billing.shared.prepareOnboardingPaywall() }
+        }
         .task(id: prayerPreparation) {
             if let preparation = prayerPreparation { await preparePrayer(preparation) }
         }

@@ -80,7 +80,7 @@ struct VerseSnapshotView: View {
                 }
                 Spacer()
                 Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
-            }.padding(.horizontal, 20).padding(.top, 16).padding(.bottom, 14)
+            }.padding(.horizontal, 22).padding(.bottom, 14)
             GeometryReader { area in
                 let scale = max(0.01, min((area.size.width - 36) / 600, (area.size.height - 44) / design.height))
                 VStack(spacing: 8) {

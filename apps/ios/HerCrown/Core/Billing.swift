@@ -39,10 +39,10 @@ final class Billing: NSObject {
         #endif
         configured = true
         let options = SuperwallOptions()
+        // Preload only onboarding, once her final page is visible and identity is ready.
+        options.paywalls.shouldPreload = false
         #if HC_STAGING_TESTFLIGHT
         options.testModeBehavior = .never
-        // Load the paywall at presentation so sandbox testing starts with the current Apple session.
-        options.paywalls.shouldPreload = false
         #elseif DEBUG
         if UserDefaults.standard.bool(forKey: "hcPaywallDiagnostics") {
             // Exercise the Apple sandbox payment sheet during this diagnostic run.
@@ -67,6 +67,14 @@ final class Billing: NSObject {
         #if HC_STAGING_TESTFLIGHT
         lastPaywallTrialResult = "\(placement): \(outcome)"
         #endif
+    }
+
+    /// Warm the final onboarding paywall without presenting it or registering a placement.
+    /// Presentation still evaluates the current audience and verified subscription state.
+    func prepareOnboardingPaywall() {
+        guard configured, app?.me != nil, app?.membership.premium != true, !isPaywallBusy else { return }
+        Superwall.shared.setInterfaceStyle(to: .light)
+        Superwall.shared.preloadPaywalls(forPlacements: ["onboarding_complete"])
     }
 
     /// Shows the paywall campaign for this placement (onboarding_complete, study_explain, plan_start, settings…).
