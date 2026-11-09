@@ -91,7 +91,7 @@ All of these return 403 `premium_required` for free users. See [study-tools.md](
 
 | Call | Use |
 |---|---|
-| `GET /discover?filter=for-you\|plan\|Peace…&translation=` | Cards: verse (from our Bibles) + `reflection` (not Scripture), `saved`. `filters[]` gives the chip titles in order |
+| `GET /discover?filter=for-you\|plan\|Peace…&translation=` | Cards: verse in the selected enabled edition + `reflection` (not Scripture), `saved`. `filters[]` gives the chip titles in order. Licensed editions return up to 12 cards with `nextOffset`; request `offset=nextOffset` for more |
 
 ## Saved / library
 
@@ -138,3 +138,5 @@ Daily passage personalization: `/scripture/verse-of-the-day` rotates among curat
 
 #### Licensed online editions (2026-11-08)
 NKJV, MSG, AMP and NLT are fetched on demand through the Worker with `API_BIBLE_KEY`. Migration 0014 registers the provider IDs and publisher credits. Remote responses use `Cache-Control: no-store`; iOS retains at most six chapters in memory, without bundling or seeding copyrighted text. A verse bridge has optional `end` (e.g. verse 1/end 3), is shown once and is not split into invented verses. Study generation continues to use existing public-domain sources. Native-only mobile apps are exempt from FUMS reporting: https://docs.api.bible/resources/fair-use/. Web clients would need reporting.
+
+Licensed daily content: Home, Discover, devotional passage quotations and library snippets resolve NKJV/MSG/AMP/NLT through API.Bible when selected. Canonical refs remain stable for notes/saves, while `label` reports the actual provider verse bridge (e.g. Psalm 23:1–3). Provider errors are surfaced rather than silently substituting KJV. Devotional commentary and public-domain study grounding are unchanged; licensed passage text is never supplied to the model. The iOS offline session uses bundled KJV when the saved selection requires the network.

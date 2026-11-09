@@ -3,6 +3,7 @@
 import { badRequest, notFound, readJson } from "./http";
 import { preferencesRow, type SessionUser } from "./profile";
 import { parseRef, resolveVerse } from "./refs";
+import { textsFor } from "./content";
 import { refLabel } from "./scripture";
 
 const MAX_NOTE = 10_000;
@@ -15,19 +16,10 @@ const label = (ref: string) => {
   return refLabel(p.book, p.chapter, p.start, p.end);
 };
 
-/** Verse text in her reading translation (falls back to KJV for online-only translations). */
-async function verseTexts(env: Env, userId: string, refs: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
-  if (refs.length === 0) return out;
+/** Snippets use the same edition and intact bridge labels as Home and Discover. */
+async function verseTexts(env: Env, userId: string, refs: string[]) {
   const { translation } = await preferencesRow(env, userId);
-  const local = ["kjv", "bsb", "web"].includes(translation) ? translation : "kjv";
-  for (const ref of refs) {
-    const p = parseRef(ref)!;
-    const row = await env.DB.prepare("SELECT text FROM verses WHERE translation_id = ?1 AND book_id = ?2 AND chapter = ?3 AND verse = ?4")
-      .bind(local, p.book, p.chapter, p.start).first<{ text: string }>();
-    if (row) out.set(ref, row.text);
-  }
-  return out;
+  return refs.length ? textsFor(env, translation, refs) : new Map();
 }
 
 const before = (url: URL) => {
@@ -44,7 +36,7 @@ export async function listNotes(url: URL, env: Env, user: SessionUser) {
   ).bind(user.id, before(url), PAGE).all<{ ref: string; text: string; created_at: number; updated_at: number }>()).results;
   const texts = await verseTexts(env, user.id, rows.map((r) => r.ref));
   return Response.json({
-    notes: rows.map((r) => ({ ref: r.ref, label: label(r.ref), verse: texts.get(r.ref) ?? null, text: r.text, createdAt: r.created_at, updatedAt: r.updated_at })),
+    notes: rows.map((r) => ({ ref: r.ref, label: texts.get(r.ref)?.label ?? label(r.ref), verse: texts.get(r.ref)?.text ?? null, text: r.text, createdAt: r.created_at, updatedAt: r.updated_at })),
     nextBefore: rows.length === PAGE ? rows[rows.length - 1]!.updated_at : null,
   });
 }
@@ -118,7 +110,7 @@ export async function listSavedStudies(url: URL, env: Env, user: SessionUser) {
   ).bind(user.id, before(url), PAGE).all<{ ref: string; tool: string; saved_at: number }>()).results;
   const texts = await verseTexts(env, user.id, [...new Set(rows.map((r) => r.ref))]);
   return Response.json({
-    studies: rows.map((r) => ({ ref: r.ref, label: label(r.ref), verse: texts.get(r.ref) ?? null, tool: r.tool, savedAt: r.saved_at })),
+    studies: rows.map((r) => ({ ref: r.ref, label: texts.get(r.ref)?.label ?? label(r.ref), verse: texts.get(r.ref)?.text ?? null, tool: r.tool, savedAt: r.saved_at })),
     nextBefore: rows.length === PAGE ? rows[rows.length - 1]!.saved_at : null,
   });
 }
@@ -132,7 +124,7 @@ export async function listStudied(url: URL, env: Env, user: SessionUser) {
   const texts = await verseTexts(env, user.id, rows.map((r) => r.ref));
   return Response.json({
     studied: rows.map((r) => ({
-      ref: r.ref, label: label(r.ref), verse: texts.get(r.ref) ?? null,
+      ref: r.ref, label: texts.get(r.ref)?.label ?? label(r.ref), verse: texts.get(r.ref)?.text ?? null,
       tools: STUDY_TOOLS.filter((t) => r.tools.split(",").includes(t)), lastStudiedAt: r.last,
     })),
     nextBefore: rows.length === PAGE ? rows[rows.length - 1]!.last : null,

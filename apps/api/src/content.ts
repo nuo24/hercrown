@@ -6,6 +6,7 @@ import { badRequest, notFound, readJson } from "./http";
 import { preferencesRow, type SessionUser } from "./profile";
 import { resolveToday } from "./reading";
 import { parseRef } from "./refs";
+import { fetchRemoteChapter, type RemoteChapter } from "./apibible";
 import { refLabel } from "./scripture";
 import { dayOrdinal, isValidDay, localDayIn } from "./streak";
 
@@ -19,16 +20,44 @@ const byRef = new Map(CARDS.map((c) => [c.ref, c]));
 const hash = (s: string) => [...s].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
 export const VOTD_POOL = [...CARDS.map((c) => c.ref), ...verses.verseOfTheDayExtra].sort((a, b) => hash(a) - hash(b) || a.localeCompare(b));
 
-/** Her reading translation if it's one we have offline, else KJV. An explicit ?translation= wins. */
+/** Preserve the selected enabled edition; never silently substitute KJV for a licensed passage. */
 async function translationFor(env: Env, user: SessionUser, url: URL) {
   const requested = url.searchParams.get("translation") ?? (await preferencesRow(env, user.id)).translation;
-  return LOCAL.has(requested) ? requested : "kjv";
+  return LOCAL.has(requested) || ["nkjv", "msg", "amp", "nlt"].includes(requested) ? requested : "kjv";
 }
 
 /** Text for many references, 24 per query (D1 allows 100 bound values; 4 per reference). Passages are joined with spaces. */
-export async function textsFor(env: Env, translation: string, refs: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
+export interface PassageContent { text: string; label: string; copyright?: string | null }
+export function remotePassage(content: RemoteChapter, ref: string): PassageContent | undefined {
+  const p = parseRef(ref);
+  if (!p) return;
+  const matching = content.verses.filter(v => v.verse <= p.end && (v.end ?? v.verse) >= p.start);
+  if (!matching.length) return;
+  return { text: matching.map(v => v.text).join(" "),
+    label: refLabel(p.book, p.chapter, matching[0]!.verse, matching.at(-1)!.end ?? matching.at(-1)!.verse), copyright: content.copyright };
+}
+export async function textsFor(env: Env, translation: string, refs: string[]): Promise<Map<string, PassageContent>> {
+  const out = new Map<string, PassageContent>();
   const parsed = [...new Set(refs)].map((ref) => ({ ref, p: parseRef(ref)! })).filter((x) => x.p);
+  if (!LOCAL.has(translation)) {
+    const t = await env.DB.prepare("SELECT provider_bible_id FROM translations WHERE id = ?1 AND enabled = 1 AND provider = 'api_bible'")
+      .bind(translation).first<{ provider_bible_id: string }>();
+    if (!t?.provider_bible_id) throw notFound("Translation is not enabled");
+    // Deduplicate chapters within this response; at most four provider requests in flight.
+    const chapters = [...new Set(parsed.map(({ p }) => `${p.book}.${p.chapter}`))];
+    const loaded = new Map<string, RemoteChapter>();
+    for (let i = 0; i < chapters.length; i += 4) {
+      await Promise.all(chapters.slice(i, i + 4).map(async key => {
+        const [book, number] = key.split(".");
+        loaded.set(key, await fetchRemoteChapter(env, t.provider_bible_id, book!, Number(number)));
+      }));
+    }
+    for (const { ref, p } of parsed) {
+      const passage = remotePassage(loaded.get(`${p.book}.${p.chapter}`)!, ref);
+      if (passage) out.set(ref, passage);
+    }
+    return out;
+  }
   for (let i = 0; i < parsed.length; i += 24) {
     const chunk = parsed.slice(i, i + 24);
     const where = chunk.map((_, j) => `(book_id = ?${j * 4 + 2} AND chapter = ?${j * 4 + 3} AND verse BETWEEN ?${j * 4 + 4} AND ?${j * 4 + 5})`).join(" OR ");
@@ -36,7 +65,7 @@ export async function textsFor(env: Env, translation: string, refs: string[]): P
       .bind(translation, ...chunk.flatMap(({ p }) => [p.book, p.chapter, p.start, p.end])).all<{ book_id: string; chapter: number; verse: number; text: string }>();
     for (const { ref, p } of chunk) {
       const text = rows.results.filter((r) => r.book_id === p.book && r.chapter === p.chapter && r.verse >= p.start && r.verse <= p.end).map((r) => r.text).join(" ");
-      if (text) out.set(ref, text);
+      if (text) out.set(ref, { text, label: label(ref) });
     }
   }
   return out;
@@ -63,7 +92,7 @@ async function verseCard(env: Env, translation: string, ref: string, userId: str
     env.DB.prepare("SELECT 1 FROM saved_passages WHERE user_id = ?1 AND ref = ?2").bind(userId, ref).first(),
   ]);
   const card = byRef.get(ref);
-  return { ref, label: label(ref), text: text.get(ref) ?? null, translation, theme: card?.theme ?? null, reflection: card?.reflection ?? null, saved: Boolean(saved) };
+  return { ref, label: text.get(ref)?.label ?? label(ref), text: text.get(ref)?.text ?? null, copyright: text.get(ref)?.copyright ?? null, translation, theme: card?.theme ?? null, reflection: card?.reflection ?? null, saved: Boolean(saved) };
 }
 
 /** GET /scripture/verse-of-the-day?date=YYYY-MM-DD&translation= (date defaults to her today). */
@@ -127,15 +156,18 @@ export async function getDiscover(url: URL, env: Env, user: SessionUser) {
     throw badRequest(`filter must be for-you, plan, or one of: ${THEMES.join(", ")}`);
   }
 
+  const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset")) || 0));
+  const nextOffset = !LOCAL.has(translation) && offset + 12 < chosen.length ? offset + 12 : null;
+  if (!LOCAL.has(translation)) chosen = chosen.slice(offset, offset + 12);
   const [texts, saved] = await Promise.all([
     textsFor(env, translation, chosen.map((c) => c.ref)),
     env.DB.prepare("SELECT ref FROM saved_passages WHERE user_id = ?1").bind(user.id).all<{ ref: string }>(),
   ]);
   const savedRefs = new Set(saved.results.map((r) => r.ref));
   return Response.json({
-    filter, filters: filters(plan), translation, plan,
+    filter, filters: filters(plan), translation, plan, nextOffset,
     cards: chosen.filter((c) => texts.has(c.ref)).map((c) => ({
-      id: c.ref, ref: c.ref, label: label(c.ref), theme: c.theme, text: texts.get(c.ref)!, reflection: c.reflection, saved: savedRefs.has(c.ref),
+      id: c.ref, ref: c.ref, label: texts.get(c.ref)!.label, theme: c.theme, text: texts.get(c.ref)!.text, copyright: texts.get(c.ref)!.copyright ?? null, reflection: c.reflection, saved: savedRefs.has(c.ref),
     })),
   });
 }
@@ -157,7 +189,7 @@ async function devotionalJson(env: Env, user: SessionUser, url: URL, row: Devoti
     env.DB.prepare("SELECT read_at FROM devotional_reads WHERE user_id = ?1 AND devotional_id = ?2").bind(user.id, row.id).first<{ read_at: number }>(),
   ]);
   return {
-    id: row.id, title: row.title, ref: row.ref, label: label(row.ref), passage: texts.get(row.ref) ?? null, translation,
+    id: row.id, title: row.title, ref: row.ref, label: texts.get(row.ref)?.label ?? label(row.ref), passage: texts.get(row.ref)?.text ?? null, copyright: texts.get(row.ref)?.copyright ?? null, translation,
     tag: row.tag, minutes: row.minutes, body: row.body, reflection: row.reflection,
     origin: row.origin, // "ai-draft-reviewed": drafted with AI from the cited commentaries, then approved by our team
     sources: JSON.parse(row.sources) as string[], readAt: read?.read_at ?? null,

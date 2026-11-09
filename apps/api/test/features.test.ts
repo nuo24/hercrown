@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { VOTD_POOL, verseOfTheDayRef } from "../src/content";
+import { VOTD_POOL, verseOfTheDayRef, remotePassage, textsFor, getDiscover, getVerseOfTheDay, getTodaysDevotional } from "../src/content";
 import { markdownToHtml } from "../src/legal";
 import { weeksInARow } from "../src/progress";
 import { moveUserData } from "../src/users";
@@ -291,5 +291,40 @@ describe("account deletion", () => {
     for (const table of ["verse_notes", "chapter_completions", "app_open_days", "support_requests", "study_history", "preferences"]) {
       expect(await env.DB.prepare(`SELECT count(*) AS n FROM ${table} WHERE user_id = ?1`).bind(userId).first(), table).toEqual({ n: 0 });
     }
+  });
+});
+
+
+describe("selected licensed passages", () => {
+  it("keeps the complete provider bridge and its actual range", () => {
+    const result = remotePassage({ verses: [{ verse: 1, end: 3, text: "Provider bridge fixture." }, { verse: 4, text: "Next fixture." }], copyright: "© Fixture", fumsToken: null }, "PSA.23.2");
+    expect(result).toEqual({ text: "Provider bridge fixture.", label: "Psalm 23:1–3", copyright: "© Fixture" });
+  });
+  it("deduplicates chapter fetches and never silently substitutes KJV on provider failure", async () => {
+    const spy = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ data: { copyright: "© Fixture", content: [{ type: "text", text: "Provider bridge fixture.", attrs: { verseId: "PSA.23.1-PSA.23.3" } }] } }));
+    const result = await textsFor({ ...env, API_BIBLE_KEY: "fixture-key" }, "msg", ["PSA.23.1", "PSA.23.2"]);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(result.get("PSA.23.2")?.label).toBe("Psalm 23:1–3");
+    spy.mockResolvedValue(new Response("busy", { status: 429 }));
+    await expect(textsFor({ ...env, API_BIBLE_KEY: "fixture-key" }, "nlt", ["PSA.23.1"])).rejects.toMatchObject({ status: 503 });
+  });
+});
+
+
+describe("licensed editions across daily content", () => {
+  it.each(["nkjv", "msg", "amp", "nlt"])("uses %s in Home, Discover and the devotional", async edition => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async input => {
+      const chapter = String(input).match(/chapters\/([A-Z0-9]+)\.(\d+)/)!;
+      return Response.json({ data: { copyright: "© Fixture", content: Array.from({ length: 180 }, (_, i) => ({ type: "text", text: `Provider fixture ${i + 1}.`, attrs: { verseId: `${chapter[1]}.${chapter[2]}.${i + 1}` } })) } });
+    });
+    const user = { id: userId } as Parameters<typeof getDiscover>[2];
+    const remoteEnv = { ...env, API_BIBLE_KEY: "fixture-key" };
+    const home = await (await getVerseOfTheDay(new URL(`https://test/scripture/verse-of-the-day?translation=${edition}`), remoteEnv, user)).json<any>();
+    expect(home.translation).toBe(edition); expect(home.text).toContain("Provider fixture");
+    const feed = await (await getDiscover(new URL(`https://test/discover?translation=${edition}`), remoteEnv, user)).json<any>();
+    expect(feed.translation).toBe(edition); expect(feed.cards).toHaveLength(12); expect(feed.nextOffset).toBe(12);
+    expect(feed.cards.every((c: any) => c.text.startsWith("Provider fixture") && c.copyright === "© Fixture")).toBe(true);
+    const devotional = await (await getTodaysDevotional(new URL(`https://test/devotionals/today?translation=${edition}`), remoteEnv, user)).json<any>();
+    expect(devotional.translation).toBe(edition); expect(devotional.passage).toContain("Provider fixture");
   });
 });

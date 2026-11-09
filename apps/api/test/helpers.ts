@@ -11,7 +11,7 @@ export function api(path: string, init: RequestInit & { token?: string } = {}) {
 
 /** Signs in as a new guest and returns the bearer token and user id. */
 export async function signInGuest() {
-  const res = await api("/api/auth/sign-in/anonymous", { method: "POST", body: "{}" });
+  const res = await api("/api/auth/sign-in/anonymous", { method: "POST", body: "{}", headers: { "cf-connecting-ip": `test-${crypto.randomUUID()}` } });
   if (res.status !== 200) throw new Error(`guest sign-in failed: ${res.status} ${await res.text()}`);
   const token = res.headers.get("set-auth-token");
   if (!token) throw new Error("no set-auth-token header");
