@@ -127,10 +127,14 @@ struct AIStudyView: View {
     }
 
     private func section(_ title: String, _ body: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.ui(15, weight: .semibold)).accessibilityAddTraits(.isHeader)
-            CitedText(text: body).font(.ui(14)).lineSpacing(6)
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title).font(.ui(12, weight: .semibold)).tracking(0.5)
+                .foregroundStyle(Theme.muted(scheme)).accessibilityAddTraits(.isHeader)
+            CitedText(text: body).font(.ui(15)).lineSpacing(7)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
     }
 
     /// While streaming: "## Title\nbody…" → (title, body) pairs as they arrive.

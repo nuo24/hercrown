@@ -1,7 +1,7 @@
 import AVFoundation
 import SwiftUI
 
-/// Native playback of the supplied recording, with an explicit control when autoplay is suppressed.
+/// Native playback of the supplied recording, without visible playback controls. Reduce Motion keeps it paused.
 struct OnboardingDemoView: View {
     let reducedMotion: Bool
     let isActive: Bool
@@ -22,15 +22,6 @@ struct OnboardingDemoView: View {
                 }
             if let error = playback.error {
                 Text(error).font(.ui(11)).padding(12).frame(maxWidth: .infinity).background(.white)
-            } else {
-                Button {
-                    if playback.playing { playback.pause() } else { playback.play() }
-                } label: {
-                    Image(systemName: playback.playing ? "pause.fill" : "play.fill")
-                        .font(.system(size: 13)).frame(width: 44, height: 44)
-                        .background(.regularMaterial, in: Circle())
-                }.buttonStyle(.plain).padding(5)
-                    .accessibilityLabel(playback.playing ? "Pause demonstration" : "Play demonstration")
             }
         }
         .onAppear { playback.setActive(isActive, autoplay: !reducedMotion) }

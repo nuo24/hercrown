@@ -16,6 +16,7 @@ struct OnboardingView: View {
     @State private var settled = false
     @State private var artVisible = false
     @State private var prayerTitleFinished = false
+    @State private var prayerTitleRevealed = 0
     @State private var prayerErrorMessage = ""
     @State private var prayerRequest: UUID?
     @State private var prayer = ""
@@ -31,6 +32,7 @@ struct OnboardingView: View {
     @State private var reminderTime = DailyReminder.time(from: "08:00")
     @State private var reminderDenied = false
     @State private var finishing = false
+    @State private var awaitingPaywall = false
     @State private var saveError = false
     @FocusState private var textFocused: Bool
 
@@ -117,7 +119,7 @@ struct OnboardingView: View {
                                 else if step == 11 { prayerPage }
                                 else if step == 2 { demoPage(height: page.size.height) }
                                 else {
-                                    HStack(spacing: 16) {
+                                    HStack(alignment: .top, spacing: 16) {
                                         animatedText(title).font(.serif(28.8)).tracking(-1).lineSpacing(0)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                         if step != 2 { Image.illustration(art).resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion)).accessibilityHidden(true) }
@@ -127,13 +129,13 @@ struct OnboardingView: View {
                                     pageContent.opacity(settled ? 1 : 0).allowsHitTesting(settled)
                                 }
                                 if step == 11 { Color.clear.frame(height: 18).id("prayer-bottom") }
-                            }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, isTextPage ? 20 : 4)
+                            }.frame(maxWidth: .infinity, alignment: .leading).padding(.top, 20)
                         }
                         .scrollBounceBehavior(.basedOnSize)
                         .scrollIndicators(.hidden)
                         .clipped()
                         .onChange(of: revealed) { _, count in
-                            if step == 11 && !loadingPrayer && count % 8 == 0 { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
+                            if step == 11 && prayerRevealing && !loadingPrayer && count % 8 == 0 { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
                         }
                         .onChange(of: settled) { _, done in
                             if step == 11 && done { prayerScroll.scrollTo("prayer-bottom", anchor: .bottom) }
@@ -262,7 +264,7 @@ struct OnboardingView: View {
 
     private var prayerPage: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 animatedText(title)
                     .font(.serif(28.8)).tracking(-1).frame(maxWidth: .infinity, alignment: .leading)
                 Image.illustration("faith-hands").resizable().scaledToFit().frame(width: 82, height: 90).modifier(OnboardingArtReveal(visible: artVisible, reducedMotion: reduceMotion))
@@ -341,7 +343,12 @@ struct OnboardingView: View {
         }.accessibilityAddTraits(selected ? .isSelected : [])
     }
     private func animatedText(_ text: String) -> Text {
-        let visible = settled || reduceMotion || (step == 11 && prayerTitleFinished && text == title) ? text.count : min(revealed, text.count)
+        let visible: Int
+        if step == 11 && text == title && !showingAcknowledgement {
+            visible = reduceMotion || prayerTitleFinished ? text.count : min(prayerTitleRevealed, text.count)
+        } else {
+            visible = settled || reduceMotion ? text.count : min(revealed, text.count)
+        }
         let warning = step == 1 && !bridge ? text.range(of: "10 years of your life") : nil
         return text.enumerated().reduce(Text("")) { result, entry in
             let index = text.index(text.startIndex, offsetBy: entry.offset)
@@ -364,10 +371,10 @@ struct OnboardingView: View {
         if step == 3 { answers.name = name }
         if step == 11, !prayer.isEmpty { PersonalPrayerStore.save(prayer, userID: app.me?.user.id) }
         acknowledgement = skipping ? "" : response(for: step)
-        settled = false; artVisible = false; prayerTitleFinished = false; prayerRevealing = false; revealed = 0; bridge = false
+        settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerRevealing = false; revealed = 0; bridge = false; step = max(0, step - 1) }
+    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; step = max(0, step - 1) }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."
@@ -395,6 +402,7 @@ struct OnboardingView: View {
             elapsed += prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : 48
             try await clock.sleep(until: start.advanced(by: .milliseconds(elapsed)))
             try Task.checkCancellation(); revealed = count
+            if step == 11 && !prayer && !showingAcknowledgement { prayerTitleRevealed = count }
             if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
                 feedback.impactOccurred(intensity: prayer ? 0.5 : 0.7)
                 feedback.prepare()
@@ -481,7 +489,7 @@ struct OnboardingView: View {
     }
     private func complete(guest: Bool) async {
         guard !finishing else { return }; finishing = true
-        defer { finishing = false }
+        defer { if !awaitingPaywall { finishing = false } }
         if !guest, !name.isEmpty, app.displayName != name {
             do { try await app.updateProfile(displayName: name, bio: app.me?.profile.bio ?? "") }
             catch { saveError = true; return }
@@ -501,10 +509,22 @@ struct OnboardingView: View {
             do { _ = try await app.api.send("PATCH", "/me/preferences", json: patch) }
             catch { saveError = true; return }
         }
-        await app.completeOnboarding()
-        await OnboardingNotificationTest.scheduleIfAllowed()
-        if guest { if let id = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: id) } }
-        else { app.presentPaywall(placement: "onboarding_complete") }
+        if guest {
+            await app.completeOnboarding()
+            await OnboardingNotificationTest.scheduleIfAllowed()
+            if let id = app.me?.user.id { await Billing.shared.scheduleReturnOffer(for: id) }
+        } else {
+            // Present over the final onboarding page. Only reveal the reader after dismissal,
+            // purchase, or a skipped/failed campaign, rather than flashing it during loading.
+            awaitingPaywall = true
+            app.presentPaywall(placement: "onboarding_complete", onComplete: {
+                Task { @MainActor in
+                    await app.completeOnboarding()
+                    awaitingPaywall = false; finishing = false
+                    await OnboardingNotificationTest.scheduleIfAllowed()
+                }
+            })
+        }
     }
     static func hhmm(_ date: Date) -> String { let c = Calendar.current.dateComponents([.hour, .minute], from: date); return String(format: "%02d:%02d", c.hour ?? 8, c.minute ?? 0) }
 }

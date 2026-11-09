@@ -154,9 +154,9 @@ struct DiscoverView: View {
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .sheet(item: $detail, onDismiss: openDetailAction) { card in
             if let ref = VerseRef(card.ref) {
-                ReflectionSheet(ref: ref, translation: feed?.translation ?? translation, autofocus: false,
-                    onStudy: { pendingDetailAction = .study(ref); detail = nil },
-                    onComplete: { [accountKey] in markStudied(card.ref, accountKey: accountKey); detail = nil })
+                InsightsSheet(ref: ref, translation: feed?.translation ?? translation,
+                    initialTool: app.membership.premium ? .deeper : nil) { app.openInReader($0) }
+                    .presentationDetents([.large])
             }
         }
         .sheet(item: $studyRef) { ref in

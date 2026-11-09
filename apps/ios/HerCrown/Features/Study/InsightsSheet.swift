@@ -9,13 +9,19 @@ struct InsightsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
     @State private var widgetSet = false
-    @State private var path: [StudyTool] = {
+    @State private var path: [StudyTool]
+
+    init(ref: VerseRef, translation: String, initialTool: StudyTool? = nil, onOpen: @escaping (VerseRef) -> Void) {
+        self.ref = ref
+        self.translation = translation
+        self.onOpen = onOpen
         #if DEBUG
-        // Review switch: `-hcOpenStudy explain|deeper|original|related` opens that tool directly.
-        if let tool = UserDefaults.standard.string(forKey: "hcOpenStudy").flatMap(StudyTool.init) { return [tool] }
+        let reviewTool = UserDefaults.standard.string(forKey: "hcOpenStudy").flatMap(StudyTool.init)
+        _path = State(initialValue: (reviewTool ?? initialTool).map { [$0] } ?? [])
+        #else
+        _path = State(initialValue: initialTool.map { [$0] } ?? [])
         #endif
-        return []
-    }()
+    }
 
     var body: some View {
         NavigationStack(path: $path) {
