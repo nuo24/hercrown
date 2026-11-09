@@ -209,6 +209,14 @@ describe("online translations (API.Bible)", () => {
     ], "PSA", 23)).toEqual([{ verse: 1, end: 3, text: "Provider bridge fixture." }, { verse: 4, text: "Next fixture." }]);
   });
 
+  it("retains MSG lettered bridge endpoints and extends merged numeric spans", () => {
+    expect(versesFromContent([
+      { type: "text", text: "First fixture.", attrs: { verseId: "PSA.4.6-PSA.4.7a" } },
+      { type: "text", text: "Second fixture.", attrs: { verseId: "PSA.4.7a" } },
+      { type: "text", text: " More fixture.", attrs: { verseId: "PSA.4.7b-PSA.4.8" } },
+    ], "PSA", 4)).toEqual([{ verse: 6, end: 7, text: "First fixture." }, { verse: 7, end: 8, text: "Second fixture. More fixture." }]);
+  });
+
   it("assembles verse text and skips notes", () => {
     expect(versesFromContent(content, "PSA", 23)).toEqual([
       { verse: 1, text: "The Lord is my shepherd; I have all that I need." },

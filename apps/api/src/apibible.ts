@@ -30,10 +30,14 @@ export function versesFromContent(content: ContentNode[], book: string, chapter:
       const id = node.attrs?.verseId;
       if (node.type === "text" && node.text && id?.startsWith(prefix)) {
         const range = id.slice(prefix.length).split("-");
-        const n = Number(range[0]);
-        const end = range[1] ? Number(range[1].startsWith(prefix) ? range[1].slice(prefix.length) : range[1]) : undefined;
+        // MSG can split bridge endpoints as 7a/7b. Keep the full supplied group,
+        // mapping its numeric span for reader navigation rather than dropping that text.
+        const verseNumber = (value: string) => /^\d+[a-z]?$/i.test(value) ? Number(value.replace(/[a-z]$/i, "")) : NaN;
+        const n = verseNumber(range[0]!);
+        const end = range[1] ? verseNumber(range[1].startsWith(prefix) ? range[1].slice(prefix.length) : range[1]) : undefined;
         if (Number.isInteger(n) && n > 0 && (end === undefined || (Number.isInteger(end) && end >= n))) {
           const group = byVerse.get(n) ?? { end, parts: [] };
+          if (end !== undefined) group.end = Math.max(group.end ?? n, end);
           group.parts.push(node.text); byVerse.set(n, group); lastVerse = n;
         }
       }
