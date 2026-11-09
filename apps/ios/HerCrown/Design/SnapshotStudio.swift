@@ -54,7 +54,8 @@ struct VerseSnapshotView: View {
     @State private var selected: UUID?
     @State private var tab = "Background"
     @State private var expanded = false
-    @GestureState private var drawerDrag: CGFloat = 0
+    @State private var drawerDragHeight: CGFloat?
+    @State private var drawerDragOrigin: CGFloat?
     @FocusState private var captionFocused: Bool
     @State private var studioHeight: CGFloat = 800
     @State private var rendered: UIImage?
@@ -155,23 +156,37 @@ struct VerseSnapshotView: View {
     }
     private var tools: some View {
         VStack(spacing: 0) {
-            Button { withAnimation(.easeInOut(duration: 0.25)) { expanded.toggle() } } label: {
-                VStack(spacing: 4) {
-                    Capsule().fill(Theme.muted(scheme).opacity(0.4)).frame(width: 33, height: 4)
-                    Text(expanded ? "Slide down to arrange" : "Swipe up for tools").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
-                }.frame(maxWidth: .infinity).frame(height: 44)
-            }.accessibilityLabel(expanded ? "Collapse design tools" : "Expand design tools")
-                .simultaneousGesture(DragGesture(minimumDistance: 8)
-                    .updating($drawerDrag) { value, state, _ in state = -value.translation.height }
-                    .onEnded { value in
-                        let upward = -value.predictedEndTranslation.height
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            if abs(upward) > 30 { expanded = upward > 0; if !expanded { captionFocused = false } }
-                        }
-                    })
-                .accessibilityAdjustableAction { direction in
-                    withAnimation { expanded = direction == .increment }
+            VStack(spacing: 4) {
+                Capsule().fill(Theme.muted(scheme).opacity(0.4)).frame(width: 33, height: 4)
+                Text(expanded ? "Slide down to arrange" : "Swipe up for tools")
+                    .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+            }
+            .frame(maxWidth: .infinity).frame(height: 48).contentShape(Rectangle())
+            // Global coordinates remain fixed as the drawer moves under the finger. A local
+            // translation changes its own origin during layout and makes this handle jerk.
+            .gesture(DragGesture(minimumDistance: 2, coordinateSpace: .global)
+                .onChanged { value in
+                    if drawerDragOrigin == nil { drawerDragOrigin = expanded ? trayHeight : 0 }
+                    var transaction = Transaction(); transaction.disablesAnimations = true
+                    withTransaction(transaction) {
+                        drawerDragHeight = min(trayHeight, max(0, (drawerDragOrigin ?? 0) - value.translation.height))
+                    }
                 }
+                .onEnded { value in
+                    let projected = (drawerDragOrigin ?? (expanded ? trayHeight : 0)) - value.predictedEndTranslation.height
+                    withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.88)) {
+                        expanded = projected > trayHeight * 0.45
+                        drawerDragHeight = nil; drawerDragOrigin = nil
+                        if !expanded { captionFocused = false }
+                    }
+                })
+            .onTapGesture { withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.88)) { expanded.toggle() } }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Design tools drawer")
+            .accessibilityValue(expanded ? "Expanded" : "Collapsed")
+            .accessibilityAdjustableAction { direction in
+                withAnimation { expanded = direction == .increment }
+            }
             HStack(spacing: 0) {
                 ForEach(["Background", "Text", "Illustrations"], id: \.self) { name in
                     Button { tab = name; expanded = true } label: {
@@ -181,7 +196,7 @@ struct VerseSnapshotView: View {
                     }
                 }
             }.padding(.horizontal, 12).padding(.bottom, 8)
-            if expanded || drawerDrag > 0 {
+            Group {
                 Divider()
                 ScrollViewReader { reader in
                 ScrollView {
@@ -209,7 +224,7 @@ struct VerseSnapshotView: View {
                     .onChange(of: captionFocused) { _, focused in
                         if focused { withAnimation { reader.scrollTo("studio-caption", anchor: .bottom) } }
                     }
-                }.frame(height: max(0, min(trayHeight, (expanded ? trayHeight : 0) + drawerDrag)))
+                }.frame(height: drawerDragHeight ?? (expanded ? trayHeight : 0))
                     .clipped()
             }
         }.background(Theme.canvas(scheme)).clipShape(UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24))
