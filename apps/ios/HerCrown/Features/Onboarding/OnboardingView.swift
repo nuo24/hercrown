@@ -443,6 +443,9 @@ struct OnboardingView: View {
                 withAnimation(.easeOut(duration: 0.35)) { acknowledgementOpacity = 0 }
                 try await Task.sleep(for: .milliseconds(350))
             }
+            // Reset before mounting the question: the artwork entrance awaits before
+            // type(title), so the acknowledgement's count would briefly reveal it.
+            revealed = 0
             showingAcknowledgement = false
             acknowledgement = ""
             if step == 11 {

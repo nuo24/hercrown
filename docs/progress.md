@@ -483,3 +483,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - Clean archive source `348121c6e43c4e6f42ae61026041edb0617b7ad3` at `/private/tmp/hercrown-build24-source`; Release + HC_STAGING_TESTFLIGHT archive `/private/tmp/hercrown-build24/HerCrown.xcarchive`. Verified Info.plist version 1.0 (24). Xcode Organizer confirmed successful upload after owner unlocked the Mac.
 - Apple build `a2296ad6-d813-4268-9b6a-3d49cd048e26` processed VALID, APP_STORE_ELIGIBLE. Build-specific test notes saved, tester notifications enabled and existing internal/external Beta groups assigned. Submitted beta review; final API status internal IN_BETA_TESTING and external IN_BETA_TESTING. No production deployment or App Store release.
+
+### Nov 9: fix question flash after acknowledgement
+
+- Build 24's illustration entrance introduced a 220 ms wait between replacing an acknowledgement with the next question and resetting the typing character count. The acknowledgement's old count could briefly reveal the question before typing restarted. Reset the count before mounting the question; keep the illustration entrance and aligned heading layout.
+- Verification: npm run check and all 198 API tests passed; all 24 native tests passed. Corrected app launched and its onboarding question screen was inspected in the simulator. Interactive acknowledgement-transition verification was interrupted when the Mac locked, so that visual check remains pending. This correction is local, not in the installed TestFlight build 24; no new archive/upload or production changes.
