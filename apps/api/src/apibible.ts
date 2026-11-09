@@ -1,10 +1,10 @@
 // API.Bible client for licensed online translations. Text is fetched per request and not stored.
-// FUMS v3: every response carries a fumsToken that the app must report when it shows the text
-// (GET https://fums.api.bible/f3 with device/session ids). See docs.api.bible "Fair use".
+// Native mobile-only apps are exempt from FUMS reporting under API.Bible Fair Use.
+// Preserve the token for any future web client; publisher attribution remains required.
 import { HttpError } from "./http";
 
 export interface RemoteChapter {
-  verses: { verse: number; text: string }[];
+  verses: { verse: number; end?: number; text: string }[];
   copyright: string | null;
   fumsToken: string | null;
 }
@@ -21,15 +21,20 @@ const unavailable = (message: string) => new HttpError(503, "translation_unavail
 
 /** Collects text per verse from API.Bible's JSON content tree. Notes are skipped. */
 export function versesFromContent(content: ContentNode[], book: string, chapter: number) {
-  const byVerse = new Map<number, string[]>();
+  const byVerse = new Map<number, { end?: number; parts: string[] }>();
   const prefix = `${book}.${chapter}.`;
   const walk = (nodes: ContentNode[]) => {
     for (const node of nodes) {
       if (node.name === "note") continue;
       const id = node.attrs?.verseId;
       if (node.type === "text" && node.text && id?.startsWith(prefix)) {
-        const n = Number(id.slice(prefix.length));
-        if (Number.isInteger(n)) (byVerse.get(n) ?? byVerse.set(n, []).get(n)!).push(node.text);
+        const range = id.slice(prefix.length).split("-");
+        const n = Number(range[0]);
+        const end = range[1] ? Number(range[1].startsWith(prefix) ? range[1].slice(prefix.length) : range[1]) : undefined;
+        if (Number.isInteger(n) && n > 0 && (end === undefined || (Number.isInteger(end) && end >= n))) {
+          const group = byVerse.get(n) ?? { end, parts: [] };
+          group.parts.push(node.text); byVerse.set(n, group);
+        }
       }
       if (node.items) walk(node.items);
     }
@@ -37,7 +42,7 @@ export function versesFromContent(content: ContentNode[], book: string, chapter:
   walk(content);
   return [...byVerse.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([verse, parts]) => ({ verse, text: parts.join("").replace(/\s+/g, " ").trim() }))
+    .map(([verse, { end, parts }]) => ({ verse, ...(end && end > verse ? { end } : {}), text: parts.join("").replace(/\s+/g, " ").trim() }))
     .filter((v) => v.text);
 }
 

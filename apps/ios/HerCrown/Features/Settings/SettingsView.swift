@@ -103,9 +103,9 @@ struct SettingsView: View {
                             sectionTitle("Bible text")
                             group {
                                 formRow("character.book.closed", "Translation") {
-                                    selectMenu(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][app.preferences.translation] ?? "King James Version",
-                                               ["King James Version", "Berean Standard Bible", "World English Bible"]) { v in
-                                        let id = ["King James Version": "kjv", "Berean Standard Bible": "bsb", "World English Bible": "web"][v] ?? "kjv"
+                                    selectMenu(BibleStore.names[app.preferences.translation] ?? "King James Version",
+                                               BibleStore.translationIDs.compactMap { BibleStore.names[$0] }) { v in
+                                        let id = BibleStore.translationIDs.first { BibleStore.names[$0] == v } ?? "kjv"
                                         app.updatePreferences(["translation": id]) { $0.translation = id }
                                     }
                                 }

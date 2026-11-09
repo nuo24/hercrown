@@ -14,11 +14,12 @@ const get = async (path: string) => {
 describe("catalog", () => {
   it("lists KJV, BSB and WEB as bundled offline translations", async () => {
     const { body } = await get("/scripture/translations");
-    expect(body.translations.map((t: any) => [t.id, t.abbreviation, t.availability, t.license])).toEqual([
+    expect(body.translations.filter((t: any) => t.availability === "bundled").map((t: any) => [t.id, t.abbreviation, t.availability, t.license])).toEqual([
       ["kjv", "KJV", "bundled", "Public Domain"],
       ["bsb", "BSB", "bundled", "Public Domain"],
       ["web", "WEB", "bundled", "Public Domain"],
     ]);
+    expect(body.translations.filter((t: any) => t.availability === "remote").map((t: any) => t.id)).toEqual(["nkjv", "msg", "amp", "nlt"]);
     expect(body.translations[2].attribution).toMatch(/trademark of eBible\.org/);
   });
 
@@ -192,6 +193,14 @@ describe("online translations (API.Bible)", () => {
       { type: "text", text: "He lets me rest.", attrs: { verseId: "PSA.23.2" } },
     ] },
   ];
+
+  it("preserves provider verse bridges without splitting or repeating text", () => {
+    expect(versesFromContent([
+      { type: "text", text: "Provider bridge ", attrs: { verseId: "PSA.23.1-PSA.23.3" } },
+      { type: "text", text: "fixture.", attrs: { verseId: "PSA.23.1-PSA.23.3" } },
+      { type: "text", text: "Next fixture.", attrs: { verseId: "PSA.23.4" } },
+    ], "PSA", 23)).toEqual([{ verse: 1, end: 3, text: "Provider bridge fixture." }, { verse: 4, text: "Next fixture." }]);
+  });
 
   it("assembles verse text and skips notes", () => {
     expect(versesFromContent(content, "PSA", 23)).toEqual([

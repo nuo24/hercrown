@@ -37,6 +37,21 @@ struct ReaderView: View {
                 .padding(.leading, 10)
             toolbar
         }
+        .overlay {
+            if model.loading || model.failure != nil {
+                ZStack {
+                    AppGradient()
+                    VStack(spacing: 16) {
+                        if model.loading { ProgressView("Loading translation…") }
+                        else {
+                            Text(model.failure ?? "Unable to load translation").font(.ui(14)).multilineTextAlignment(.center)
+                            Button("Try again") { model.retry() }
+                            Button("Read KJV offline") { model.setTranslation("kjv") }
+                        }
+                    }.padding(32)
+                }
+            }
+        }
         .sheet(isPresented: $showingChapters) {
             ChapterPicker(current: model.chapter) { book, number in jump(to: VerseRef(book: book, chapter: number, verse: 1)); showingChapters = false }
                 .presentationDetents([.large])
@@ -49,7 +64,7 @@ struct ReaderView: View {
         .sheet(item: $reflectRef) { ref in
             ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.large])
         }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
+        .sheet(isPresented: $showingSaved) { SavedSheet(translation: BibleStore.offline[model.translation] == nil ? "kjv" : model.translation) }
         .sheet(isPresented: $showingBookmarks) {
             ReaderBookmarks(current: model.currentRef) { ref in
                 jump(to: ref)
@@ -66,12 +81,21 @@ struct ReaderView: View {
             model.didView(ref.verse)
             if let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
         }
-        .onChange(of: model.translation) { _, _ in
-            if let ref = model.currentRef { jump(to: ref, reset: true) }
+        .onChange(of: model.chapter.map { "\($0.translation).\($0.book.id).\($0.number)" }) { _, _ in
+            guard let chapter = model.chapter, chapter.translation == model.translation, let ref = model.currentRef else { return }
+            if chapterWindow?.chapters.first?.translation != chapter.translation || chapterWindow?.contains(ref) != true {
+                chapterWindow = ReaderChapterWindow(chapter: chapter)
+            }
+            visibleRef = ref.description
+        }
+        .onChange(of: app.preferences.translation) { _, id in model.setTranslation(id) }
+        .task(id: model.chapter.map { "\($0.translation).\($0.book.id).\($0.number)" }) {
+            await model.prepareNeighbours()
+            if !Task.isCancelled, let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
         }
         #if DEBUG
         .task {
-            guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy") else { return }
+            guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy"), !preview.isEmpty else { return }
             try? await Task.sleep(for: .seconds(1))
             if preview == "reflection" { reflectRef = model.currentRef }
             else { studyRef = model.currentRef }
@@ -94,16 +118,16 @@ struct ReaderView: View {
 
             Menu {
                 Picker("Translation", selection: Binding(get: { model.translation }, set: { model.setTranslation($0) })) {
-                    Text("King James Version (KJV)").tag("kjv")
-                    Text("Berean Standard Bible (BSB)").tag("bsb")
-                    Text("World English Bible (WEB)").tag("web")
+                    ForEach(BibleStore.translationIDs, id: \.self) { id in
+                        Text((BibleStore.names[id] ?? id) + (BibleStore.online[id] != nil ? " · online" : "")).tag(id)
+                    }
                 }
             } label: {
-                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? "KJV").font(.ui(16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV").font(.ui(16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44)
             }
             .padding(.leading, 2)
-            .accessibilityLabel("Bible translation, \(BibleStore.offline[model.translation] ?? "KJV")")
+            .accessibilityLabel("Bible translation, \(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV")")
             Spacer()
             Button { showingBookmarks = true } label: {
                 Group {
@@ -131,16 +155,14 @@ struct ReaderView: View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
                 ForEach(chapterWindow?.chapters ?? [], id: \.label) { chapter in
-                    let next = ReaderChapterWindow.neighbour(of: chapter, direction: 1)
+                    let next = ReaderChapterWindow.neighbourReference(of: chapter, direction: 1)
                     ForEach(chapter.verses) { verse in
-                        let ref = VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number)
+                        let ref = VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)
                         VersePage(verse: verse, chapter: chapter, artwork: model.artwork(for: verse, in: chapter),
-                                  isLast: verse.number == chapter.verses.last?.number, next: next?.label,
+                                  isLast: verse.number == chapter.verses.last?.number, next: next.map { "\(BibleStore.shared.book($0.book)?.displayName ?? $0.book) \($0.chapter)" },
                                   onStudy: { studyRef = ref }, onReflect: { reflectRef = ref },
                                   onNext: {
-                                      if let next, let first = next.verses.first {
-                                          jump(to: VerseRef(book: next.book.id, chapter: next.number, verse: first.number), animated: true)
-                                      }
+                                      if let next { jump(to: next, animated: true) }
                                   })
                             .containerRelativeFrame(.vertical)
                             .id(ref.description)
@@ -156,7 +178,7 @@ struct ReaderView: View {
 
     private func jump(to ref: VerseRef, reset: Bool = false, animated: Bool = false) {
         model.open(ref.book, ref.chapter, verse: ref.verse)
-        guard let chapter = model.chapter, let destination = model.currentRef else { return }
+        guard let chapter = model.chapter, chapter.translation == model.translation, chapter.book.id == ref.book, chapter.number == ref.chapter, let destination = model.currentRef else { return }
         if reset || chapterWindow?.contains(destination) != true {
             chapterWindow = ReaderChapterWindow(chapter: chapter)
         }
@@ -190,7 +212,8 @@ struct VersePage: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
 
-    private var ref: String { "\(chapter.book.id).\(chapter.number).\(verse.number)" }
+    private var ref: String { VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end).description }
+    private var reference: String { BibleStore.shared.label(VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)) }
     private var fontSize: CGFloat { (ReaderFontSize(rawValue: app.preferences.fontSize) ?? .default).points }
 
     /// Center the Scripture and artwork between the toolbar and the bottom controls.
@@ -211,8 +234,12 @@ struct VersePage: View {
                     .multilineTextAlignment(.center)
                     .minimumScaleFactor(0.5)
                     .foregroundStyle(Theme.text(scheme))
-                Text("\(chapter.book.displayName) \(chapter.number):\(verse.number)")
+                Text(reference)
                     .font(.ui(13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 30)
+                if let copyright = chapter.copyright {
+                    Text(copyright).font(.system(size: 8)).foregroundStyle(Theme.muted(scheme))
+                        .multilineTextAlignment(.center).padding(.top, 10)
+                }
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: 350)
@@ -232,8 +259,8 @@ struct VersePage: View {
                 Button(action: onReflect) { Image.glyph("message").frame(width: 20, height: 20).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .accessibilityLabel("Reflect")
                 VerseShareButton(text: verse.text,
-                                 reference: "\(chapter.book.displayName) \(chapter.number):\(verse.number)",
-                                 translation: chapter.translation)
+                                 reference: reference,
+                                 translation: chapter.translation, copyright: chapter.copyright)
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.trailing, 12)

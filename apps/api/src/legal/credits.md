@@ -8,6 +8,11 @@ Her Crown is built on the work of translators, scholars and open-data projects. 
 - **Berean Standard Bible (BSB).** Public domain. BSB Publishing, LLC. Text from eBible.org.
 - **World English Bible (WEB).** Public domain. "World English Bible" is a trademark of eBible.org. Text from eBible.org.
 
+- **New King James Version (NKJV).** New King James Version®, Copyright© 1982, Thomas Nelson. All rights reserved. Online access supplied by API.Bible.
+- **The Message (MSG).** THE MESSAGE: The Bible in Contemporary Language copyright © 1993, 2002, 2018 by Eugene H. Peterson. All rights reserved. Used by permission of NavPress. Represented by Tyndale House Publishers. Online access supplied by API.Bible.
+- **Amplified Bible (AMP).** Amplified® Bible Copyright © 2015 by The Lockman Foundation, La Habra, CA 90631 All rights reserved. http://www.lockman.org Online access supplied by API.Bible.
+- **New Living Translation (NLT).** Holy Bible, New Living Translation, copyright © 1996, 2004, 2015 by Tyndale House Foundation. All rights reserved. Used by permission of Tyndale House Publishers, Carol Stream, Illinois 60188. All rights reserved. Online access supplied by API.Bible.
+
 ## Study tools
 
 - **Greek and Hebrew words and lexicons:** STEPBible Data, *Translators Amalgamated Greek NT* (TAGNT), *Translators Amalgamated Hebrew OT* (TAHOT), *Translators Brief Lexicons* (TBESG, TBESH), by Tyndale House, Cambridge, [STEPBible.org](https://www.stepbible.org). Licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

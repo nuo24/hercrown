@@ -35,6 +35,15 @@ final class BibleStoreTests: XCTestCase {
         for v in luke.verses { for r in v.wordsOfJesus { XCTAssertLessThanOrEqual(NSMaxRange(r), (v.text as NSString).length) } }
     }
 
+    func testLicensedTranslationNeverSilentlyFallsBackAndPreservesBridges() throws {
+        XCTAssertNil(store.chapter("nlt", book: "GEN", chapter: 49))
+        let book = try XCTUnwrap(store.book("PSA"))
+        store.cacheRemote(Chapter(translation: "msg", book: book, number: 23, title: nil,
+            verses: [Verse(number: 1, text: "Provider fixture", wordsOfJesus: [], end: 3)], copyright: "Fixture credit"))
+        XCTAssertEqual(store.text("msg", VerseRef("PSA.23.2")!), "Provider fixture")
+        XCTAssertEqual(store.chapter("msg", book: "PSA", chapter: 23)?.verses.count, 1)
+    }
+
     func testUnknownTranslationFallsBackToKJV() {
         XCTAssertEqual(store.chapter("niv", book: "JHN", chapter: 3)?.translation, "kjv")
     }

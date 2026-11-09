@@ -328,3 +328,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Expanded tray scales with screen height; text alignment controls fit above the fixed Save footer at 402 pt. Lightened the onboarding Scripture scroll to near-white ivory, with softer edges/shadow.
 - Verification: npm run check and all 189 API tests passed; all 16 native tests passed; final simulator build passed after spacing/library-order adjustment. Simulator inspected dark Text, Background and Illustrations trays, and the lighter onboarding scroll. Screenshots /tmp/hercrown-widget-palette-dark.png, /tmp/hercrown-widget-background-dark.png, /tmp/hercrown-widget-library-dark.png and /tmp/hercrown-scripture-scroll-light.png. No archive/upload; TestFlight remains build 17.
 - Exported current floral crown app icon as 1024x1024 JPEG at /tmp/her-crown-logo.jpg for owner download. No API.Bible changes.
+
+### 2026-11-08 · Build 18: licensed online translations
+- Owner confirmed NKJV, MSG, AMP and NLT on API.Bible Pro Commercial. Added migration 0014, server-only credential, translation menus, asynchronous reader loading/retry, six-chapter memory cache, publisher attribution and preserved MSG verse bridges. NIV/ESV are not enabled. Existing offline KJV/BSB/WEB and public-domain study grounding stay available. Home/Discover editorial passages continue using explicitly labeled bundled editions.
+- Production migration/secret/deploy remain owner-run and pending; build 18 targets staging. API key was shared in chat; rotate it before launch.

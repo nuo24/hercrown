@@ -11,29 +11,64 @@ final class ReaderModel {
     private var versesSeen = Set<String>()
     private var completed = Set<String>()
     private var dayRecorded: String?
+    var loading = false
+    var failure: String?
+    private var loadTask: Task<Void, Never>?
+    private var pending = VerseRef(book: "GEN", chapter: 1, verse: 1)
     private let app: AppModel
 
     init(app: AppModel) {
         self.app = app
-        translation = BibleStore.offline[app.preferences.translation] == nil ? "kjv" : app.preferences.translation
+        translation = BibleStore.names[app.preferences.translation] == nil ? "kjv" : app.preferences.translation
+        #if DEBUG
+        if let preview = UserDefaults.standard.string(forKey: "hcPreviewTranslation"), BibleStore.names[preview] != nil { translation = preview }
+        #endif
         let saved = UserDefaults.standard.string(forKey: "hc.position").flatMap(VerseRef.init) ?? VerseRef(book: "GEN", chapter: 1, verse: 1)
         open(saved.book, saved.chapter, verse: saved.verse)
     }
 
     var verses: [Verse] { chapter?.verses ?? [] }
-    var currentRef: VerseRef? { chapter.map { VerseRef(book: $0.book.id, chapter: $0.number, verse: current ?? 1) } }
+    var currentRef: VerseRef? { chapter.map { VerseRef(book: $0.book.id, chapter: $0.number, verse: current ?? 1, end: $0.verses.first { $0.number == current }?.end) } }
 
     func open(_ book: String, _ number: Int, verse: Int = 1) {
-        guard let next = BibleStore.shared.chapter(translation, book: book, chapter: number) else { return }
-        chapter = next
-        current = next.verses.contains { $0.number == verse } ? verse : next.verses.first?.number
+        pending = VerseRef(book: book, chapter: number, verse: verse)
+        loadTask?.cancel()
+        if let next = BibleStore.shared.chapter(translation, book: book, chapter: number) {
+            apply(next, verse: verse); return
+        }
+        guard BibleStore.online[translation] != nil else { return }
+        loading = true; failure = nil
+        let requested = translation
+        loadTask = Task {
+            do {
+                let next = try await OnlineBible.chapter(requested, book: book, number: number)
+                guard !Task.isCancelled, translation == requested else { return }
+                apply(next, verse: verse)
+            } catch {
+                guard !Task.isCancelled else { return }
+                loading = false; failure = "This translation needs a connection. \(error.localizedDescription)"
+            }
+        }
+    }
+    func retry() { open(pending.book, pending.chapter, verse: pending.verse) }
+    private func apply(_ next: Chapter, verse: Int) {
+        chapter = next; loading = false; failure = nil
+        current = next.verses.first { $0.number <= verse && ($0.end ?? $0.number) >= verse }?.number ?? next.verses.first?.number
         savePosition()
+    }
+    func prepareNeighbours() async {
+        guard BibleStore.online[translation] != nil, let chapter else { return }
+        for direction in [-1, 1] {
+            guard !Task.isCancelled, let ref = ReaderChapterWindow.neighbourReference(of: chapter, direction: direction) else { continue }
+            _ = try? await OnlineBible.chapter(chapter.translation, book: ref.book, number: ref.chapter)
+        }
     }
 
     func setTranslation(_ id: String) {
-        guard id != translation, let chapter else { return }
+        guard id != translation else { return }
+        let destination = currentRef ?? pending
         translation = id
-        open(chapter.book.id, chapter.number, verse: current ?? 1)
+        open(destination.book, destination.chapter, verse: destination.verse)
         app.updatePreferences(["translation": id]) { $0.translation = id }
         Task { await Analytics.shared.track("translation_changed", ["translation": .string(id)]) }
     }
@@ -118,6 +153,15 @@ struct ReaderChapterWindow {
 
     func contains(_ ref: VerseRef) -> Bool {
         chapters.contains { $0.book.id == ref.book && $0.number == ref.chapter }
+    }
+
+    static func neighbourReference(of chapter: Chapter, direction: Int) -> VerseRef? {
+        let number = chapter.number + direction
+        if (1...chapter.book.chapterCount).contains(number) { return VerseRef(book: chapter.book.id, chapter: number, verse: 1) }
+        let books = BibleStore.shared.books
+        guard let index = books.firstIndex(where: { $0.id == chapter.book.id }), books.indices.contains(index + direction) else { return nil }
+        let book = books[index + direction]
+        return VerseRef(book: book.id, chapter: direction > 0 ? 1 : book.chapterCount, verse: 1)
     }
 
     static func neighbour(of chapter: Chapter, direction: Int) -> Chapter? {

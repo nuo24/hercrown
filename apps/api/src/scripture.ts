@@ -88,6 +88,7 @@ function neighbours(book: string, chapter: number) {
 
 interface ChapterVerse {
   verse: number;
+  end?: number;
   text: string;
   wordsOfJesus?: [number, number][]; // [start, length] in UTF-16 units, for "Words of Jesus in red"
 }
@@ -130,7 +131,7 @@ export async function getChapter(env: Env, translationId: string, bookInput: str
     ...neighbours(book, chapter),
     copyright: content.copyright,
     fumsToken: content.fumsToken,
-  });
+  }, { headers: t.provider === "api_bible" ? { "Cache-Control": "no-store" } : {} });
 }
 
 export async function getPassage(env: Env, translationId: string, refInput: string) {
@@ -139,7 +140,7 @@ export async function getPassage(env: Env, translationId: string, refInput: stri
   const [t, total] = await Promise.all([translation(env, translationId), verseCount(env, ref.book, ref.chapter)]);
   if (ref.end > total) throw badRequest(`${ref.book} ${ref.chapter} has ${total} verses`);
   const content = await chapterVerses(env, t, ref.book, ref.chapter);
-  const verses = content.verses.filter((v) => v.verse >= ref.start && v.verse <= ref.end);
+  const verses = content.verses.filter((v) => v.verse <= ref.end && (v.end ?? v.verse) >= ref.start);
   if (verses.length === 0) {
     throw new HttpError(404, "not_in_translation",
       `${refLabel(ref.book, ref.chapter, ref.start, ref.end)} isn't in the ${t.abbreviation ?? t.name}. Some translations leave out verses that are missing from the earliest manuscripts.`);
@@ -151,7 +152,7 @@ export async function getPassage(env: Env, translationId: string, refInput: stri
     verses,
     copyright: content.copyright,
     fumsToken: content.fumsToken,
-  });
+  }, { headers: t.provider === "api_bible" ? { "Cache-Control": "no-store" } : {} });
 }
 
 export function refLabel(book: string, chapter: number, start: number, end = start) {

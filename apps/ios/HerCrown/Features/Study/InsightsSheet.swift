@@ -87,7 +87,7 @@ struct VerseQuote: View {
         VStack(spacing: 14) {
             Text(BibleStore.shared.label(ref)).font(.system(size: 22, weight: .semibold))
             ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation).font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
-            Text(BibleStore.offline[translation].map { translationName($0) } ?? "").font(.system(size: 12)).foregroundStyle(.secondary)
+            Text(BibleStore.names[translation] ?? translation.uppercased()).font(.system(size: 12)).foregroundStyle(.secondary)
         }
         .multilineTextAlignment(.center)
     }

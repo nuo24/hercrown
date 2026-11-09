@@ -27,6 +27,7 @@ struct Verse: Identifiable, Hashable {
     let text: String
     /// Words of Jesus as UTF-16 ranges (NSRange), for red letters.
     let wordsOfJesus: [NSRange]
+    var end: Int? = nil
     var id: Int { number }
 }
 
@@ -36,6 +37,7 @@ struct Chapter {
     let number: Int
     let title: String?        // psalm superscription, kept apart from verse 1
     let verses: [Verse]
+    var copyright: String? = nil
     var label: String { "\(book.displayName) \(number)" }
 }
 
@@ -61,6 +63,18 @@ final class BibleStore: @unchecked Sendable {
         let books: [Book]
     }
 
+    static let online = ["nkjv": "NKJV", "msg": "MSG", "amp": "AMP", "nlt": "NLT"]
+    static let names = ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible", "nkjv": "New King James Version", "msg": "The Message", "amp": "Amplified Bible", "nlt": "New Living Translation"]
+    static let translationIDs = ["kjv", "bsb", "web", "nkjv", "msg", "amp", "nlt"]
+    private var remoteChapters: [String: Chapter] = [:]
+    private var remoteOrder: [String] = []
+    func cacheRemote(_ chapter: Chapter) {
+        lock.lock(); defer { lock.unlock() }
+        let key = "\(chapter.translation).\(chapter.book.id).\(chapter.number)"
+        remoteChapters[key] = chapter
+        remoteOrder.removeAll { $0 == key }; remoteOrder.append(key)
+        while remoteOrder.count > 6 { remoteChapters.removeValue(forKey: remoteOrder.removeFirst()) }
+    }
     private var files: [String: File] = [:]
     private let lock = NSLock()
 
@@ -85,6 +99,10 @@ final class BibleStore: @unchecked Sendable {
     func book(_ id: String) -> BibleBook? { books.first { $0.id == id } }
 
     func chapter(_ translation: String, book: String, chapter number: Int) -> Chapter? {
+        if Self.online[translation] != nil {
+            lock.lock(); defer { lock.unlock() }
+            return remoteChapters["\(translation).\(book).\(number)"]
+        }
         let translation = Self.offline[translation] == nil ? "kjv" : translation
         guard let file = file(translation), let b = file.books.first(where: { $0.id == book }),
               number >= 1, number <= b.chapters.count else { return nil }
@@ -102,7 +120,7 @@ final class BibleStore: @unchecked Sendable {
 
     func text(_ translation: String, _ ref: VerseRef) -> String? {
         guard let chapter = chapter(translation, book: ref.book, chapter: ref.chapter) else { return nil }
-        let verses = chapter.verses.filter { $0.number >= ref.verse && $0.number <= (ref.end ?? ref.verse) }
+        let verses = chapter.verses.filter { $0.number <= (ref.end ?? ref.verse) && ($0.end ?? $0.number) >= ref.verse }
         return verses.isEmpty ? nil : verses.map(\.text).joined(separator: " ")
     }
 

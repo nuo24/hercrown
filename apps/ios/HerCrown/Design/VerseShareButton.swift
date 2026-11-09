@@ -6,13 +6,14 @@ struct VerseShareButton: View {
     let text: String
     let reference: String
     let translation: String
+    var copyright: String? = nil
     @State private var showingSnapshot = false
 
     private var translationName: String { BibleStore.offline[translation] ?? translation.uppercased() }
 
     var body: some View {
         Menu {
-            ShareLink(item: "“\(text)” — \(reference) (\(translationName))") {
+            ShareLink(item: "“\(text)” — \(reference) (\(translationName))\(copyright.map { "\n" + $0 } ?? "")") {
                 Label("Share verse text", systemImage: "text.quote")
             }
             Button("Create a snapshot", systemImage: "photo") { showingSnapshot = true }
