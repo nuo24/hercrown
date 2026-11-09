@@ -367,3 +367,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Staging deployed from clean isolated source `512587d`: Worker version `477249e8-57e9-4fe4-8d85-96a7aa73bf3b`. Live authenticated smoke passed all four editions on Home, NLT Discover pagination (12 cards / nextOffset 12) and the NLT devotional passage. MSG Psalm 4:8 resolves to its intact 7–8 group with correct label/attribution. Temporary smoke account deleted (200). No production deploy and no new TestFlight archive.
 
 - Nov 9 owner adjustment: onboarding typing intensity raised to 0.7 and prayer to 0.5; pacing unchanged. Typecheck, all 198 API tests and iOS simulator build passed. Physical feel needs an iPhone check in the next build; not in TestFlight 19.
+
+### Nov 9: TestFlight build 20
+
+- Archive 1.0 (20) succeeded from clean isolated source `30eb518f07633dc3a275ffd2dd29119c5acc2877`, using `HC_STAGING_TESTFLIGHT`; staging backend is `512587d` / Worker `477249e8-57e9-4fe4-8d85-96a7aa73bf3b`. Includes selected editions across daily content, compact credits, preserved Message bridges, prayer reveal scrolling and requested typing/prayer intensities 0.7/0.5. Validation: check, 198 API tests, 19 native tests, simulator build and visual/live staging checks. Command-line upload failed with saved-account / API cloud-signing permission errors; Organizer upload in progress with the same archive. Tester availability not yet verified.
