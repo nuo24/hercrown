@@ -206,7 +206,7 @@ struct OnboardingView: View {
             animatedText(title).font(.serif(28.8)).tracking(-1)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Spacer(minLength: 20)
-            pageContent.opacity(settled ? 1 : 0).allowsHitTesting(settled)
+            pageContent.opacity(artVisible ? 1 : 0).allowsHitTesting(artVisible)
             Spacer(minLength: 20)
         }.frame(minHeight: max(0, height - 8))
     }
@@ -214,7 +214,7 @@ struct OnboardingView: View {
     @ViewBuilder private var pageContent: some View {
         switch step {
         case 2:
-            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active && settled).frame(width: 165, height: 165 * 2556 / 1180).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
+            OnboardingDemoView(reducedMotion: reduceMotion, isActive: scenePhase == .active && artVisible).frame(width: 165, height: 165 * 2556 / 1180).clipShape(RoundedRectangle(cornerRadius: 24)).overlay(RoundedRectangle(cornerRadius: 24).strokeBorder(ink, lineWidth: 2)).frame(maxWidth: .infinity).padding(.top, 4).accessibilityLabel("Demonstration of reading and saving a Bible passage")
         case 4: choices(["Social media", "The Bible", "About the same"], selection: $answers.comparison)
         case 5:
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
@@ -443,7 +443,16 @@ struct OnboardingView: View {
                 try Task.checkCancellation(); revealed = 0; prayerRevealing = true
                 try await type(prayer, prayer: true)
             }
-            else { try await type(title); artVisible = true }
+            else {
+                // The intro collage, demo, name journal and comparison magnifier lead
+                // their headings; the Christ flower and later question art follow text.
+                if [1, 2, 3, 4].contains(step) {
+                    artVisible = true
+                    if !reduceMotion { try await Task.sleep(for: .milliseconds(220)) }
+                }
+                try await type(title)
+                artVisible = true
+            }
             if step == 1 {
                 try await Task.sleep(for: .milliseconds(1200)); artVisible = false; bridge = true
                 try await type("Let’s show you how to turn some of that time toward Christ."); artVisible = true
