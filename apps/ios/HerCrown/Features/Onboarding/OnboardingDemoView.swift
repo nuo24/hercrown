@@ -43,9 +43,8 @@ struct OnboardingDemoView: View {
             error = "The demonstration could not load."; return
         }
         let item = AVPlayerItem(url: url)
-        // The supplied 10.52-second recording ends with a long still hold.
-        // Loop its first four seconds, which contain the actual scrolling demonstration.
-        looper = AVPlayerLooper(player: player, templateItem: item, timeRange: CMTimeRange(start: .zero, duration: CMTime(seconds: 4, preferredTimescale: 600)))
+        // Play the full new recording, including the reader, Community and Home.
+        looper = AVPlayerLooper(player: player, templateItem: item)
         status = player.observe(\.currentItem, options: [.initial, .new]) { [weak self] _, _ in
             Task { @MainActor in
                 guard let self else { return }

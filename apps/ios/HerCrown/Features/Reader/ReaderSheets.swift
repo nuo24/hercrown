@@ -224,7 +224,7 @@ struct ReflectionSheet: View {
                     .accessibilityHidden(true)
                 Text(BibleStore.shared.label(ref))
                     .font(.ui(compact ? 16 : 20, weight: .semibold))
-                Text(BibleStore.shared.text(translation, ref) ?? "")
+                ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation)
                     .font(.serif(fontSize, relativeTo: .title2))
                     .lineSpacing(max(0, fontSize * 0.15))
                 Text(translationName)

@@ -23,7 +23,7 @@ struct AIStudyView: View {
                     .accessibilityAddTraits(.isHeader)
                 VStack(spacing: 16) {
                     Text(BibleStore.shared.label(ref)).font(.ui(21, weight: .semibold))
-                    Text(BibleStore.shared.text(translation, ref) ?? "")
+                    ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation)
                         .font(.serif(25, relativeTo: .title2)).lineSpacing(4)
                     Text(BibleStore.offline[translation] ?? translation.uppercased())
                         .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
@@ -253,7 +253,7 @@ struct RelatedVersesView: View {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(item.label).font(.system(size: 14, weight: .semibold))
-                                    Text(item.text).font(.serif(18)).multilineTextAlignment(.leading)
+                                    ScriptureText(text: item.text, reference: item.ref, translation: translation).font(.serif(18)).multilineTextAlignment(.leading)
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)

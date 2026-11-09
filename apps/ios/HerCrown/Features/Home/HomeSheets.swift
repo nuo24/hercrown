@@ -158,23 +158,25 @@ struct PlanSheet: View {
             ScrollView {
                 if let plan {
                     VStack(alignment: .leading, spacing: 16) {
+                        SheetControls(back: { dismiss() }, done: { dismiss() })
                         VStack(spacing: 16) {
-                            Text("A gentle reading plan").font(.system(size: 11)).foregroundStyle(Theme.muted(scheme))
-                            Text(plan.title).font(.serif(32, relativeTo: .largeTitle))
+                            Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90).padding(.vertical, 12)
+                            Text(plan.title).font(.serif(28, relativeTo: .title))
                             Text(plan.description).font(.system(size: 14)).lineSpacing(7.14)
                         }
                         .frame(maxWidth: .infinity)
                         .multilineTextAlignment(.center)
+                        Text("\(plan.progress?.completedSteps ?? 0) of \(plan.days) passages · Read at your own pace")
+                            .font(.ui(13)).foregroundStyle(Theme.muted(scheme)).padding(.top, 28)
                         VStack(spacing: 0) { ForEach(plan.steps) { step in stepRow(plan, step) } }
-                        Text("\(plan.days) passages · Read at your own pace")
-                            .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme))
-                            .frame(maxWidth: .infinity)
+                            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
                         primaryButton(plan)
                     }
                     .padding(Theme.Spacing.gutter)
                 }
             }
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar(.hidden, for: .navigationBar)
+            .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme))
         }
         .task { await Analytics.shared.track("plan_viewed", ["plan": .string(planId), "locked": .bool(locked)]) }
     }
@@ -192,12 +194,12 @@ struct PlanSheet: View {
                 .frame(width: 28, height: 28)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(ref.map { BibleStore.shared.label($0) } ?? step.ref).font(.system(size: 14, weight: .semibold))
-                    Text(ref.flatMap { BibleStore.shared.text(translation, $0) } ?? "").font(.serif(18)).multilineTextAlignment(.leading)
+                    Text("A moment in the Word").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
                 }
                 Spacer(minLength: 0)
-                Image(systemName: locked ? "lock" : "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
             }
-            .padding(.vertical, 12)
+            .padding(16).frame(minHeight: 74)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -206,13 +208,14 @@ struct PlanSheet: View {
 
     @ViewBuilder private func primaryButton(_ plan: ReadingPlan) -> some View {
         if locked {
-            Button("Start with Plus") { app.presentPaywall(placement: "plan_start") }.buttonStyle(CapsuleButtonStyle()).padding(.top, 8)
+            Button("Start with Plus") { app.presentPaywall(placement: "plan_start") }.buttonStyle(PlanActionStyle()).padding(.top, 8)
             Text("Reading plans are part of Her Crown Plus. Reading the Bible stays free.")
                 .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: .infinity).multilineTextAlignment(.center)
         } else if plan.progress?.completedAt == nil {
-            let next = plan.steps.first { $0.completedAt == nil } ?? plan.steps[0]
+            if let next = plan.steps.first(where: { $0.completedAt == nil }) {
             Button(plan.progress == nil ? "Start this plan" : "Continue with passage \(next.position + 1)") { read(plan, next) }
-                .buttonStyle(CapsuleButtonStyle()).padding(.top, 8)
+                .buttonStyle(PlanActionStyle()).padding(.top, 8)
+            }
         } else {
             Text("You finished this plan. Well done.").font(.serif(19)).frame(maxWidth: .infinity)
         }
@@ -245,17 +248,14 @@ struct DevotionalSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    HStack {
-                        if let tag = devotional.tag { Text(tag.uppercased()).font(.system(size: 12, weight: .semibold)).tracking(1) }
-                        Spacer()
-                        Text("\(devotional.minutes ?? 1) min read").font(.system(size: 12))
-                    }
-                    .foregroundStyle(Theme.muted(scheme))
+                    SheetControls(back: { dismiss() }, done: { dismiss() })
                     Text(devotional.title).font(.ui(20, weight: .semibold)).tracking(-0.4)
+                    Text("\(devotional.minutes ?? 1) min read" + (devotional.tag.map { " · " + $0 } ?? ""))
+                        .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                     Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90).frame(maxWidth: .infinity)
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("“\(devotional.passage ?? "")”")
-                            .font(.serif(28, relativeTo: .title2)).lineSpacing(4.2)
+                        ScriptureText(text: devotional.passage ?? "", reference: devotional.ref, translation: devotional.translation)
+                            .font(.serif(20, relativeTo: .title3)).lineSpacing(3)
                         Text("\(devotional.label) · \(BibleStore.offline[devotional.translation] ?? devotional.translation.uppercased())")
                             .font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.muted(scheme))
                     }
@@ -277,7 +277,7 @@ struct DevotionalSheet: View {
                     Button("Read \(devotional.label) in context") {
                         if let ref = VerseRef(devotional.ref) { dismiss(); app.openInReader(ref) }
                     }
-                    .buttonStyle(CapsuleButtonStyle())
+                    .buttonStyle(PlanActionStyle())
                     if let ref = VerseRef(devotional.ref), let passage = BibleStore.shared.text(devotional.translation, ref) {
                         VerseShareButton(text: passage, reference: devotional.label, translation: devotional.translation)
                     }
@@ -286,7 +286,8 @@ struct DevotionalSheet: View {
                 .foregroundStyle(Theme.text(scheme))
                 .padding(Theme.Spacing.gutter)
             }
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar(.hidden, for: .navigationBar)
+            .background(Theme.canvas(scheme))
         }
         .task {
             await model.markDevotionalRead(devotional.id)
@@ -303,78 +304,62 @@ struct DevotionalSheet: View {
     }
 }
 
-/// plans.list: "Recommended for you" and "Topics & seasons", horizontally scrolling plan cards (237×340, 14 radius,
-/// 160 pt tinted cover with a 150 pt cutout).
+/// The supplied vertical illustrated plan catalogue. Browsing remains free.
 struct PlansListSheet: View {
     let model: HomeModel
     let onOpen: (ReadingPlan) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
 
-    private var plans: [ReadingPlan] { model.plans?.plans ?? [] }
-
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AppGradient()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 0) {
-                        section("Recommended for you", "Choose a place to begin. Read at your own pace.", plans.filter { $0.topic == nil || $0.id == "strength" }, top: 18)
-                        section("Topics & seasons", "Thoughtful readings for what’s on your heart.", plans.filter { !($0.topic == nil || $0.id == "strength") }, top: 28)
-                    }
-                    .padding(.bottom, 40)
-                }
+        VStack(spacing: 0) {
+            HStack(spacing: 18) {
+                Button { dismiss() } label: { Image(systemName: "arrow.left").frame(width: 24, height: 44) }
+                Text("Reading Plans").font(.serif(28)).tracking(-0.5)
+                Spacer()
+                Button("Done") { dismiss() }.font(.ui(12, weight: .medium))
+            }.buttonStyle(.plain).padding(.horizontal, 22).padding(.top, 12)
+            ScrollView {
+                VStack(spacing: 16) {
+                    VStack(spacing: 16) {
+                        Image.illustration("journal").resizable().scaledToFit().frame(width: 90, height: 90)
+                        Text("A place to begin.").font(.serif(28)).tracking(-0.5)
+                        Text("Read at your own pace, one passage at a time.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                    }.multilineTextAlignment(.center).padding(.top, 30).padding(.bottom, 24)
+                    ForEach(model.plans?.plans ?? []) { plan in card(plan) }
+                }.padding(22)
             }
-            .navigationTitle("Reading Plans")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
+        .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme))
         .task { await Analytics.shared.track("plans_viewed") }
     }
 
-    @ViewBuilder private func section(_ title: String, _ subtitle: String, _ items: [ReadingPlan], top: CGFloat) -> some View {
-        if !items.isEmpty {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title).font(.serif(28, relativeTo: .title)).tracking(-0.4)
-                Text(subtitle).font(.system(size: 13)).frame(minHeight: 19.5).foregroundStyle(Theme.muted(scheme))
-            }
-            .foregroundStyle(Theme.text(scheme))
-            .padding(EdgeInsets(top: top + 8, leading: 20, bottom: 12, trailing: 20))
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) { ForEach(items) { card($0) } }
-                    .padding(EdgeInsets(top: 8, leading: 16, bottom: 20, trailing: 16))
-            }
-        }
-    }
-
     private func card(_ plan: ReadingPlan) -> some View {
-        let dark = scheme == .dark
-        let cover: Color = switch plan.tone {
-        case "sand": dark ? Color(hex: 0x302C27) : Color(hex: 0xF2EEE7)
-        case "lavender": dark ? Color(hex: 0x232D33) : Color(hex: 0xE8F1F3)
-        default: dark ? Color(hex: 0x242B29) : Color(hex: 0xEDF2E9)
-        }
         let art = plan.id == "quiet" ? "sunrise" : plan.id == "peace" ? "dove" : "anchor"
         return Button { onOpen(plan) } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                Image.illustration(art).resizable().scaledToFit().frame(width: 150, height: 150)
-                    .frame(maxWidth: .infinity, minHeight: 160).background(cover).accessibilityHidden(true)
-                VStack(alignment: .leading, spacing: 9) {
-                    Text(plan.title).font(.system(size: 17, weight: .semibold)).tracking(-0.3)
-                    Text("\(plan.days) passages · about 2 min each").font(.system(size: 12)).foregroundStyle(Theme.muted(scheme))
-                    Text(plan.description).font(.system(size: 13)).lineSpacing(4.03).fixedSize(horizontal: false, vertical: true)
-                    Spacer(minLength: 0)
-                    Text(plan.progress == nil ? "Explore plan →" : "Continue reading →").font(.system(size: 12, weight: .medium))
-                }
-                .multilineTextAlignment(.leading)
-                .padding(18)
-                .frame(maxWidth: .infinity, minHeight: 180, alignment: .topLeading)
+            HStack(spacing: 18) {
+                Image.illustration(art).resizable().scaledToFit().frame(width: 90, height: 100).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 14) {
+                    Text(plan.title).font(.serif(24)).tracking(-0.4)
+                    Text("\(plan.days) passages · about 2 min each").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    Text(plan.description).font(.ui(12)).lineSpacing(3)
+                    Text("Explore plan →").font(.ui(12, weight: .medium)).padding(.top, 4)
+                }.frame(maxWidth: .infinity, alignment: .leading)
             }
-            .foregroundStyle(Theme.text(scheme))
-            .frame(width: 237, height: 340)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .surfaceCard(radius: 14)
-        }
-        .buttonStyle(.plain)
+            .multilineTextAlignment(.leading).padding(20).frame(maxWidth: .infinity, minHeight: 175)
+            .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(Theme.border(scheme).opacity(scheme == .dark ? 0 : 1), lineWidth: 0.5))
+        }.buttonStyle(.plain)
+    }
+}
+
+private struct PlanActionStyle: ButtonStyle {
+    @Environment(\.colorScheme) private var scheme
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label.font(.ui(14, weight: .medium))
+            .foregroundStyle(scheme == .dark ? Color.black : Color.white)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(scheme == .dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x111111), in: RoundedRectangle(cornerRadius: 8))
+            .opacity(configuration.isPressed ? 0.75 : 1)
     }
 }

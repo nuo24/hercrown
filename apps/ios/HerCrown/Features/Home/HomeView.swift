@@ -29,6 +29,7 @@ struct HomeView: View {
     @State private var studyRef: VerseRef?
     @State private var openPlan: ReadingPlan?
     @State private var showingPlans = false
+    @State private var pendingPlan: ReadingPlan?
     @State private var openDevotional: Devotional?
     @State private var searchRef = VerseRef(book: "PSA", chapter: 23, verse: 1)
 
@@ -99,7 +100,9 @@ struct HomeView: View {
         .alert("Couldn’t delete the note", isPresented: $deleteFailed) { Button("OK", role: .cancel) {} }
         .sheet(isPresented: $showingStreak) { StreakSheet(model: model).presentationDetents([.large]) }
         .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
-        .sheet(isPresented: $showingPlans) { PlansListSheet(model: model) { plan in showingPlans = false; openPlan = plan }.presentationDetents([.large]) }
+        .sheet(isPresented: $showingPlans, onDismiss: {
+            if let plan = pendingPlan { pendingPlan = nil; openPlan = plan }
+        }) { PlansListSheet(model: model) { plan in pendingPlan = plan; showingPlans = false }.presentationDetents([.large]) }
         .sheet(item: $studyRef) { ref in
             InsightsSheet(ref: ref, translation: translation) { r in app.openInReader(r) }.presentationDetents([.large])
         }
@@ -380,7 +383,7 @@ struct HomeView: View {
                     .buttonStyle(.plain)
                     .accessibilityLabel(app.isSaved(verse.ref) ? "Remove from saved" : "Save verse")
                 }
-                Text(verse.text ?? "").font(.serif(28, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
+                ScriptureText(text: verse.text ?? "", reference: verse.ref, translation: verse.translation).font(.serif(28, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
                     .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 265, alignment: .leading)
                 HStack(spacing: 4) {
                     Text("\(verse.label.uppercased()) · \(BibleStore.offline[verse.translation] ?? verse.translation.uppercased())")

@@ -26,7 +26,6 @@ struct OnboardingView: View {
     @State private var reminderDenied = false
     @State private var finishing = false
     @State private var saveError = false
-    @StateObject private var reciter = PrayerReciter()
     @FocusState private var textFocused: Bool
 
     static let intentions = ["Grow closer to God", "Build a reading habit", "Explore the Bible for the first time", "Find encouragement"]
@@ -132,8 +131,6 @@ struct OnboardingView: View {
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
         .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
-        .onDisappear { reciter.stop() }
-        .onChange(of: scenePhase) { _, value in if value != .active { reciter.stop() } }
         .alert("Couldn’t save your name", isPresented: $saveError) { Button("OK", role: .cancel) {} } message: { Text("Your onboarding answers are still here. Check your connection and try again.") }
     }
 
@@ -238,16 +235,7 @@ struct OnboardingView: View {
                 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             } else {
                 animatedText(prayer).font(.serif(20)).lineSpacing(5).textSelection(.enabled)
-                Button {} label: { Text(reciter.speaking ? "Release to pause" : "Hold to hear your prayer").frame(maxWidth: .infinity, minHeight: 48) }
-                    .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                    .onLongPressGesture(minimumDuration: .infinity, maximumDistance: 30, pressing: { holding in
-                        if holding && settled { reciter.start(prayer, haptics: !reduceMotion) } else { reciter.stop() }
-                    }, perform: {})
-                    .accessibilityAction(named: reciter.speaking ? "Stop reading" : "Read prayer aloud") {
-                        if reciter.speaking { reciter.stop() } else { reciter.start(prayer, haptics: !reduceMotion) }
-                    }
-                    .disabled(!settled)
-                if let error = reciter.audioError { Text(error).font(.ui(12)).foregroundStyle(muted) }
+
             }
         }
     }
@@ -306,16 +294,20 @@ struct OnboardingView: View {
         }.accessibilityAddTraits(selected ? .isSelected : [])
     }
     private func animatedText(_ text: String) -> Text {
-        guard !settled, !reduceMotion else { return Text(text) }
-        let index = text.index(text.startIndex, offsetBy: min(revealed, text.count))
-        return Text(String(text[..<index])).foregroundColor(ink) + Text(String(text[index...])).foregroundColor(.clear)
+        let visible = settled || reduceMotion ? text.count : min(revealed, text.count)
+        let warning = step == 1 && !bridge ? text.range(of: "10 years of your life") : nil
+        return text.enumerated().reduce(Text("")) { result, entry in
+            let index = text.index(text.startIndex, offsetBy: entry.offset)
+            let accent = warning?.contains(index) == true
+            return result + Text(String(entry.element)).foregroundColor(entry.offset < visible ? (accent ? Color(hex: 0xA94F75) : ink) : .clear)
+        }
     }
     private func toggleSeason(_ value: String) {
         if value == "Prefer not to say" { answers.season = answers.season.contains(value) ? [] : [value] }
         else { answers.season.removeAll { $0 == "Prefer not to say" }; if answers.season.contains(value) { answers.season.removeAll { $0 == value } } else { answers.season.append(value) } }
     }
     private func next(skipping: Bool = false) {
-        reciter.stop(); textFocused = false
+        textFocused = false
         if skipping {
             switch step { case 3: answers.name = ""; case 4: answers.comparison = ""; case 5: answers.season = []; case 6: answers.familiarity = ""; case 7: answers.heart = []; case 8: answers.burden = ""; case 9: answers.lovedOnes = ""; case 10: answers.pace = ""; default: break }
         }
@@ -325,7 +317,7 @@ struct OnboardingView: View {
         settled = false; revealed = 0; bridge = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { reciter.stop(); textFocused = false; acknowledgement = ""; settled = false; revealed = 0; bridge = false; step = max(0, step - 1) }
+    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; revealed = 0; bridge = false; step = max(0, step - 1) }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."
@@ -349,7 +341,11 @@ struct OnboardingView: View {
         for count in 1...max(1, text.count) {
             try await clock.sleep(until: start.advanced(by: .milliseconds(count * (prayer ? 40 : 48))))
             try Task.checkCancellation(); revealed = count
-            if Date().timeIntervalSince(lastPulse) >= (prayer ? 1.6 : 0.2) { feedback.impactOccurred(intensity: prayer ? 0.22 : 0.3); lastPulse = Date() }
+            if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
+                feedback.impactOccurred(intensity: prayer ? 0.16 : 0.22)
+                feedback.prepare()
+                lastPulse = Date()
+            }
         }
     }
     private func enterPage() async {

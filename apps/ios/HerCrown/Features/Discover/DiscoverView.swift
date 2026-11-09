@@ -386,7 +386,7 @@ private struct DiscoverCard: View {
                 }
                 .font(.system(size: 11))
                 .foregroundStyle(Theme.muted(scheme))
-                Text("“\(card.text)”").font(.serif(25, relativeTo: .title2)).tracking(-0.4).lineSpacing(2.9)
+                ScriptureText(text: "“\(card.text)”", reference: card.ref, translation: translation).font(.serif(25, relativeTo: .title2)).tracking(-0.4).lineSpacing(2.9)
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 26)
                 Text(translationName).font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 16)
                 if let reflection = card.reflection {

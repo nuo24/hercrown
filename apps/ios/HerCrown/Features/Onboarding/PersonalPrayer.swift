@@ -1,4 +1,3 @@
-import AVFoundation
 import SwiftUI
 
 struct PersonalOnboardingAnswers: Codable, Equatable {
@@ -52,53 +51,6 @@ enum PersonalPrayerStore {
     static func remove(_ userID: String?) { UserDefaults.standard.removeObject(forKey: key(userID)) }
     static func read(_ userID: String?) -> String? { UserDefaults.standard.string(forKey: key(userID)) }
     static func save(_ text: String, userID: String?) { UserDefaults.standard.set(text, forKey: key(userID)) }
-}
-
-/// Speech and feedback share one lifecycle. Haptics occur at slow phrase intervals, never for every character.
-@MainActor final class PrayerReciter: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
-    @Published private(set) var speaking = false
-    @Published private(set) var audioError: String?
-    private var activeUtterance: AVSpeechUtterance?
-    private let speech = AVSpeechSynthesizer()
-    private let feedback = UIImpactFeedbackGenerator(style: .soft)
-    private var lastPulse = Date.distantPast
-
-    override init() { super.init(); speech.delegate = self }
-    func start(_ prayer: String, haptics: Bool) {
-        guard !speaking else { return }
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch { audioError = "Audio couldn’t start. Please try holding again."; return }
-        speaking = true; audioError = nil
-        Task { await Analytics.shared.track("prayer_recited") }
-        allowHaptics = haptics
-        lastPulse = .distantPast
-        let utterance = AVSpeechUtterance(string: prayer)
-        utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
-        utterance.rate = 0.42
-        utterance.preUtteranceDelay = 0.15
-        activeUtterance = utterance
-        speech.speak(utterance)
-    }
-    private var allowHaptics = true
-    func stop() {
-        activeUtterance = nil; speech.stopSpeaking(at: .immediate); speaking = false
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    }
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString range: NSRange, utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in
-            guard let self, activeUtterance === utterance, speaking, allowHaptics, Date().timeIntervalSince(lastPulse) >= 1.6 else { return }
-            feedback.impactOccurred(intensity: 0.35)
-            lastPulse = Date()
-        }
-    }
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in if self?.activeUtterance === utterance { self?.stop() } }
-    }
-    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Task { @MainActor [weak self] in if self?.activeUtterance === utterance { self?.stop() } }
-    }
 }
 
 struct SavedPersonalPrayerView: View {

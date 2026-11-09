@@ -7,6 +7,7 @@ struct InsightsSheet: View {
     let onOpen: (VerseRef) -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @State private var widgetSet = false
     @State private var path: [StudyTool] = {
         #if DEBUG
@@ -20,6 +21,7 @@ struct InsightsSheet: View {
         NavigationStack(path: $path) {
             ScrollView {
                 VStack(spacing: 0) {
+                    SheetControls(back: { dismiss() }, done: { dismiss() }).padding(.bottom, 20)
                     Image.illustration("open-book").resizable().scaledToFit().frame(width: 68, height: 58).accessibilityHidden(true)
                     VerseQuote(ref: ref, translation: translation).padding(.top, 8)
                     Divider().padding(.top, 26)
@@ -64,11 +66,15 @@ struct InsightsSheet: View {
                     case .related: RelatedVersesView(ref: ref, translation: translation) { r in dismiss(); onOpen(r) }
                     }
                 }
-                .navigationBarTitleDisplayMode(.inline)
+                .safeAreaInset(edge: .top) {
+                    SheetControls(back: { if !path.isEmpty { path.removeLast() } }, done: { dismiss() })
+                        .padding(.horizontal, 24).background(Theme.canvas(scheme))
+                }
+                .toolbar(.hidden, for: .navigationBar)
                 .task { await Analytics.shared.track("study_opened", ["tool": .string(tool.rawValue)]) }
             }
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
+            .background(Theme.canvas(scheme))
         }
     }
 }
@@ -80,7 +86,7 @@ struct VerseQuote: View {
     var body: some View {
         VStack(spacing: 14) {
             Text(BibleStore.shared.label(ref)).font(.system(size: 22, weight: .semibold))
-            Text(BibleStore.shared.text(translation, ref) ?? "").font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
+            ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation).font(.serif(23, relativeTo: .title3)).lineSpacing(5.75)
             Text(BibleStore.offline[translation].map { translationName($0) } ?? "").font(.system(size: 12)).foregroundStyle(.secondary)
         }
         .multilineTextAlignment(.center)

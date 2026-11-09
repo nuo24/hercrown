@@ -232,7 +232,7 @@ private struct SavedVerseCard: View {
         Card(padding: EdgeInsets(top: 22, leading: 20, bottom: 14, trailing: 20)) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(label).font(.serif(24, relativeTo: .title2)).tracking(-0.48).frame(minHeight: 28.8)
-                Text("“\(text)”").font(.serif(28, relativeTo: .title2)).tracking(-0.56).lineSpacing(4.2)
+                ScriptureText(text: "“\(text)”", reference: ref.description, translation: translation).font(.serif(28, relativeTo: .title2)).tracking(-0.56).lineSpacing(4.2)
                     .fixedSize(horizontal: false, vertical: true).padding(.top, 32)
                 Text(["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible"][translation] ?? "")
                     .font(.system(size: 11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 28)
