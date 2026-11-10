@@ -791,8 +791,12 @@ struct SubscriptionView: View {
                 } else if let expires = sub.expiresAt {
                     LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                 }
-                Link("Manage subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
-                    .buttonStyle(CapsuleButtonStyle()).padding(.top, 6)
+                Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
+                    Text("Manage subscription").font(.ui(15, weight: .semibold))
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .foregroundStyle(Theme.canvas(scheme))
+                        .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+                }.buttonStyle(.plain).padding(.top, 6)
             }
             .font(.ui(14))
             .padding(18)
