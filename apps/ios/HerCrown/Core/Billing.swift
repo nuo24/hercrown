@@ -101,6 +101,16 @@ final class Billing: NSObject {
             self?.lastPaywallTrialResult = result
         }
         #endif
+        handler.onWillDismiss { [weak self] _, _ in
+            guard placement == "onboarding_complete" else { return }
+            Task { @MainActor in
+                guard let self, self.presentingPlacement == requestID,
+                      self.app?.me?.user.id == userID else { return }
+                // Replace onboarding underneath the still-visible paywall, before dismissal.
+                // This changes navigation only; Plus still requires server verification.
+                self.app?.finishOnboardingLocally()
+            }
+        }
         handler.onDismiss { [weak self] _, result in
             Task { @MainActor in
                 guard let self, self.presentingPlacement == requestID else { return }

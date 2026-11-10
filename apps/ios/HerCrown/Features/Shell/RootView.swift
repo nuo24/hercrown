@@ -19,6 +19,9 @@ struct RootView: View {
         Group {
             if app.onboardingCompleted || Self.skipOnboarding { tabs } else { OnboardingView() }
         }
+        .onChange(of: app.onboardingCompleted) { _, complete in
+            if complete { tab = .bible }
+        }
         .environment(\.font, .ui(14))
         // Settings can switch accounts and replace the content underneath it.
         .fullScreenCover(isPresented: $showingSettings) { SettingsView().environment(app) }
@@ -36,6 +39,9 @@ struct RootView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             Dock(selection: $tab)
+        }
+        .onAppear {
+            if let requested = app.requestedTab { tab = requested; app.requestedTab = nil }
         }
         .onChange(of: tab) { _, new in Task { await Analytics.shared.track("tab_viewed", ["tab": .string(new.rawValue)]) } }
         .onChange(of: app.requestedTab) { _, new in if let new { tab = new; app.requestedTab = nil } }

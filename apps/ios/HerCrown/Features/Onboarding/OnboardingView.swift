@@ -28,6 +28,8 @@ struct OnboardingView: View {
     @State private var preparedAnswers: PersonalOnboardingAnswers?
     @State private var preparedVersion = -1
     @State private var bridge = false
+    @State private var introOpacity = 1.0
+    @State private var welcomeCopyVisible = false
     @State private var reminders = false
     @State private var reminderTime = DailyReminder.time(from: "08:00")
     @State private var reminderDenied = false
@@ -83,7 +85,7 @@ struct OnboardingView: View {
         case 6: "No test. No catching up."
         case 7: "Bring the whole of you."
         case 8, 9: "Optional. Your answers are sent securely to our prayer provider to prepare your prayer. They aren’t added to analytics."
-        case 10: "A prayer shaped around what’s on your heart."
+        case 10: "Your pace. You can change it anytime."
         case 11: "You can come back to these words."
         case 12: "You can change this anytime in Settings."
         default: "Come as you are."
@@ -138,7 +140,7 @@ struct OnboardingView: View {
                         }
                         }
                         if isTextPage { inputDock.opacity(settled ? 1 : 0).allowsHitTesting(settled) }
-                        else if !(step == 11 && prayerError) { actions.opacity(settled && !loadingPrayer ? 1 : 0).allowsHitTesting(settled && !loadingPrayer) }
+                        else if !(step == 11 && prayerError) { actions.opacity(settled && (step != 11 || !loadingPrayer) ? 1 : 0).allowsHitTesting(settled && (step != 11 || !loadingPrayer)) }
                     }
                 }
                 .padding(.horizontal, 28).padding(.top, 12).padding(.bottom, 24)
@@ -173,6 +175,8 @@ struct OnboardingView: View {
                     animatedText(title).font(.serif(g.size.width < 380 ? 39 : 44)).tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
                     Text("Discover the Bible one passage at a time. Make space for God’s Word in your everyday life.")
                         .font(.ui(15)).lineSpacing(5).foregroundStyle(muted).multilineTextAlignment(.center).frame(maxWidth: 280).padding(.top, 20)
+                        .opacity(welcomeCopyVisible || reduceMotion ? 1 : 0)
+                        .animation(reduceMotion ? nil : .easeIn(duration: 0.7), value: welcomeCopyVisible)
                     Spacer(minLength: 20)
                     Button { next() } label: { Label("Get started", systemImage: "arrow.right").labelStyle(TrailingIcon()) }.buttonStyle(CapsuleButtonStyle())
                     Button("Explore as a guest") { Task { await complete(guest: true) } }.buttonStyle(CapsuleButtonStyle(kind: .secondary)).padding(.top, 10)
@@ -196,7 +200,7 @@ struct OnboardingView: View {
                 }.frame(height: 174)
                 animatedText(title).font(.serif(33.3)).tracking(-0.7)
             }
-        }.multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 32)
+        }.multilineTextAlignment(.center).frame(maxWidth: .infinity).padding(.top, 32).opacity(introOpacity)
     }
 
     private func demoPage(height: CGFloat) -> some View {
@@ -332,11 +336,8 @@ struct OnboardingView: View {
             } label: {
                 Label(finishing ? "Getting ready…" : step == 11 ? "Keep this prayer" : step == 12 ? "Save my choice" : step == 13 ? "Open my Bible" : "Continue", systemImage: "arrow.right").labelStyle(TrailingIcon())
             }.buttonStyle(CapsuleButtonStyle()).disabled(finishing || (step == 11 && (prayer.isEmpty || prayerError)))
-            if step == 10 {
-                Button("Use a simple prayer instead") { simplePrayerRequested = true; next() }
-                    .font(.ui(12)).frame(minHeight: 44).foregroundStyle(muted)
-            }
             Text(footnote).font(.ui([8, 9].contains(step) ? 10 : 11)).foregroundStyle(muted).multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                .frame(minHeight: 30, alignment: .top)
         }.padding(.top, 22)
     }
 
@@ -347,7 +348,12 @@ struct OnboardingView: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: selected ? "largecircle.fill.circle" : "circle").font(.system(size: 17)).foregroundStyle(selected ? ink : muted)
-                Text(title).font(.ui(14)).multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.ui(14))
+                    if step == 10 && title == "5 minutes" {
+                        Text("A gentle place to start").font(.ui(11)).foregroundStyle(muted)
+                    }
+                }.multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.horizontal, 16).frame(minHeight: 60)
                 .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(selected ? ink : Color(hex: 0xE4E4E7), lineWidth: selected ? 1.5 : 1))
@@ -382,10 +388,10 @@ struct OnboardingView: View {
         if step == 3 { answers.name = name }
         if step == 11, !prayer.isEmpty { PersonalPrayerStore.save(prayer, userID: app.me?.user.id) }
         acknowledgement = skipping ? "" : response(for: step)
-        settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false
+        settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; step = max(0, step - 1) }
+    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false; step = max(0, step - 1) }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."
@@ -410,8 +416,12 @@ struct OnboardingView: View {
         let characters = Array(text)
         var elapsed = 0
         for count in 1...max(1, text.count) {
-            elapsed += prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : (step == 0 ? 32 : 48)
-            try await clock.sleep(until: start.advanced(by: .milliseconds(elapsed)))
+            let delay = prayer ? PrayerReadingPace.delay(before: count - 1, in: characters) : (step == 0 ? 29 : 43)
+            elapsed += delay
+            // Prayer stays at reading pace even if scrolling/rendering delays a frame.
+            // Catching up to an old deadline can otherwise skip most haptic pulses.
+            if prayer { try await Task.sleep(for: .milliseconds(delay)) }
+            else { try await clock.sleep(until: start.advanced(by: .milliseconds(elapsed))) }
             try Task.checkCancellation(); revealed = count
             if step == 11 && !prayer && !showingAcknowledgement { prayerTitleRevealed = count }
             if Date().timeIntervalSince(lastPulse) >= (prayer ? 0.16 : 0.09) {
@@ -432,9 +442,14 @@ struct OnboardingView: View {
                 settled = true
             }
         }
-        if step == 1 { bridge = false }
+        if step == 1 { bridge = false; introOpacity = 1 }
         artVisible = reduceMotion
         do {
+            if step == 0 {
+                // Commit a hidden frame before starting the subtitle's fade-in.
+                if !reduceMotion { try await Task.sleep(for: .milliseconds(50)) }
+                welcomeCopyVisible = true
+            }
             if !acknowledgement.isEmpty, !reduceMotion, scenePhase == .active {
                 acknowledgementOpacity = 1
                 showingAcknowledgement = true
@@ -470,7 +485,12 @@ struct OnboardingView: View {
                 artVisible = true
             }
             if step == 1 {
-                try await Task.sleep(for: .milliseconds(1200)); artVisible = false; bridge = true
+                try await Task.sleep(for: .milliseconds(1200))
+                if !reduceMotion {
+                    withAnimation(.easeOut(duration: 0.4)) { introOpacity = 0 }
+                    try await Task.sleep(for: .milliseconds(400))
+                }
+                artVisible = false; revealed = 0; bridge = true; introOpacity = 1
                 try await type("Let’s show you how to turn some of that time toward Christ."); artVisible = true
             }
             try Task.checkCancellation(); settled = true
@@ -544,6 +564,7 @@ struct OnboardingView: View {
             // purchase, or a skipped/failed campaign, rather than flashing it during loading.
             awaitingPaywall = true
             app.presentPaywall(placement: "onboarding_complete", onComplete: {
+                app.finishOnboardingLocally()
                 Task { @MainActor in
                     await app.completeOnboarding()
                     awaitingPaywall = false; finishing = false

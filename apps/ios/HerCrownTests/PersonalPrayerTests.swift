@@ -6,6 +6,26 @@ import SwiftUI
 
 final class PersonalPrayerTests: XCTestCase {
     @MainActor
+    func testOnboardingExitSelectsReaderWithoutGrantingPlus() {
+        let defaults = UserDefaults.standard
+        let previous = defaults.object(forKey: "hc.onboardingCompleted")
+        defer {
+            if let previous { defaults.set(previous, forKey: "hc.onboardingCompleted") }
+            else { defaults.removeObject(forKey: "hc.onboardingCompleted") }
+        }
+        let app = AppModel()
+        app.onboardingCompleted = false
+        app.requestedTab = .home
+        app.finishOnboardingLocally()
+        XCTAssertTrue(app.onboardingCompleted)
+        XCTAssertEqual(app.requestedTab, .bible)
+        XCTAssertFalse(app.membership.premium)
+        app.requestedTab = nil
+        app.finishOnboardingLocally()
+        XCTAssertNil(app.requestedTab, "A later server sync must not reset navigation again")
+    }
+
+    @MainActor
     func testDemoAutoplaysAfterReadinessAndRewindsOnReentry() async throws {
         let playback = DemoPlayback()
         playback.setActive(true, autoplay: true)

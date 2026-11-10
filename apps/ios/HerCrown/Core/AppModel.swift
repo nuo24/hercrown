@@ -355,9 +355,15 @@ final class AppModel {
     // MARK: Onboarding
 
     /// Marks onboarding complete locally at once (so it never shows again) and on the server (first completion counts).
-    func completeOnboarding() async {
+    func finishOnboardingLocally() {
+        guard !onboardingCompleted else { return }
+        requestedTab = .bible
         onboardingCompleted = true
         UserDefaults.standard.set(true, forKey: "hc.onboardingCompleted")
+    }
+
+    func completeOnboarding() async {
+        finishOnboardingLocally()
         if api.token == nil { try? await signInAsGuest() }
         _ = try? await api.send("POST", "/me/onboarding/complete")
     }
