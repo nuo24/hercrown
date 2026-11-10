@@ -100,7 +100,7 @@ struct HomeView: View {
         }
         .alert("Couldn’t delete the note", isPresented: $deleteFailed) { Button("OK", role: .cancel) {} }
         .sheet(isPresented: $showingStreak) { StreakSheet(model: model).presentationDetents([.large]) }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
+        .fullScreenCover(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .sheet(isPresented: $showingPlans, onDismiss: {
             if let plan = pendingPlan { pendingPlan = nil; openPlan = plan }
         }) { PlansListSheet(model: model) { plan in pendingPlan = plan; showingPlans = false }.presentationDetents([.large]) }

@@ -64,7 +64,7 @@ struct ReaderView: View {
         .sheet(item: $reflectRef) { ref in
             ReflectionSheet(ref: ref, translation: model.translation).presentationDetents([.large])
         }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
+        .fullScreenCover(isPresented: $showingSaved) { SavedSheet(translation: model.translation) }
         .sheet(isPresented: $showingBookmarks) {
             ReaderBookmarks(current: model.currentRef) { ref in
                 jump(to: ref)

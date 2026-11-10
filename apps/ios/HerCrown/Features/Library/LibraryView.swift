@@ -13,7 +13,16 @@ struct SavedSheet: View {
     let translation: String
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.colorScheme) private var scheme
+    @Environment(\.colorScheme) private var inheritedScheme
+
+    private var preferredScheme: ColorScheme? {
+        switch app.preferences.appearance {
+        case "light": .light
+        case "dark": .dark
+        default: nil
+        }
+    }
+    private var scheme: ColorScheme { preferredScheme ?? inheritedScheme }
 
     enum Section: String, CaseIterable, Identifiable { case verses = "Verses", notes = "Notes", studies = "Studies", studied = "Studied"; var id: String { rawValue } }
     @State private var section: Section = .verses
@@ -34,7 +43,7 @@ struct SavedSheet: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Theme.canvas(scheme)
+                Theme.canvas(scheme).ignoresSafeArea()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         HStack(spacing: 18) {
@@ -65,6 +74,7 @@ struct SavedSheet: View {
             ReflectionSheet(ref: ref, translation: translation, notesOnly: true)
                 .presentationDetents([.large])
         }
+        .preferredColorScheme(preferredScheme)
         .task { await load() }
         .task(id: section) { await loadSection() }
     }

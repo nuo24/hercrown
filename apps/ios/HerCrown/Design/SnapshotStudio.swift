@@ -142,7 +142,7 @@ struct VerseSnapshotView: View {
                         }.accessibilityLabel(downloaded ? "Snapshot saved to Photos" : "Download snapshot").disabled(downloading)
                     }
                     Button { captionFocused = false; if widgetMode { saveWidget() } else { export() } } label: {
-                        Label(widgetMode ? (widgetSaved ? "Widget design saved" : "Save widget design") : "Share snapshot", systemImage: widgetMode ? "checkmark" : "square.and.arrow.up").frame(maxWidth: .infinity)
+                        Label(widgetMode ? (widgetSaved ? "Widget design saved" : "Save widget design") : "Share snapshot", systemImage: widgetMode ? "square.grid.2x2" : "square.and.arrow.up").frame(maxWidth: .infinity)
                     }.buttonStyle(CapsuleButtonStyle())
                 }
                 Text(widgetMode ? "\(design.format.replacingOccurrences(of: "Widget ", with: "")) widget · Your widget verse" : "\(design.exportSize) PNG").font(.ui(10)).foregroundStyle(Theme.muted(scheme))

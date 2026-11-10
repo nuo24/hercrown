@@ -54,7 +54,7 @@ struct InsightsSheet: View {
                             showingWidgetStudio = true
                         } label: {
                             HStack(spacing: 14) {
-                                Image(systemName: "book").font(.system(size: 22)).frame(width: 25)
+                                Image(systemName: "square.grid.2x2").font(.system(size: 22)).frame(width: 25)
                                 Text("Set as your widget verse").font(.system(size: 16))
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(.tertiary)

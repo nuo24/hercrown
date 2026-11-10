@@ -93,7 +93,7 @@ struct CommunityView: View {
         }
         .scrollIndicators(.hidden).background(Theme.canvas(scheme)).foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
         .task(id: app.me?.user.id) { await load() }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.preferences.translation) }
+        .fullScreenCover(isPresented: $showingSaved) { SavedSheet(translation: app.preferences.translation) }
         .sheet(isPresented: $showingSuggestions) { NavigationStack { CommunitySuggestionsView() } }
         .sheet(item: $story, onDismiss: { if let cause = voteAfterStory { voteAfterStory = nil; candidate = cause } }) { cause in
             NavigationStack {

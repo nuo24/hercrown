@@ -45,6 +45,8 @@ struct DiscoverView: View {
     @State private var detail: DiscoverFeed.Card?
     @State private var pendingDetailAction: DetailAction?
     @State private var query = ""
+    @State private var completing: Set<String> = []
+    @State private var fading: Set<String> = []
     @State private var searching = false
     @FocusState private var searchFocused: Bool
 
@@ -151,7 +153,7 @@ struct DiscoverView: View {
         // Reload once she's signed in (a brand-new guest signs in while this tab may already be open).
         .task(id: "\(filter)|\(translation)|\(app.me?.user.id ?? "")") { await load() }
         .onAppear { if let topic = app.discoverTopic { filter = topic; app.discoverTopic = nil } }
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: translation) }
+        .fullScreenCover(isPresented: $showingSaved) { SavedSheet(translation: translation) }
         .sheet(item: $detail, onDismiss: openDetailAction) { card in
             if let ref = VerseRef(card.ref) {
                 InsightsSheet(ref: ref, translation: feed?.translation ?? translation,
@@ -214,11 +216,47 @@ struct DiscoverView: View {
 
     private func markStudied(_ ref: String, accountKey: String) {
         var completed = DiscoverStudied.byAccount(studiedData)
-        guard completed[accountKey]?.contains(ref) != true else { return }
+        completed[accountKey, default: []].removeAll { $0 == ref }
         completed[accountKey, default: []].append(ref)
         guard let data = try? JSONEncoder().encode(completed) else { return }
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.32)) { studiedData = data }
         Task { await Analytics.shared.track("discover_card_read", ["ref": .string(ref)]) }
+    }
+
+    private func complete(_ card: DiscoverFeed.Card) {
+        guard !completing.contains(card.ref) else { return }
+        let owner = accountKey
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
+            completing.insert(card.ref)
+        }
+        Task { @MainActor in
+            if !reduceMotion {
+                try? await Task.sleep(for: .milliseconds(180))
+                withAnimation(.easeOut(duration: 0.24)) { fading.insert(card.ref) }
+                try? await Task.sleep(for: .milliseconds(260))
+            }
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.32)) {
+                markStudied(card.ref, accountKey: owner)
+                fading.remove(card.ref)
+                completing.remove(card.ref)
+            }
+        }
+    }
+
+    private func completionButton(_ card: DiscoverFeed.Card) -> some View {
+        let checked = completing.contains(card.ref) || studied.contains(card.ref)
+        return Button { complete(card) } label: {
+            Image(systemName: checked ? "checkmark.circle.fill" : "checkmark.circle")
+                .font(.system(size: 23, weight: .regular))
+                .foregroundStyle(Theme.text(scheme))
+                .scaleEffect(completing.contains(card.ref) && !reduceMotion ? 1.12 : 1)
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(completing.contains(card.ref))
+        .accessibilityLabel(checked ? "Studied: \(card.label). Move to end" : "Mark \(card.label) as studied")
+        .accessibilityHint("Moves this passage to the bottom of Discover. Your notes stay saved.")
     }
 
     private func feature(_ card: DiscoverFeed.Card) -> some View {
@@ -227,14 +265,17 @@ struct DiscoverView: View {
                 Text(title(for: card)).font(.serif(34, relativeTo: .title)).tracking(-0.6)
                 Text(card.ref == "PSA.23.1" ? "A moment in Psalm 23, just for you and God." : card.label)
                     .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
-                Button { detail = card } label: {
-                    HStack(spacing: 9) {
-                        Text("Begin reading").font(.ui(12, weight: .medium))
-                        Image.glyph("arrow").frame(width: 16, height: 16)
+                HStack {
+                    Button { detail = card } label: {
+                        HStack(spacing: 9) {
+                            Text("Begin reading").font(.ui(12, weight: .medium))
+                            Image.glyph("arrow").frame(width: 16, height: 16)
+                        }
+                        .frame(minHeight: 44)
                     }
-                    .frame(minHeight: 44)
+                    .buttonStyle(.plain)
+                    completionButton(card)
                 }
-                .buttonStyle(.plain)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             Image.illustration(artwork(for: card)).resizable().scaledToFit()
@@ -263,6 +304,7 @@ struct DiscoverView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            completionButton(card)
             Menu {
                 Button(app.isSaved(card.ref) ? "Remove from saved" : "Save passage", systemImage: "heart") { app.toggleSave(card.ref) }
                 Button("Read in The Bible", systemImage: "book") { if let ref = VerseRef(card.ref) { app.openInReader(ref) } }
@@ -311,12 +353,17 @@ struct DiscoverView: View {
     @ViewBuilder private var cards: some View {
         if let feed, feed.filter == requestedFilter {
             let search = query.trimmingCharacters(in: .whitespacesAndNewlines)
-            let remaining = feed.cards.filter { card in
+            let matches = feed.cards.filter { card in
                 if filter == "saved", !app.isSaved(card.ref) { return false }
-                if filter != "saved", studied.contains(card.ref) { return false }
                 return search.isEmpty || [card.label, card.text, card.theme ?? "", title(for: card)]
                     .contains { $0.localizedCaseInsensitiveContains(search) }
             }
+            // Completed passages remain available, in completion order below unread ones.
+            let completedOrder = Dictionary(studied.enumerated().map { ($0.element, $0.offset) }, uniquingKeysWith: { _, last in last })
+            let remaining = matches.filter { completedOrder[$0.ref] == nil }
+                + matches.filter { completedOrder[$0.ref] != nil }.sorted {
+                    completedOrder[$0.ref, default: 0] < completedOrder[$1.ref, default: 0]
+                }
             if remaining.isEmpty {
                 VStack(spacing: 10) {
                     Image.illustration("lantern").resizable().scaledToFit().frame(height: 90).accessibilityHidden(true)
@@ -326,9 +373,9 @@ struct DiscoverView: View {
                 .frame(maxWidth: .infinity).padding(.vertical, 40)
             } else {
                 let featured = filter == "for-you" && search.isEmpty
-                    ? remaining.first(where: { $0.ref == "PSA.23.1" }) ?? remaining.first
+                    ? remaining.first(where: { !studied.contains($0.ref) })
                     : nil
-                if let featured { feature(featured) }
+                if let featured { feature(featured).opacity(fading.contains(featured.ref) ? 0 : 1) }
                 HStack {
                     Text("For your everyday").font(.ui(13, weight: .medium))
                     Spacer()
@@ -337,7 +384,7 @@ struct DiscoverView: View {
                 .padding(.top, 19)
                 .overlay(alignment: .top) { Divider() }
                 ForEach(remaining.filter { $0.id != featured?.id }) { card in
-                    entry(card).transition(.opacity)
+                    entry(card).opacity(fading.contains(card.ref) ? 0 : 1).transition(.opacity)
                 }
             }
         } else if failed {

@@ -48,7 +48,7 @@ private struct VerseShareOptions: View {
                     Divider()
                     Button { studio = .snapshot } label: { row("Snapshot Studio", icon: "square.and.arrow.up", subtitle: "Create an image of this verse") }
                     Divider()
-                    Button { studio = .widget } label: { row("Set as widget verse", icon: "bookmark") }
+                    Button { studio = .widget } label: { row("Set as widget verse", icon: "square.grid.2x2") }
                 }
             }.padding(.horizontal, 22).padding(.top, 12).padding(.bottom, 24)
         }

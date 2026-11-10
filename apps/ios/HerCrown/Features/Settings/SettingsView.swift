@@ -182,7 +182,7 @@ struct SettingsView: View {
         }
         .environment(\.colorScheme, scheme)
 
-        .sheet(isPresented: $showingSaved) { SavedSheet(translation: app.readingTranslation) }
+        .fullScreenCover(isPresented: $showingSaved) { SavedSheet(translation: app.readingTranslation) }
         .sheet(item: $legal) { page in SafariView(url: page.url).ignoresSafeArea() }
         .task { showsTestSession = await AppModel.allowsTestSessions() }
         .alert("Couldn’t switch test accounts", isPresented: $testSessionError) {
@@ -955,6 +955,7 @@ private struct AvatarCropView: View {
     @GestureState private var magnification: CGFloat = 1
     @State private var error: String?
     @State private var saving = false
+    @State private var windowInsets = UIEdgeInsets.zero
 
     private func position(side: CGFloat, zoom: CGFloat, offset: CGSize) -> (CGFloat, CGSize) {
         let scale = max(side / image.size.width, side / image.size.height) * zoom
@@ -965,10 +966,13 @@ private struct AvatarCropView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let side = max(1, min(geometry.size.width - 40, geometry.size.height - 200))
+            let availableHeight = max(1, geometry.size.height - windowInsets.top - windowInsets.bottom - 60)
+            let side = max(1, min(geometry.size.width - 40, availableHeight - 200))
             let liveZoom = min(6, max(1, zoom * magnification))
             let live = position(side: side, zoom: liveZoom, offset: CGSize(width: offset.width + drag.width, height: offset.height + drag.height))
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
+                cropHeader
+                VStack(spacing: 24) {
                 Spacer(minLength: 0)
                 ZStack {
                     Image(uiImage: image).resizable()
@@ -1014,9 +1018,22 @@ private struct AvatarCropView: View {
                     .background(.white, in: Capsule())
                     .contentShape(Capsule())
                 }.buttonStyle(.plain).disabled(saving).padding(.bottom, 18)
-            }.padding(.horizontal, 20).frame(width: geometry.size.width, height: geometry.size.height)
+                }.padding(.horizontal, 20).frame(height: availableHeight)
+            }
+            .padding(.top, windowInsets.top)
+            .padding(.bottom, windowInsets.bottom)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .background(CropWindowInsets { windowInsets = $0 })
         }
-        .safeAreaInset(edge: .top, spacing: 0) {
+        .ignoresSafeArea()
+        .background(Color.black.ignoresSafeArea()).foregroundStyle(.white).preferredColorScheme(.dark)
+        .interactiveDismissDisabled(saving)
+        .alert("Photo wasn’t saved", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+            Button("OK", role: .cancel) { error = nil }
+        } message: { Text(error ?? "Please try again.") }
+    }
+
+    private var cropHeader: some View {
             ZStack {
                 Text("Adjust photo").font(.ui(18, weight: .medium))
                 HStack {
@@ -1030,11 +1047,34 @@ private struct AvatarCropView: View {
                 }
             }.padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 8)
                 .background(Color.black)
+    }
+}
+
+/// A full-screen cover can briefly inherit zero SwiftUI safe-area insets from its
+/// presenting sheet. Measure only the overlap with the actual window's system areas.
+private struct CropWindowInsets: UIViewRepresentable {
+    let onChange: (UIEdgeInsets) -> Void
+
+    func makeUIView(context: Context) -> Probe { Probe() }
+    func updateUIView(_ view: Probe, context: Context) {
+        view.onChange = onChange
+        view.setNeedsLayout()
+    }
+
+    final class Probe: UIView {
+        var onChange: ((UIEdgeInsets) -> Void)?
+        private var reported = UIEdgeInsets.zero
+        override func didMoveToWindow() { super.didMoveToWindow(); setNeedsLayout() }
+        override func safeAreaInsetsDidChange() { super.safeAreaInsetsDidChange(); setNeedsLayout() }
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            guard let window else { return }
+            let frame = convert(bounds, to: window)
+            let insets = UIEdgeInsets(top: max(0, window.safeAreaInsets.top - frame.minY), left: 0,
+                                      bottom: max(0, frame.maxY - (window.bounds.height - window.safeAreaInsets.bottom)), right: 0)
+            guard insets != reported else { return }
+            reported = insets
+            DispatchQueue.main.async { [weak self] in self?.onChange?(insets) }
         }
-        .background(Color.black.ignoresSafeArea()).foregroundStyle(.white).preferredColorScheme(.dark)
-        .interactiveDismissDisabled(saving)
-        .alert("Photo wasn’t saved", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
-            Button("OK", role: .cancel) { error = nil }
-        } message: { Text(error ?? "Please try again.") }
     }
 }
