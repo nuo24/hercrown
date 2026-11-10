@@ -600,3 +600,4 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 ### Nov 10: red heart bloom refinement
 - Replaced the monochrome like pulse with a red gradient heart: spring bloom, delicate expanding ring and six small sparks, then an upward drift and fade. The saved reader heart is red too. Reduce Motion omits the spatial animation.
 - Captured a held expanded frame from the native simulator for visual review (debug-only preview flag, reset afterward). Simulator build and required typecheck/tests passed (198 tests). Not uploaded to TestFlight.
+- Follow-up: removed the decorative ring and all sparkles from the like effect at the owner’s request. Kept only the red heart bloom, upward drift and fade. Visually checked in the simulator; build, typecheck and 198 tests passed.

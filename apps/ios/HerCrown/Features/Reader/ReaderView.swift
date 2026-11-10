@@ -342,7 +342,7 @@ struct VersePage: View {
     }
 }
 
-/// A brief bloom, a soft ring and tiny sparks, then an upward drifting farewell.
+/// A red heart blooms, then drifts upward and fades.
 private struct VerseLikeBloom: View {
     let reduceMotion: Bool
     let holdForPreview: Bool
@@ -352,19 +352,6 @@ private struct VerseLikeBloom: View {
 
     var body: some View {
         ZStack {
-            Circle().stroke(red.opacity(0.25), lineWidth: 1.5)
-                .frame(width: 108, height: 108)
-                .scaleEffect(bloomed ? 1.35 : 0.4)
-                .opacity(departing ? 0 : 1)
-            ForEach(0..<6) { index in
-                let angle = Double(index) * .pi / 3 - .pi / 2
-                Image(systemName: index.isMultiple(of: 2) ? "sparkle" : "circle.fill")
-                    .font(.system(size: index.isMultiple(of: 2) ? 13 : 5))
-                    .foregroundStyle(red.opacity(0.7))
-                    .offset(x: cos(angle) * (bloomed ? 70 : 20),
-                            y: sin(angle) * (bloomed ? 70 : 20))
-                    .opacity(departing ? 0 : 1)
-            }
             Image(systemName: "heart.fill")
                 .font(.system(size: 78))
                 .foregroundStyle(LinearGradient(colors: [Color(red: 1, green: 0.36, blue: 0.43), red], startPoint: .topLeading, endPoint: .bottomTrailing))
