@@ -69,6 +69,11 @@ struct VerseSnapshotView: View {
     @State private var downloading = false
     @State private var dragOrigin: CGPoint?
     @State private var pinchSize: Double?
+    @State private var savedDesign: SnapshotDesign?
+    @State private var photoRevision = UUID()
+    @State private var savedPhotoRevision = UUID()
+    @State private var showingCloseConfirmation = false
+    private var hasUnsavedChanges: Bool { savedDesign.map { $0 != design || photoRevision != savedPhotoRevision } ?? false }
     private var ink: Color { Theme.text(scheme) }
     private var translationLabel: String { BibleStore.names.first(where: { $0.value == translation })?.key.uppercased() ?? translation.uppercased() }
     private var watermark: Bool { !widgetMode && design.watermark }
@@ -150,6 +155,8 @@ struct VerseSnapshotView: View {
             else if widgetMode { design.format = "Widget Medium"; design.art = [SnapshotArt(asset: "olive", x: 0.5, y: 0.18, size: 0.12)] }
             if widgetMode && !design.format.hasPrefix("Widget ") { design.format = "Widget Medium" }
             photo = UIImage(contentsOfFile: photoURL.path)
+            savedDesign = design
+            savedPhotoRevision = photoRevision
             #if DEBUG
             if let review = UserDefaults.standard.string(forKey: "hcStudioReview"), ["Background", "Text", "Illustrations"].contains(review) { tab = review; expanded = true }
             if UserDefaults.standard.bool(forKey: "hcStudioCaptionFocus") { tab = "Text"; expanded = true; captionFocused = true }
@@ -157,13 +164,45 @@ struct VerseSnapshotView: View {
             if widgetMode { await Analytics.shared.track("widget_studio_opened") }
             else { await Analytics.shared.track("verse_snapshot_opened") }
         }
-        .onDisappear { if !widgetMode { save() } }
         .onChange(of: design) { _, _ in widgetSaved = false; downloaded = false }
         .background(GeometryReader { geometry in Color.clear.onAppear { studioHeight = geometry.size.height }.onChange(of: geometry.size.height) { _, height in studioHeight = height } })
         .onChange(of: photoSelection) { _, item in Task { await loadPhoto(item) } }
         .sheet(isPresented: $sharing) { if let rendered { SnapshotShareSheet(image: rendered) } }
         .toolbar(.hidden, for: .navigationBar)
+        .interactiveDismissDisabled(hasUnsavedChanges)
+        .disabled(showingCloseConfirmation)
+        .accessibilityHidden(showingCloseConfirmation)
+        .overlay {
+            if showingCloseConfirmation { closeConfirmation.transition(.opacity) }
+        }
 
+    }
+    private var closeConfirmation: some View {
+        ZStack(alignment: .bottom) {
+            Color.black.opacity(0.48).ignoresSafeArea()
+            VStack(spacing: 10) {
+                Text("Keep your changes?").font(.serif(28)).accessibilityAddTraits(.isHeader)
+                Text("Save this design, or return to the last saved version.")
+                    .font(.ui(13)).foregroundStyle(Theme.muted(scheme))
+                    .multilineTextAlignment(.center).padding(.bottom, 10)
+                Button("Save & Close") {
+                    showingCloseConfirmation = false
+                    if widgetMode { if saveWidget() { dismiss() } }
+                    else if save() { dismiss() }
+                }.buttonStyle(CapsuleButtonStyle()).padding(.bottom, 5)
+                Button("Discard changes", role: .destructive) { dismiss() }
+                    .font(.ui(14)).foregroundStyle(Color(hex: 0xAD4343)).frame(maxWidth: .infinity, minHeight: 48)
+                Button("Keep editing") { withAnimation(.easeOut(duration: 0.18)) { showingCloseConfirmation = false } }
+                    .font(.ui(14, weight: .medium)).frame(maxWidth: .infinity, minHeight: 48)
+            }
+            .padding(26).frame(maxWidth: .infinity)
+            .background(Theme.canvas(scheme), in: RoundedRectangle(cornerRadius: 24))
+            .foregroundStyle(ink).buttonStyle(.plain)
+            .padding(.horizontal, 15).padding(.bottom, 15)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("studioUnsavedChanges")
+            .accessibilityAddTraits(.isModal)
+        }
     }
     private var trayHeight: CGFloat {
         let available = max(96, studioHeight - 180)
@@ -232,7 +271,7 @@ struct VerseSnapshotView: View {
                         Button("Reset design") {
                             design = SnapshotDesign()
                             if widgetMode { design.format = "Widget Medium"; design.art = [SnapshotArt(asset: "olive", x: 0.5, y: 0.18, size: 0.12)] }
-                            photo = nil; selected = nil
+                            photo = nil; photoRevision = UUID(); selected = nil
                         }.font(.ui(12)).frame(maxWidth: .infinity, minHeight: 44)
                     }.padding(.horizontal, 22).padding(.top, 16).padding(.bottom, 20)
                 }.scrollDismissesKeyboard(.interactively)
@@ -251,7 +290,7 @@ struct VerseSnapshotView: View {
                 PhotosPicker(selection: $photoSelection, matching: .images) { Label("Use a photo", systemImage: "photo").font(.ui(12)) }
             }
             if photo != nil {
-                Button("Remove photo") { photo = nil }.font(.ui(13))
+                Button("Remove photo") { photo = nil; photoRevision = UUID() }.font(.ui(13))
                 control("Photo shade", value: $design.photoShade, range: 0...70)
                 control("Photo position", value: $design.photoFocus, range: 0...100)
             } else {
@@ -409,21 +448,34 @@ struct VerseSnapshotView: View {
                 .frame(height: 36).accessibilityLabel(label)
         }.font(.ui(13))
     }
-    private func save() {
-        UserDefaults.standard.set(try? JSONEncoder().encode(design), forKey: key)
-        if let data = photo?.jpegData(compressionQuality: 0.85) {
-            try? FileManager.default.createDirectory(at: photoURL.deletingLastPathComponent(), withIntermediateDirectories: true)
-            try? data.write(to: photoURL, options: .atomic)
-        } else { try? FileManager.default.removeItem(at: photoURL) }
+    @discardableResult private func save() -> Bool {
+        do {
+            let data = try JSONEncoder().encode(design)
+            if let imageData = photo?.jpegData(compressionQuality: 0.85) {
+                try FileManager.default.createDirectory(at: photoURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+                try imageData.write(to: photoURL, options: .atomic)
+            } else if FileManager.default.fileExists(atPath: photoURL.path) {
+                try FileManager.default.removeItem(at: photoURL)
+            }
+            UserDefaults.standard.set(data, forKey: key)
+            savedDesign = design
+            savedPhotoRevision = photoRevision
+            failure = nil
+            return true
+        } catch {
+            failure = "Your design couldn’t save. Please try again."
+            return false
+        }
     }
     @MainActor private func close() {
-        if widgetMode { if saveWidget() { dismiss() } }
-        else { save(); dismiss() }
+        captionFocused = false
+        guard hasUnsavedChanges else { dismiss(); return }
+        withAnimation(.easeOut(duration: 0.18)) { showingCloseConfirmation = true }
     }
     @MainActor @discardableResult private func saveWidget() -> Bool {
         do {
             try WidgetDesignStore.publish(design: design, photo: photo, text: text, reference: reference, translation: translation, owner: app.me?.user.id)
-            save(); failure = nil; widgetSaved = true
+            guard save() else { return false }; failure = nil; widgetSaved = true
             Task { await Analytics.shared.track("widget_studio_saved", ["size": .string(design.format.replacingOccurrences(of: "Widget ", with: "").lowercased())]) }
             return true
         } catch { failure = "Your widget design couldn’t save. Please try again."; return false }
@@ -433,6 +485,7 @@ struct VerseSnapshotView: View {
         guard let data = try? await item.loadTransferable(type: Data.self), data.count <= 20_000_000, let image = UIImage(data: data) else { failure = "Choose an image smaller than 20 MB."; return }
         let size = image.size; let ratio = min(1, 2400 / max(size.width, size.height))
         photo = UIGraphicsImageRenderer(size: CGSize(width: size.width * ratio, height: size.height * ratio)).image { _ in image.draw(in: CGRect(x: 0, y: 0, width: size.width * ratio, height: size.height * ratio)) }
+        photoRevision = UUID()
         failure = nil
     }
     @MainActor private func download() async {
