@@ -30,4 +30,4 @@ Reflection prompts and devotionals are written for Her Crown. Devotionals drafte
 
 ## Community photographs
 
-Community nominee profiles are researched from the organizations’ official program pages. Listing an independent nominee does not imply endorsement or partnership. Organization photographs in the local design review are pending reuse approval and must not be published until approval and applicable credits are recorded.
+Community nominee profiles are researched from the organizations’ official program pages. Listing an independent nominee does not imply endorsement or partnership. The owner confirmed photo-sharing permission for Sharing the Mission, House of Grace and Meninadança on November 10, 2026. Mercy Multiplied uses a representative [Pexels photograph (6646918)](https://www.pexels.com/photo/6646918/) under the [Pexels License](https://www.pexels.com/license/); the people pictured are not identified as Mercy staff or participants. No endorsement is implied.

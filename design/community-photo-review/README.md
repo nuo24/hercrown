@@ -37,3 +37,8 @@ Preferred visual direction: recognizable program activity, warm group portraits,
 ## Selected revision, November 10
 
 Owner selected Mercy Multiplied (USA), Sharing the Mission (Nigeria), House of Grace (Thailand), and Meninadança (Brazil). Native cards and the local web preview now use their official program photos. These assets are bundled locally for review only; public reuse permission and photo-specific credits remain unconfirmed. Do not distribute this revision until cleared. Migration 0016 retains all historical vote identifiers and uses a fresh charities-v2 ballot so old votes are not reassigned. Staging and production have not received this revision. Earlier nominee and stock-image notes above are historical.
+
+
+### Permission update from owner, November 10
+
+Owner confirms photo-sharing permission for the selected Meninadança, Sharing the Mission and House of Grace images. This supersedes the pending-permission notes for those three selections; permission correspondence is held by the owner and has not been independently inspected. Mercy Multiplied permission is not confirmed: removed its official program photo from native/preview card assets and substituted existing Pexels stock photo 6646918, explicitly identified as representative, not Mercy participants or staff. Pexels license checked at https://www.pexels.com/license/; do not imply endorsement. No staging/production deployment or TestFlight upload in this update.
