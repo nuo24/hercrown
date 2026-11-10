@@ -47,6 +47,7 @@ struct DiscoverView: View {
     @State private var query = ""
     @State private var completing: Set<String> = []
     @State private var fading: Set<String> = []
+    @State private var featureVisible = true
     @State private var searching = false
     @FocusState private var searchFocused: Bool
 
@@ -186,15 +187,16 @@ struct DiscoverView: View {
     private func load() async {
         if feed?.translation != translation { feed = nil }
         let selected = filter
+        let edition = translation
         let source = requestedFilter
         let encoded = source.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? source
         do {
-            let response: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(translation)")
-            guard !Task.isCancelled, filter == selected else { return }
+            let response: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(translation)&includeText=false")
+            guard !Task.isCancelled, filter == selected, translation == edition else { return }
             feed = response
             failed = false
         } catch {
-            guard !Task.isCancelled, filter == selected else { return }
+            guard !Task.isCancelled, filter == selected, translation == edition else { return }
             failed = feed?.filter != source
         }
         await Analytics.shared.track("discover_viewed", ["filter": .string(selected)])
@@ -207,7 +209,7 @@ struct DiscoverView: View {
         let selected = filter; let edition = translation
         let encoded = requestedFilter.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? requestedFilter
         do {
-            let next: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(edition)&offset=\(offset)")
+            let next: DiscoverFeed = try await app.api.get("/discover?filter=\(encoded)&translation=\(edition)&offset=\(offset)&includeText=false")
             guard !Task.isCancelled, filter == selected, translation == edition else { return }
             feed = DiscoverFeed(filter: next.filter, filters: next.filters, translation: next.translation,
                 cards: previous.cards + next.cards.filter { c in !previous.cards.contains { $0.id == c.id } }, nextOffset: next.nextOffset)
@@ -219,13 +221,15 @@ struct DiscoverView: View {
         completed[accountKey, default: []].removeAll { $0 == ref }
         completed[accountKey, default: []].append(ref)
         guard let data = try? JSONEncoder().encode(completed) else { return }
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.32)) { studiedData = data }
+        studiedData = data
         Task { await Analytics.shared.track("discover_card_read", ["ref": .string(ref)]) }
     }
 
     private func complete(_ card: DiscoverFeed.Card) {
         guard !completing.contains(card.ref) else { return }
         let owner = accountKey
+        let wasFeatured = filter == "for-you" && query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && feed?.cards.first(where: { !studied.contains($0.ref) })?.ref == card.ref
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.16)) {
             completing.insert(card.ref)
         }
@@ -235,10 +239,20 @@ struct DiscoverView: View {
                 withAnimation(.easeOut(duration: 0.24)) { fading.insert(card.ref) }
                 try? await Task.sleep(for: .milliseconds(260))
             }
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.32)) {
+            // Swap identities after the outgoing card is invisible. Animating this
+            // mutation reused the featured slot and briefly showed the incoming title
+            // with the outgoing artwork/opacity.
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                if wasFeatured && !reduceMotion { featureVisible = false }
                 markStudied(card.ref, accountKey: owner)
                 fading.remove(card.ref)
                 completing.remove(card.ref)
+            }
+            if wasFeatured && !reduceMotion {
+                try? await Task.sleep(for: .milliseconds(30))
+                withAnimation(.easeIn(duration: 0.24)) { featureVisible = true }
             }
         }
     }
@@ -381,7 +395,12 @@ struct DiscoverView: View {
                 let featured = filter == "for-you" && search.isEmpty
                     ? remaining.first(where: { !studied.contains($0.ref) })
                     : nil
-                if let featured { feature(featured).opacity(fading.contains(featured.ref) ? 0 : 1) }
+                if let featured {
+                    feature(featured)
+                        .id(featured.ref)
+                        .opacity(fading.contains(featured.ref) || !featureVisible ? 0 : 1)
+                        .transition(.opacity)
+                }
                 HStack {
                     Text("For your everyday").font(.ui(13, weight: .medium))
                     Spacer()

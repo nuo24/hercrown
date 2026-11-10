@@ -157,17 +157,21 @@ export async function getDiscover(url: URL, env: Env, user: SessionUser) {
   }
 
   const offset = Math.max(0, Math.floor(Number(url.searchParams.get("offset")) || 0));
-  const nextOffset = !LOCAL.has(translation) && offset + 12 < chosen.length ? offset + 12 : null;
-  if (!LOCAL.has(translation)) chosen = chosen.slice(offset, offset + 12);
+  // Native Discover lists editorial titles and references, not Scripture text. Load its
+  // catalog without contacting the translation provider; the opened passage fetches
+  // the selected edition separately. Existing clients retain the text-filled response.
+  const catalogOnly = url.searchParams.get("includeText") === "false";
+  const nextOffset = !catalogOnly && !LOCAL.has(translation) && offset + 12 < chosen.length ? offset + 12 : null;
+  if (!catalogOnly && !LOCAL.has(translation)) chosen = chosen.slice(offset, offset + 12);
   const [texts, saved] = await Promise.all([
-    textsFor(env, translation, chosen.map((c) => c.ref)),
+    catalogOnly ? Promise.resolve(new Map<string, PassageContent>()) : textsFor(env, translation, chosen.map((c) => c.ref)),
     env.DB.prepare("SELECT ref FROM saved_passages WHERE user_id = ?1").bind(user.id).all<{ ref: string }>(),
   ]);
   const savedRefs = new Set(saved.results.map((r) => r.ref));
   return Response.json({
     filter, filters: filters(plan), translation, plan, nextOffset,
-    cards: chosen.filter((c) => texts.has(c.ref)).map((c) => ({
-      id: c.ref, ref: c.ref, label: texts.get(c.ref)!.label, theme: c.theme, text: texts.get(c.ref)!.text, copyright: texts.get(c.ref)!.copyright ?? null, reflection: c.reflection, saved: savedRefs.has(c.ref),
+    cards: chosen.filter((c) => catalogOnly || texts.has(c.ref)).map((c) => ({
+      id: c.ref, ref: c.ref, label: texts.get(c.ref)?.label ?? label(c.ref), theme: c.theme, text: texts.get(c.ref)?.text ?? "", copyright: texts.get(c.ref)?.copyright ?? null, reflection: c.reflection, saved: savedRefs.has(c.ref),
     })),
   });
 }

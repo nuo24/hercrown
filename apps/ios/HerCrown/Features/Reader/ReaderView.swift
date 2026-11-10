@@ -35,14 +35,17 @@ struct ReaderView: View {
                 .padding(.top, 94)
                 .padding(.bottom, 65)
                 .padding(.leading, 10)
-            toolbar
         }
         .overlay {
             if model.loading || model.failure != nil {
                 ZStack {
                     AppGradient()
                     VStack(spacing: 16) {
-                        if model.loading { ProgressView("Loading translation…") }
+                        if model.loading {
+                            ProgressView("Loading translation…")
+                            Text("Online translations need a connection.").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                            Button("Read KJV offline") { model.setTranslation("kjv") }
+                        }
                         else {
                             Text(model.failure ?? "Unable to load translation").font(.ui(14)).multilineTextAlignment(.center)
                             Button("Try again") { model.retry() }
@@ -52,6 +55,7 @@ struct ReaderView: View {
                 }
             }
         }
+        .overlay(alignment: .top) { toolbar }
         .sheet(isPresented: $showingChapters) {
             ChapterPicker(current: model.chapter) { book, number in jump(to: VerseRef(book: book, chapter: number, verse: 1)); showingChapters = false }
                 .presentationDetents([.large])

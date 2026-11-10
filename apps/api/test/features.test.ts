@@ -328,3 +328,17 @@ describe("licensed editions across daily content", () => {
     expect(devotional.translation).toBe(edition); expect(devotional.passage).toContain("Provider fixture");
   });
 });
+
+
+describe("Discover catalog availability", () => {
+  it.each(["nkjv", "msg", "amp", "nlt"])("lists the full %s catalog without waiting for the provider", async edition => {
+    const spy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("Provider unavailable"));
+    const user = { id: userId } as Parameters<typeof getDiscover>[2];
+    const feed = await (await getDiscover(new URL(`https://test/discover?translation=${edition}&includeText=false`), env, user)).json<any>();
+    expect(feed.translation).toBe(edition);
+    expect(feed.cards.length).toBeGreaterThan(12);
+    expect(feed.nextOffset).toBeNull();
+    expect(feed.cards.every((card: any) => card.ref && card.label && card.text === "")).toBe(true);
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
