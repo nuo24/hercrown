@@ -43,15 +43,17 @@ struct ReaderView: View {
                     VStack(spacing: 16) {
                         if model.loading {
                             ProgressView("Loading translation…")
-                            Text("Online translations need a connection.").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
-                            offlineTranslations
                         }
                         else {
                             Text(model.failure ?? "Unable to load translation").font(.ui(14)).multilineTextAlignment(.center)
                             Button("Try again") { model.retry() }
+                                .buttonStyle(CapsuleButtonStyle(kind: .secondary))
                             offlineTranslations
                         }
-                    }.padding(32)
+                    }
+                    .foregroundStyle(Theme.text(scheme))
+                    .tint(Theme.text(scheme))
+                    .padding(32)
                 }
             }
         }
@@ -110,9 +112,20 @@ struct ReaderView: View {
     private var offlineTranslations: some View {
         VStack(spacing: 12) {
             ForEach(["kjv", "bsb", "web"], id: \.self) { id in
-                Button("Read \(id.uppercased()) offline") { model.setTranslation(id) }
-                    .font(.ui(14, weight: .medium))
-                    .frame(minHeight: 44)
+                Button { model.setTranslation(id) } label: {
+                    HStack {
+                        Text(BibleStore.names[id] ?? id.uppercased()).font(.ui(14, weight: .medium))
+                        Spacer()
+                        Text(id.uppercased()).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    }
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .foregroundStyle(Theme.text(scheme))
+                    .background(RoundedRectangle(cornerRadius: 12).fill(Theme.canvas(scheme)))
+                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border(scheme), lineWidth: 1))
+                    .contentShape(RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
             }
         }
     }

@@ -46,7 +46,12 @@ final class ReaderModel {
                 apply(next, verse: verse)
             } catch {
                 guard !Task.isCancelled else { return }
-                loading = false; failure = "This translation needs a connection. \(error.localizedDescription)"
+                loading = false
+                if let apiError = error as? APIError, apiError.status == 0 {
+                    failure = "You’re offline. Choose a bundled Bible to keep reading."
+                } else {
+                    failure = "We couldn’t load this translation right now. Try again, or choose a bundled Bible below."
+                }
             }
         }
     }
