@@ -579,3 +579,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Clean archive source `8df0168` from `/tmp/hercrown-build28-source`; archive `/private/tmp/hercrown-build28/HerCrown.xcarchive`. Archive succeeded; verified app version 1.0 (28) and staging API URL in the archived executable.
 - Started Xcode Organizer App Store Connect distribution (eligible for internal and external TestFlight). Latest visible stage: Waiting for App Store Connect analysis response, Uploading. Mac then locked; requested owner unlock. Apple API does not yet return build 28, so delivery and tester access are not confirmed.
 - Prepared `/private/tmp/hercrown-external28.mjs` to save build notes, assign existing tester groups and submit beta review once Apple returns the valid build. No production deployment or public release.
+
+
+### Nov 9: build 28 delivered to TestFlight
+
+- Xcode Organizer confirmed HerCrown 1.0 (28) uploaded. Apple build `2015c91e-ecd8-4dd8-9dca-cc288f3fbbb6` processed VALID, APP_STORE_ELIGIBLE. Clean archive source `8df0168`, archive `/private/tmp/hercrown-build28/HerCrown.xcarchive`, Release + HC_STAGING_TESTFLIGHT.
+- Saved build-specific testing notes, enabled automatic tester notifications, assigned existing internal groups and external Beta, and submitted beta review. Final Apple API status confirms internal IN_BETA_TESTING and external IN_BETA_TESTING.
+- Includes Discover circle-check completion/fade/reordering with persisted progress, full-screen appearance-aware Saved passages, four-square widget action icons and the measured-window-safe-area photo crop header. Prior feature checks passed npm run check, all 198 API tests, simulator build and interactive checks. Real-device crop controls remain an owner verification item. No production deploy or public release.
