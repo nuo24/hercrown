@@ -44,12 +44,12 @@ struct ReaderView: View {
                         if model.loading {
                             ProgressView("Loading translation…")
                             Text("Online translations need a connection.").font(.ui(12)).foregroundStyle(Theme.muted(scheme))
-                            Button("Read KJV offline") { model.setTranslation("kjv") }
+                            offlineTranslations
                         }
                         else {
                             Text(model.failure ?? "Unable to load translation").font(.ui(14)).multilineTextAlignment(.center)
                             Button("Try again") { model.retry() }
-                            Button("Read KJV offline") { model.setTranslation("kjv") }
+                            offlineTranslations
                         }
                     }.padding(32)
                 }
@@ -105,6 +105,16 @@ struct ReaderView: View {
             else { studyRef = model.currentRef }
         }
         #endif
+    }
+
+    private var offlineTranslations: some View {
+        VStack(spacing: 12) {
+            ForEach(["kjv", "bsb", "web"], id: \.self) { id in
+                Button("Read \(id.uppercased()) offline") { model.setTranslation(id) }
+                    .font(.ui(14, weight: .medium))
+                    .frame(minHeight: 44)
+            }
+        }
     }
 
     // MARK: Toolbar

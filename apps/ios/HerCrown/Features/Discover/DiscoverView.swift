@@ -397,7 +397,7 @@ struct DiscoverView: View {
                     : nil
                 if let featured {
                     feature(featured)
-                        .id(featured.ref)
+                        .id("featured-\(featured.ref)")
                         .opacity(fading.contains(featured.ref) || !featureVisible ? 0 : 1)
                         .transition(.opacity)
                 }
