@@ -572,3 +572,10 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - Includes the post-build-27 crop window-safe-area correction, full-screen Saved passages honoring appearance, consistent four-square widget icons, and Discover circle-check completion with fade/reordering and persisted studied state.
 - The feature commit passed npm run check, all 198 API tests and an iOS simulator build; running-app checks are recorded above. This commit bumps app and widget to 1.0 (28). Archive uses a clean isolated checkout with Release + HC_STAGING_TESTFLIGHT. No production deployment.
+
+
+### Nov 9: build 28 archived; upload verification waiting for Mac unlock
+
+- Clean archive source `8df0168` from `/tmp/hercrown-build28-source`; archive `/private/tmp/hercrown-build28/HerCrown.xcarchive`. Archive succeeded; verified app version 1.0 (28) and staging API URL in the archived executable.
+- Started Xcode Organizer App Store Connect distribution (eligible for internal and external TestFlight). Latest visible stage: Waiting for App Store Connect analysis response, Uploading. Mac then locked; requested owner unlock. Apple API does not yet return build 28, so delivery and tester access are not confirmed.
+- Prepared `/private/tmp/hercrown-external28.mjs` to save build notes, assign existing tester groups and submit beta review once Apple returns the valid build. No production deployment or public release.
