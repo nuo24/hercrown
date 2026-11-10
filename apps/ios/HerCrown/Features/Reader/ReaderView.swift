@@ -211,6 +211,9 @@ struct VersePage: View {
     let onNext: () -> Void
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var likePulse = 0
+    @State private var showingLike = false
 
     private var ref: String { VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end).description }
     private var reference: String { BibleStore.shared.label(VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)) }
@@ -246,11 +249,27 @@ struct VersePage: View {
             .frame(maxWidth: 350)
             .padding(EdgeInsets(top: 100, leading: 44, bottom: 116, trailing: 44))
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture(count: 2) { likeVerse() }
+            .overlay {
+                if showingLike {
+                    Image(systemName: "heart.fill")
+                        .font(.system(size: 76, weight: .regular))
+                        .foregroundStyle(Theme.text(scheme))
+                        .shadow(color: Theme.canvas(scheme).opacity(0.8), radius: 12)
+                        .transition(reduceMotion ? .opacity : .scale(scale: 0.5).combined(with: .opacity))
+                        .accessibilityHidden(true)
+                        .allowsHitTesting(false)
+                }
+            }
 
             VStack(spacing: 3) {
                 Button(action: onStudy) { Image.glyph("insights").frame(width: 21, height: 21).frame(width: 44, height: 44).contentShape(Rectangle()) }
                     .accessibilityLabel("Insights for \(chapter.book.displayName) \(chapter.number):\(verse.number)")
-                Button { app.toggleSave(ref) } label: {
+                Button {
+                    if app.isSaved(ref) { app.toggleSave(ref) }
+                    else { likeVerse() }
+                } label: {
                     Group {
                         if app.isSaved(ref) { Image(systemName: "heart.fill").font(.system(size: 19)) }
                         else { Image.glyph("heart").frame(width: 20, height: 20) }
@@ -289,6 +308,22 @@ struct VersePage: View {
             .padding(.leading, 44)
             .padding(.bottom, 24)
         }
+        .task(id: likePulse) {
+            guard likePulse > 0 else { return }
+            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 0.6)) {
+                showingLike = true
+            }
+            do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
+            withAnimation(.easeOut(duration: 0.25)) { showingLike = false }
+        }
+        .onDisappear { showingLike = false }
+    }
+
+    /// Double-tapping confirms a like; it never removes an already saved passage.
+    private func likeVerse() {
+        if !app.isSaved(ref) { app.toggleSave(ref) }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred(intensity: 0.5)
+        likePulse += 1
     }
 
     /// Words of Jesus in red when the setting is on.

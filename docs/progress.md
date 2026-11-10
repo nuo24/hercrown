@@ -591,3 +591,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Replaced Home’s full-height search card/wheel pickers with the reference pull-up: small Back/Done controls, Book menu, Chapter/Verse menus, and a wide bottom Study this verse button. Starts at 58% height and can expand for longer/accessibility content; follows appearance.
 - Raised the share actions by tightening the verse/action spacing and increasing bottom breathing room. Kept the three-quarter sheet, plain rows, and consistent four-square widget icon.
 - Verified in UI Review simulator: chapter menu selection opened Psalm 1:1 in the study menu; inspected Home search and the updated dark share sheet visually. Simulator build succeeded; npm run check passed; npm test passed (198 tests). These changes are local and are not included in the already-delivered TestFlight build 28.
+
+### Nov 10: reader like animation and double tap
+- Bible reader now shows a springing heart that fades away when saving with the heart button or double-tapping the verse area. Double tap only saves, never unsaves; the heart button retains unlike behavior. Uses appearance-aware colors, light haptic feedback, and an opacity-only transition for Reduce Motion.
+- Uses the existing saved-passage persistence/API and server `passage_saved` analytics event. No new vendor or dependency.
+- Verification: simulator build succeeded; npm run check and all 198 tests passed. In UI Review, double tap saved Psalm 23:1, a repeat double tap retained it, and the heart button unsaved/saved correctly. Haptic feel needs a physical iPhone check. Not yet uploaded to TestFlight.
