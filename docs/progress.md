@@ -551,3 +551,9 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - Build 27 includes the shorter plain-row Share verse sheet, visible illustration thumbnail removal in both studios, and the crop screen's safe-area header/X, plus all build 26 photo-save fixes.
 - Required check and all 198 API tests passed; the preceding simulator builds and interactive UI checks passed. Archive will use a clean isolated checkout with HC_STAGING_TESTFLIGHT. No production deployment or public release.
+
+### Nov 9: build 27 delivered to TestFlight
+
+- Archived from clean isolated checkout `/tmp/hercrown-build27-source`, source `228f76e8f764ec1bba7e7e23ee07833a4b8b4e0e`. Archive `/private/tmp/hercrown-build27/HerCrown.xcarchive`, Release + HC_STAGING_TESTFLIGHT; verified version 1.0 (27). Xcode Organizer confirmed Uploaded to Apple.
+- Apple build `ecc65dae-03b1-4290-97c3-1937396e5443` processed VALID, APP_STORE_ELIGIBLE. Saved build-specific testing notes, enabled tester notifications, assigned existing internal groups and external Beta, and submitted beta review. Final API status confirms internal IN_BETA_TESTING and external IN_BETA_TESTING.
+- Includes the three-quarter-height plain-row Share verse sheet, visible illustration removal in both studios, and the safe-area photo crop header with X, plus build 26 photo replacement fixes. Required check and 198 API tests passed; simulator UI checks and final archive compilation succeeded. Real-device crop/pinch and photo replacement remain owner checks. No production deployment or public App Store release; return offers remain off.
