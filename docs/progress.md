@@ -541,3 +541,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Share verse opens at three-quarter height, with optional expansion for long passages; removed the gray grouped-row background and muted action-row styling. Snapshot and Widget Studio remain full-screen editors.
 - Added a visible X to each placed illustration thumbnail in both studios. Removal clears the selected layer and active transform state when relevant; the existing Save/Discard flow still controls persistence.
 - Verification: required check and all 198 API tests passed; simulator build succeeded. Inspected the shorter Share verse sheet with plain white rows, then opened Widget Studio and used the new X to remove its olive illustration (count 1 → 0, canvas removed it), and added a Cosmos to inspect the X placement. Shared implementation covers Snapshot Studio. These corrections are local and are not included in TestFlight build 26 yet.
+
+### Nov 9: photo crop safe-area header (local)
+
+- Moved Adjust photo controls into a dedicated top safe-area inset with a 44-point X target (“Cancel photo crop”), centered title and Reset. Constrained crop content to the available viewport so it cannot push the header above the display; only the black background extends behind system areas.
+- Verification: simulator screenshot confirmed X/title/Reset below the status bar and Use photo above the home area. Tapping X returned to Your account without saving. Used a temporary bundled-image preview because the native photo-picker grid is not accessible to the computer tool; removed that preview from source. Required check and all 198 API tests passed. This correction is local, not in TestFlight 26.

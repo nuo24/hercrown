@@ -965,17 +965,10 @@ private struct AvatarCropView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let side = max(1, min(geometry.size.width - 40, geometry.size.height - 240))
+            let side = max(1, min(geometry.size.width - 40, geometry.size.height - 200))
             let liveZoom = min(6, max(1, zoom * magnification))
             let live = position(side: side, zoom: liveZoom, offset: CGSize(width: offset.width + drag.width, height: offset.height + drag.height))
             VStack(spacing: 24) {
-                HStack {
-                    Button("Cancel") { dismiss() }.disabled(saving)
-                    Spacer()
-                    Text("Adjust photo").font(.ui(18, weight: .medium))
-                    Spacer()
-                    Button("Reset") { zoom = 1; offset = .zero }.disabled(saving)
-                }.font(.ui(14)).padding(.top, 12)
                 Spacer(minLength: 0)
                 ZStack {
                     Image(uiImage: image).resizable()
@@ -1021,9 +1014,24 @@ private struct AvatarCropView: View {
                     .background(.white, in: Capsule())
                     .contentShape(Capsule())
                 }.buttonStyle(.plain).disabled(saving).padding(.bottom, 18)
-            }.padding(.horizontal, 20).frame(maxWidth: .infinity)
+            }.padding(.horizontal, 20).frame(width: geometry.size.width, height: geometry.size.height)
         }
-        .background(Color.black).foregroundStyle(.white).preferredColorScheme(.dark)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            ZStack {
+                Text("Adjust photo").font(.ui(18, weight: .medium))
+                HStack {
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").font(.system(size: 17, weight: .medium))
+                            .frame(width: 44, height: 44).contentShape(Rectangle())
+                    }.accessibilityLabel("Cancel photo crop").disabled(saving)
+                    Spacer()
+                    Button("Reset") { zoom = 1; offset = .zero }
+                        .font(.ui(14)).frame(minWidth: 44, minHeight: 44).disabled(saving)
+                }
+            }.padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 8)
+                .background(Color.black)
+        }
+        .background(Color.black.ignoresSafeArea()).foregroundStyle(.white).preferredColorScheme(.dark)
         .interactiveDismissDisabled(saving)
         .alert("Photo wasn’t saved", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
             Button("OK", role: .cancel) { error = nil }
