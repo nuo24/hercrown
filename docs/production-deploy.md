@@ -2,7 +2,7 @@
 
 Production is humans only (AGENTS.md rule 6). Production storage and the initial deployment already exist. For the current release, follow the refresh checklist below; do not recreate resources or rotate existing auth secrets. The numbered first-time setup is retained for disaster recovery only.
 
-Version 1.0 includes the $39.99 annual plan with a 7-day trial for eligible subscribers and the $5.99 monthly plan with no trial. Weekly is retired from new checkout. Both $19.99 return offers are off for production. Leave the separate $19.99 subscription out of App Review and keep Superwall's legacy `paywall_decline` placement paused. The annual `trial_return_1999` offer remains parked; the app disables both return offers globally. App Store Connect uses manual release.
+Version 1.0 includes the $39.99 annual plan with a 7-day trial for eligible subscribers and the $5.99 monthly plan with no trial. Weekly is retired from new checkout. Both $19.99 return offers are off for production. Leave the separate $19.99 subscription out of App Review and keep Superwall's legacy `paywall_decline` placement paused. The annual `trial_return_1999` offer remains parked; the app disables both return offers globally. App Store Connect uses automatic release after approval (`AFTER_APPROVAL`), as requested by the owner on November 10. Superwall Main is already targeted to production users without an active entitlement; do not wait until approval to enable checkout.
 
 The production server will be **https://bible-scroll-api.bible-scroll-api.workers.dev** (already set as `BETTER_AUTH_URL` in `apps/api/wrangler.jsonc`). When the domain exists, it can move there.
 
@@ -13,18 +13,18 @@ cd ~/Downloads/bible-scroll-ios-build-kit/apps/api
 npx wrangler whoami        # should show your Cloudflare account; if not: npx wrangler login
 ```
 
-## Current release refresh (verified 2026-11-10)
+## Current release status (verified 2026-11-10 evening)
 
-Production currently serves version `2492147a-dce3-4d05-b311-c29636298b09` from November 6. `/health`, `/legal/privacy`, `/legal/terms` and `/legal/support` all return 200. This does not verify the new endpoints. Production secret names include the existing auth, Apple, APNs, OpenRouter, Superwall and Tinybird keys, but **not API_BIBLE_KEY**.
+Production is deployed: owner-reported Cloudflare version `7750d96a-ecde-4c29-a782-df909139cbb6`. The owner applied migrations through **0016**, regenerated and set `API_BIBLE_KEY` on staging and production, and deployed the current backend. Do not repeat resource creation, large seeds or auth-secret rotation. Public `/health` confirms `env=production`; privacy, terms, support and credits all return HTTP 200.
 
-1. Owner: from `apps/api`, run `npm run db:migrate:production` to apply the three pending migrations. Do not repeat storage creation or the large Scripture/study seeds.
-2. Owner: rotate the previously shared API.Bible key in its dashboard, then run `npx wrangler secret put API_BIBLE_KEY --env production`. Enter the value privately.
-3. Confirm publisher permissions for the enabled reading, sharing, snapshots and widget uses. Review the expanded App Privacy label for optional personal prayer processing and private suggestions.
-4. From a tested clean commit, owner runs `npm run deploy:production`. Record the source SHA and returned Cloudflare version in `docs/progress.md`.
-5. Recheck public endpoints. Test new production endpoints with dedicated test accounts: prayer, licensed chapter, feedback, Community empty-ballot state, and a Tinybird event tagged production. Verify the owner-reported giving total against records; production ballots remain disabled until real recipients are approved.
-6. Archive the final iOS Release candidate without `HC_STAGING_TESTFLIGHT`. Debug and staging beta builds continue pointing at staging. Verify checkout, restore, signed webhook delivery, notifications and account deletion in the production-connected TestFlight candidate.
-7. Refresh screenshots and review notes for the final UI. Select the tested candidate for 1.0, attach annual/monthly subscriptions, and retain manual release. Review current Superwall audiences before submission so App Review can reach checkout. Do not activate parked discount campaigns.
-8. Submit for review only after these checks. After approval, confirm the Main audience includes intended users without an active entitlement before the owner manually releases. Verify public App Store checkout/restore separately.
+- Build **33**, archived from clean source `722feba`, is VALID and selected for version 1.0. Owner confirmed production-connected purchase, Plus unlock and restore; background/cold notification opening and offline KJV/BSB/WEB passed on build 32. Build 33 contains only the subsequent native loading presentation correction.
+- Production analytics and verified server billing events were checked in Tinybird. TestFlight purchases remain sandbox transactions even though this release candidate uses the production API.
+- App Privacy is published with 12 data types, including Sensitive Info for optional prayer context. Paid/Free Apps agreements, bank and W-9 are Active.
+- Six owner iPhone screenshots and six iPad screenshots are COMPLETE. Final centered white/daylight header is uploaded; separate search-results artwork is retained.
+- Review draft now contains version 1.0/build 33, annual, monthly and the Plus subscription group. Apple's prior missing-group validation error is cleared. Weekly and $19.99 products remain excluded. App subtitle is `Daily Bible for women`; unsupported `#1` wording was removed.
+- App and annual/monthly availability is 174 territories, excluding mainland China. App-specific DSA declaration says trader; Apple's contact/document verification remains **In Review**. This does not establish verified distribution rights for every translation in every region. Full non-US checkout presentation and publisher territorial/sharing/widget permissions are not independently certified by this checklist.
+- Final public App Review submission has not been sent. Owner had paused that step for artwork; prepare the package before obtaining final go-ahead. Automatic release means approval can make the app public without a later manual Release action.
+- After public availability, verify a real production checkout/restore separately from TestFlight sandbox checks. Renew the Apple client secret before 2027-05-02. Monitor support, verified billing delivery, analytics and scheduled alerts; `EMAIL_FROM`/`ALERT_INBOX` are optional and currently unset.
 
 ## First-time recovery setup (not needed for this refresh)
 
@@ -49,7 +49,7 @@ npm run seed:study:production
 npm run seed:devotionals:production     # approved devotionals only
 ```
 
-The migration command applies every pending migration through `0014_licensed_translations.sql`. The current production database has 0001–0011 applied; 0012–0014 were confirmed pending on 2026-11-10. These add prayer request counts, Community tables and online translation metadata. Do not edit applied migrations.
+The migration command applies pending SQL migrations through `0016_selected_community_nominees.sql`. The owner has already applied these to production as of November 10. On recovery, apply migrations before importing seeds; never edit a migration already applied remotely.
 
 ## 3. Secrets (15 min)
 
