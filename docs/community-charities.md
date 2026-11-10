@@ -47,3 +47,8 @@ No messages sent, no additional photo permissions obtained, and no beneficiary i
 2. Deliver a new native candidate with the new photos, official-site links and nonbinding ballot text. Existing build 29 still contains prototype stock photos and old copy; backend deployment alone cannot update bundled assets.
 3. Owner runs production migration and deployment from the recorded clean commit: `cd ~/Downloads/bible-scroll-ios-build-kit/apps/api`, `npm run db:migrate:production`, then `npm run deploy:production`. Do not enable this backend on production ahead of the matching native candidate.
 4. Owner verifies production Community loads all four profiles and a vote survives reload. No real funds are moved by these commands.
+
+
+## Selected revision, November 10
+
+Owner selected Mercy Multiplied (USA), Sharing the Mission (Nigeria), House of Grace (Thailand), and Meninadança (Brazil). Native cards and the local web preview now use their official program photos. These assets are bundled locally for review only; public reuse permission and photo-specific credits remain unconfirmed. Do not distribute this revision until cleared. Migration 0016 retains all historical vote identifiers and uses a fresh charities-v2 ballot so old votes are not reassigned. Staging and production have not received this revision. Earlier nominee and stock-image notes above are historical.

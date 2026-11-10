@@ -30,4 +30,4 @@ Reflection prompts and devotionals are written for Her Crown. Devotionals drafte
 
 ## Community photographs
 
-Community cards use representative photographs under the [Pexels License](https://www.pexels.com/license/): [clothing hangers, photo 334979](https://www.pexels.com/photo/close-up-of-clothes-hanging-in-store-334979/), [books, photo 1148399](https://www.pexels.com/photo/selective-focus-photo-of-pile-of-assorted-title-books-1148399/), [holding hands, photo 5080678](https://www.pexels.com/photo/holding-hands-5080678/), and [carrying books, photo 9065298](https://www.pexels.com/photo/person-holding-stack-of-books-9065298/). These are illustrative stock images, not photographs of the listed organizations or their beneficiaries. Listing an independent nominee does not imply endorsement or partnership.
+Community nominee profiles are researched from the organizations’ official program pages. Listing an independent nominee does not imply endorsement or partnership. Organization photographs in the local design review are pending reuse approval and must not be published until approval and applicable credits are recorded.

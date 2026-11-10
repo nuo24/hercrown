@@ -32,3 +32,8 @@ All five images visually inspected. These are candidate organizations/programs, 
 Context: https://lhinigeria.org/nidake and https://sharingthemission.org/participate/ . Sharing the Mission credits its photos/video to Azigbo Dafe Samuel, Beatrice Yakubu, AMEN or STM, used by its site by permission; this is not a license to Her Crown. Obtain the applicable photo-specific credit and app reuse approval before distribution. LHI permission/credit also needs confirmation. No outreach messages have been sent.
 
 Preferred visual direction: recognizable program activity, warm group portraits, eye-level photography and clear context. Use the owner-selected adult group photo as the Sharing the Mission cover. Additional candidates above are for selection, not evidence of a Her Crown partnership or completed grant. Existing four-nominee staging ballot is unchanged until the revised recipient list and publishable assets are ready.
+
+
+## Selected revision, November 10
+
+Owner selected Mercy Multiplied (USA), Sharing the Mission (Nigeria), House of Grace (Thailand), and Meninadança (Brazil). Native cards and the local web preview now use their official program photos. These assets are bundled locally for review only; public reuse permission and photo-specific credits remain unconfirmed. Do not distribute this revision until cleared. Migration 0016 retains all historical vote identifiers and uses a fresh charities-v2 ballot so old votes are not reassigned. Staging and production have not received this revision. Earlier nominee and stock-image notes above are historical.

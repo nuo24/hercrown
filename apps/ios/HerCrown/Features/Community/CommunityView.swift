@@ -112,7 +112,7 @@ struct CommunityView: View {
                         if let website = cause.website, let url = URL(string: website), url.scheme == "https" {
                             Link("Visit official website", destination: url).font(.ui(13, weight: .medium)).tint(Theme.text(scheme))
                         }
-                        Text("Illustrative stock photo. This organization has not endorsed Her Crown.").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
+                        Text("Photo from the organization’s published program materials. This organization has not endorsed Her Crown.").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         Text("A vote never authorizes a payment.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                         Button(state?.vote == cause.id ? "Your vote is saved" : "Vote for this cause") { voteAfterStory = cause; story = nil }
                             .buttonStyle(CapsuleButtonStyle()).disabled(state?.vote == cause.id)
