@@ -32,6 +32,17 @@ Asset keys are retained for older API compatibility; their old filenames do not 
 
 ## Rollout
 
+### Follow-up: authentic people photography
+
+Owner prefers actual participants/program activity over illustrative objects. Do not treat stock models as beneficiaries.
+
+- Dress for Success Twin Cities publishes a [brand-kit photo gallery](https://www.dressforsuccesstwincities.org/brand-kit.html) expressly welcoming journalists, corporate partners and supporters to use its photos to highlight its mission/events. Credit: Meredith Gruenes — crosslakemedia.com. These depict that affiliate, not necessarily Worldwide programs; any eventual card must identify the affiliate accurately. Example official image: `https://www.dressforsuccesstwincities.org/uploads/1/2/9/5/129566098/clm-4872_1.jpg`.
+- CAMFED has authentic participant imagery, but its [communications/image-release policy](https://camfed.org/wp-content/uploads/2021/12/Camfed_Child_Protection_Policy.pdf) specifies controlled external release, accurate captions and photographer credits. Request an approved app-use image before bundling.
+- Educate Girls US lists media enquiries on its [media kit](https://educategirls.us/media/); no reusable beneficiary-photo license was established during this search.
+- Women’s Aid requires permission for site material. Its own About page also uses stock images, so an official-site image alone is not proof that someone is a beneficiary. Request an approved staff/program photograph rather than identifying survivors.
+
+No messages sent, no additional photo permissions obtained, and no beneficiary images deployed by this follow-up.
+
 1. Commit checked source, apply migration 0015 to staging, deploy staging, verify real votes and account isolation.
 2. Deliver a new native candidate with the new photos, official-site links and nonbinding ballot text. Existing build 29 still contains prototype stock photos and old copy; backend deployment alone cannot update bundled assets.
 3. Owner runs production migration and deployment from the recorded clean commit: `cd ~/Downloads/bible-scroll-ios-build-kit/apps/api`, `npm run db:migrate:production`, then `npm run deploy:production`. Do not enable this backend on production ahead of the matching native candidate.
