@@ -601,3 +601,21 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Replaced the monochrome like pulse with a red gradient heart: spring bloom, delicate expanding ring and six small sparks, then an upward drift and fade. The saved reader heart is red too. Reduce Motion omits the spatial animation.
 - Captured a held expanded frame from the native simulator for visual review (debug-only preview flag, reset afterward). Simulator build and required typecheck/tests passed (198 tests). Not uploaded to TestFlight.
 - Follow-up: removed the decorative ring and all sparkles from the like effect at the owner’s request. Kept only the red heart bloom, upward drift and fade. Visually checked in the simulator; build, typecheck and 198 tests passed.
+
+
+## Production preflight — November 10, 2026
+
+Owner requested the move toward production. Read-only checks confirmed:
+
+- [x] Release points at production unless explicitly built with HC_STAGING_TESTFLIGHT; returnOffersEnabled is false. Latest TestFlight 28 is a staging beta, not the final production candidate.
+- [x] Production health/privacy/terms/support return HTTP 200.
+- [ ] Update production: active Worker is still `2492147a-dce3-4d05-b311-c29636298b09` (November 6); migrations 0012_onboarding_prayer, 0013_community and 0014_licensed_translations are pending. API_BIBLE_KEY is absent from production secret names. Owner must apply migrations, privately set a regenerated key, then deploy a tested clean commit. No production writes were performed by the agent.
+- [x] Apple API confirms version 1.0 is Prepare for Submission, releaseType MANUAL, and age rating FOUR_PLUS.
+- [ ] Review/publish privacy details for the new personal-prayer and suggestion flows; prior November 6 publication predates these features.
+- [ ] Confirm licensed translation sharing/widget permissions and the owner-reported $7,350 donation total. Production fictional ballot profiles remain disabled.
+- [ ] Final production-connected TestFlight candidate, sandbox purchase/restore and signed production webhook delivery; fresh onboarding, personal prayer, translation, notifications, account deletion and analytics smoke checks.
+- [ ] Final screenshots/review metadata, selected release build and annual/monthly subscriptions, then App Review submission. Manual public release follows approval.
+
+Updated production-deploy.md to reflect $39.99 annual / $5.99 monthly, pending migrations and existing infrastructure. No production deploy or App Store submission has occurred in this preflight.
+
+Live Apple follow-up: annual and monthly are READY_TO_SUBMIT; monthly has zero introductory offers and annual has ONE_WEEK FREE_TRIAL offers. Version 1.0 still selects build 1; latest uploaded beta is 28. Corrected the draft listing Support URL to production, replaced weekly with monthly in description/review notes, and marked both return offers disabled in private review notes. These draft edits do not submit or release the app. Required check and all 198 tests passed.
