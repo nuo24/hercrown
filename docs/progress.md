@@ -672,3 +672,7 @@ Owner applied production migrations 0015–0016 and deployed source `dc7ee54` on
 
 
 Owner clarified Discover completion during build 30 upload: retain the circle/tick icon, not a text capsule. Corrected to a 10 pt outlined/filled circle tick beside list verse references (12 pt beside featured reference), with a separate 44 pt accessible tap target. Completion fading/reordering/persistence remain unchanged. Build 31 supersedes build 30 for tester distribution; do not assign build 30 to groups.
+
+Build 30 upload completed and Apple processed it VALID (`3c798fd9-c77f-4547-982a-6c8663143735`), but the owner clarified the Discover icon during upload. It is superseded by build 31 and was not manually assigned to external Beta.
+
+Build 31 archive succeeded from clean source `916b46e` at `/private/tmp/hercrown-build31/HerCrown.xcarchive`. Verified version 1.0 (31), com.hercrown.app, and production API endpoint. Typecheck and all 198 API tests passed; Debug simulator build passed and the small circle-tick was visually inspected beside featured/list references (`/private/tmp/hercrown-build31-discover-circle.png`). Owner also confirmed the button behavior works. Organizer upload is in progress; processing and tester availability are not yet confirmed.
