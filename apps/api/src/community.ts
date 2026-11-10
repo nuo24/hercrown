@@ -1,26 +1,27 @@
 import { badRequest, HttpError, readJson } from './http';
 import type { Tracker } from './events';
 
-// Owner confirmed these giving figures on November 8. The gallery remains a staging ballot
-// until recipient identities and grants are approved; no prototype votes are imported.
+// Owner-reported aggregate, not donations to the nominees below.
 export const GIVING = { totalCents: 735000, currency: 'USD', revenuePercent: 30, reportedAt: '2026-11-08' };
+// Independent nominees researched from official program and financial/impact pages.
+// Listing is not a partnership or a claim that Her Crown has funded this organization.
 export const CAUSES = [
- { id: 'safe', name: 'Her Safe Place', category: 'Safety & a fresh start', photo: 'community-safe', summary: 'A safe place to land. A chance to begin again.', support: 'Emergency accommodation, practical essentials, and one-to-one support as women rebuild their lives.' },
- { id: 'girls', name: 'Open Doors for Girls', category: 'Education & opportunity', photo: 'community-girls', summary: 'Help a girl stay in school and see a bigger future.', support: 'School supplies, transport assistance, and mentoring that helps girls keep learning.' },
- { id: 'mothers', name: 'The Motherhood Fund', category: 'Care for mothers', photo: 'community-mothers', summary: 'Care for the woman who cares for everyone.', support: 'Baby essentials, meals, and a network of local support.' },
- { id: 'church', name: 'Grace Church Pantry', category: 'Local church outreach', photo: 'community-church', summary: 'Practical care for women and families in the neighborhood.', support: 'Community meals, essential groceries, and women’s support gatherings led by local volunteers.' },
+ { id: 'dress-for-success', name: 'Dress for Success', category: 'United States · Economic independence', photo: 'community-safe', summary: 'Helping women take their next step into work.', support: 'Career support, professional clothing and a network that helps women build economic independence. Dress for Success works through local affiliates in the United States and internationally.', website: 'https://dressforsuccess.org/about-us/what-we-do/' },
+ { id: 'camfed', name: 'CAMFED', category: 'Africa · Education & leadership', photo: 'community-girls', summary: 'More girls learning. More women leading.', support: 'A pan-African movement focused on girls’ education and young women’s leadership, working with rural communities to address barriers to learning and opportunity.', website: 'https://camfed.org/who-we-are/' },
+ { id: 'womens-aid', name: 'Women’s Aid', category: 'Europe · Safety & support', photo: 'community-mothers', summary: 'Supporting women and children to live free from domestic abuse.', support: 'Women’s Aid Federation of England supports a network of specialist domestic abuse services, provides information and works to improve the response to survivors. Its work is focused on England.', website: 'https://womensaid.org.uk/about-us/' },
+ { id: 'educate-girls', name: 'Educate Girls', category: 'Asia · Girls’ education', photo: 'community-church', summary: 'Opening a path to education for girls in India.', support: 'Educate Girls US raises support for girls’ education in India through local implementation partners, helping address barriers to enrolment and learning.', website: 'https://educategirls.us/about-us/what-we-do/' },
 ];
+export const BALLOT_NOTE = 'Your vote helps guide future giving. Final grants depend on recipient checks and available funds. These independent nominees are not Her Crown partners; the donated total is not attributed to them. Photos are illustrative stock images.';
 function round() {
  const now = new Date(); const year = now.getUTCFullYear(), month = now.getUTCMonth();
- return { id: `${year}-${String(month + 1).padStart(2, '0')}`, title: new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(now) + '’s ballot', closesAt: Date.UTC(year, month + 1, 1), preview: true };
+ return { id: `${year}-${String(month + 1).padStart(2, '0')}-charities-v1`, title: new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: 'UTC' }).format(now) + '’s ballot', closesAt: Date.UTC(year, month + 1, 1), preview: false };
 }
 export async function getCommunity(env: Env, userId: string) {
  const r = round();
  const row = await env.DB.prepare('SELECT cause_id FROM community_votes WHERE user_id = ?1 AND round_id = ?2').bind(userId, r.id).first<{cause_id: string}>();
- return Response.json({ giving: GIVING, round: env.APP_ENV === 'production' ? null : r, causes: env.APP_ENV === 'production' ? [] : CAUSES, vote: row?.cause_id ?? null });
+ return Response.json({ giving: GIVING, round: r, causes: CAUSES, ballotNote: BALLOT_NOTE, vote: row?.cause_id ?? null });
 }
 export async function voteCommunity(request: Request, env: Env, userId: string, tracker: Tracker) {
- if (env.APP_ENV === 'production') throw new HttpError(409, 'ballot_unavailable', 'This ballot is not open yet.');
  const body = await readJson(request); const r = round();
  if (body.roundId !== r.id) throw new HttpError(409, 'round_changed', 'The ballot has changed. Refresh and choose again.');
  if (!CAUSES.some(c => c.id === body.causeId)) throw badRequest('Choose a cause from this ballot');

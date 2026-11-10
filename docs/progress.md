@@ -632,3 +632,11 @@ Build 29 archived successfully from clean source `51a053d` at `/private/tmp/herc
 Xcode Organizer confirmed “HerCrown 1.0 (29) uploaded” on November 10. Apple processing and TestFlight assignment are being checked; upload completion is not confirmation of tester availability.
 
 Build 29 delivery verified: Apple build `7840137b-f1f7-4e76-a813-47a9077d83a4`, processing VALID, audience APP_STORE_ELIGIBLE. Assigned existing external Beta group `20c28d43-2861-4a95-a0be-dc4cc303e4af`, updated beta notes and enabled notifications. Apple API reports both internalBuildState and externalBuildState IN_BETA_TESTING. Source `51a053d`; production Release, no HC_STAGING_TESTFLIGHT. Production-connected device smoke tests and App Store review submission remain pending.
+
+
+### November 10 — real Community shortlist prepared
+
+- Replaced fictional Community profiles with independently researched Dress for Success (US), CAMFED (Africa), Women’s Aid Federation of England (Europe/England), and Educate Girls US (Asia/India programs). Sources and photo licenses: `docs/community-charities.md`. These are nominees, not claimed partners or recipients of the $7,350 historical aggregate.
+- Restored the four-card production ballot in code with nonbinding future-giving copy, official-site links, and representative licensed stock photos. No donations/transfers are performed.
+- Added migration 0015 to accept real charity IDs while retaining historical votes; new `-charities-v1` rounds prevent prototype votes being assigned to real organizations. Apply on staging first. Production migration/deploy remains owner-run.
+- Native Community copy/photos and the smaller Discover completion button need a new iOS candidate; build 29 is unchanged. Do not submit the store draft with old screenshots or until the owner finishes build 29 purchase/unlock/restore/notification checks.

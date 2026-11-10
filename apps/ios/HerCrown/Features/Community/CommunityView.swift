@@ -7,6 +7,7 @@ struct CommunityCause: Decodable, Identifiable, Equatable {
     let photo: String
     let summary: String
     let support: String
+    let website: String?
 }
 struct CommunityRound: Decodable {
     let id: String
@@ -23,6 +24,7 @@ struct CommunityState: Decodable {
     let giving: CommunityGiving
     let round: CommunityRound?
     let causes: [CommunityCause]
+    let ballotNote: String?
     var vote: String?
 }
 
@@ -60,7 +62,7 @@ struct CommunityView: View {
                         .font(.ui(9)).tracking(0.4).textCase(.uppercase).foregroundStyle(Theme.muted(scheme)).padding(.top, 5)
                     Divider().padding(.top, 18).padding(.bottom, 24)
                     Text("A little care,\nclose to home.").font(.serif(30)).tracking(-0.6).lineSpacing(0).padding(.bottom, 12)
-                    Text("Each month, our community votes for a cause supporting women and girls. Explore charities and local church projects, then choose one.")
+                    Text("Help guide our future giving. Meet organizations supporting women and girls around the world, then vote for the cause closest to your heart.")
                         .font(.ui(13)).lineSpacing(5).foregroundStyle(Theme.muted(scheme)).padding(.bottom, 9)
                     Button { showingSuggestions = true } label: {
                         Label("Suggest a local cause", systemImage: "arrow.right").labelStyle(TrailingIcon()).font(.ui(13)).frame(minHeight: 44)
@@ -80,6 +82,9 @@ struct CommunityView: View {
                         if round.preview {
                             Text("Preview ballot · Stock photos illustrate the supplied cause profiles. Recipient details will be confirmed before launch.")
                                 .font(.ui(10)).lineSpacing(5).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.top, 12)
+                        }
+                        if let note = state.ballotNote {
+                            Text(note).font(.ui(10)).lineSpacing(5).foregroundStyle(Theme.muted(scheme)).padding(.top, 12)
                         }
                     } else {
                         Text("The next ballot is being prepared.").font(.serif(22)).padding(.vertical, 24)
@@ -102,8 +107,12 @@ struct CommunityView: View {
                         Image(cause.photo).resizable().scaledToFill().frame(height: 230).clipped().clipShape(RoundedRectangle(cornerRadius: 8))
                         Text(cause.name).font(.serif(30)).tracking(-0.6)
                         Text(cause.summary).font(.ui(14)).lineSpacing(6)
-                        Text("What your vote supports").font(.ui(14, weight: .medium))
+                        Text("Their work").font(.ui(14, weight: .medium))
                         Text(cause.support).font(.ui(14)).lineSpacing(6).foregroundStyle(Theme.muted(scheme))
+                        if let website = cause.website, let url = URL(string: website), url.scheme == "https" {
+                            Link("Visit official website", destination: url).font(.ui(13, weight: .medium)).tint(Theme.text(scheme))
+                        }
+                        Text("Illustrative stock photo. This organization has not endorsed Her Crown.").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         Text("A vote never authorizes a payment.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                         Button(state?.vote == cause.id ? "Your vote is saved" : "Vote for this cause") { voteAfterStory = cause; story = nil }
                             .buttonStyle(CapsuleButtonStyle()).disabled(state?.vote == cause.id)
@@ -116,7 +125,7 @@ struct CommunityView: View {
         .confirmationDialog(state?.vote == nil ? "Vote for \(candidate?.name ?? "this cause")?" : "Move your vote to \(candidate?.name ?? "this cause")?", isPresented: Binding(get: { candidate != nil }, set: { if !$0 { candidate = nil } }), titleVisibility: .visible, presenting: candidate) { cause in
             Button(state?.vote == nil ? "Confirm vote" : "Change my vote") { Task { await vote(cause) } }
             Button("Cancel", role: .cancel) { candidate = nil }
-        } message: { _ in Text("One member, one vote. You can change it before the ballot closes. This does not make a donation or charge your account.") }
+        } message: { _ in Text("One member, one vote. Your preference helps guide future giving; it does not guarantee a grant, make a donation or charge your account. You can change it before the ballot closes.") }
     }
     private func causeTile(_ cause: CommunityCause, selected: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
