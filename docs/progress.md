@@ -697,3 +697,12 @@ Owner requested the latest fixes in TestFlight. Build 31 is already uploaded and
 Build 32 archived from clean source `6fd7cf8` at `/private/tmp/hercrown-build32/HerCrown.xcarchive`; archive confirms 1.0 (32), com.hercrown.app. Required check and 202 tests passed; native simulator verification completed in the preceding fix. Xcode Organizer upload started.
 
 November 10 App Store readiness recheck (Apple API): version 1.0 PREPARE_FOR_SUBMISSION, release MANUAL, age FOUR_PLUS. Annual `6830439735` and monthly `6831699380` both READY_TO_SUBMIT. Current selected App Store build remains 29 until the new candidate processes. All six APP_IPHONE_61 screenshot assets are COMPLETE; upload completeness does not establish that every screen matches final UI. Listing/review notes use $39.99 annual with eligible 7-day trial, $5.99 monthly without trial, weekly retired and return offers off. Review notes cover guest access, optional personal-prayer provider processing, restore and deletion. Browser session expired; privacy-label verification/publishing requires owner sign-in. No public submission or release performed.
+
+Build 32 upload completed successfully in Xcode Organizer on November 10. Apple processing/tester assignment pending below. Annual introductory-offer API confirms ONE_WEEK/FREE_TRIAL across 175 territories; monthly has zero introductory offers. Existing screenshot preview inspected: uploaded artwork still contains older Home/Discover layouts, so refresh those before public review.
+
+Current ordered submission gates:
+1. Owner redeploy production (`npm run deploy:production` from apps/api) and provide Cloudflare version, then read-only health verification.
+2. Make build 32 available to Beta and select it on the version 1.0 draft. Do not submit until device checks below pass.
+3. Owner test build 32: offline switch from NKJV to bundled KJV/BSB/WEB; notification opening with app backgrounded and fully closed; quick purchase/restore regression. Prior build 31 purchase/unlock/restore and voting confirmed by owner.
+4. Finish browser App Privacy audit for personal-prayer inputs and private suggestions; publish corrected label. Browser sign-in requested, pending.
+5. Refresh outdated listing screenshots, confirm annual/monthly attached and parked products excluded; verify Paid Apps agreement/availability in signed-in dashboard, production webhook/Tinybird event evidence, then submit for App Review. Manual release remains selected; owner releases after approval and launch audience switch.
