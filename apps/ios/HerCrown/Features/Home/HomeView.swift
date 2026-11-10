@@ -79,12 +79,11 @@ struct HomeView: View {
             if collection == .notes { await loadNotes() }
         }
         .sheet(isPresented: $showingSearch, onDismiss: { if let ref = pendingSearchStudy { pendingSearchStudy = nil; studyRef = ref } }) {
-            NavigationStack {
-                ScrollView { verseSearch.padding(22) }
-                    .navigationTitle("Search Scripture")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showingSearch = false } } }
-            }
+            verseSearch
+                .presentationDetents([.fraction(0.58), .large])
+                .presentationDragIndicator(.visible)
+                .presentationBackground(Theme.canvas(scheme))
+                .preferredColorScheme(scheme)
         }
         .sheet(isPresented: $showingProfile) {
             NavigationStack {
@@ -422,49 +421,85 @@ struct HomeView: View {
         let verses = BibleStore.shared.chapter(translation, book: searchRef.book, chapter: searchRef.chapter)?.verses ?? []
         let selectedVerse = verses.first { $0.number == searchRef.verse } ?? verses.first
 
-        return Card {
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Verse Search", systemImage: "magnifyingglass")
-                    .font(.serif(23, relativeTo: .title3))
-                Text("Choose a passage to read and reflect on.")
-                    .font(.system(size: 13)).foregroundStyle(Theme.muted(scheme))
-                HStack(spacing: 0) {
-                    Picker("Book", selection: Binding(get: { searchRef.book }, set: {
-                        searchRef = VerseRef(book: $0, chapter: 1, verse: 1)
-                    })) {
-                        ForEach(books) { book in
-                            Text(book.displayName).lineLimit(1).minimumScaleFactor(0.7).tag(book.id)
+        return VStack(spacing: 0) {
+            SheetControls(back: { showingSearch = false }, done: { showingSearch = false })
+                .padding(.horizontal, 22).padding(.top, 8)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Find a passage").font(.ui(19, weight: .semibold))
+                    Text("Choose a passage to read and study.")
+                        .font(.ui(13)).foregroundStyle(Theme.muted(scheme))
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Book").font(.ui(12, weight: .medium))
+                        Menu {
+                            Picker("Book", selection: Binding(get: { searchRef.book }, set: {
+                                searchRef = VerseRef(book: $0, chapter: 1, verse: 1)
+                            })) {
+                                ForEach(books) { Text($0.displayName).tag($0.id) }
+                            }
+                        } label: {
+                            searchSelection(books.first { $0.id == searchRef.book }?.displayName ?? "Choose a book")
+                        }
+                        .accessibilityLabel("Book")
+                    }
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Chapter").font(.ui(12, weight: .medium))
+                            Menu {
+                                Picker("Chapter", selection: Binding(get: { searchRef.chapter }, set: {
+                                    searchRef = VerseRef(book: searchRef.book, chapter: $0, verse: 1)
+                                })) {
+                                    ForEach(1..<(chapters + 1), id: \.self) { Text("\($0)").tag($0) }
+                                }
+                            } label: { searchSelection("\(searchRef.chapter)") }
+                            .accessibilityLabel("Chapter")
+                        }
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Verse").font(.ui(12, weight: .medium))
+                            Menu {
+                                Picker("Verse", selection: Binding(get: { selectedVerse?.number ?? 1 }, set: {
+                                    searchRef = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: $0)
+                                })) {
+                                    ForEach(verses) { Text("\($0.number)").tag($0.number) }
+                                }
+                            } label: { searchSelection("\(selectedVerse?.number ?? 1)") }
+                            .accessibilityLabel("Verse")
+                            .disabled(verses.isEmpty)
                         }
                     }
-                    .frame(maxWidth: .infinity)
-                    Picker("Chapter", selection: Binding(get: { searchRef.chapter }, set: {
-                        searchRef = VerseRef(book: searchRef.book, chapter: $0, verse: 1)
-                    })) {
-                        ForEach(1..<(chapters + 1), id: \.self) { Text("\($0)").tag($0) }
-                    }
-                    .frame(width: 64)
-                    Picker("Verse", selection: Binding(get: { selectedVerse?.number ?? 1 }, set: {
-                        searchRef = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: $0)
-                    })) {
-                        ForEach(verses) { verse in Text("\(verse.number)").tag(verse.number) }
-                    }
-                    .frame(width: 64)
                 }
-                .pickerStyle(.wheel)
-                .frame(height: 100)
-                .clipped()
-                Button("Study this verse") {
-                    guard let selectedVerse else { return }
-                    let ref = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: selectedVerse.number)
-                    pendingSearchStudy = ref
-                    showingSearch = false
-                    Task { await Analytics.shared.track("verse_search_studied", ["ref": .string(ref.description)]) }
-                }
-                .buttonStyle(CapsuleButtonStyle())
-                .disabled(selectedVerse == nil)
+                .padding(.horizontal, 22).padding(.top, 18).padding(.bottom, 20)
             }
-            .foregroundStyle(Theme.text(scheme))
+            Button("Study this verse") {
+                guard let selectedVerse else { return }
+                let ref = VerseRef(book: searchRef.book, chapter: searchRef.chapter, verse: selectedVerse.number)
+                pendingSearchStudy = ref
+                showingSearch = false
+                Task { await Analytics.shared.track("verse_search_studied", ["ref": .string(ref.description)]) }
+            }
+            .font(.ui(14, weight: .semibold))
+            .foregroundStyle(Theme.canvas(scheme))
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+            .buttonStyle(.plain)
+            .disabled(selectedVerse == nil)
+            .opacity(selectedVerse == nil ? 0.5 : 1)
+            .padding(.horizontal, 22).padding(.top, 8).padding(.bottom, 18)
         }
+        .foregroundStyle(Theme.text(scheme))
+        .background(Theme.canvas(scheme))
+    }
+
+    private func searchSelection(_ value: String) -> some View {
+        HStack {
+            Text(value).font(.ui(14)).lineLimit(1)
+            Spacer(minLength: 8)
+            Image(systemName: "chevron.down").font(.system(size: 10))
+        }
+        .padding(.horizontal, 14).frame(maxWidth: .infinity, minHeight: 46)
+        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 10))
+        .overlay { RoundedRectangle(cornerRadius: 10).stroke(Theme.border(scheme), lineWidth: 1) }
+        .contentShape(Rectangle())
     }
 
     // MARK: Today's Reading (.reading-card: 16 padding, 14 gap, 82×100 journal)
