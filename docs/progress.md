@@ -546,3 +546,8 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 - Moved Adjust photo controls into a dedicated top safe-area inset with a 44-point X target (“Cancel photo crop”), centered title and Reset. Constrained crop content to the available viewport so it cannot push the header above the display; only the black background extends behind system areas.
 - Verification: simulator screenshot confirmed X/title/Reset below the status bar and Use photo above the home area. Tapping X returned to Your account without saving. Used a temporary bundled-image preview because the native photo-picker grid is not accessible to the computer tool; removed that preview from source. Required check and all 198 API tests passed. This correction is local, not in TestFlight 26.
+
+### Nov 9: prepare TestFlight build 27
+
+- Build 27 includes the shorter plain-row Share verse sheet, visible illustration thumbnail removal in both studios, and the crop screen's safe-area header/X, plus all build 26 photo-save fixes.
+- Required check and all 198 API tests passed; the preceding simulator builds and interactive UI checks passed. Archive will use a clean isolated checkout with HC_STAGING_TESTFLIGHT. No production deployment or public release.
