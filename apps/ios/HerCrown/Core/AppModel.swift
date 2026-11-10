@@ -12,6 +12,8 @@ final class AppModel {
 
     var phase: Phase = .launching
     var me: Me?
+    /// The successfully uploaded crop, shared by every avatar while its versioned remote image loads.
+    var avatarImageData: Data?
     var preferences: Preferences = AppModel.cachedPreferences ?? .defaults
     var membership: Membership = .free
     var showExistingAppleSubscription = false
@@ -46,8 +48,10 @@ final class AppModel {
     /// A topic Discover should open on (Home's "For the season you're in" cards).
     var discoverTopic: String?
 
-    let api = APIClient.shared
+    let api: APIClient
     let bible = BibleStore.shared
+
+    init(api: APIClient = .shared) { self.api = api }
 
     var displayName: String? { me?.profile.displayName }
 
@@ -109,6 +113,7 @@ final class AppModel {
     }
 
     private func applySession(_ me: Me) {
+        if self.me?.user.id != me.user.id || me.profile.avatarUrl == nil { avatarImageData = nil }
         if self.me?.user.id != me.user.id { Billing.shared.identify(userId: me.user.id, onboarding: me.preferences) }
         self.me = me
         preferences = me.preferences
@@ -268,13 +273,22 @@ final class AppModel {
     }
 
     func uploadAvatar(_ jpeg: Data) async throws {
-        try await api.upload("PUT", "/me/avatar", data: jpeg, contentType: "image/jpeg")
-        try await refresh()
+        let userID = me?.user.id
+        let token = api.token
+        let data = try await api.upload("PUT", "/me/avatar", data: jpeg, contentType: "image/jpeg")
+        let profile = try JSONDecoder().decode(Me.Profile.self, from: data)
+        guard api.token == token, let current = me, current.user.id == userID else {
+            throw APIError(status: 409, code: "session_changed", message: "Your account changed while saving. Please choose your photo again.")
+        }
+        me = Me(user: current.user, profile: profile, preferences: current.preferences,
+                onboarding: current.onboarding, membership: current.membership)
+        avatarImageData = jpeg
         await Analytics.shared.track("avatar_updated")
     }
 
     func removeAvatar() async throws {
         try await api.send("DELETE", "/me/avatar")
+        avatarImageData = nil
         try await refresh()
     }
 

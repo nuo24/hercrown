@@ -504,11 +504,9 @@ struct AccountView: View {
         .sheet(isPresented: $showsAppleSignIn) { appleSignIn }
         .fullScreenCover(item: $cropPhoto) { selected in
             AvatarCropView(image: selected.image) { jpeg in
+                try await app.uploadAvatar(jpeg)
+                message = "Photo updated."
                 cropPhoto = nil
-                run {
-                    try await app.uploadAvatar(jpeg)
-                    message = "Photo updated."
-                }
             }
         }
         .onAppear {
@@ -668,7 +666,7 @@ struct Avatar: View {
     var body: some View {
         ZStack {
             Circle().fill(Theme.supporting(scheme))
-            if let image { Image(uiImage: image).resizable().scaledToFill() }
+            if let image = app.avatarImageData.flatMap({ UIImage(data: $0) }) ?? image { Image(uiImage: image).resizable().scaledToFill() }
             else if let initial = app.displayName.flatMap({ $0 == "Guest" ? nil : $0.first }) { Text(String(initial)).font(.serif(size * 0.45)) }
             else { Image.illustration("cosmos").resizable().scaledToFit().padding(size * 0.18) }
         }
@@ -676,8 +674,11 @@ struct Avatar: View {
         .clipShape(Circle())
         .overlay(Circle().strokeBorder(Theme.border(scheme), lineWidth: 0.8))
         .accessibilityHidden(true)
-        .task(id: app.me?.profile.avatarUrl) {
-            guard app.me?.profile.avatarUrl != nil, let (data, _) = try? await app.api.send("GET", "/me/avatar") else { image = nil; return }
+        .task(id: "\(app.me?.user.id ?? ""):\(app.me?.profile.avatarUrl ?? "")") {
+            image = nil
+            guard let path = app.me?.profile.avatarUrl,
+                  let (data, _) = try? await app.api.send("GET", path) else { return }
+            guard !Task.isCancelled, path == app.me?.profile.avatarUrl else { return }
             image = UIImage(data: data)
         }
     }
@@ -946,13 +947,14 @@ private struct AvatarCropPhoto: Identifiable {
 /// The avatar remains square in storage; the circle previews the visible profile crop.
 private struct AvatarCropView: View {
     let image: UIImage
-    let onSave: (Data) -> Void
+    let onSave: (Data) async throws -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var zoom: CGFloat = 1
     @State private var offset = CGSize.zero
     @GestureState private var drag = CGSize.zero
     @GestureState private var magnification: CGFloat = 1
-    @State private var error = false
+    @State private var error: String?
+    @State private var saving = false
 
     private func position(side: CGFloat, zoom: CGFloat, offset: CGSize) -> (CGFloat, CGSize) {
         let scale = max(side / image.size.width, side / image.size.height) * zoom
@@ -968,11 +970,11 @@ private struct AvatarCropView: View {
             let live = position(side: side, zoom: liveZoom, offset: CGSize(width: offset.width + drag.width, height: offset.height + drag.height))
             VStack(spacing: 24) {
                 HStack {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel") { dismiss() }.disabled(saving)
                     Spacer()
                     Text("Adjust photo").font(.ui(18, weight: .medium))
                     Spacer()
-                    Button("Reset") { zoom = 1; offset = .zero }
+                    Button("Reset") { zoom = 1; offset = .zero }.disabled(saving)
                 }.font(.ui(14)).padding(.top, 12)
                 Spacer(minLength: 0)
                 ZStack {
@@ -990,7 +992,9 @@ private struct AvatarCropView: View {
                 .accessibilityLabel("Photo crop. Drag to reposition and pinch to zoom.")
                 Text("Drag to move. Pinch to zoom.").font(.ui(13)).foregroundStyle(Color.white.opacity(0.7))
                 Spacer(minLength: 0)
-                Button("Use photo") {
+                Button {
+                    guard !saving else { return }
+                    saving = true
                     let crop = position(side: side, zoom: zoom, offset: offset)
                     let format = UIGraphicsImageRendererFormat(); format.scale = 1
                     let factor = 640 / side
@@ -999,13 +1003,30 @@ private struct AvatarCropView: View {
                                               y: ((side - image.size.height * crop.0) / 2 + crop.1.height) * factor,
                                               width: image.size.width * crop.0 * factor, height: image.size.height * crop.0 * factor))
                     }
-                    if let jpeg = result.jpegData(compressionQuality: 0.85) { onSave(jpeg) } else { error = true }
-                }.font(.ui(15, weight: .medium)).foregroundStyle(.black)
+                    guard let jpeg = result.jpegData(compressionQuality: 0.85) else {
+                        saving = false; error = "We couldn’t prepare that photo."; return
+                    }
+                    Task {
+                        do { try await onSave(jpeg) }
+                        catch { self.error = error.localizedDescription }
+                        saving = false
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        if saving { ProgressView().tint(.black) }
+                        Text(saving ? "Saving photo…" : "Use photo")
+                    }
+                    .font(.ui(15, weight: .medium)).foregroundStyle(.black)
                     .frame(maxWidth: .infinity, minHeight: 50)
-                    .background(.white, in: Capsule()).buttonStyle(.plain).padding(.bottom, 18)
+                    .background(.white, in: Capsule())
+                    .contentShape(Capsule())
+                }.buttonStyle(.plain).disabled(saving).padding(.bottom, 18)
             }.padding(.horizontal, 20).frame(maxWidth: .infinity)
         }
         .background(Color.black).foregroundStyle(.white).preferredColorScheme(.dark)
-        .alert("We couldn’t prepare that photo.", isPresented: $error) { Button("OK", role: .cancel) {} }
+        .interactiveDismissDisabled(saving)
+        .alert("Photo wasn’t saved", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+            Button("OK", role: .cancel) { error = nil }
+        } message: { Text(error ?? "Please try again.") }
     }
 }

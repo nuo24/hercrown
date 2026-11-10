@@ -6,6 +6,38 @@ import SwiftUI
 
 final class PersonalPrayerTests: XCTestCase {
     @MainActor
+    func testReplacingAvatarPublishesEachCropWithoutASecondProfileFetch() async throws {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [AvatarUploadProtocol.self]
+        let session = URLSession(configuration: config)
+        defer { session.invalidateAndCancel(); AvatarUploadProtocol.handler = nil }
+        let api = APIClient(base: URL(string: "https://avatar-test.invalid")!, session: session)
+        let app = AppModel(api: api)
+        app.me = Me(user: .init(id: "avatar-test", isAnonymous: true, email: nil),
+                    profile: .init(displayName: "Test", bio: nil, avatarUrl: "/me/avatar?v=old"),
+                    preferences: .defaults, onboarding: .init(completed: true, completedAt: nil, version: nil), membership: .free)
+        var uploads = 0
+        AvatarUploadProtocol.handler = { request in
+            XCTAssertEqual(request.httpMethod, "PUT")
+            XCTAssertEqual(request.url?.path, "/me/avatar")
+            uploads += 1
+            let body = try JSONSerialization.data(withJSONObject: ["displayName": "Test", "avatarUrl": "/me/avatar?v=\(uploads)"])
+            return (200, body)
+        }
+        let first = Data([0xFF, 0xD8, 1])
+        let second = Data([0xFF, 0xD8, 2])
+        try await app.uploadAvatar(first)
+        XCTAssertEqual(app.avatarImageData, first)
+        XCTAssertEqual(app.me?.profile.avatarUrl, "/me/avatar?v=1")
+        try await app.uploadAvatar(second)
+        XCTAssertEqual(app.avatarImageData, second)
+        XCTAssertEqual(app.me?.profile.avatarUrl, "/me/avatar?v=2")
+        XCTAssertEqual(uploads, 2, "One upload per selection; no profile fetch that can fail after a successful save")
+        AvatarUploadProtocol.handler = { _ in (500, Data("{\"message\":\"Upload failed\"}".utf8)) }
+        do { try await app.uploadAvatar(first); XCTFail("Failed uploads must not report success") }
+        catch { XCTAssertEqual(app.avatarImageData, second); XCTAssertEqual(app.me?.profile.avatarUrl, "/me/avatar?v=2") }
+    }
+    @MainActor
     func testOnboardingExitSelectsReaderWithoutGrantingPlus() {
         let defaults = UserDefaults.standard
         let previous = defaults.object(forKey: "hc.onboardingCompleted")
@@ -229,4 +261,22 @@ final class PersonalPrayerTests: XCTestCase {
         XCTAssertEqual(restored.format, "Portrait")
     }
 
+}
+
+private final class AvatarUploadProtocol: URLProtocol {
+    static var handler: ((URLRequest) throws -> (Int, Data))?
+    override class func canInit(with request: URLRequest) -> Bool { true }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+    override func startLoading() {
+        do {
+            guard let handler = Self.handler else { throw URLError(.badServerResponse) }
+            let (status, body) = try handler(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil,
+                                           headerFields: ["Content-Type": "application/json"])!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: body)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch { client?.urlProtocol(self, didFailWithError: error) }
+    }
+    override func stopLoading() {}
 }
