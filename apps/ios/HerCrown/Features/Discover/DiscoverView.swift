@@ -246,11 +246,12 @@ struct DiscoverView: View {
     private func completionButton(_ card: DiscoverFeed.Card) -> some View {
         let checked = completing.contains(card.ref) || studied.contains(card.ref)
         return Button { complete(card) } label: {
-            Image(systemName: checked ? "checkmark.circle.fill" : "checkmark.circle")
-                .font(.system(size: 23, weight: .regular))
-                .foregroundStyle(Theme.text(scheme))
-                .scaleEffect(completing.contains(card.ref) && !reduceMotion ? 1.12 : 1)
-                .frame(width: 44, height: 44)
+            Text(checked ? "Studied" : "Mark studied")
+                .font(.ui(9, weight: .medium))
+                .foregroundStyle(checked ? Theme.canvas(scheme) : Theme.text(scheme))
+                .padding(.horizontal, 8).padding(.vertical, 5)
+                .background(checked ? Theme.text(scheme) : Theme.supporting(scheme), in: Capsule())
+                .frame(minHeight: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -263,8 +264,11 @@ struct DiscoverView: View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 12) {
                 Text(title(for: card)).font(.serif(34, relativeTo: .title)).tracking(-0.6)
-                Text(card.ref == "PSA.23.1" ? "A moment in Psalm 23, just for you and God." : card.label)
-                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                HStack(spacing: 8) {
+                    Text(card.label).font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                    completionButton(card)
+                }
                 HStack {
                     Button { detail = card } label: {
                         HStack(spacing: 9) {
@@ -274,7 +278,6 @@ struct DiscoverView: View {
                         .frame(minHeight: 44)
                     }
                     .buttonStyle(.plain)
-                    completionButton(card)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -287,24 +290,29 @@ struct DiscoverView: View {
 
     private func entry(_ card: DiscoverFeed.Card) -> some View {
         HStack(spacing: 6) {
-            Button { detail = card } label: {
-                HStack(spacing: 14) {
+            HStack(spacing: 14) {
+                Button { detail = card } label: {
                     Image.illustration(artwork(for: card)).resizable().scaledToFit()
-                        .padding(3).frame(width: 74, height: 86).accessibilityHidden(true)
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(title(for: card)).font(.serif(23, relativeTo: .title3)).tracking(-0.3)
-                            .padding(.bottom, 5)
-                        Text(card.label.uppercased()).font(.ui(10)).tracking(0.35).foregroundStyle(Theme.muted(scheme))
-                        if let theme = card.theme { Text(theme.uppercased()).font(.ui(9)).tracking(0.4).foregroundStyle(Theme.muted(scheme)) }
-                    }
-                    Spacer(minLength: 0)
+                        .padding(3).frame(width: 74, height: 86)
                 }
-                .multilineTextAlignment(.leading)
-                .frame(maxWidth: .infinity, minHeight: 86, alignment: .leading)
-                .contentShape(Rectangle())
+                .accessibilityLabel("Read \(card.label)")
+                VStack(alignment: .leading, spacing: 0) {
+                    Button { detail = card } label: {
+                        Text(title(for: card)).font(.serif(23, relativeTo: .title3)).tracking(-0.3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .contentShape(Rectangle())
+                    }
+                    HStack(spacing: 6) {
+                        Text(card.label.uppercased()).font(.ui(10)).tracking(0.35).foregroundStyle(Theme.muted(scheme))
+                        completionButton(card)
+                    }
+                    if let theme = card.theme { Text(theme.uppercased()).font(.ui(9)).tracking(0.4).foregroundStyle(Theme.muted(scheme)) }
+                }
+                Spacer(minLength: 0)
             }
+            .multilineTextAlignment(.leading)
+            .frame(maxWidth: .infinity, minHeight: 86, alignment: .leading)
             .buttonStyle(.plain)
-            completionButton(card)
             Menu {
                 Button(app.isSaved(card.ref) ? "Remove from saved" : "Save passage", systemImage: "heart") { app.toggleSave(card.ref) }
                 Button("Read in The Bible", systemImage: "book") { if let ref = VerseRef(card.ref) { app.openInReader(ref) } }
