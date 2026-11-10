@@ -626,3 +626,9 @@ Production deployment completed by owner on November 10, 2026: source `e93d05afe
 
 ### Build 29 production release candidate preparation
 - Bumped app and widget to 1.0 (29). Archive uses standard Release without HC_STAGING_TESTFLIGHT, so it connects to production and hides Sandbox testing. Includes the post-28 Home search/share spacing updates and red heart double-tap like animation without sparks. Return offers remain disabled. Production backend version ca9055cd-bb29-4f05-b3fe-688f9b9d7b12 was verified before preparation. Upload and production-connected device checks are pending.
+
+Build 29 archived successfully from clean source `51a053d` at `/private/tmp/hercrown-build29/HerCrown.xcarchive`. Verified app version 1.0 (29), team 494RZLCNHQ, and production URL in the archived binary. Required typecheck and all 198 tests passed. Command-line upload failed with Failed to Use Accounts; Organizer upload is in progress. No App Review submission or public release yet.
+
+Xcode Organizer confirmed “HerCrown 1.0 (29) uploaded” on November 10. Apple processing and TestFlight assignment are being checked; upload completion is not confirmation of tester availability.
+
+Build 29 delivery verified: Apple build `7840137b-f1f7-4e76-a813-47a9077d83a4`, processing VALID, audience APP_STORE_ELIGIBLE. Assigned existing external Beta group `20c28d43-2861-4a95-a0be-dc4cc303e4af`, updated beta notes and enabled notifications. Apple API reports both internalBuildState and externalBuildState IN_BETA_TESTING. Source `51a053d`; production Release, no HC_STAGING_TESTFLIGHT. Production-connected device smoke tests and App Store review submission remain pending.
