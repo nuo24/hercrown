@@ -169,7 +169,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 
 ## Version 1.0 launch checklist
 
-- [x] App Store Connect uses manual release. The owner presses Release after approval.
+- [x] Owner changed version 1.0 to automatic release after approval on November 10; Apple API verified `AFTER_APPROVAL`. Submission remains paused until final asset approval. This supersedes the earlier manual-release decision.
 - [x] App Store Connect weekly plan has no introductory offer in any territory and is Ready to Submit. Yearly retains its 7-day trial for eligible subscribers. Superwall Main publishes the matching weekly disclosure.
 - [x] App Store Connect age rating is 4+ and the third-party content rights declaration is saved.
 - [x] Both $19.99 return offers are off for version 1.0. The app requires a sandbox receipt, the Worker endpoints require staging, and Superwall's legacy `paywall_decline` placement is paused. Exclude the separate $19.99 product from the 1.0 submission.
@@ -183,7 +183,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - [x] Release now points at production and uses its legal and support URLs. The production build disables sandbox testing and both return offers.
 - [ ] Verify first-run onboarding on an iPhone that has never had Her Crown installed. The Sandbox testing menu is hidden in production builds. Complete the production smoke checks.
 - [ ] Sandbox checkout and restore on the TestFlight release candidate. Use dedicated test accounts: the build writes those accounts and their purchases to production, with purchases flagged as sandbox. Verify the entitlement and purchase event on the production backend.
-- [ ] After Apple approves 1.0, switch Superwall Main to all users without an active entitlement immediately before the owner presses Release.
+- [ ] Before submitting for App Review, switch and verify Superwall Main for all users without an active entitlement. Automatic release means the paywall must be launch-ready before approval; do not wait until after approval. Make this change only when the owner resumes final submission preparation.
 - [ ] Production checkout and restore from the public App Store build. Verify the entitlement and purchase event on the production backend.
 
 ## November 6 design handoff
@@ -730,3 +730,7 @@ Owner requested the final push. Preparing 1.0 (33) with the last native loading-
 - Replaced outdated screenshots with current native CUA captures. Owner requested the original artwork, captions, frame positions, texture and illustration decorations be restored, with pure white backgrounds. The original PNGs remain untouched; reproducible composition lives in `scripts/app-store/compose-final-screenshots.py`, output `design/app-store-screenshots/build33/decorated-white/`. Only phone-display content is replaced; original decorative pixels are preserved. Current capture set visually inspected as a six-page contact sheet. App Store asset replacement status follows below.
 
 All six decorated-white 1206×2622 RGB PNGs uploaded and ordered in App Store Connect. Read-back: three COMPLETE, three UPLOAD_COMPLETE with no errors (Apple processing pending). Confirmed sampled outer backgrounds are RGB 255/255/255. Original screenshot source files were not modified. Required check passed and all 202 tests passed; the first restricted test attempt could not bind localhost, and the authorized rerun passed. Public review remains paused.
+
+
+### November 10 — owner requests automatic release
+Apple API updated version 1.0 to `releaseType=AFTER_APPROVAL` and read back the same value; state remains PREPARE_FOR_SUBMISSION. No review submission performed. This supersedes manual-release references above. Superwall Main audience must be configured for production before submission/approval, rather than after approval. Availability audit found 175 enabled storefronts and availableInNewTerritories=true, which does not match the earlier U.S.-first launch plan. Asked owner whether to restrict app availability to USA only; no territory changes made pending answer. Owner screenshot also shows the current draft contains two subscriptions but lacks the app version and subscription group; these must be added together when the owner resumes submission work.
