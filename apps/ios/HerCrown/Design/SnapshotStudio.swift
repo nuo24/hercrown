@@ -378,10 +378,21 @@ struct VerseSnapshotView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
                     ForEach(design.art) { art in
-                        Button { selected = selected == art.id ? nil : art.id } label: {
-                            Image.illustration(art.asset).resizable().scaledToFit().padding(4).frame(width: 58, height: 58)
-                                .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected == art.id ? ink : Theme.border(scheme), lineWidth: 1))
-                        }.buttonStyle(.plain).accessibilityLabel("Arrange \(art.asset.replacingOccurrences(of: "-", with: " "))")
+                        ZStack(alignment: .topTrailing) {
+                            Button { selected = selected == art.id ? nil : art.id } label: {
+                                Image.illustration(art.asset).resizable().scaledToFit().padding(4).frame(width: 58, height: 58)
+                                    .overlay(RoundedRectangle(cornerRadius: 11).stroke(selected == art.id ? ink : Theme.border(scheme), lineWidth: 1))
+                            }.buttonStyle(.plain).accessibilityLabel("Arrange \(art.asset.replacingOccurrences(of: "-", with: " "))")
+                                .padding(.top, 12).padding(.trailing, 12)
+                            Button { removeArt(art.id) } label: {
+                                Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
+                                    .frame(width: 24, height: 24)
+                                    .background(Theme.canvas(scheme), in: Circle())
+                                    .overlay(Circle().stroke(Theme.border(scheme)))
+                                    .frame(width: 44, height: 44, alignment: .topTrailing)
+                                    .contentShape(Rectangle())
+                            }.buttonStyle(.plain).accessibilityLabel("Remove \(art.asset.replacingOccurrences(of: "-", with: " ")) illustration")
+                        }
                     }
                 }.padding(3)
             }
@@ -398,7 +409,7 @@ struct VerseSnapshotView: View {
                         Spacer()
                         Button("Bring forward") { design.art.removeAll { $0.id == layer.id }; design.art.append(layer) }
                         Spacer()
-                        Button("Remove", role: .destructive) { design.art.removeAll { $0.id == layer.id }; selected = nil }
+                        Button("Remove", role: .destructive) { removeArt(layer.id) }
                     }.font(.ui(12)).frame(minHeight: 44)
                 }.padding(14).background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 13))
             }
@@ -414,6 +425,10 @@ struct VerseSnapshotView: View {
                 }
             }
         }
+    }
+    private func removeArt(_ id: UUID) {
+        design.art.removeAll { $0.id == id }
+        if selected == id { selected = nil; pinchSize = nil; dragOrigin = nil }
     }
     private func artBinding(_ id: UUID, _ path: WritableKeyPath<SnapshotArt, Double>) -> Binding<Double> {
         Binding(get: { design.art.first(where: { $0.id == id })?[keyPath: path] ?? 0 }, set: { value in if let i = design.art.firstIndex(where: { $0.id == id }) { design.art[i][keyPath: path] = value } })

@@ -535,3 +535,9 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Archived from clean isolated checkout `/tmp/hercrown-build26-source`, source `db00793a6313afcc708463a02b0a6ebf8b660ee7`. Archive `/private/tmp/hercrown-build26/HerCrown.xcarchive`, Release + HC_STAGING_TESTFLIGHT; verified version 1.0 (26). Xcode Organizer confirmed Uploaded to Apple.
 - Apple build `6b226000-431b-4d26-8140-6f89516a7a4c` processed VALID, APP_STORE_ELIGIBLE. Saved photo-fix testing notes, enabled tester notifications, assigned existing internal groups and external Beta, and submitted beta review. Final API status confirms internal IN_BETA_TESTING and external IN_BETA_TESTING.
 - Includes the cropped-avatar replacement and single-tap save fix described above, plus all build 25 changes. Required check, 198 API tests and 26 native tests passed; archive compilation succeeded. Owner should test a real photo replacement, reopening Account and relaunching to confirm persistence. No production deployment or public release.
+
+### Nov 9: compact verse sharing and visible illustration removal (local)
+
+- Share verse opens at three-quarter height, with optional expansion for long passages; removed the gray grouped-row background and muted action-row styling. Snapshot and Widget Studio remain full-screen editors.
+- Added a visible X to each placed illustration thumbnail in both studios. Removal clears the selected layer and active transform state when relevant; the existing Save/Discard flow still controls persistence.
+- Verification: required check and all 198 API tests passed; simulator build succeeded. Inspected the shorter Share verse sheet with plain white rows, then opened Widget Studio and used the new X to remove its olive illustration (count 1 → 0, canvas removed it), and added a Cosmos to inspect the X placement. Shared implementation covers Snapshot Studio. These corrections are local and are not included in TestFlight build 26 yet.

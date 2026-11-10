@@ -49,11 +49,11 @@ private struct VerseShareOptions: View {
                     Button { studio = .snapshot } label: { row("Snapshot Studio", icon: "square.and.arrow.up", subtitle: "Create an image of this verse") }
                     Divider()
                     Button { studio = .widget } label: { row("Set as widget verse", icon: "bookmark") }
-                }.background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 18))
+                }
             }.padding(.horizontal, 22).padding(.top, 12).padding(.bottom, 24)
         }
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme)).buttonStyle(.plain)
-        .presentationDetents([.large]).presentationDragIndicator(.visible)
+        .presentationDetents([.fraction(0.75), .large]).presentationDragIndicator(.visible)
         .task { await Analytics.shared.track("verse_share_opened") }
         .fullScreenCover(item: $studio) { destination in
             VerseSnapshotView(text: text, reference: reference,
@@ -67,10 +67,10 @@ private struct VerseShareOptions: View {
             Image(systemName: icon).font(.system(size: 19)).frame(width: 24)
             VStack(alignment: .leading, spacing: 6) {
                 Text(title).font(.ui(14, weight: .semibold))
-                if let subtitle { Text(subtitle).font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
+                if let subtitle { Text(subtitle).font(.ui(12)) }
             }
             Spacer(minLength: 8)
-            Image(systemName: "chevron.right").font(.system(size: 10)).foregroundStyle(Theme.muted(scheme))
+            Image(systemName: "chevron.right").font(.system(size: 10))
         }.padding(.horizontal, 18).padding(.vertical, 22).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
     }
 }
