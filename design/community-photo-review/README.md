@@ -2,6 +2,20 @@
 
 Local design review, November 10, 2026. These files are not bundled into the app or cleared for public reuse. Preserve watermarks and source context. Public website availability does not itself establish app-use permission.
 
+## Regional follow-up
+
+Owner keeps Sharing the Mission as the Africa selection and requested the next candidates from the USA, Europe, Asia and Brazil. NIDAKE photos are retained as research history, not selected for the design. Religious affiliation is researched from organizations' statements, not inferred from photographed people's clothing.
+
+| File | Region / program page | Original photo URL |
+| --- | --- | --- |
+| usa-mercy-program.jpg | USA, [Mercy Multiplied residential program](https://mercymultiplied.com/programs/residential-program/), a Christian organization | https://mercymultiplied.com/wp-content/uploads/2026/05/Resident-Program-Banner-1-1.jpg |
+| europe-mercy-uk.jpg | Europe/UK, [Mercy UK published residential testimonies](https://www.mercyuk.org/residential-testimonies), Christian discipleship program history | https://images.squarespace-cdn.com/content/v1/59b86b16ccc5c574395b3b57/1634642108554-YWGEN39C4VB8HUI6NGJR/5D_36673_cold.jpg |
+| asia-house-of-grace.png | Asia/Thailand, [Global Servants House of Grace](https://www.globalservants.org/thailand), girls' education and Christian care | https://irp.cdn-website.com/88c72c17/dms3rep/multi/opt/art7-1920w.png |
+| brazil-meninadanca-friendship.png | Brazil, [Meninadança Pink Houses](https://meninadanca.org/the-pink-houses/), official places-of-friendship imagery | https://meninadanca.org/wp-content/uploads/2023/05/friendship.png |
+| brazil-meninadanca-program.png | Brazil, same official Pink Houses program page, group photo with staff/program participants; do not assign individual roles without caption confirmation | https://meninadanca.org/wp-content/uploads/2023/04/22.png |
+
+All five images visually inspected. These are candidate organizations/programs, not completed recipient due diligence. No app reuse license has been established for these five images. Obtain organization approval, photographer credit and confirmation of the relevant participant publicity consent before bundling or publishing. Do not label any individual as a survivor, patient, orphan or member of a religion from visual appearance. Do not carry over public testimony details into a new promotional context without approval.
+
 ## Owner selection
 
 `sharing-the-mission-selected.png`: exact image supplied and selected by the owner for Sharing the Mission. Use this photo for the local card design. Sharing the Mission's program page describes its Nigerian partners, widows' conferences and outreach. Do not identify individual women or assert that Her Crown has funded them. Reuse permission remains unconfirmed.
