@@ -243,15 +243,13 @@ struct DiscoverView: View {
         }
     }
 
-    private func completionButton(_ card: DiscoverFeed.Card) -> some View {
+    private func completionButton(_ card: DiscoverFeed.Card, size: CGFloat = 10) -> some View {
         let checked = completing.contains(card.ref) || studied.contains(card.ref)
         return Button { complete(card) } label: {
-            Text(checked ? "Studied" : "Mark studied")
-                .font(.ui(9, weight: .medium))
-                .foregroundStyle(checked ? Theme.canvas(scheme) : Theme.text(scheme))
-                .padding(.horizontal, 8).padding(.vertical, 5)
-                .background(checked ? Theme.text(scheme) : Theme.supporting(scheme), in: Capsule())
-                .frame(minHeight: 44)
+            Image(systemName: checked ? "checkmark.circle.fill" : "checkmark.circle")
+                .font(.system(size: size, weight: .regular))
+                .foregroundStyle(Theme.text(scheme))
+                .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -267,7 +265,7 @@ struct DiscoverView: View {
                 HStack(spacing: 8) {
                     Text(card.label).font(.ui(12)).foregroundStyle(Theme.muted(scheme))
                         .lineLimit(1).minimumScaleFactor(0.7)
-                    completionButton(card)
+                    completionButton(card, size: 12)
                 }
                 HStack {
                     Button { detail = card } label: {
