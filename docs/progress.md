@@ -566,3 +566,9 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Standardized widget actions on the four-square icon in Share verse, study tools and the Widget Studio save control; Settings already uses it. Verified Share verse visually.
 - Added circle-check controls to Discover's featured passage and each list entry. Tapping fills the themed check, briefly enlarges it, fades the passage, then moves it below unread entries in completion order while the list closes the gap. Completed passages remain readable/searchable and can be moved to the end again. Progress uses existing per-account studied storage; emits discover_card_read. Reduce Motion skips decorative animation.
 - Verification: iOS simulator build succeeded; npm run check and all 198 API tests passed. In the running app marked 1 Peter 4:10, confirmed removal from its original position and placement after the other loaded entries, relaunched, then searched for it and confirmed the persisted filled check. No new TestFlight upload or production change yet.
+
+
+### Nov 9: prepare TestFlight build 28
+
+- Includes the post-build-27 crop window-safe-area correction, full-screen Saved passages honoring appearance, consistent four-square widget icons, and Discover circle-check completion with fade/reordering and persisted studied state.
+- The feature commit passed npm run check, all 198 API tests and an iOS simulator build; running-app checks are recorded above. This commit bumps app and widget to 1.0 (28). Archive uses a clean isolated checkout with Release + HC_STAGING_TESTFLIGHT. No production deployment.
