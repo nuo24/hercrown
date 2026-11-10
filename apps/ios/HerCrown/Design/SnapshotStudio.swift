@@ -70,22 +70,20 @@ struct VerseSnapshotView: View {
     @State private var dragOrigin: CGPoint?
     @State private var pinchSize: Double?
     private var ink: Color { Theme.text(scheme) }
+    private var translationLabel: String { BibleStore.names.first(where: { $0.value == translation })?.key.uppercased() ?? translation.uppercased() }
     private var watermark: Bool { !widgetMode && design.watermark }
     private var key: String { "hc.\(widgetMode ? "widgetStudio" : "snapshotStudio").\(app.me?.user.id ?? "local")" }
     private var photoURL: URL { FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("\(widgetMode ? "widget" : "snapshot")-\(app.me?.user.id ?? "local").jpg") }
     var body: some View {
         VStack(spacing: 0) {
-            ZStack {
-                VStack(spacing: 4) {
+            HStack(spacing: 8) {
+                Button { close() } label: { Image(systemName: "chevron.left").frame(width: 36, height: 44) }
+                    .accessibilityLabel(widgetMode ? "Close Widget Studio" : "Close Snapshot Studio")
+                VStack(alignment: .leading, spacing: 4) {
                     Text(widgetMode ? "Widget Studio" : "Snapshot Studio").font(.serif(26)).lineLimit(1).minimumScaleFactor(0.8)
-                    Text("\(reference) · \(translation)").font(.ui(11)).foregroundStyle(Theme.muted(scheme)).lineLimit(1)
-                }.padding(.horizontal, 54)
-                HStack {
-                    Button { close() } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44) }
-                        .accessibilityLabel(widgetMode ? "Close Widget Studio" : "Close Snapshot Studio")
-                    Spacer()
-                    Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
-                }
+                    Text("\(reference) · \(translationLabel)").font(.ui(11)).foregroundStyle(Theme.muted(scheme)).lineLimit(1)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                Button("Done") { close() }.font(.ui(14, weight: .medium)).frame(minWidth: 44, minHeight: 44)
             }.padding(.horizontal, 18).padding(.top, 10).padding(.bottom, 14)
             GeometryReader { area in
                 let scale = max(0.01, min((area.size.width - 36) / 600, (area.size.height - 44) / design.height))
