@@ -8,7 +8,7 @@ struct InsightsSheet: View {
     @Environment(AppModel.self) private var app
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var scheme
-    @State private var widgetSet = false
+    @State private var showingWidgetStudio = false
     @State private var path: [StudyTool]
 
     init(ref: VerseRef, translation: String, initialTool: StudyTool? = nil, onOpen: @escaping (VerseRef) -> Void) {
@@ -34,7 +34,10 @@ struct InsightsSheet: View {
                         ForEach(StudyTool.allCases) { tool in
                             NavigationLink(value: tool) {
                                 HStack(spacing: 16) {
-                                    Image(systemName: tool.symbol).font(.system(size: 25)).frame(width: 25)
+                                    Group {
+                                        if tool == .related { RelatedVerseIcon().frame(width: 24, height: 24) }
+                                        else { Image(systemName: tool.symbol).font(.system(size: 25)) }
+                                    }.frame(width: 25)
                                     Text(tool.title).font(.system(size: 17))
                                     Spacer()
                                     if !app.membership.premium { Text("Plus").font(.system(size: 11, weight: .semibold)).padding(.horizontal, 7).padding(.vertical, 3).background(Capsule().fill(Color.primary.opacity(0.08))) }
@@ -48,20 +51,23 @@ struct InsightsSheet: View {
                             Divider()
                         }
                         Button {
-                            app.updatePreferences(["widgetRef": ref.description]) { $0.widgetRef = ref.description }
-                            widgetSet = true
+                            showingWidgetStudio = true
                         } label: {
                             HStack(spacing: 14) {
-                                Image(systemName: widgetSet ? "checkmark.circle" : "square.grid.2x2").font(.system(size: 18)).frame(width: 24)
-                                Text(widgetSet ? "Widget verse set" : "Set as your widget verse").font(.system(size: 16))
+                                Image(systemName: "book").font(.system(size: 22)).frame(width: 25)
+                                Text("Set as your widget verse").font(.system(size: 16))
                                 Spacer()
+                                Image(systemName: "chevron.right").font(.system(size: 13)).foregroundStyle(.tertiary)
                             }
-                            .padding(.vertical, 15)
+                            .frame(minHeight: 76)
                         }
                         .buttonStyle(.plain)
                     }
                 }
                 .padding(24)
+            }
+            .fullScreenCover(isPresented: $showingWidgetStudio) {
+                SelectedVerseWidgetStudio(ref: ref, translation: translation)
             }
             .sheetControls(back: { dismiss() }, done: { dismiss() })
             .navigationDestination(for: StudyTool.self) { tool in
@@ -120,5 +126,35 @@ struct PlusRequiredView: View {
                 app.presentPaywall(placement: "study_\(tool.rawValue)")
             }.buttonStyle(CapsuleButtonStyle())
         }.frame(maxWidth: .infinity).padding(.vertical, 16)
+    }
+}
+
+/// Shared outline chain used by the menu and every cross-reference row.
+struct RelatedVerseIcon: View {
+    var body: some View { Image.glyph("link") }
+}
+
+private struct SelectedVerseWidgetStudio: View {
+    let ref: VerseRef
+    let translation: String
+    @State private var passage: OnlineBible.Passage?
+    @State private var failed = false
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        Group {
+            if let text = passage?.text ?? BibleStore.shared.text(translation, ref), !text.isEmpty {
+                VerseSnapshotView(text: text, reference: passage?.label ?? BibleStore.shared.label(ref), translation: translation.uppercased(), widgetMode: true)
+            } else if failed {
+                VStack(spacing: 18) {
+                    Text("Your widget verse couldn’t load.")
+                    Button("Done") { dismiss() }
+                }
+            } else { ProgressView() }
+        }.task {
+            if BibleStore.online[translation] != nil {
+                passage = try? await OnlineBible.passage(translation, ref: ref)
+                failed = passage == nil
+            }
+        }
     }
 }

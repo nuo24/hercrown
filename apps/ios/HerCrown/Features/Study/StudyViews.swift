@@ -21,16 +21,7 @@ struct AIStudyView: View {
             VStack(alignment: .leading, spacing: 24) {
                 Text(tool.title).font(.ui(20, weight: .semibold))
                     .accessibilityAddTraits(.isHeader)
-                VStack(spacing: 16) {
-                    ScriptureReference(ref: ref, translation: translation).font(.ui(21, weight: .semibold))
-                    ScriptureText(text: BibleStore.shared.text(translation, ref) ?? "", reference: ref.description, translation: translation)
-                        .font(.serif(25, relativeTo: .title2)).lineSpacing(4)
-                    Text(BibleStore.offline[translation] ?? translation.uppercased())
-                        .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
-                }
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity)
-                .padding(.bottom, 10)
+                VerseQuote(ref: ref, translation: translation).frame(maxWidth: .infinity).padding(.bottom, 10)
                 content
             }
             .padding(.horizontal, 22)
@@ -77,7 +68,7 @@ struct AIStudyView: View {
                 .padding(14)
                 .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 12))
             ForEach(answer.sections) { section($0.title, $0.text) }
-            DisclosureGroup("Sources & study notice") {
+            DisclosureGroup("Sources & study notes") {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(answer.sources) { source in
                         Text("[\(source.tag)] \(source.author), \(source.name) (\(source.published)) · \(source.license)")
@@ -127,14 +118,7 @@ struct AIStudyView: View {
     }
 
     private func section(_ title: String, _ body: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.ui(12, weight: .semibold)).tracking(0.5)
-                .foregroundStyle(Theme.muted(scheme)).accessibilityAddTraits(.isHeader)
-            CitedText(text: body).font(.ui(15)).lineSpacing(7)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+        CollapsibleStudySection(title: title, text: body)
     }
 
     /// While streaming: "## Title\nbody…" → (title, body) pairs as they arrive.
@@ -185,24 +169,22 @@ struct OriginalLanguageView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 20) {
+                Text("Original language").font(.ui(20, weight: .semibold))
+                VerseQuote(ref: ref, translation: translation).frame(maxWidth: .infinity).padding(.bottom, 12)
                 switch state {
                 case .loaded(let data):
                     Text(data.language == "grc" ? "Greek" : "Hebrew").font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
                     ForEach(data.words) { word in
                         Button { open = word } label: {
-                            HStack(alignment: .firstTextBaseline, spacing: 14) {
-                                VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 14) {
+                                VStack(alignment: .leading, spacing: 6) {
                                     Text(word.text).font(.system(size: 24))
-                                    Text(word.transliteration).font(.system(size: 13, design: .serif)).italic().foregroundStyle(.secondary)
-                                }
-                                .frame(minWidth: 96, alignment: .leading)
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(Self.plainGloss(word.gloss)).font(.system(size: 16, weight: .medium))
-                                    if let meaning = word.meaning, meaning != word.gloss, !meaning.hasPrefix("[") { Text(meaning).font(.system(size: 13)).foregroundStyle(.secondary) }
-                                    if let parsing = word.parsing { Text(parsing).font(.system(size: 12)).foregroundStyle(.tertiary) }
+                                    Text(word.transliteration).font(.ui(13, weight: .semibold))
+                                    Text("\(Self.plainGloss(word.gloss)) · \(word.strong)").font(.ui(12)).foregroundStyle(.secondary)
                                 }
                                 Spacer()
+                                Image(systemName: "chevron.right").font(.system(size: 12)).foregroundStyle(.secondary)
                             }
                             .padding(14)
                             .surfaceCard(radius: 14)
@@ -257,15 +239,18 @@ struct RelatedVersesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 4) {
+                Text("Related verses").font(.ui(20, weight: .semibold)).padding(.bottom, 24)
+                VerseQuote(ref: ref, translation: translation).frame(maxWidth: .infinity).padding(.bottom, 24)
                 switch state {
                 case .loaded(let data):
-                    Text("Passages often read alongside this verse").font(.system(size: 13)).foregroundStyle(.secondary).padding(.bottom, 8)
+                    if data.related.isEmpty { Text("No related verses.").font(.ui(14)).foregroundStyle(.secondary) }
                     ForEach(data.related) { item in
                         Button { if let r = VerseRef(item.ref) { onOpen(r) } } label: {
-                            HStack(alignment: .top) {
-                                VStack(alignment: .leading, spacing: 4) {
+                            HStack(spacing: 18) {
+                                RelatedVerseIcon().frame(width: 21, height: 21)
+                                VStack(alignment: .leading, spacing: 6) {
                                     Text(item.label).font(.system(size: 14, weight: .semibold))
-                                    ScriptureText(text: item.text, reference: item.ref, translation: translation).font(.serif(18)).multilineTextAlignment(.leading)
+                                    ScriptureText(text: item.text, reference: item.ref, translation: translation).font(.ui(13)).foregroundStyle(.secondary).multilineTextAlignment(.leading)
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
@@ -275,7 +260,7 @@ struct RelatedVersesView: View {
                         .buttonStyle(.plain)
                         Divider()
                     }
-                    Text("\(data.source.name) · \(data.source.license)").font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 8)
+
                 case .needsPlus: PlusRequiredView(tool: .related)
                 case .failed(let message): Text(message).foregroundStyle(.secondary)
                 default: ProgressView()
@@ -289,5 +274,24 @@ struct RelatedVersesView: View {
             state = .loading
             state = await StudyService.load(ref, .related, translation: translation)
         }
+    }
+}
+
+private struct CollapsibleStudySection: View {
+    let title: String
+    let text: String
+    @State private var expanded = true
+    @Environment(\.colorScheme) private var scheme
+    var body: some View {
+        DisclosureGroup(isExpanded: $expanded) {
+            CitedText(text: text).font(.ui(15)).lineSpacing(7)
+                .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 12)
+        } label: {
+            Text(title).font(.ui(12, weight: .semibold)).tracking(0.5)
+                .foregroundStyle(Theme.muted(scheme)).accessibilityAddTraits(.isHeader)
+        }
+        .tint(Theme.muted(scheme))
+        .padding(20)
+        .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
     }
 }

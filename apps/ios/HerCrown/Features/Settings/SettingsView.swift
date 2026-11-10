@@ -423,6 +423,7 @@ struct AccountView: View {
     @State private var name = ""
     @State private var bio = ""
     @State private var photo: PhotosPickerItem?
+    @State private var cropPhoto: AvatarCropPhoto?
     @State private var message: String?
     @State private var busy = false
     @State private var confirmingDelete = false
@@ -461,9 +462,6 @@ struct AccountView: View {
                 if let message { Text(message).font(.ui(13)).accessibilityAddTraits(.updatesFrequently) }
 
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Permanently deletes your profile, photo, saves, notes and reading history. Deleting your account doesn’t cancel Apple billing.")
-                        .font(.ui(12))
-                        .foregroundStyle(Theme.muted(scheme))
                     Button(role: .destructive) { confirmingDelete = true } label: {
                         Text("Delete account")
                             .font(.ui(15, weight: .medium))
@@ -504,6 +502,15 @@ struct AccountView: View {
         .disabled(busy)
         .overlay { if busy { ProgressView() } }
         .sheet(isPresented: $showsAppleSignIn) { appleSignIn }
+        .fullScreenCover(item: $cropPhoto) { selected in
+            AvatarCropView(image: selected.image) { jpeg in
+                cropPhoto = nil
+                run {
+                    try await app.uploadAvatar(jpeg)
+                    message = "Photo updated."
+                }
+            }
+        }
         .onAppear {
             name = app.displayName.flatMap { $0 == "Guest" ? nil : $0 } ?? ""
             bio = app.me?.profile.bio ?? ""
@@ -512,15 +519,14 @@ struct AccountView: View {
             guard let item else { return }
             run {
                 defer { photo = nil }
-                guard let data = try await item.loadTransferable(type: Data.self), let jpeg = Self.squareJPEG(data) else { message = "We couldn’t read that photo."; return }
-                try await app.uploadAvatar(jpeg)
-                message = "Photo updated."
+                guard let data = try await item.loadTransferable(type: Data.self), let image = UIImage(data: data) else { message = "We couldn’t read that photo."; return }
+                cropPhoto = AvatarCropPhoto(image: image)
             }
         }
         .confirmationDialog("Delete your account?", isPresented: $confirmingDelete, titleVisibility: .visible) {
             Button("Delete account", role: .destructive) { run { try await app.deleteAccount(); message = "Your account was deleted. You’re starting fresh as a guest." } }
         } message: {
-            Text("This can’t be undone.")
+            Text("Permanently deletes your profile, photo, saves, notes and reading history. This can’t be undone. Deleting your account doesn’t cancel Apple billing.")
         }
     }
 
@@ -531,9 +537,12 @@ struct AccountView: View {
             Avatar(size: 110)
             PhotosPicker(selection: $photo, matching: .images) {
                 Label("Choose photo", systemImage: "camera")
+                    .font(.ui(14, weight: .medium))
+                    .frame(maxWidth: .infinity, minHeight: 46)
+                    .overlay { RoundedRectangle(cornerRadius: 8).stroke(Theme.text(scheme), lineWidth: 1) }
             }
-            .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-            .frame(width: 164)
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
             if app.me?.profile.avatarUrl != nil {
                 Button("Remove photo") { run { try await app.removeAvatar(); message = "Photo removed." } }
                     .font(.ui(13, weight: .medium))
@@ -583,7 +592,8 @@ struct AccountView: View {
                 Text(app.isGuest ? "Sign in with Apple" : "Signed in with Apple")
                     .font(.ui(14, weight: .medium))
                 Text("Keep your saves, notes and reading history safe")
-                    .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                    .font(.ui(11)).lineLimit(1).minimumScaleFactor(0.75)
+                    .foregroundStyle(Theme.muted(scheme))
             }
             Spacer(minLength: 0)
             if app.isGuest {
@@ -645,19 +655,7 @@ struct AccountView: View {
         }
     }
 
-    /// Center-crops to a square and scales to 640 px, JPEG (well under the 10 MB limit).
-    static func squareJPEG(_ data: Data) -> Data? {
-        guard let image = UIImage(data: data) else { return nil }
-        let side = min(image.size.width, image.size.height)
-        let target: CGFloat = 640
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: target, height: target), format: { let f = UIGraphicsImageRendererFormat(); f.scale = 1; return f }())
-        let scaled = renderer.image { _ in
-            let scale = target / side
-            image.draw(in: CGRect(x: -(image.size.width - side) / 2 * scale, y: -(image.size.height - side) / 2 * scale,
-                                  width: image.size.width * scale, height: image.size.height * scale))
-        }
-        return scaled.jpegData(compressionQuality: 0.85)
-    }
+
 }
 
 /// Her photo (private, fetched with her session), else her initial, else the cosmos flower.
@@ -785,14 +783,16 @@ struct SubscriptionView: View {
     private var currentPlan: some View {
         if let sub = app.membership.subscription, app.membership.premium {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Her Crown Plus").font(.serif(28, weight: .semibold, relativeTo: .title2))
+                Text("Her Crown Plus").font(.serif(28, relativeTo: .title2))
                     .accessibilityAddTraits(.isHeader)
-                Text(planName(sub.productId)).font(.ui(14)).foregroundStyle(Theme.muted(scheme))
+                Text("Active membership · " + planName(sub.productId)).font(.ui(12)).foregroundStyle(Theme.muted(scheme))
                 if sub.isTrial, let trial = sub.trial {
                     LabeledContent("Free trial ends", value: Date(timeIntervalSince1970: trial.endsAt / 1000).formatted(date: .abbreviated, time: .omitted))
                 } else if let expires = sub.expiresAt {
                     LabeledContent(sub.willRenew ? "Renews" : "Ends", value: Date(timeIntervalSince1970: expires / 1000).formatted(date: .abbreviated, time: .omitted))
                 }
+                Link("Manage subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+                    .buttonStyle(CapsuleButtonStyle()).padding(.top, 6)
             }
             .font(.ui(14))
             .padding(18)
@@ -932,4 +932,76 @@ struct SafariView: UIViewControllerRepresentable {
     let url: URL
     func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
     func updateUIViewController(_ controller: SFSafariViewController, context: Context) {}
+}
+
+private struct AvatarCropPhoto: Identifiable {
+    let id = UUID()
+    let image: UIImage
+}
+
+/// The avatar remains square in storage; the circle previews the visible profile crop.
+private struct AvatarCropView: View {
+    let image: UIImage
+    let onSave: (Data) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var zoom: CGFloat = 1
+    @State private var offset = CGSize.zero
+    @GestureState private var drag = CGSize.zero
+    @GestureState private var magnification: CGFloat = 1
+    @State private var error = false
+
+    private func position(side: CGFloat, zoom: CGFloat, offset: CGSize) -> (CGFloat, CGSize) {
+        let scale = max(side / image.size.width, side / image.size.height) * zoom
+        let x = max(0, (image.size.width * scale - side) / 2)
+        let y = max(0, (image.size.height * scale - side) / 2)
+        return (scale, CGSize(width: min(x, max(-x, offset.width)), height: min(y, max(-y, offset.height))))
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let side = max(1, min(geometry.size.width - 40, geometry.size.height - 240))
+            let liveZoom = min(6, max(1, zoom * magnification))
+            let live = position(side: side, zoom: liveZoom, offset: CGSize(width: offset.width + drag.width, height: offset.height + drag.height))
+            VStack(spacing: 24) {
+                HStack {
+                    Button("Cancel") { dismiss() }
+                    Spacer()
+                    Text("Adjust photo").font(.ui(18, weight: .medium))
+                    Spacer()
+                    Button("Reset") { zoom = 1; offset = .zero }
+                }.font(.ui(14)).padding(.top, 12)
+                Spacer(minLength: 0)
+                ZStack {
+                    Image(uiImage: image).resizable()
+                        .frame(width: image.size.width * live.0, height: image.size.height * live.0)
+                        .offset(live.1)
+                }
+                .frame(width: side, height: side).clipped()
+                .overlay { Circle().stroke(.white, lineWidth: 2).allowsHitTesting(false) }
+                .contentShape(Rectangle())
+                .gesture(DragGesture().updating($drag) { value, state, _ in state = value.translation }
+                    .onEnded { value in offset = position(side: side, zoom: zoom, offset: CGSize(width: offset.width + value.translation.width, height: offset.height + value.translation.height)).1 })
+                .simultaneousGesture(MagnificationGesture().updating($magnification) { value, state, _ in state = value }
+                    .onEnded { value in zoom = min(6, max(1, zoom * value)); offset = position(side: side, zoom: zoom, offset: offset).1 })
+                .accessibilityLabel("Photo crop. Drag to reposition and pinch to zoom.")
+                Text("Drag to move. Pinch to zoom.").font(.ui(13)).foregroundStyle(Color.white.opacity(0.7))
+                Spacer(minLength: 0)
+                Button("Use photo") {
+                    let crop = position(side: side, zoom: zoom, offset: offset)
+                    let format = UIGraphicsImageRendererFormat(); format.scale = 1
+                    let factor = 640 / side
+                    let result = UIGraphicsImageRenderer(size: CGSize(width: 640, height: 640), format: format).image { _ in
+                        image.draw(in: CGRect(x: ((side - image.size.width * crop.0) / 2 + crop.1.width) * factor,
+                                              y: ((side - image.size.height * crop.0) / 2 + crop.1.height) * factor,
+                                              width: image.size.width * crop.0 * factor, height: image.size.height * crop.0 * factor))
+                    }
+                    if let jpeg = result.jpegData(compressionQuality: 0.85) { onSave(jpeg) } else { error = true }
+                }.font(.ui(15, weight: .medium)).foregroundStyle(.black)
+                    .frame(maxWidth: .infinity, minHeight: 50)
+                    .background(.white, in: Capsule()).buttonStyle(.plain).padding(.bottom, 18)
+            }.padding(.horizontal, 20).frame(maxWidth: .infinity)
+        }
+        .background(Color.black).foregroundStyle(.white).preferredColorScheme(.dark)
+        .alert("We couldn’t prepare that photo.", isPresented: $error) { Button("OK", role: .cancel) {} }
+    }
 }
