@@ -252,12 +252,9 @@ struct VersePage: View {
             .contentShape(Rectangle())
             .onTapGesture(count: 2) { likeVerse() }
             .overlay {
-                if showingLike {
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 76, weight: .regular))
-                        .foregroundStyle(Theme.text(scheme))
-                        .shadow(color: Theme.canvas(scheme).opacity(0.8), radius: 12)
-                        .transition(reduceMotion ? .opacity : .scale(scale: 0.5).combined(with: .opacity))
+                if showingLike || previewLikeAnimation {
+                    VerseLikeBloom(reduceMotion: reduceMotion, holdForPreview: previewLikeAnimation)
+                        .id(likePulse)
                         .accessibilityHidden(true)
                         .allowsHitTesting(false)
                 }
@@ -271,7 +268,7 @@ struct VersePage: View {
                     else { likeVerse() }
                 } label: {
                     Group {
-                        if app.isSaved(ref) { Image(systemName: "heart.fill").font(.system(size: 19)) }
+                        if app.isSaved(ref) { Image(systemName: "heart.fill").font(.system(size: 19)).foregroundStyle(Color(red: 0.91, green: 0.16, blue: 0.28)) }
                         else { Image.glyph("heart").frame(width: 20, height: 20) }
                     }.frame(width: 44, height: 44).contentShape(Rectangle())
                 }
@@ -310,13 +307,19 @@ struct VersePage: View {
         }
         .task(id: likePulse) {
             guard likePulse > 0 else { return }
-            withAnimation(reduceMotion ? .easeOut(duration: 0.15) : .spring(response: 0.3, dampingFraction: 0.6)) {
-                showingLike = true
-            }
-            do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
-            withAnimation(.easeOut(duration: 0.25)) { showingLike = false }
+            showingLike = true
+            do { try await Task.sleep(for: .milliseconds(1400)) } catch { return }
+            showingLike = false
         }
         .onDisappear { showingLike = false }
+    }
+
+    private var previewLikeAnimation: Bool {
+        #if DEBUG
+        UserDefaults.standard.bool(forKey: "hcPreviewLikeAnimation")
+        #else
+        false
+        #endif
     }
 
     /// Double-tapping confirms a like; it never removes an already saved passage.
@@ -336,6 +339,48 @@ struct VersePage: View {
             }
         }
         return (try? AttributedString(ns, including: \.uiKit)) ?? AttributedString(verse.text)
+    }
+}
+
+/// A brief bloom, a soft ring and tiny sparks, then an upward drifting farewell.
+private struct VerseLikeBloom: View {
+    let reduceMotion: Bool
+    let holdForPreview: Bool
+    @State private var bloomed = false
+    @State private var departing = false
+    private let red = Color(red: 0.91, green: 0.16, blue: 0.28)
+
+    var body: some View {
+        ZStack {
+            Circle().stroke(red.opacity(0.25), lineWidth: 1.5)
+                .frame(width: 108, height: 108)
+                .scaleEffect(bloomed ? 1.35 : 0.4)
+                .opacity(departing ? 0 : 1)
+            ForEach(0..<6) { index in
+                let angle = Double(index) * .pi / 3 - .pi / 2
+                Image(systemName: index.isMultiple(of: 2) ? "sparkle" : "circle.fill")
+                    .font(.system(size: index.isMultiple(of: 2) ? 13 : 5))
+                    .foregroundStyle(red.opacity(0.7))
+                    .offset(x: cos(angle) * (bloomed ? 70 : 20),
+                            y: sin(angle) * (bloomed ? 70 : 20))
+                    .opacity(departing ? 0 : 1)
+            }
+            Image(systemName: "heart.fill")
+                .font(.system(size: 78))
+                .foregroundStyle(LinearGradient(colors: [Color(red: 1, green: 0.36, blue: 0.43), red], startPoint: .topLeading, endPoint: .bottomTrailing))
+                .shadow(color: red.opacity(0.22), radius: 16, y: 6)
+                .scaleEffect(bloomed ? 1 : 0.25)
+                .rotationEffect(.degrees(bloomed ? -8 : -20))
+        }
+        .scaleEffect(departing && !reduceMotion ? 0.65 : 1)
+        .offset(x: departing && !reduceMotion ? 32 : 0, y: departing && !reduceMotion ? -90 : 0)
+        .opacity(departing ? 0 : 1)
+        .task {
+            withAnimation(reduceMotion ? nil : .spring(response: 0.38, dampingFraction: 0.55)) { bloomed = true }
+            guard !holdForPreview else { return }
+            do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
+            withAnimation(.easeInOut(duration: 0.65)) { departing = true }
+        }
     }
 }
 

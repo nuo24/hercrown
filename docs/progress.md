@@ -596,3 +596,7 @@ Product, design and mockup already exist (this kit). Pricing decided: see [decis
 - Bible reader now shows a springing heart that fades away when saving with the heart button or double-tapping the verse area. Double tap only saves, never unsaves; the heart button retains unlike behavior. Uses appearance-aware colors, light haptic feedback, and an opacity-only transition for Reduce Motion.
 - Uses the existing saved-passage persistence/API and server `passage_saved` analytics event. No new vendor or dependency.
 - Verification: simulator build succeeded; npm run check and all 198 tests passed. In UI Review, double tap saved Psalm 23:1, a repeat double tap retained it, and the heart button unsaved/saved correctly. Haptic feel needs a physical iPhone check. Not yet uploaded to TestFlight.
+
+### Nov 10: red heart bloom refinement
+- Replaced the monochrome like pulse with a red gradient heart: spring bloom, delicate expanding ring and six small sparks, then an upward drift and fade. The saved reader heart is red too. Reduce Motion omits the spatial animation.
+- Captured a held expanded frame from the native simulator for visual review (debug-only preview flag, reset afterward). Simulator build and required typecheck/tests passed (198 tests). Not uploaded to TestFlight.
