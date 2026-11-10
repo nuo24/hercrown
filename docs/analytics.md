@@ -152,3 +152,6 @@ Other endpoints: `installs.pipe` (top of funnel), `revenue.pipe` (daily trials, 
 - Server `community_cause_suggested`: no properties. Nomination names, location, website and reason stay in the authenticated review records, never the event stream.
 
 - `verse_snapshot_shared`: native Snapshot Studio opened the iOS image share sheet; `format` is `portrait`, `square` or `story`. No Scripture, image, name, note or photo is sent to analytics. Opening the share sheet is not proof the user completed sharing.
+
+- `verse_snapshot_downloaded`: a Snapshot Studio image was successfully saved to Photos; `format` is `portrait`, `square` or `story`. No image, Scripture or personal data is collected.
+- `verse_share_opened`: the verse preview and three sharing choices open; no verse or personal data is collected.

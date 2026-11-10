@@ -22,7 +22,7 @@ struct WidgetStudioView: View {
         }.safeAreaInset(edge: .top) {
             if passage == nil && failed {
                 HStack {
-                    Button { dismiss() } label: { Image(systemName: "arrow.left").frame(width: 44, height: 44) }
+                    Button { dismiss() } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44) }
                     Text("Widget Studio").font(.serif(26))
                     Spacer()
                     Button("Done") { dismiss() }.font(.ui(14)).frame(minHeight: 44)
