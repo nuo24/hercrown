@@ -29,7 +29,21 @@
     "seed:scripture:production": "wrangler d1 execute DB --env production --remote --file seeds/kjv.sql && wrangler d1 execute DB --env production --remote --file seeds/bsb.sql && wrangler d1 execute DB --env production --remote --file seeds/web.sql",
     "seed:study:production": "wrangler d1 execute DB --env production --remote --file seeds/study/lexicon.sql && wrangler d1 execute DB --env production --remote --file seeds/study/original_words.sql && wrangler d1 execute DB --env production --remote --file seeds/study/cross_references.sql && wrangler d1 execute DB --env production --remote --file seeds/study/commentary_notes.sql",
     "seed:devotionals:production": "node scripts/build-devotionals.mjs && wrangler d1 execute DB --env production --remote --file seeds/devotionals.sql",
-    "deploy:production": "wrangler deploy --env production"
+    "deploy:production": "wrangler deploy --env production",
+    "build:asv": "node scripts/build-ebible.mjs asv",
+    "seed:asv": "wrangler d1 execute DB --local --file seeds/asv.sql",
+    "build:ylt": "node scripts/build-ebible.mjs ylt",
+    "seed:ylt": "wrangler d1 execute DB --local --file seeds/ylt.sql",
+    "build:darby": "node scripts/build-ebible.mjs darby",
+    "seed:darby": "wrangler d1 execute DB --local --file seeds/darby.sql",
+    "build:webster": "node scripts/build-ebible.mjs webster",
+    "seed:webster": "wrangler d1 execute DB --local --file seeds/webster.sql",
+    "build:msb": "node scripts/build-ebible.mjs msb",
+    "seed:msb": "wrangler d1 execute DB --local --file seeds/msb.sql",
+    "build:rv1909": "node scripts/build-ebible.mjs rv1909",
+    "seed:rv1909": "wrangler d1 execute DB --local --file seeds/rv1909.sql",
+    "seed:free-editions": "npm run seed:asv && npm run seed:ylt && npm run seed:darby && npm run seed:webster && npm run seed:msb && npm run seed:rv1909",
+    "seed:free-editions:staging": "wrangler d1 execute DB --env staging --remote --file seeds/asv.sql && wrangler d1 execute DB --env staging --remote --file seeds/ylt.sql && wrangler d1 execute DB --env staging --remote --file seeds/darby.sql && wrangler d1 execute DB --env staging --remote --file seeds/webster.sql && wrangler d1 execute DB --env staging --remote --file seeds/msb.sql && wrangler d1 execute DB --env staging --remote --file seeds/rv1909.sql"
   },
   "dependencies": {
     "better-auth": "^1.7.15"

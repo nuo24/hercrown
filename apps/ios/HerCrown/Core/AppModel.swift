@@ -17,7 +17,7 @@ final class AppModel {
     var preferences: Preferences = AppModel.cachedPreferences ?? .defaults
     var membership: Membership = .free
     var showExistingAppleSubscription = false
-    private var checkingPaywall = false
+    private(set) var checkingPaywall = false
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
     private var bookmarksByAccount = UserDefaults.standard.dictionary(forKey: "hc.readerBookmarks") as? [String: [String]] ?? [:]
 
@@ -310,6 +310,8 @@ final class AppModel {
         bookmarksByAccount.removeValue(forKey: deletedAccount)
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil
+        OnboardingDraft.clear()
+        await OnboardingActivity.shared.finish()
         PersonalPrayerStore.remove(prayerUserID)
         SnapshotDraftStore.remove(prayerUserID)
         WidgetDesignStore.activate(owner: nil)
@@ -395,6 +397,8 @@ final class AppModel {
         requestedTab = .bible
         onboardingCompleted = true
         UserDefaults.standard.set(true, forKey: "hc.onboardingCompleted")
+        Task { await OnboardingActivity.shared.finish() }
+        OnboardingDraft.clear()
     }
 
     func completeOnboarding() async {

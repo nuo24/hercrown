@@ -50,6 +50,8 @@ struct DiscoverView: View {
     @State private var featureVisible = true
     @State private var searching = false
     @FocusState private var searchFocused: Bool
+    @ScaledMetric(relativeTo: .title3) private var entryTitleWidth = 138.0
+    @ScaledMetric(relativeTo: .caption) private var referenceLineHeight = 16.0
 
     private enum DetailAction {
         case note(VerseRef), study(VerseRef)
@@ -274,7 +276,7 @@ struct DiscoverView: View {
 
     private func feature(_ card: DiscoverFeed.Card) -> some View {
         HStack(spacing: 8) {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(title(for: card)).font(.serif(34, relativeTo: .title)).tracking(-0.6)
                 HStack(spacing: 8) {
                     Text(card.label).font(.ui(12)).foregroundStyle(Theme.muted(scheme))
@@ -297,7 +299,7 @@ struct DiscoverView: View {
                 .frame(maxWidth: 165, maxHeight: 182).rotationEffect(.degrees(12)).accessibilityHidden(true)
         }
         .foregroundStyle(Theme.text(scheme))
-        .frame(minHeight: 219)
+        .frame(minHeight: 201)
     }
 
     private func entry(_ card: DiscoverFeed.Card) -> some View {
@@ -310,15 +312,24 @@ struct DiscoverView: View {
                 .accessibilityLabel("Read \(card.label)")
                 VStack(alignment: .leading, spacing: 0) {
                     Button { detail = card } label: {
-                        Text(title(for: card)).font(.serif(23, relativeTo: .title3)).tracking(-0.3)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text(title(for: card)).font(.serif(22, relativeTo: .title3)).tracking(-0.3)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: entryTitleWidth, alignment: .leading)
                             .contentShape(Rectangle())
                     }
-                    HStack(spacing: 6) {
-                        Text(card.label.uppercased()).font(.ui(10)).tracking(0.35).foregroundStyle(Theme.muted(scheme))
+                    HStack(spacing: 0) {
+                        Text(card.label.uppercased()).font(.ui(10)).tracking(0.35)
+                            .lineLimit(1).minimumScaleFactor(0.8)
                         completionButton(card)
                     }
-                    if let theme = card.theme { Text(theme.uppercased()).font(.ui(9)).tracking(0.4).foregroundStyle(Theme.muted(scheme)) }
+                    // Keep the 44-point button target without letting it separate the two text lines.
+                    .frame(height: referenceLineHeight)
+                    .padding(.top, 8)
+                    .foregroundStyle(Theme.muted(scheme))
+                    Text([card.theme?.uppercased(), card.reflection?.isEmpty == false ? "REFLECTION" : nil]
+                        .compactMap { $0 }.joined(separator: " · "))
+                        .font(.ui(9)).tracking(0.4).foregroundStyle(Theme.muted(scheme))
+                        .padding(.top, 4)
                 }
                 Spacer(minLength: 0)
             }
@@ -336,7 +347,9 @@ struct DiscoverView: View {
             .accessibilityLabel("Actions for \(card.label)")
         }
         .foregroundStyle(Theme.text(scheme))
+        .padding(.vertical, 7)
     }
+
 
     // MARK: Filters
 

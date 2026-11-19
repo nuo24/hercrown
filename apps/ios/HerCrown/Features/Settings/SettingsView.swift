@@ -126,6 +126,13 @@ struct SettingsView: View {
                             }
                             sectionTitle("Here for you")
                             group {
+                                Button {
+                                    if let url = URL(string: "https://apps.apple.com/app/id6830437910?action=write-review") {
+                                        UIApplication.shared.open(url)
+                                        Task { await Analytics.shared.track("review_link_opened") }
+                                    }
+                                } label: { row("star", "Rate Her Crown", "Share your experience on the App Store") }.buttonStyle(.plain)
+                                divider
                                 NavigationLink { SavedPersonalPrayerView() } label: {
                                     row("heart", "Your prayer", "A moment, just for you")
                                 }.buttonStyle(.plain)

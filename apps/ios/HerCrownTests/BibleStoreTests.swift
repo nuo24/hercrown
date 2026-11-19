@@ -10,14 +10,27 @@ final class BibleStoreTests: XCTestCase {
         XCTAssertNil(VerseRef("John 3:16"))
     }
 
-    func testAllThreeBiblesAreBundledWithTheRightShape() throws {
+    func testAllOfflineBiblesAreBundledWithTheRightShape() throws {
         XCTAssertEqual(store.books.count, 66)
         XCTAssertEqual(store.books.reduce(0) { $0 + $1.chapterCount }, 1189)
-        for t in ["kjv", "bsb", "web"] {
+        for t in BibleStore.offlineIDs {
             let genesis = try XCTUnwrap(store.chapter(t, book: "GEN", chapter: 1), t)
             XCTAssertEqual(genesis.verses.count, 31, t)
         }
         XCTAssertEqual(store.text("kjv", VerseRef("PSA.23.1")!), "The LORD is my shepherd; I shall not want.")
+    }
+
+    func testSpanishAndSourceOmissionsArePreserved() throws {
+        XCTAssertEqual(store.text("rv1909", VerseRef("PSA.23.1")!), "Salmo de David. JEHOVÁ es mi pastor; nada me faltará.")
+        XCTAssertEqual(store.chapter("rv1909", book: "GEN", chapter: 1)?.book.name, "Génesis")
+        XCTAssertEqual(store.label(VerseRef("GEN.1.1")!, translation: "rv1909"), "Génesis 1:1")
+        XCTAssertNil(store.text("msb", VerseRef("ACT.8.37")!))
+        XCTAssertNil(store.text("asv", VerseRef("MAT.17.21")!))
+        for t in BibleStore.offlineIDs {
+            let end = try XCTUnwrap(store.chapter(t, book: "REV", chapter: 22), t)
+            XCTAssertFalse(end.verses.isEmpty, t)
+            XCTAssertNotNil(store.text(t, VerseRef("JHN.3.16")!), t)
+        }
     }
 
     func testTranslationsKeepTheirOwnVersification() throws {

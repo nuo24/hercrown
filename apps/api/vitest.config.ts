@@ -8,7 +8,7 @@ export default defineConfig(async () => {
   // Throwaway App Store Server API key so tests can check request signing (Apple itself is mocked).
   const appStoreKey = generateKeyPairSync("ec", { namedCurve: "P-256" });
   // A few chapters of each offline translation (seeds/*-test.sql), one SQL statement per entry.
-  const kjvTestSeed = ["kjv", "bsb", "web"].flatMap((id) => readFileSync(`./seeds/${id}-test.sql`, "utf8")
+  const kjvTestSeed = ["kjv", "bsb", "web", "asv", "ylt", "darby", "webster", "msb", "rv1909"].flatMap((id) => readFileSync(`./seeds/${id}-test.sql`, "utf8")
     .split(/;\n/).map((s) => s.replace(/^--.*$/gm, "").trim()).filter(Boolean))
     // Study data subset (seeds/study-test.sql): note text can contain ";\n", so split only before each INSERT.
     .concat(readFileSync("./seeds/study-test.sql", "utf8").replace(/^--.*\n/, "").split(/;\n(?=INSERT )/)

@@ -62,6 +62,7 @@ struct HerCrownApp: App {
                 await Task.detached(priority: .userInitiated) { BibleStore.shared.preload(translation) }.value
                 Billing.shared.configure(app: app)
                 await app.start()
+                if app.onboardingCompleted { await OnboardingActivity.shared.finish() }
                 await Push.registerIfAllowed()
             }
             .task(id: scenePhase == .active && app.phase == .ready && !showColdLaunch) {

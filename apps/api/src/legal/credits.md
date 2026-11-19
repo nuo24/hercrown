@@ -31,3 +31,12 @@ Reflection prompts and devotionals are written for Her Crown. Devotionals drafte
 ## Community photographs
 
 Community nominee profiles are researched from the organizations’ official program pages. Listing an independent nominee does not imply endorsement or partnership. The owner confirmed photo-sharing permission for Sharing the Mission, House of Grace and Meninadança on November 10, 2026. Mercy Multiplied uses a representative [Pexels photograph (6646918)](https://www.pexels.com/photo/6646918/) under the [Pexels License](https://www.pexels.com/license/); the people pictured are not identified as Mercy staff or participants. No endorsement is implied.
+
+### Additional offline editions
+
+- **American Standard Version (ASV).** Public domain. [Rights statement](https://ebible.org/asv/copyright.htm). Text from eBible.org; original verse numbering retained.
+- **Young’s Literal Translation (YLT).** Public domain. [Rights statement](https://ebible.org/engylt/copyright.htm). Text from eBible.org; original verse numbering retained.
+- **Darby Translation (DBY).** Public domain. [Rights statement](https://ebible.org/engDBY/copyright.htm). Text from eBible.org; original verse numbering retained.
+- **Webster Bible (WBT).** Public domain. [Rights statement](https://ebible.org/engwebster/copyright.htm). Text from eBible.org; original verse numbering retained.
+- **Majority Standard Bible (MSB).** Public domain. [Rights statement](https://ebible.org/engmsb/copyright.htm). Text from eBible.org; original verse numbering retained.
+- **Reina-Valera 1909 (RV1909).** Public domain. [Rights statement](https://ebible.org/spaRV1909/copyright.htm). Text from eBible.org; original verse numbering retained.

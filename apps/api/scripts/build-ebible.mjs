@@ -19,6 +19,7 @@ import { join } from "node:path";
 import { finishVerse, WJ_CLOSE, WJ_OPEN } from "./scripture-text.mjs";
 
 const EDITIONS = {
+  ...JSON.parse(readFileSync(new URL("./free-editions.json", import.meta.url))),
   bsb: {
     ebibleId: "engbsb",
     name: "Berean Standard Bible",
@@ -63,7 +64,9 @@ const SKIP_LINE = /^\\(id|ide|h|toc\d|mt\d?|ms\d?|mr|s\d?|sr|r|sp|cl|cd|rem|d|qa
 
 /** Verse text from USFM: keep words, drop notes/markup, mark \wj spans with sentinels. */
 function cleanVerse(raw) {
-  return raw
+  // These editions' VPL exports retain supplied-word brackets. Preserve them rather than silently dropping them.
+  if (!["bsb", "web"].includes(id)) raw = raw.replace(/\\add\s+([\s\S]*?)\\add\*/g, "[$1]");
+  const cleaned = raw
     .replace(/\\f\s[\s\S]*?\\f\*/g, "")             // footnotes
     .replace(/\\x\s[\s\S]*?\\x\*/g, "")             // cross-references
     .replace(/\\\+?w\s([^|\\]*?)(\|[^\\]*)?\\\+?w\*/g, "$1") // \w word|strong="…"\w*
@@ -71,9 +74,11 @@ function cleanVerse(raw) {
     .replace(/\\\+?[a-z]+\d*\*/g, "")                // closing markers (\k* \qs* \bk* …): no space, punctuation may follow
     .replace(/\\\+?[a-z]+\d*/g, " ")                // opening/paragraph markers (\p \q1 \k \qs \add …), keep their text
     .replace(/\s+/g, " ");
+  return id === "darby" ? cleaned.replace(/\(\s+/g, "(") : cleaned;
 }
 
 const verses = new Map(BOOKS.map(([b]) => [b, []])); // verses[book][chapter-1] = Map(verse → {text, wj})
+const bookNames = new Map();
 const titles = new Map(); // "PSA.23" → "A Psalm by David."
 const acrostics = new Map(); // "PSA.119.1" → "ALEPH" (Psalm 119 letter headings; headings, not verse text)
 const speakers = new Map(); // "SNG.1.4" → ["Friends", "Beloved"] (Song of Solomon speaker labels; editorial, not verse text)
@@ -82,6 +87,7 @@ for (const file of readdirSync(usfmDir).filter((f) => f.endsWith(".usfm"))) {
   const text = readFileSync(join(usfmDir, file), "utf8");
   const book = text.match(/^\\id\s+(\S+)/m)?.[1];
   if (!bookIds.has(book)) continue; // front matter, glossary, etc.
+  if (edition.language === "es") bookNames.set(book, text.match(/^\\toc2\s+(.+)$/m)?.[1]?.trim() ?? text.match(/^\\h\s+(.+)$/m)?.[1]?.trim());
   let chapter = 0, verse = null, buffer = "", pendingQa = null;
   const flush = () => {
     if (verse !== null) {
@@ -92,10 +98,15 @@ for (const file of readdirSync(usfmDir).filter((f) => f.endsWith(".usfm"))) {
     verse = null; buffer = "";
   };
   for (const line of text.split(/\r?\n/)) {
+    // ASV centers Hebrew stanza labels with \qc. They are headings, not the previous verse's words.
+    if (id === "asv" && book === "PSA" && chapter === 119 && /^\\qc\s/.test(line)) { flush(); continue; }
     const c = line.match(/^\\c\s+(\d+)/);
     if (c) { flush(); chapter = Number(c[1]); continue; }
     const d = line.match(/^\\d\s+(.*)$/);
     if (d) {
+      if (id === "asv" && book === "HAB" && chapter === 3 && verse === 19) {
+        buffer += " " + d[1]; continue; // Source places the closing musical direction inside verse 19.
+      }
       const text = finishVerse(cleanVerse(d[1]))[0];
       // WEB marks Psalm 119's letter headings (ALEPH, BETH, …) as \d; they head a stanza, not the psalm.
       if (/^[A-Z]+( [A-Z]+)*$/.test(text)) pendingQa = text;
@@ -211,7 +222,7 @@ writeFileSync(new URL(`${id}-test.sql`, outDir), header + inserts((b, c) => TEST
 writeFileSync(new URL(`${id}.json`, outDir), JSON.stringify({
   translation: { id, name: edition.name, license: "Public Domain", source: `https://ebible.org/Scriptures/${edition.ebibleId}_usfm.zip`, sha256: edition.usfmSha256 },
   books: BOOKS.map(([b, name, testament]) => ({
-    id: b, name, testament,
+    id: b, name: bookNames.get(b) ?? name, testament,
     chapters: verses.get(b).map((vs, c) => ({
       title: titles.get(`${b}.${c + 1}`) ?? null,
       verses: [...vs].sort((x, y) => x[0] - y[0]).map(([n, v]) => (v.wj ? { n, t: v.text, wj: v.wj } : { n, t: v.text })),

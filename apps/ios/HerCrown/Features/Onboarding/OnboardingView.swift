@@ -48,8 +48,16 @@ struct OnboardingView: View {
     private let muted = Color(hex: 0x68686E)
 
     init() {
+        if let draft = OnboardingDraft.load() {
+            _step = State(initialValue: min(max(draft.step, 0), 13))
+            _answers = State(initialValue: draft.answers)
+            _reminders = State(initialValue: draft.reminders)
+            _reminderTime = State(initialValue: draft.reminderTime)
+        }
         #if DEBUG
-        _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "hcOnboardingStep"), 0), 13))
+        if UserDefaults.standard.object(forKey: "hcOnboardingStep") != nil {
+            _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "hcOnboardingStep"), 0), 13))
+        }
         #endif
     }
 
@@ -148,6 +156,13 @@ struct OnboardingView: View {
         }
         .foregroundStyle(ink).buttonStyle(.plain)
         .background(Color.white.ignoresSafeArea())
+        .task(id: "activity-\(step)-\(scenePhase)") {
+            if scenePhase == .active { await OnboardingActivity.shared.update(step: step) }
+        }
+        .onChange(of: step) { _, _ in saveDraft() }
+        .onChange(of: answers) { _, _ in saveDraft() }
+        .onChange(of: reminders) { _, _ in saveDraft() }
+        .onChange(of: reminderTime) { _, _ in saveDraft() }
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
         .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
         .task(id: "paywall-\(step)-\(app.me?.user.id ?? "")") {
@@ -392,6 +407,10 @@ struct OnboardingView: View {
         if step < 13 { step += 1 }
     }
     private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false; step = max(0, step - 1) }
+
+    private func saveDraft() {
+        OnboardingDraft(step: step, answers: answers, reminders: reminders, reminderTime: reminderTime).save()
+    }
     private func response(for previous: Int) -> String {
         switch previous {
         case 2: "Now let’s build a Bible experience that’s for you.\n\nWe’ll ask a few questions to shape your own For You page."

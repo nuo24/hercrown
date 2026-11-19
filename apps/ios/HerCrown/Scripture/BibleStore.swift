@@ -49,10 +49,10 @@ struct BibleBook: Identifiable, Hashable {
     var displayName: String { name == "Psalms" ? "Psalm" : name }
 }
 
-/// The three offline Bibles (KJV, BSB, WEB), bundled from the verified seeds. Each loads once, on first use.
+/// Public-domain offline Bibles, bundled from verified seeds. Each loads once, on first use.
 final class BibleStore: @unchecked Sendable {
     static let shared = BibleStore()
-    static let offline = ["kjv": "KJV", "bsb": "BSB", "web": "WEB"]
+    static let offline = ["kjv": "KJV", "bsb": "BSB", "web": "WEB", "asv": "ASV", "ylt": "YLT", "darby": "DBY", "webster": "WBT", "msb": "MSB", "rv1909": "RV1909"]
 
     private struct File: Decodable {
         struct Translation: Decodable { let id: String; let name: String }
@@ -64,8 +64,9 @@ final class BibleStore: @unchecked Sendable {
     }
 
     static let online = ["nkjv": "NKJV", "msg": "MSG", "amp": "AMP", "nlt": "NLT"]
-    static let names = ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible", "nkjv": "New King James Version", "msg": "The Message", "amp": "Amplified Bible", "nlt": "New Living Translation"]
-    static let translationIDs = ["kjv", "bsb", "web", "nkjv", "msg", "amp", "nlt"]
+    static let names = ["kjv": "King James Version", "bsb": "Berean Standard Bible", "web": "World English Bible", "asv": "American Standard Version", "ylt": "Young’s Literal Translation", "darby": "Darby Translation", "webster": "Webster Bible", "msb": "Majority Standard Bible", "rv1909": "Reina-Valera 1909", "nkjv": "New King James Version", "msg": "The Message", "amp": "Amplified Bible", "nlt": "New Living Translation"]
+    static let translationIDs = ["kjv", "bsb", "web", "asv", "ylt", "darby", "webster", "msb", "nkjv", "msg", "amp", "nlt", "rv1909"]
+    static let offlineIDs = translationIDs.filter { offline[$0] != nil }
     private var remoteChapters: [String: Chapter] = [:]
     private var remoteOrder: [String] = []
     func cacheRemote(_ chapter: Chapter) {
@@ -91,8 +92,9 @@ final class BibleStore: @unchecked Sendable {
     /// Loads a translation ahead of time (off the main thread at launch).
     func preload(_ translation: String) { _ = file(translation) }
 
-    var books: [BibleBook] {
-        guard let file = file("kjv") else { return [] }
+    var books: [BibleBook] { books(for: "kjv") }
+    func books(for translation: String) -> [BibleBook] {
+        guard let file = file(Self.offline[translation] == nil ? "kjv" : translation) else { return [] }
         return file.books.map { BibleBook(id: $0.id, name: $0.name, testament: $0.testament, chapterCount: $0.chapters.count) }
     }
 
@@ -124,8 +126,8 @@ final class BibleStore: @unchecked Sendable {
         return verses.isEmpty ? nil : verses.map(\.text).joined(separator: " ")
     }
 
-    func label(_ ref: VerseRef) -> String {
-        let name = book(ref.book)?.displayName ?? ref.book
+    func label(_ ref: VerseRef, translation: String = "kjv") -> String {
+        let name = books(for: translation).first { $0.id == ref.book }?.displayName ?? ref.book
         return "\(name) \(ref.chapter):\(ref.verse)\(ref.end.map { "–\($0)" } ?? "")"
     }
 }

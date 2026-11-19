@@ -122,5 +122,5 @@ struct QuietVerseWidget: Widget {
 
 @main
 struct HerCrownWidgets: WidgetBundle {
-    var body: some Widget { HerCrownWidget(); QuietVerseWidget() }
+    var body: some Widget { HerCrownWidget(); QuietVerseWidget(); OnboardingLiveActivity() }
 }

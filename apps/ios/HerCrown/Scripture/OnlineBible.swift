@@ -11,7 +11,8 @@ enum OnlineBible {
     struct Passage {
         let text: String
         let reference: VerseRef
-        var label: String { BibleStore.shared.label(reference) }
+        var translation: String = "kjv"
+        var label: String { BibleStore.shared.label(reference, translation: translation) }
     }
     static func passage(_ translation: String, ref: VerseRef) async throws -> Passage {
         let c = try await chapter(translation, book: ref.book, number: ref.chapter)
@@ -21,7 +22,7 @@ enum OnlineBible {
         let selected = chapter.verses.filter { $0.number <= (ref.end ?? ref.verse) && ($0.end ?? $0.number) >= ref.verse }
         guard let first = selected.first, let last = selected.last else { throw APIError(status: 404, code: "not_in_translation", message: "This verse isn’t included in this translation.") }
         let end = last.end ?? last.number
-        return Passage(text: selected.map(\.text).joined(separator: " "), reference: VerseRef(book: ref.book, chapter: ref.chapter, verse: first.number, end: end > first.number ? end : nil))
+        return Passage(text: selected.map(\.text).joined(separator: " "), reference: VerseRef(book: ref.book, chapter: ref.chapter, verse: first.number, end: end > first.number ? end : nil), translation: chapter.translation)
     }
     private static let requests = ChapterRequests()
     static func chapter(_ translation: String, book: String, number: Int) async throws -> Chapter {

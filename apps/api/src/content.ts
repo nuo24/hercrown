@@ -13,7 +13,7 @@ import { dayOrdinal, isValidDay, localDayIn } from "./streak";
 interface Card { ref: string; theme: string; reflection: string }
 const CARDS = verses.cards as Card[];
 const THEMES = verses.themes;
-const LOCAL = new Set(["kjv", "bsb", "web"]);
+const LOCAL = new Set(["kjv", "bsb", "web", "asv", "ylt", "darby", "webster", "msb", "rv1909"]);
 const byRef = new Map(CARDS.map((c) => [c.ref, c]));
 
 /** Stable order that mixes themes, so consecutive days don't share one (FNV-1a hash of the reference). */

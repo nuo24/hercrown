@@ -12,12 +12,19 @@ const get = async (path: string) => {
 };
 
 describe("catalog", () => {
-  it("lists KJV, BSB and WEB as bundled offline translations", async () => {
+  it("lists all verified public-domain editions as bundled offline translations", async () => {
     const { body } = await get("/scripture/translations");
     expect(body.translations.filter((t: any) => t.availability === "bundled").map((t: any) => [t.id, t.abbreviation, t.availability, t.license])).toEqual([
       ["kjv", "KJV", "bundled", "Public Domain"],
       ["bsb", "BSB", "bundled", "Public Domain"],
       ["web", "WEB", "bundled", "Public Domain"],
+      ["asv", "ASV", "bundled", "Public Domain"],
+      ["ylt", "YLT", "bundled", "Public Domain"],
+      ["darby", "DBY", "bundled", "Public Domain"],
+      ["webster", "WBT", "bundled", "Public Domain"],
+      ["msb", "MSB", "bundled", "Public Domain"],
+      ["rv1909", "RV1909", "bundled", "Public Domain"],
+
     ]);
     expect(body.translations.filter((t: any) => t.availability === "remote").map((t: any) => t.id)).toEqual(["nkjv", "msg", "amp", "nlt"]);
     expect(body.translations[2].attribution).toMatch(/trademark of eBible\.org/);
@@ -254,3 +261,18 @@ describe("online translations (API.Bible)", () => {
     expect((await get("/scripture/search?q=shepherd&translation=test")).status).toBe(400); // search is offline-only
   });
 });
+
+ describe("additional free editions", () => {
+  it("serves every new edition locally and identifies Spanish", async () => {
+    const catalog = (await get("/scripture/translations")).body.translations;
+    expect(catalog.find((t: any) => t.id === "rv1909").language).toBe("es");
+    for (const id of ["asv", "ylt", "darby", "webster", "msb", "rv1909"]) {
+      const {status, body} = await get(`/scripture/${id}/JHN/3`);
+      expect(status).toBe(200);
+      expect(body.verses.find((v: any) => v.verse === 16)?.text.length).toBeGreaterThan(30);
+      const discover = await get(`/discover?translation=${id}`);
+      expect(discover.status).toBe(200);
+      expect(discover.body.cards.length).toBeGreaterThan(0);
+    }
+  });
+ });

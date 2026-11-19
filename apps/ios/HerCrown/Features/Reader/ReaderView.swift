@@ -48,7 +48,7 @@ struct ReaderView: View {
                             Text(model.failure ?? "Unable to load translation").font(.ui(14)).multilineTextAlignment(.center)
                             Button("Try again") { model.retry() }
                                 .buttonStyle(CapsuleButtonStyle(kind: .secondary))
-                            offlineTranslations
+                            ScrollView { offlineTranslations }.frame(maxHeight: 340)
                         }
                     }
                     .foregroundStyle(Theme.text(scheme))
@@ -111,12 +111,12 @@ struct ReaderView: View {
 
     private var offlineTranslations: some View {
         VStack(spacing: 12) {
-            ForEach(["kjv", "bsb", "web"], id: \.self) { id in
+            ForEach(BibleStore.offlineIDs, id: \.self) { id in
                 Button { model.setTranslation(id) } label: {
                     HStack {
                         Text(BibleStore.names[id] ?? id.uppercased()).font(.ui(14, weight: .medium))
                         Spacer()
-                        Text(id.uppercased()).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                        Text(BibleStore.offline[id] ?? id.uppercased()).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                     }
                     .padding(.horizontal, 16)
                     .frame(maxWidth: .infinity, minHeight: 50)
@@ -145,9 +145,12 @@ struct ReaderView: View {
 
             Menu {
                 Picker("Translation", selection: Binding(get: { model.translation }, set: { model.setTranslation($0) })) {
-                    ForEach(BibleStore.translationIDs, id: \.self) { id in
-                        Text((BibleStore.names[id] ?? id) + (BibleStore.online[id] != nil ? " · online" : "")).tag(id)
+                    Section("English") {
+                        ForEach(BibleStore.translationIDs.filter { $0 != "rv1909" }, id: \.self) { id in
+                            Text((BibleStore.names[id] ?? id) + (BibleStore.online[id] != nil ? " · online" : "")).tag(id)
+                        }
                     }
+                    Section("Español") { Text("Reina-Valera 1909 · offline").tag("rv1909") }
                 }
             } label: {
                 HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV").font(.ui(16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
@@ -243,7 +246,7 @@ struct VersePage: View {
     @State private var showingLike = false
 
     private var ref: String { VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end).description }
-    private var reference: String { BibleStore.shared.label(VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)) }
+    private var reference: String { BibleStore.shared.label(VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end), translation: chapter.translation) }
     private var fontSize: CGFloat { (ReaderFontSize(rawValue: app.preferences.fontSize) ?? .default).points }
 
     /// Center the Scripture and artwork between the toolbar and the bottom controls.

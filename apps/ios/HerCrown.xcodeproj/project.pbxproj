@@ -64,6 +64,7 @@
 			path = HerCrownWidget;
 			sourceTree = "<group>";
 		};
+		C0DE00000000000000000077 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Shared; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +99,7 @@
 				C0DE00000000000000000002 /* HerCrown */,
 				C0DE00000000000000000022 /* HerCrownTests */,
 				C0DE00000000000000000055 /* HerCrownWidget */,
+				C0DE00000000000000000077 /* Shared */,
 				C0DE00000000000000000005 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -133,6 +135,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				C0DE00000000000000000002 /* HerCrown */,
+				C0DE00000000000000000077 /* Shared */,
 			);
 			name = HerCrown;
 			packageProductDependencies = (
@@ -179,6 +182,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				C0DE00000000000000000055 /* HerCrownWidget */,
+				C0DE00000000000000000077 /* Shared */,
 			);
 			name = HerCrownWidget;
 			packageProductDependencies = (
@@ -269,6 +273,12 @@
 				"$(SRCROOT)/../api/seeds/kjv.json",
 				"$(SRCROOT)/../api/seeds/bsb.json",
 				"$(SRCROOT)/../api/seeds/web.json",
+				"$(SRCROOT)/../api/seeds/asv.json",
+				"$(SRCROOT)/../api/seeds/ylt.json",
+				"$(SRCROOT)/../api/seeds/darby.json",
+				"$(SRCROOT)/../api/seeds/webster.json",
+				"$(SRCROOT)/../api/seeds/msb.json",
+				"$(SRCROOT)/../api/seeds/rv1909.json",
 			);
 			name = "Bundle offline Bibles";
 			outputFileListPaths = (
@@ -277,10 +287,16 @@
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/kjv.json",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/bsb.json",
 				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/web.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/asv.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/ylt.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/darby.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/webster.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/msb.json",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/rv1909.json",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# The verified Scripture seeds (apps/api/seeds) are the single source for both the server and the app.\nset -e\nfor t in kjv bsb web; do\n  cp \"${SRCROOT}/../api/seeds/${t}.json\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${t}.json\"\ndone\n";
+			shellScript = "# The verified Scripture seeds (apps/api/seeds) are the single source for both the server and the app.\nset -e\nfor t in kjv bsb web asv ylt darby webster msb rv1909; do\n  cp \"${SRCROOT}/../api/seeds/${t}.json\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/${t}.json\"\ndone\n";
 		};
 		C0DE00000000000000000071 /* Bundle mockup artwork */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -473,12 +489,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HerCrown.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 494RZLCNHQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/HerCrown-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Her Crown";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a profile photo.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your verse snapshots to Photos.";
@@ -505,12 +523,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = HerCrown.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 494RZLCNHQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/HerCrown-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Her Crown";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Choose a profile photo.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save your verse snapshots to Photos.";
@@ -563,7 +583,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HerCrownWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 494RZLCNHQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HerCrownWidget-Info.plist";
@@ -588,7 +608,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = HerCrownWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 33;
+				CURRENT_PROJECT_VERSION = 34;
 				DEVELOPMENT_TEAM = 494RZLCNHQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HerCrownWidget-Info.plist";

@@ -32,7 +32,10 @@ struct InsightsSheet: View {
                     Divider().padding(.top, 26)
                     VStack(spacing: 0) {
                         ForEach(StudyTool.allCases) { tool in
-                            NavigationLink(value: tool) {
+                            Button {
+                                if app.membership.premium { path.append(tool) }
+                                else { app.presentPaywall(placement: "study_\(tool.rawValue)") }
+                            } label: {
                                 HStack(spacing: 16) {
                                     Group {
                                         if tool == .related { RelatedVerseIcon().frame(width: 24, height: 24) }
@@ -40,7 +43,6 @@ struct InsightsSheet: View {
                                     }.frame(width: 25)
                                     Text(tool.title).font(.system(size: 17))
                                     Spacer()
-                                    if !app.membership.premium { Text("Plus").font(.system(size: 11, weight: .semibold)).padding(.horizontal, 7).padding(.vertical, 3).background(Capsule().fill(Color.primary.opacity(0.08))) }
                                     Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.tertiary)
                                 }
                                 .frame(minHeight: 76)

@@ -10,7 +10,7 @@ struct ChapterPicker: View {
     @State private var selectedBook: BibleBook?
 
     private var books: [BibleBook] {
-        let all = BibleStore.shared.books
+        let all = BibleStore.shared.books(for: current?.translation ?? "kjv")
         let search = query.trimmingCharacters(in: .whitespacesAndNewlines)
         return search.isEmpty ? all : all.filter { $0.name.localizedCaseInsensitiveContains(search) }
     }

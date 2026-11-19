@@ -20,7 +20,7 @@ const DEEPER_PROMPT_VERSION = 4;
 const versionFor = (tool: AiTool) => tool === "deeper" ? DEEPER_PROMPT_VERSION : PROMPT_VERSION;
 export const TOOLS = ["explain", "deeper"] as const;
 export type AiTool = (typeof TOOLS)[number];
-const LOCAL = new Set(["kjv", "bsb", "web"]);
+const LOCAL = new Set(["kjv", "bsb", "web", "asv", "ylt", "darby", "webster", "msb", "rv1909"]);
 const NOTICE = "Study commentary · separate from Scripture.";
 const REPORTS_TO_HIDE = 3;
 

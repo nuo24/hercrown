@@ -12,7 +12,7 @@ We're glad you're here. Write to us at **macnatephil@gmail.com**, or in the app 
 
 **I got a new phone.** Sign in with Apple on the new phone (Settings → Account) to bring your saves, notes and streak with you, then restore your purchase.
 
-**Can I read offline?** Yes. The King James Version, Berean Standard Bible and World English Bible are built into the app. Other translations need a connection.
+**Can I read offline?** Yes. KJV, BSB, WEB, ASV, YLT, Darby, Webster, MSB and Spanish Reina-Valera 1909 are built into updated versions of the app. Other translations need a connection.
 
 **Are the study answers Scripture?** No. Explain Easier and Deeper Study are AI summaries of the public-domain commentaries cited with each answer. They're labeled in the app and can contain mistakes. Tap **Report a problem** under any answer and we'll review it.
 

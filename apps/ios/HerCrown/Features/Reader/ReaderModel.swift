@@ -9,6 +9,7 @@ final class ReaderModel {
     var chapter: Chapter?
     var current: Int? = 1               // verse number in view
     private var versesSeen = Set<String>()
+    private var versesSeenDay: String?
     private var completed = Set<String>()
     private var dayRecorded: String?
     var loading = false
@@ -90,10 +91,12 @@ final class ReaderModel {
     func didView(_ verse: Int?) {
         guard let verse, let chapter else { return }
         savePosition()
-        versesSeen.insert("\(chapter.book.id).\(chapter.number).\(verse)")
         let today = AppModel.localDay()
+        if versesSeenDay != today { versesSeen.removeAll(); versesSeenDay = today }
+        versesSeen.insert("\(chapter.book.id).\(chapter.number).\(verse)")
         if versesSeen.count >= 3, dayRecorded != today {
             dayRecorded = today
+            ReviewPrompter.shared.recordReadingDay(today)
             let ref = "\(chapter.book.id).\(chapter.number).\(verse)"
             Task {
                 _ = try? await app.api.send("POST", "/me/reading-events", json: ["events": [[
