@@ -105,6 +105,7 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   settings_viewed: {},
   setting_changed: { setting: ["appearance"], value: ["system", "light", "dark"] },
   support_opened: {},
+  guest_chapter_paywall_requested: {},
   review_requested: {},
   review_link_opened: {},
   feedback_prompt_viewed: {},

@@ -4,6 +4,7 @@ import SwiftUI
 struct ReaderView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.scenePhase) private var scenePhase
     @State private var model: ReaderModel
     @State private var showingChapters = false
     @State private var showingSaved = false
@@ -99,6 +100,16 @@ struct ReaderView: View {
             await model.prepareNeighbours()
             if !Task.isCancelled, let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
         }
+        .task(id: "\(model.pendingGuestPaywall?.uuidString ?? "")-\(canOfferGuestPaywall)") {
+            guard canOfferGuestPaywall else { return }
+            do { try await Task.sleep(for: .milliseconds(600)) } catch { return }
+            guard !Task.isCancelled, canOfferGuestPaywall else { return }
+            model.pendingGuestPaywall = nil
+            // Reuse the already configured standard campaign; no new Superwall campaign is required.
+            app.presentPaywall(placement: "onboarding_complete")
+            await Analytics.shared.track("guest_chapter_paywall_requested")
+        }
+        .onChange(of: app.me?.user.id) { _, _ in model.pendingGuestPaywall = nil }
         #if DEBUG
         .task {
             guard let preview = UserDefaults.standard.string(forKey: "hcOpenStudy"), !preview.isEmpty else { return }
@@ -107,6 +118,17 @@ struct ReaderView: View {
             else { studyRef = model.currentRef }
         }
         #endif
+    }
+
+    private var canOfferGuestPaywall: Bool {
+        model.pendingGuestPaywall != nil && model.guestPaywallUserID != nil
+            && model.guestPaywallUserID == app.me?.user.id
+            && (model.guestPaywallQueuedAt.map { Date.now.timeIntervalSince($0) < 5 * 60 } ?? false)
+            && app.onboardingCompleted && app.phase == .ready && !app.offline
+            && scenePhase == .active && !app.checkingPaywall && !app.showExistingAppleSubscription
+            && !showingChapters && !showingSaved && !showingBookmarks && studyRef == nil && reflectRef == nil
+            && Billing.shared.configured && !Billing.shared.isPaywallBusy
+            && GuestPaywallPrompter.shared.canRequest(isGuest: app.isGuest, premium: app.membership.premium)
     }
 
     private var offlineTranslations: some View {

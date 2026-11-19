@@ -12,6 +12,10 @@ final class ReaderModel {
     private var versesSeenDay: String?
     private var completed = Set<String>()
     private var dayRecorded: String?
+    private var guestChapterProgress = GuestChapterProgress()
+    var pendingGuestPaywall: UUID?
+    var guestPaywallUserID: String?
+    var guestPaywallQueuedAt: Date?
     var loading = false
     var failure: String?
     private var loadTask: Task<Void, Never>?
@@ -91,6 +95,13 @@ final class ReaderModel {
     func didView(_ verse: Int?) {
         guard let verse, let chapter else { return }
         savePosition()
+        if guestChapterProgress.record(chapter: "\(chapter.book.id).\(chapter.number)", verse: verse,
+            verseCount: chapter.verses.count, lastVerse: chapter.verses.last?.number ?? verse),
+           app.isGuest, app.onboardingCompleted {
+            guestPaywallUserID = app.me?.user.id
+            guestPaywallQueuedAt = .now
+            pendingGuestPaywall = UUID()
+        }
         let today = AppModel.localDay()
         if versesSeenDay != today { versesSeen.removeAll(); versesSeenDay = today }
         versesSeen.insert("\(chapter.book.id).\(chapter.number).\(verse)")

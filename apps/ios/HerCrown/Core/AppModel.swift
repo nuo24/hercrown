@@ -243,6 +243,7 @@ final class AppModel {
                 onComplete?()
                 return
             }
+            if isGuest, Billing.shared.configured { GuestPaywallPrompter.shared.requested() }
             Billing.shared.present(placement: placement, onComplete: onComplete)
             await Analytics.shared.track("paywall_requested", ["placement": .string(placement)])
         }
