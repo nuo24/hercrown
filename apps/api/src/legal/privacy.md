@@ -31,6 +31,10 @@ Her Crown ("we", "us") is made by Nathan Okolo, an individual developer. This po
 
 To provide the app: sync your reading across devices, keep your streak, unlock Plus, send reminders you asked for, and answer support requests. To understand and improve the app in aggregate, for example how many people finish onboarding or start a trial. To keep the service secure, for example rate limits and abuse prevention.
 
+## Email updates
+
+If you opt in to email updates in Your account, we use your account email to send Her Crown news and reading encouragement. Signing in or subscribing does not opt you in. You can turn updates off in Your account. Apple may provide a private relay email instead of your personal address. Your consent preference is deleted with your account; email addresses are not included in product analytics.
+
 ## AI study tools
 
 When you open Explain Easier or Deeper Study for a verse, we send the verse and passages from public-domain commentaries and Bible-study datasets to an AI model provider. **We do not send your notes, your profile or anything that identifies you.** Answers are stored and shared with everyone who studies the same verse.

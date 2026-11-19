@@ -1,6 +1,6 @@
 // Membership: Superwall webhooks → `entitlements`, the only source of truth for Premium (ai-app-playbook chapter 07).
 // Reading is free; Premium unlocks plans and study tools (docs/decisions/0003).
-import { type Props, type ServerEvent, Tracker } from "./events";
+import { personIdFor, type Props, type ServerEvent, Tracker } from "./events";
 import { HttpError } from "./http";
 import { trialInfo } from "./reminders";
 
@@ -191,14 +191,24 @@ export function billingEvent(e: StoreEvent, deliveryId: string): { name: ServerE
   return null;
 }
 
-export async function handleSuperwallWebhook(request: Request, env: Env, ctx?: Pick<ExecutionContext, "waitUntil">): Promise<Response> {
+async function queueBillingEvent(env: Env, event: StoreEvent, deliveryId: string, userId: string | null) {
+  const analytics = billingEvent(event, deliveryId);
+  if (!analytics) return;
+  const personId = userId ? await personIdFor(env, userId) : null;
+  const row = new Tracker(env).row(analytics.name, `${env.APP_ENV}:${analytics.id}`,
+    event.occurredAt, Date.now(), personId, "api", analytics.props, event.environment === "SANDBOX");
+  // A billing webhook is acknowledged only after its event reaches the durable queue.
+  // If queuing fails, return 500 so Superwall retries the signed delivery.
+  await env.EVENTS.send(row);
+}
+
+export async function handleSuperwallWebhook(request: Request, env: Env, _ctx?: Pick<ExecutionContext, "waitUntil">): Promise<Response> {
   const body = await request.text();
   if (!(await verifyWebhook(env.SUPERWALL_WEBHOOK_SECRET, request.headers, body))) {
     return Response.json({ error: "invalid_signature" }, { status: 401 });
   }
   const deliveryId = `superwall:${request.headers.get("svix-id")}`;
   const seen = await env.DB.prepare("SELECT 1 FROM webhook_events WHERE id = ?1").bind(deliveryId).first();
-  if (seen) return Response.json({ ok: true, duplicate: true });
 
   let event: StoreEvent | null = null;
   try {
@@ -207,6 +217,17 @@ export async function handleSuperwallWebhook(request: Request, env: Env, ctx?: P
     // fall through
   }
   if (!event) return Response.json({ error: "invalid_payload" }, { status: 400 });
+  // Both dashboard endpoints receive the app's events. Never write live purchases
+  // into staging or let its analytics replace production's copy in Tinybird.
+  if (env.APP_ENV === "staging" && event.environment === "PRODUCTION") {
+    return Response.json({ ok: true, ignored: "production_event_on_staging" });
+  }
+  if (seen) {
+    // Repair an interrupted queue send without applying the entitlement twice.
+    // Repeated analytics deliveries have the same environment-scoped event ID.
+    await queueBillingEvent(env, event, deliveryId, await resolveUser(env, event));
+    return Response.json({ ok: true, duplicate: true });
+  }
 
   const t = Date.now();
   const markSeen = env.DB.prepare("INSERT INTO webhook_events (id, source, type, received_at) VALUES (?1, 'superwall', ?2, ?3)")
@@ -249,16 +270,14 @@ export async function handleSuperwallWebhook(request: Request, env: Env, ctx?: P
   try {
     await env.DB.batch(writes);
   } catch (err) {
-    if (String(err).includes("UNIQUE constraint failed: webhook_events.id")) return Response.json({ ok: true, duplicate: true });
+    if (String(err).includes("UNIQUE constraint failed: webhook_events.id")) {
+      await queueBillingEvent(env, event, deliveryId, userId);
+      return Response.json({ ok: true, duplicate: true });
+    }
     throw err; // 500 → Superwall retries
   }
 
-  const analytics = billingEvent(event, deliveryId);
-  if (analytics) {
-    new Tracker(env, ctx).track(analytics.name, analytics.props, {
-      id: analytics.id, at: event.occurredAt, userId, sandbox: event.environment === "SANDBOX",
-    });
-  }
+  await queueBillingEvent(env, event, deliveryId, userId);
   return Response.json({ ok: true, applied: Boolean(change && userId), matched: Boolean(userId) });
 }
 

@@ -3,6 +3,7 @@ import { createPrayer } from "./prayer";
 import { recordOfferDecline, reserveReturnOffer, signTrialReturnOffer } from "./return-offers";
 // The whole API as one fetch handler. No router framework (ai-app-playbook chapter 02).
 import { getAuth } from "./auth";
+import { getEmailPreferences, updateEmailPreferences } from "./email-preferences";
 import { entitlementFor, handleSuperwallWebhook } from "./billing";
 import { deliverEvents, type EventRow, receiveEvents, requestContext, type ServerEvent, Tracker } from "./events";
 import { errorResponse, HttpError } from "./http";
@@ -101,6 +102,10 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
   switch (`${request.method} ${url.pathname}`) {
     case "GET /me":
       return getMe(env, user);
+    case "GET /me/email-preferences":
+      return getEmailPreferences(env, user);
+    case "PUT /me/email-preferences":
+      return updateEmailPreferences(request, env, user, tracker);
     case "GET /me/entitlements":
       return Response.json(await entitlementFor(env, user.id));
     case "POST /me/return-offer/decline":

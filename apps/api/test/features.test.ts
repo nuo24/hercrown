@@ -281,6 +281,25 @@ describe("legal pages", () => {
 });
 
 describe("account deletion", () => {
+  it("deletes an older guest through the guest endpoint without weakening Apple session freshness", async () => {
+    await call("/me/notes/PSA.23.1", "PUT", { text: "private guest note" });
+    await env.DB.prepare('UPDATE session SET createdAt = ?1 WHERE userId = ?2')
+      .bind(Date.now() - 2 * 86_400_000, userId).run();
+    const oldPath = await call("/api/auth/delete-user", "POST", {});
+    expect(oldPath.status).toBe(400);
+    expect(await oldPath.json()).toMatchObject({ code: "SESSION_EXPIRED" });
+    expect((await call("/api/auth/delete-anonymous-user", "POST", {})).status).toBe(200);
+    expect(await env.DB.prepare('SELECT id FROM user WHERE id = ?1').bind(userId).first()).toBeNull();
+    expect(await env.DB.prepare('SELECT count(*) AS n FROM verse_notes WHERE user_id = ?1').bind(userId).first()).toEqual({ n: 0 });
+    expect((await call("/me")).status).toBe(401);
+  });
+
+  it("never lets the guest deletion endpoint remove a signed-in account", async () => {
+    await env.DB.prepare('UPDATE user SET isAnonymous = 0 WHERE id = ?1').bind(userId).run();
+    expect((await call("/api/auth/delete-anonymous-user", "POST", {})).status).toBe(403);
+    expect(await env.DB.prepare('SELECT id FROM user WHERE id = ?1').bind(userId).first()).toEqual({ id: userId });
+  });
+
   it("removes notes, studies, progress, devices and support requests", async () => {
     vi.spyOn(env.EMAIL, "send").mockImplementation(async () => ({ messageId: "m" }));
     await call("/me/notes/PSA.23.1", "PUT", { text: "private" });

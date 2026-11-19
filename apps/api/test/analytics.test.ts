@@ -3,9 +3,9 @@
 import { env } from "cloudflare:workers";
 import { createExecutionContext, createMessageBatch, getQueueResult } from "cloudflare:test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { billingEvent, normalizeEvent } from "../src/billing";
+import { billingEvent, handleSuperwallWebhook, normalizeEvent } from "../src/billing";
 import { deliverEvents, type EventRow, linkPerson, Tracker } from "../src/events";
-import { api, deliverWebhook, grantPremium, signInGuest } from "./helpers";
+import { api, deliverWebhook, grantPremium, signInGuest, signedHeaders } from "./helpers";
 
 const DAY = 86_400_000;
 const INSTALL = "0b7e9a52-3c1d-4e8f-9a6b-2d4c8e1f0a35";
@@ -205,6 +205,39 @@ describe("billing events (from verified webhooks only)", () => {
     subscriber: { app_user_id: appUserId, aliases: [appUserId] },
   });
 
+  it("separates copies of one store event across environments and ignores live events in staging", async () => {
+    const body = JSON.stringify(v2("initial_purchase", userId, { period_type: "TRIAL", environment: "SANDBOX" }));
+    const request = async () => new Request("https://example.test/webhooks/superwall", {
+      method: "POST", body, headers: await signedHeaders(body),
+    });
+    expect((await handleSuperwallWebhook(await request(), { ...env, APP_ENV: "production" })).status).toBe(200);
+    expect((await handleSuperwallWebhook(await request(), { ...env, APP_ENV: "staging" })).status).toBe(200);
+    const trials = rows.filter(r => r.event === "trial_started");
+    expect(trials).toHaveLength(2);
+    expect(new Set(trials.map(r => r.event_id)).size).toBe(2);
+    expect(trials.map(r => r.environment)).toEqual(["production", "staging"]);
+
+    const liveBody = JSON.stringify(v2("initial_purchase", userId, { period_type: "TRIAL" }));
+    const before = await env.DB.prepare("SELECT count(*) AS n FROM webhook_events").first();
+    const ignored = await handleSuperwallWebhook(new Request("https://example.test/webhooks/superwall", {
+      method: "POST", body: liveBody, headers: await signedHeaders(liveBody),
+    }), { ...env, APP_ENV: "staging" });
+    expect(await ignored.json()).toMatchObject({ ignored: "production_event_on_staging" });
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM webhook_events").first()).toEqual(before);
+    expect(rows.filter(r => r.event === "trial_started")).toHaveLength(2);
+  });
+
+  it("retries failed billing queue sends even after the entitlement was committed", async () => {
+    const trial = v2("initial_purchase", userId, { period_type: "TRIAL" });
+    const body = JSON.stringify(trial);
+    const headers = await signedHeaders(body, "retry-queue-test");
+    vi.mocked(env.EVENTS.send).mockRejectedValueOnce(new Error("queue unavailable"));
+    expect((await api("/webhooks/superwall", { method: "POST", body, headers })).status).toBe(500);
+    expect((await api("/webhooks/superwall", { method: "POST", body, headers })).status).toBe(200);
+    expect(rows.filter(r => r.event === "trial_started")).toHaveLength(1);
+    expect(await env.DB.prepare("SELECT count(*) AS n FROM webhook_events WHERE id = ?1").bind("superwall:retry-queue-test").first()).toEqual({ n: 1 });
+  });
+
   it("trial start → conversion, once each, attributed to the person, with no profile data", async () => {
     await api("/me/profile", { method: "PATCH", token, body: JSON.stringify({ displayName: "Hannah" }) });
     await api("/me/preferences", { method: "PATCH", token, body: JSON.stringify({ intention: "peace" }) });
@@ -213,14 +246,14 @@ describe("billing events (from verified webhooks only)", () => {
     await deliverWebhook(trial);
     await deliverWebhook({ ...trial, id: `evt_${crypto.randomUUID()}` }); // same store event, delivered again
     const [started] = await waitForEvent(rows, "trial_started");
-    expect(started).toMatchObject({ event_id: `trial_started:otx-a-${userId}`, person_id: userId, source: "api", sandbox: 0 });
+    expect(started).toMatchObject({ event_id: `${env.APP_ENV}:trial_started:otx-a-${userId}`, person_id: userId, source: "api", sandbox: 0 });
     expect(JSON.parse(started!.props)).toEqual({
       product_id: "hercrown.plus.yearly", period_type: "TRIAL", store: "APP_STORE", price: 0, proceeds: 0,
     });
 
     await deliverWebhook(v2("renewal", userId, { is_trial_conversion: true }));
     const [converted] = await waitForEvent(rows, "trial_converted");
-    expect(converted).toMatchObject({ event_id: `trial_converted:otx-a-${userId}`, person_id: userId });
+    expect(converted).toMatchObject({ event_id: `${env.APP_ENV}:trial_converted:otx-a-${userId}`, person_id: userId });
     expect(JSON.parse(converted!.props)).toMatchObject({ price: 29.99, proceeds: 25.49 });
 
     await deliverWebhook(v2("renewal", userId));
@@ -242,7 +275,7 @@ describe("billing events (from verified webhooks only)", () => {
 
     await deliverWebhook(v2("refund", userId, { price: -19.99, proceeds: -16.99, transaction_id: "t-refund-1" }));
     const [refund] = await waitForEvent(rows, "refunded");
-    expect(refund!.event_id).toBe("refunded:t-refund-1");
+    expect(refund!.event_id).toBe(`${env.APP_ENV}:refunded:t-refund-1`);
   });
 
   it("the same store event has the same id in webhook V1 and V2", () => {

@@ -295,11 +295,18 @@ final class AppModel {
     /// Deletes the account and everything in it on the server, then starts over as a new guest on this phone.
     /// Onboarding stays complete (Settings never sends her back through it).
     func deleteAccount() async throws {
+        // Fetch the authoritative account type. Guests cannot reauthenticate with Apple;
+        // Better Auth's guest endpoint accepts their valid session without a freshness limit.
+        let current: Me = try await api.get("/me")
+        guard current.user.id == me?.user.id else {
+            throw APIError(status: 409, code: "session_changed", message: "Your account changed. Please reopen Your account before deleting it.")
+        }
         let prayerUserID = me?.user.id
+        let deletedAccount = bookmarkAccount
+        let path = current.user.isAnonymous ? "/api/auth/delete-anonymous-user" : "/api/auth/delete-user"
+        try await api.send("POST", path, json: [String: Any]())
         await Analytics.shared.track("account_deleted")
         await Analytics.shared.flush()
-        let deletedAccount = bookmarkAccount
-        try await api.send("POST", "/api/auth/delete-user", json: [String: Any]())
         bookmarksByAccount.removeValue(forKey: deletedAccount)
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil
@@ -314,6 +321,20 @@ final class AppModel {
         DailyReminder.cancel()
         Billing.shared.logOut()
         try await signInAsGuest()
+        try await refresh()
+    }
+
+    /// Refresh only the intended Apple account's session before asking for deletion again.
+    /// A different Apple account must never become the target of the pending deletion.
+    func reauthenticateForDeletion(identityToken: String, expectedUserID: String) async throws {
+        let (_, response) = try await api.send("POST", "/api/auth/sign-in/social",
+            json: ["provider": "apple", "idToken": ["token": identityToken]], authentication: .anonymous)
+        guard let token = response.value(forHTTPHeaderField: "set-auth-token") else { throw APIError.offline }
+        let verified: Me = try await api.get("/me", authentication: .bearer(token))
+        guard verified.user.id == expectedUserID, me?.user.id == expectedUserID else {
+            throw APIError(status: 409, code: "account_mismatch", message: "Please use the Apple Account linked to this Her Crown account. Nothing was deleted.")
+        }
+        api.token = token
         try await refresh()
     }
 

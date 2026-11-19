@@ -78,7 +78,7 @@ final class APIClient: @unchecked Sendable {
         guard let http = response as? HTTPURLResponse else { throw APIError.offline }
         guard (200..<300).contains(http.statusCode) else {
             let object = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
-            throw APIError(status: http.statusCode, code: object?["error"] as? String ?? "http_\(http.statusCode)",
+            throw APIError(status: http.statusCode, code: object?["error"] as? String ?? object?["code"] as? String ?? "http_\(http.statusCode)",
                            message: object?["message"] as? String ?? "Something went wrong. Please try again.")
         }
         return (data, http)

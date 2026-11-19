@@ -427,6 +427,9 @@ struct AccountView: View {
     @State private var message: String?
     @State private var busy = false
     @State private var confirmingDelete = false
+    @State private var deletionUserID: String?
+    @State private var emailUpdates = false
+    @State private var emailPreferenceLoaded = false
 
     var body: some View {
         ScrollView {
@@ -459,6 +462,24 @@ struct AccountView: View {
 
                 signInSection
                     .padding(.top, 10)
+                if !app.isGuest {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Toggle("Email updates", isOn: Binding(get: { emailUpdates }, set: { value in
+                            run {
+                                struct Result: Decodable { let subscribed: Bool }
+                                let (data, _) = try await app.api.send("PUT", "/me/email-preferences", json: ["subscribed": value])
+                                emailUpdates = try JSONDecoder().decode(Result.self, from: data).subscribed
+                            }
+                        }))
+                        .font(.ui(15))
+                        .tint(Theme.text(scheme))
+                        .disabled(!emailPreferenceLoaded)
+                        Text("Receive Her Crown news and reading encouragement. Optional; turn off anytime.")
+                            .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
+                        if let email = app.me?.user.email { Text(email).font(.ui(12)).foregroundStyle(Theme.muted(scheme)) }
+                    }
+                    .padding(.vertical, 8)
+                }
                 if let message { Text(message).font(.ui(13)).accessibilityAddTraits(.updatesFrequently) }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -513,6 +534,22 @@ struct AccountView: View {
             name = app.displayName.flatMap { $0 == "Guest" ? nil : $0 } ?? ""
             bio = app.me?.profile.bio ?? ""
         }
+        .task(id: app.me?.user.id) {
+            emailUpdates = false
+            emailPreferenceLoaded = false
+            guard !app.isGuest else { return }
+            let userID = app.me?.user.id
+            struct Result: Decodable { let subscribed: Bool }
+            do {
+                let result: Result = try await app.api.get("/me/email-preferences")
+                guard !Task.isCancelled, app.me?.user.id == userID else { return }
+                emailUpdates = result.subscribed
+                emailPreferenceLoaded = true
+            } catch {
+                guard !Task.isCancelled, app.me?.user.id == userID else { return }
+                message = "Email preferences couldn’t load. Reopen Your account to try again."
+            }
+        }
         .onChange(of: photo) { _, item in
             guard let item else { return }
             run {
@@ -522,7 +559,7 @@ struct AccountView: View {
             }
         }
         .confirmationDialog("Delete your account?", isPresented: $confirmingDelete, titleVisibility: .visible) {
-            Button("Delete account", role: .destructive) { run { try await app.deleteAccount(); message = "Your account was deleted. You’re starting fresh as a guest." } }
+            Button("Delete account", role: .destructive) { deleteAccount() }
         } message: {
             Text("Permanently deletes your profile, photo, saves, notes and reading history. This can’t be undone. Deleting your account doesn’t cancel Apple billing.")
         }
@@ -571,7 +608,7 @@ struct AccountView: View {
                 .foregroundStyle(Theme.muted(scheme))
                 .accessibilityAddTraits(.isHeader)
             if app.isGuest {
-                Button { showsAppleSignIn = true } label: { signInRow }
+                Button { deletionUserID = nil; showsAppleSignIn = true } label: { signInRow }
                     .buttonStyle(.plain)
             } else {
                 signInRow.accessibilityElement(children: .combine)
@@ -608,9 +645,9 @@ struct AccountView: View {
 
     private var appleSignIn: some View {
         VStack(spacing: 16) {
-            Text("Save your account").font(.serif(28, relativeTo: .title2))
+            Text(deletionUserID == nil ? "Save your account" : "Confirm your identity").font(.serif(28, relativeTo: .title2))
                 .accessibilityAddTraits(.isHeader)
-            Text("Keep your saves, notes and reading history when you change phones.")
+            Text(deletionUserID == nil ? "Keep your saves, notes and reading history when you change phones." : "Sign in with the Apple Account linked to Her Crown to continue deleting your account.")
                 .font(.ui(14)).foregroundStyle(Theme.muted(scheme))
             SignInWithAppleButton(.signIn) { request in
                 request.requestedScopes = [.fullName, .email]
@@ -625,6 +662,13 @@ struct AccountView: View {
                 showsAppleSignIn = false
                 let given = credential.fullName?.givenName
                 run {
+                    if let expectedUserID = deletionUserID {
+                        defer { deletionUserID = nil }
+                        try await app.reauthenticateForDeletion(identityToken: token, expectedUserID: expectedUserID)
+                        // Identity is verified; require a fresh explicit delete confirmation.
+                        confirmingDelete = true
+                        return
+                    }
                     try await app.signInWithApple(identityToken: token)
                     if let given, app.displayName == nil || app.displayName == "Guest" { try await app.updateProfile(displayName: given, bio: bio) }
                     name = app.displayName.flatMap { $0 == "Guest" ? nil : $0 } ?? ""
@@ -634,7 +678,7 @@ struct AccountView: View {
             }
             .signInWithAppleButtonStyle(scheme == .dark ? .white : .black)
             .frame(height: 48)
-            Button("Continue as a guest") { showsAppleSignIn = false }
+            Button(deletionUserID == nil ? "Continue as a guest" : "Cancel") { showsAppleSignIn = false; deletionUserID = nil }
                 .font(.ui(13, weight: .medium))
                 .frame(minHeight: 44)
                 .buttonStyle(.plain)
@@ -650,6 +694,20 @@ struct AccountView: View {
         Task {
             do { try await work() } catch let error as APIError { message = error.message } catch { message = "Something went wrong. Please try again." }
             busy = false
+        }
+    }
+
+    private func deleteAccount() {
+        run {
+            do {
+                try await app.deleteAccount()
+                name = ""
+                bio = ""
+                message = "Your account was deleted. You’re starting fresh as a guest."
+            } catch let error as APIError where !app.isGuest && ["SESSION_EXPIRED", "SESSION_NOT_FRESH"].contains(error.code) {
+                deletionUserID = app.me?.user.id
+                showsAppleSignIn = true
+            }
         }
     }
 
