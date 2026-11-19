@@ -80,7 +80,7 @@ struct ReaderView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.visible)
         }
-        .onChange(of: visibleRef) { _, value in
+        .onChange(of: visibleRef, initial: true) { _, value in
             guard let value, let ref = VerseRef(value) else { return }
             if model.chapter?.book.id != ref.book || model.chapter?.number != ref.chapter {
                 model.open(ref.book, ref.chapter, verse: ref.verse)
