@@ -156,7 +156,13 @@ final class ReaderModel {
 /// A stable scroll feed. Neighbours are inserted before the reader reaches a boundary;
 /// existing verse IDs and views stay in place instead of replacing the ScrollView.
 struct ReaderChapterWindow {
+    struct Page: Identifiable {
+        let chapter: Chapter
+        let verse: Verse
+        var id: String { VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end).description }
+    }
     private(set) var chapters: [Chapter]
+    var pages: [Page] { chapters.flatMap { chapter in chapter.verses.map { Page(chapter: chapter, verse: $0) } } }
 
     init(chapter: Chapter) {
         chapters = [Self.neighbour(of: chapter, direction: -1), chapter,

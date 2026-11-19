@@ -206,19 +206,18 @@ struct ReaderView: View {
     private var pages: some View {
         ScrollView(.vertical) {
             LazyVStack(spacing: 0) {
-                ForEach(chapterWindow?.chapters ?? [], id: \.label) { chapter in
+                // Direct string IDs let SwiftUI target individual verses, including when a window is replaced.
+                ForEach(chapterWindow?.pages ?? []) { page in
+                    let chapter = page.chapter
+                    let verse = page.verse
+                    let ref = VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)
                     let next = ReaderChapterWindow.neighbourReference(of: chapter, direction: 1)
-                    ForEach(chapter.verses) { verse in
-                        let ref = VerseRef(book: chapter.book.id, chapter: chapter.number, verse: verse.number, end: verse.end)
-                        VersePage(verse: verse, chapter: chapter, artwork: model.artwork(for: verse, in: chapter),
-                                  isLast: verse.number == chapter.verses.last?.number, next: next.map { "\(BibleStore.shared.book($0.book)?.displayName ?? $0.book) \($0.chapter)" },
-                                  onStudy: { studyRef = ref }, onReflect: { reflectRef = ref },
-                                  onNext: {
-                                      if let next { jump(to: next, animated: true) }
-                                  })
-                            .containerRelativeFrame(.vertical)
-                            .id(ref.description)
-                    }
+                    VersePage(verse: verse, chapter: chapter, artwork: model.artwork(for: verse, in: chapter),
+                              isLast: verse.number == chapter.verses.last?.number, next: next.map { "\(BibleStore.shared.book($0.book)?.displayName ?? $0.book) \($0.chapter)" },
+                              onStudy: { studyRef = ref }, onReflect: { reflectRef = ref },
+                              onNext: { if let next { jump(to: next, animated: true) } })
+                        .containerRelativeFrame(.vertical)
+                        .id(page.id)
                 }
             }
             .scrollTargetLayout()

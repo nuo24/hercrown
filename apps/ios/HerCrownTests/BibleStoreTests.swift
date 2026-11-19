@@ -68,6 +68,8 @@ final class BibleStoreTests: XCTestCase {
         } }
         let original = ids(window)
         XCTAssertEqual(window.chapters.map(\.number), [1, 2, 3])
+        XCTAssertEqual(window.pages.first { $0.id == "GEN.2.1" }?.chapter.number, 2)
+        XCTAssertEqual(Set(window.pages.map(\.id)).count, window.pages.count)
         window.extend(around: try XCTUnwrap(window.chapters.last))
         XCTAssertEqual(Array(ids(window).prefix(original.count)), original)
         XCTAssertEqual(Set(ids(window)).count, ids(window).count)
