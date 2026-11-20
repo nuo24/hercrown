@@ -12,7 +12,7 @@ final class GuestPaywallTests: XCTestCase {
     }
 
     func testRolling24HourCooldownAndFutureClockAreRespected() {
-        let history = GuestPaywallHistory(lastRequest: now)
+        let history = GuestPaywallHistory(lastPresentation: now)
         XCTAssertFalse(history.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(23 * 3600)))
         XCTAssertTrue(history.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(24 * 3600)))
         XCTAssertFalse(history.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(-3600)))
@@ -35,11 +35,34 @@ final class GuestPaywallTests: XCTestCase {
         XCTAssertTrue(progress.record(chapter: "PSA.118", verse: 1, verseCount: 29, lastVerse: 29))
     }
 
+    func testProgressSurvivesCrossingBackAndForthBetweenChapters() {
+        var progress = GuestChapterProgress()
+        _ = progress.record(chapter: "PSA.117", verse: 1, verseCount: 2, lastVerse: 2)
+        for v in [2, 3, 2, 1] {
+            XCTAssertFalse(progress.record(chapter: "PSA.118", verse: v, verseCount: 29, lastVerse: 29))
+        }
+        XCTAssertFalse(progress.record(chapter: "PSA.117", verse: 2, verseCount: 2, lastVerse: 2))
+        XCTAssertTrue(progress.record(chapter: "PSA.118", verse: 1, verseCount: 29, lastVerse: 29))
+        _ = progress.record(chapter: "PSA.117", verse: 2, verseCount: 2, lastVerse: 2)
+        XCTAssertFalse(progress.record(chapter: "PSA.118", verse: 1, verseCount: 29, lastVerse: 29))
+    }
+
+    @MainActor func testFailedAttemptHasOnlyAShortBackoff() {
+        let suite = "guest-retry-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let prompter = GuestPaywallPrompter(defaults: defaults)
+        prompter.attempted(now: now)
+        XCTAssertFalse(prompter.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(60)))
+        XCTAssertTrue(prompter.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(300)))
+        XCTAssertTrue(GuestPaywallPrompter(defaults: defaults).canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(60)))
+    }
+
     @MainActor func testCooldownSurvivesRelaunch() {
         let suite = "guest-paywall-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
-        GuestPaywallPrompter(defaults: defaults).requested(now: now)
+        GuestPaywallPrompter(defaults: defaults).presented(now: now)
         let reopened = GuestPaywallPrompter(defaults: defaults)
         XCTAssertFalse(reopened.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(60)))
         XCTAssertTrue(reopened.canRequest(isGuest: true, premium: false, now: now.addingTimeInterval(86_400)))

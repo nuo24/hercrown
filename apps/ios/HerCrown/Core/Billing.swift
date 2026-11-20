@@ -64,6 +64,9 @@ final class Billing: NSObject {
     }
 
     func recordPresentationOutcome(placement: String, outcome: String) {
+        #if DEBUG
+        UserDefaults.standard.set("\(placement): \(outcome)", forKey: "hc.lastPaywallDebugResult")
+        #endif
         #if HC_STAGING_TESTFLIGHT
         lastPaywallTrialResult = "\(placement): \(outcome)"
         #endif
@@ -95,12 +98,15 @@ final class Billing: NSObject {
         let userID = app?.me?.user.id
         presentingPlacement = requestID
         let handler = PaywallPresentationHandler()
-        #if HC_STAGING_TESTFLIGHT
         handler.onPresent { [weak self] info in
-            let result = "\(placement): \(info.name) · trial \(info.isFreeTrialAvailable ? "available" : "unavailable")"
-            self?.lastPaywallTrialResult = result
+            let result = "Presented \(info.name) · trial \(info.isFreeTrialAvailable ? "available" : "unavailable")"
+            Task { @MainActor in
+                guard let self, self.presentingPlacement == requestID, self.app?.me?.user.id == userID else { return }
+                // Failed loads/skipped campaigns must not consume the guest's daily opportunity.
+                if self.app?.isGuest == true { GuestPaywallPrompter.shared.presented() }
+                self.recordPresentationOutcome(placement: placement, outcome: result)
+            }
         }
-        #endif
         handler.onWillDismiss { [weak self] _, _ in
             guard placement == "onboarding_complete" else { return }
             Task { @MainActor in
