@@ -216,6 +216,7 @@ final class AppModel {
     }
 
     func presentPaywall(placement: String, onComplete: (() -> Void)? = nil, onExistingSubscription: (() -> Void)? = nil) {
+        let requestedAt = Date()
         guard !checkingPaywall, !membership.premium else {
             Billing.shared.recordPresentationOutcome(placement: placement, outcome: membership.premium ? "Server reports active Plus" : "A subscription check is already running")
             onComplete?(); return
@@ -243,7 +244,7 @@ final class AppModel {
                 onComplete?()
                 return
             }
-            Billing.shared.present(placement: placement, onComplete: onComplete)
+            Billing.shared.present(placement: placement, onComplete: onComplete, requestedAt: requestedAt)
             await Analytics.shared.track("paywall_requested", ["placement": .string(placement)])
         }
     }

@@ -100,23 +100,13 @@ struct ReaderView: View {
             await model.prepareNeighbours()
             if !Task.isCancelled, let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
         }
+        .task(id: "guest-preload-\(app.me?.user.id ?? "")-\(canPreloadGuestPaywall)") {
+            if canPreloadGuestPaywall { Billing.shared.prepareGuestPaywall() }
+        }
         .task(id: "\(model.pendingGuestPaywall?.uuidString ?? "")-\(canOfferGuestPaywall)") {
-            #if DEBUG
-            if model.pendingGuestPaywall != nil {
-                UserDefaults.standard.set([
-                    "eligible": canOfferGuestPaywall,
-                    "accountMatches": model.guestPaywallUserID != nil && model.guestPaywallUserID == app.me?.user.id,
-                    "guest": app.isGuest, "premium": app.membership.premium,
-                    "onboarding": app.onboardingCompleted, "ready": app.phase == .ready,
-                    "offline": app.offline, "active": scenePhase == .active,
-                    "checking": app.checkingPaywall, "configured": Billing.shared.configured,
-                    "billingBusy": Billing.shared.isPaywallBusy,
-                    "cooldown": GuestPaywallPrompter.shared.canRequest(isGuest: true, premium: false)
-                ], forKey: "hc.guestPaywallDiagnostic")
-            }
-            #endif
             guard canOfferGuestPaywall else { return }
-            do { try await Task.sleep(for: .milliseconds(600)) } catch { return }
+            // Let navigation state settle without an artificial post-chapter delay.
+            await Task.yield()
             guard !Task.isCancelled, canOfferGuestPaywall else { return }
             model.pendingGuestPaywall = nil
             GuestPaywallPrompter.shared.attempted()
@@ -133,6 +123,13 @@ struct ReaderView: View {
             else { studyRef = model.currentRef }
         }
         #endif
+    }
+
+    private var canPreloadGuestPaywall: Bool {
+        app.onboardingCompleted && app.phase == .ready && app.me != nil
+            && app.isGuest && !app.membership.premium && !app.offline
+            && scenePhase == .active && Billing.shared.configured && !Billing.shared.isPaywallBusy
+            && GuestPaywallPrompter.shared.canRequest(isGuest: true, premium: false)
     }
 
     private var canOfferGuestPaywall: Bool {

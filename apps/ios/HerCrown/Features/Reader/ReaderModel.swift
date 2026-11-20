@@ -13,9 +13,6 @@ final class ReaderModel {
     private var completed = Set<String>()
     private var dayRecorded: String?
     private var guestChapterProgress = GuestChapterProgress()
-    #if DEBUG
-    private var guestChapterTrace: [String] = []
-    #endif
     var pendingGuestPaywall: UUID?
     var guestPaywallUserID: String?
     var guestPaywallQueuedAt: Date?
@@ -100,13 +97,6 @@ final class ReaderModel {
         savePosition()
         let crossedGuestChapter = guestChapterProgress.record(chapter: "\(chapter.book.id).\(chapter.number)", verse: verse,
             verseCount: chapter.verses.count, lastVerse: chapter.verses.last?.number ?? verse)
-        #if DEBUG
-        guestChapterTrace.append("\(chapter.book.id).\(chapter.number).\(verse) crossed=\(crossedGuestChapter)")
-        UserDefaults.standard.set(Array(guestChapterTrace.suffix(16)), forKey: "hc.guestChapterTrace")
-        UserDefaults.standard.set(["chapter": "\(chapter.book.id).\(chapter.number)", "verse": String(verse),
-            "crossedCompleted": String(crossedGuestChapter), "guest": String(app.isGuest),
-            "onboarding": String(app.onboardingCompleted)], forKey: "hc.guestChapterDiagnostic")
-        #endif
         if crossedGuestChapter, app.isGuest, app.onboardingCompleted {
             guestPaywallUserID = app.me?.user.id
             guestPaywallQueuedAt = .now

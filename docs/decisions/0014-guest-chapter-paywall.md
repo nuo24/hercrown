@@ -11,3 +11,5 @@ Suppress automatic offers while signed in, premium, offline, backgrounded, showi
 Reuse the existing `onboarding_complete` Superwall campaign to show the same standard paywall without requiring a new remotely configured placement. The separate `guest_chapter_paywall_requested` event distinguishes the automatic guest trigger from the general paywall event. Existing server-verified entitlements remain authoritative. The disabled $19.99 return offers stay disabled.
 
 Preserve distinct verse visits across the last 32 chapters. Navigation can cross chapter boundaries and return; it must not erase already-read verses or count the same chapter boundary twice in one reader session.
+
+Preload the standard campaign in the background when an eligible guest begins reading (once per signed-in guest identity; reset preloading state on logout). Remove the fixed 600 ms post-boundary delay; yield navigation state before requesting presentation. Keep the current entitlement and audience checks at presentation. Debug-only request-to-presentation timing supports performance checks.

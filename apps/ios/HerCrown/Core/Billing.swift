@@ -16,6 +16,7 @@ final class Billing: NSObject {
 
     private(set) var configured = false
     private var presentingPlacement: UUID?
+    private var preparedGuestUserID: String?
     #if HC_STAGING_TESTFLIGHT
     private var lastPaywallTrialResult: String? {
         get { UserDefaults.standard.string(forKey: "hc.lastPaywallTrialResult") }
@@ -80,8 +81,20 @@ final class Billing: NSObject {
         Superwall.shared.preloadPaywalls(forPlacements: ["onboarding_complete"])
     }
 
+    /// Prepare the standard campaign during reading, before she reaches a chapter boundary.
+    func prepareGuestPaywall() {
+        guard configured, let app, app.isGuest, app.onboardingCompleted, !app.membership.premium,
+              let userID = app.me?.user.id, preparedGuestUserID != userID, !isPaywallBusy,
+              GuestPaywallPrompter.shared.canRequest(isGuest: true, premium: false) else { return }
+        preparedGuestUserID = userID
+        prepareOnboardingPaywall()
+        #if DEBUG
+        UserDefaults.standard.set(Date(), forKey: "hc.guestPaywallPreloadStarted")
+        #endif
+    }
+
     /// Shows the paywall campaign for this placement (onboarding_complete, study_explain, plan_start, settings…).
-    func present(placement: String, onComplete: (() -> Void)? = nil) {
+    func present(placement: String, onComplete: (() -> Void)? = nil, requestedAt: Date = .now) {
         guard configured, !isPaywallBusy else {
             recordPresentationOutcome(placement: placement, outcome: configured ? "Another paywall is already presenting" : "Billing is not configured")
             onComplete?(); return
@@ -105,6 +118,10 @@ final class Billing: NSObject {
                 // Failed loads/skipped campaigns must not consume the guest's daily opportunity.
                 if self.app?.isGuest == true { GuestPaywallPrompter.shared.presented() }
                 self.recordPresentationOutcome(placement: placement, outcome: result)
+                #if DEBUG
+                UserDefaults.standard.set(Date.now.timeIntervalSince(requestedAt) * 1000,
+                    forKey: "hc.lastPaywallPresentationDelayMs")
+                #endif
             }
         }
         handler.onWillDismiss { [weak self] _, _ in
@@ -204,6 +221,7 @@ final class Billing: NSObject {
     #endif
 
     func logOut() {
+        preparedGuestUserID = nil
         // Retain the staging outcome across relaunches/account switches so a
         // tester can report the last attempt after leaving fresh onboarding.
         if configured { Superwall.shared.reset() }
