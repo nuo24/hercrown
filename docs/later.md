@@ -19,3 +19,7 @@ Ideas and deferred work, parked so they don't derail the current phase.
 ## November 8 follow-up
 - Widget Studio redesign remains parked for owner review; keep the existing native widget behavior. Snapshot Studio edits shareable images, not installed widgets.
 - NKJV, NIV, ESV and The Message requested. Do not bundle or expose licensed versions until commercial permission is confirmed. Existing API.Bible connector can support approved catalog entries, subject to translation-specific licenses and offline/sharing terms. API.Bible commercial guidance: https://care.api.bible/article/396-licensing-policies-quick-reference ; ESV mobile/commercial permissions: https://www.esv.org/api/ ; NIV: https://www.biblica.com/permissions/ . Owner approval is needed for new paid licensing. No license has been purchased and no copyrighted text imported.
+
+## Spanish reading and localization (V2)
+
+- Verify commercial rights for one published Spanish Bible edition and enable it in the existing reader. Evaluate offline and sharing rights separately. Add Spanish (Mexico) App Store metadata that accurately describes the available reading and interface languages. Localize the core SwiftUI experience in a later step.

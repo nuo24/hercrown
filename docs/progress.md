@@ -1,5 +1,7 @@
 # Progress
 
+- Discover layout follow-up: tightened featured and list spacing, narrowed list titles, and restored the Reflection label beside the verse reference where a prompt exists. Verified the layout in the iPhone simulator. Build and API checks passed (202 tests).
+
 Playbook phases ([ai-app-playbook AGENTS.md](https://github.com/blakeandersonw/ai-app-playbook/blob/main/AGENTS.md)) adapted to Bible Scroll. Updated 2026-11-03.
 
 ## Phase 0–1: Niche & brief — ⏭️ skipped on purpose
@@ -763,6 +765,12 @@ Apple API updated version 1.0 to `releaseType=AFTER_APPROVAL` and read back the 
 - Production /health (env=production), privacy, terms, support and credits returned 200. Required check and all 202 tests (14 files) passed. No native/server changes or deployment. Production deploy guide refreshed to replace obsolete pending-migration/manual-release instructions.
 - Remaining: final owner go-ahead for public submission (automatic release after approval), Apple DSA review, and public production purchase/restore after availability. A never-installed-device first-run test is still not independently evidenced; earlier onboarding and physical-device checks are owner-reported.
 
+### November 13 — TikTok reference audit for Her Crown
+- Resolved all eight supplied TikTok short links and reviewed public metadata for those posts plus @heavendigitals. Saved canonical accounts, caption patterns, formats, dates and metric snapshots in `marketing/references/tiktok-video-and-slideshow-references.md`; preserved its earlier screenshot notes. Full assessment: `reports/Her Crown TikTok reference review.md`, with evidence in `research_notes/Her Crown TikTok reference review/`.
+- Inspected first/final slide pairs for Aurora, Basalt, Rye and an additional Heaven Digitals example. Videos and intermediate slides were not reviewed. Prioritized Heaven's situation-to-passage structure and Basalt's habit-to-app bridge for original Her Crown content.
+- Account cadence remains unverified because complete dated profile histories were unavailable. Proposed a clearly labeled 14-day experiment: one daily post, four slideshows and three videos per week, with results compared at consistent post ages. No posting, scheduling, media reuse or attribution implementation performed.
+- Documentation-only verification: `npm run check` and all 202 tests across 14 files passed; final `git diff --check` passed. No app code changes or deployment.
+
 
 ### November 19 — billing analytics, email consent and account deletion
 
@@ -770,3 +778,53 @@ Apple API updated version 1.0 to `releaseType=AFTER_APPROVAL` and read back the 
 - Apple purchase authentication is not a reproduced Her Crown login bug. Account emails already persist through Sign in with Apple. Added optional verified-account email updates consent (default off, versioned, reversible, deleted with account) and an owner export query; no mailing vendor/campaign enabled. Migration 0017 must precede rollout.
 - Included the guest deletion endpoint/older Apple session reauthentication fix, preserving the intended account on mismatch and explicitly reconfirming deletion. Corrected artwork build inputs/outputs without disabling sandboxing.
 - Required check and 208 API tests pass; simulator build and 29 native tests pass. Recovery dry-run read one verified retained initial purchase, found one missing production row, made zero writes. Recovery is owner-run after production deployment; instructions in docs/billing-email-update.md. Native distribution and production remain pending.
+
+Staging rollout verified November 19: clean isolated checkout `/private/tmp/hercrown-billing-email-update`, source `fa89f54`, Cloudflare version `0d663a79-e61c-4822-b3c3-3543280dc51c`. Migration 0017 applied on staging. Live staging smoke checks passed guest sign-in, default email opt-out, guest opt-in rejection, forged webhook rejection and deletion of the disposable test guest. Native app launched into Your account and guest layout inspected (`/private/tmp/hercrown-account-update.png`); real-device Apple sign-in and signed-in consent layout still require owner validation. Production deployment/recovery and native upload have not been performed.
+
+Production follow-up November 19: owner applied migration 0017 and deployed source `fa89f54` as Cloudflare version `9b0767cd-1d25-456e-a499-6ecb80b3512a`. Owner ran billing recovery; ingestion succeeded but immediate readback was not yet visible. Subsequent read-only dry-run returned examined=1, missing=0, skipped=1. Independent Tinybird `FINAL` aggregate confirms exactly one production, non-sandbox `trial_started` event today. The historical staging copy also remains; filter reporting by production and sandbox=0. No repeat recovery ingestion was performed. Native consent/deletion changes still await the next app update.
+
+### November 19 — UI review and expense tracking before the next release
+
+- Owner requires all intended UI changes to be reviewed and tested together before any next archive/upload/release. Opened the original Discover web mockup and the installed staging-connected Debug app in Simulator. Comparison screenshots: `/private/tmp/hercrown-discover-reference.jpg` and `/private/tmp/hercrown-discover-current.png`. Current source places REFLECTION alongside the verse instead of the theme, and the 44-point checkmark row increases metadata height. Preserve a small checkmark on the verse line while matching the reference text grouping. This pass captured the comparison; it did not modify Discover.
+- Captured requested remaining work: remove repeated Plus badges while preserving paywall access controls; investigate an onboarding-completion Lock Screen reminder (distinguish a user-added widget from a Live Activity); standard StoreKit rating requests after meaningful use with separate optional feedback; verified free English/Spanish editions; prioritize CSB once app-specific rights are confirmed. No custom five-star gating. No claim that iOS can place a widget before first app launch.
+- Created `outputs/hercrown-2026-11-19/Her-Crown-Expense-Tracker.xlsx` with Subscriptions and Payments. Owner reconfirmed API.Bible at $69/month and corrected partner's name to Tomi. Nathan and Tomi each reported $100 ChatGPT payments; dates, billing periods and app allocation remain unverified, so these are recorded as $200 reported payments rather than silently added to monthly recurring cost. Other service amounts remain blank/unverified. Formula checks returned $69 confirmed monthly, $200 reported payments and eight costs needing confirmation; a temporary newly confirmed $20 monthly cost raised the budget to $89, then restored to $69. Both sheets rendered and inspected.
+- AFFiNE's official MCP documentation describes read-only defaults and read/write limited to development/canary deployments. No AFFiNE tool is connected in this session; no workspace credential was requested or modified.
+
+
+### November 19 — build 34 local UI and offline editions
+
+Implemented Discover's reference/check row with theme + REFLECTION directly underneath, removed repeated study Plus badges while retaining paywall/server gates, added usage-based native review and separate feedback invitation, and implemented first-launch onboarding Live Activity with resumable Keychain draft. Existing email-consent and account-deletion work remains included. Build number set to 34; not archived or uploaded.
+
+Added public-domain ASV, YLT, Darby, Webster, MSB and Spanish Reina-Valera 1909, whole-text compared against eBible VPL with pinned checksums and source omissions preserved. CSB remains pending licensing. New backend catalog migration 0018, seeds, analytics validation and content routes verified on staging.
+
+Verification: `npm run check && npm test` passed (209 API tests); Xcode build/native tests passed (34). Actual Simulator Discover light/dark and Spanish reader inspected. Staging deployed from clean source commit `3b13d8f` in `/private/tmp/hercrown-build34-stage` to Worker version `e7fece1a-1c91-479d-a666-41b57a9a1e71`; new catalog/chapter/Discover readback passed for all six editions, temporary guest removed. No production writes/deployments. Physical-iPhone Live Activity and review-dialog checks remain before release. Details: `docs/build-34-update.md`.
+
+
+### November 19 — Xcode test session and guest chapter offer
+
+Owner approved installation of Apple's required Xcode system components; installation finished, HerCrown opened in Xcode, iPhone 17 Pro (iOS 26.2) selected, and Xcode reported Running HerCrown. The Simulator UI is now exposed by Apple's Device Hub (`com.apple.dt.Devices`), rather than a standalone Simulator.app.
+
+Owner selected a guest offer after completing a chapter: same-day first opportunity, dismissible standard campaign, automatic request cooldown of 24 hours, exclusions for signed-in/Plus users, and reader-modal/foreground/account safeguards. Added five policy/reading-boundary tests (39 native tests total) and analytics event; API checks/tests passed (209). Staging analytics Worker deployed from clean commit `9ddca94` to `da2a4107-dd5c-40b8-8b7a-fbb74d3cb9a9`. Decision 0014 records the rule.
+
+Live UI testing found nested chapter/verse scroll targets could show the preceding chapter after selecting another one. Flattened the reader into direct stable verse targets (clean local source commit `99dbd70`); native tests passed (39), and actual Simulator screenshots confirmed selected Psalm 117:1 and next-chapter Psalm 118:1 now match their headers. Also count the initial visible verse so short chapters can qualify for the guest offer. Final first-verse build/test and hands-on paywall check are tracked in this chat; do not claim the paywall presentation verified until observed. Xcode's pre-existing fresh-start-on-every-run argument is now disabled to preserve test sessions. No production deployment, purchase, archive or TestFlight upload.
+
+
+Final local source commit `322fd61` in the clean build-34 checkout includes the initial-verse correction. Native build/tests passed again (39); API checks/tests remain green (209). Final Simulator runtime launched at Psalm 117 for live chapter-boundary verification. Computer control then failed to locate all Xcode/Device Hub windows (`cgWindowNotFound`), including after resetting its session. Owner asked to bring the test window forward; actual automatic paywall presentation/dismissal remains unverified. Do not ship or describe that live check as passed yet.
+
+
+### November 19 — verified guest trigger, pending visible campaign check
+
+Owner brought the Simulator forward. Actual trace verified Psalm 117:1 → 117:2 → 118:1 queues an eligible guest request with billing configured, online/active state and matching account. Superwall presentation was not observed. The live trace also exposed loss of read verses when navigation crossed out of a chapter and returned; the tracker now retains the last 32 chapters and offers each completed chapter once per reader session.
+
+Daily cooldown now begins on Superwall onPresent, not on request; failed/skipped requests have only a five-minute in-session retry backoff. Debug-only eligibility, callback and bounded reading traces assist this test. Automatic paywall visible/dismissal check remains pending owner's manual Simulator gesture because computer control repeatedly lost its native window. No purchase attempted.
+
+Final source `1fb40ba` in clean `/private/tmp/hercrown-build34-stage`; `npm run check && npm test` passed (209 API tests), native suite passed (41) on a separate “Her Crown Guest Policy Tests” Simulator so the owner's visible device was not interrupted. Staging Worker remains `da2a4107-dd5c-40b8-8b7a-fbb74d3cb9a9` from `9ddca94` (API code unchanged since). No archive, TestFlight upload or production changes.
+
+
+### November 19 — paywall latency reduced and live check passed
+
+Owner reported the guest paywall appeared but took about three seconds. Added eligible-guest background preloading of the existing standard campaign during reading, deduplicated per current guest identity and reset on logout. Removed the fixed 600 ms boundary pause; existing StoreKit, audience, entitlement and presentation/cooldown checks remain. Temporary verbose reader/eligibility traces removed. Debug-only preload timestamp and request-to-onPresent timing remain.
+
+Live isolated guest test on “Her Crown Guest Policy Tests”: preload started before chapter completion; Psalm 117:1 → 117:2 → 118:1 displayed the actual Superwall main paywall. Measured request-to-presentation latency **827 ms**, including StoreKit preflight. Screenshot saved at `outputs/hercrown-2026-11-19/build34/Guest-Paywall-Preloaded.png`. Closed using the dismiss control and visually confirmed free reading at Psalm 118:1. No purchase attempted. This resolves the previously pending visible-presentation/dismissal check; it is one local measurement, not a network-wide performance guarantee.
+
+`npm run check && npm test` passed (209 API tests); final Xcode native tests passed (41). Clean local source commit `fd11102` in `/private/tmp/hercrown-build34-stage`. API unchanged, staging Worker remains `da2a4107-dd5c-40b8-8b7a-fbb74d3cb9a9`. Verified app installed back onto the original test Simulator while preserving its account and cooldown. No archive, TestFlight upload, production deployment or production data writes.
