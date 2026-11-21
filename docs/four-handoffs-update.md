@@ -29,3 +29,8 @@ Pink invitation, reveal and free-reading exit tested through the running Simulat
 Additional final screenshots inspected: medals in Dark/Pink and book picker in Dark, with transparent silhouettes intact. The final Settings screen was captured directly from Simulator; desktop window control became unavailable after the test-device restart, so the Settings menu switch/relaunch walkthrough remains manual. Backend preference readback already passed for all four choices.
 
 Manual follow-up before release: physical iPhone haptic strength, genuine StoreKit discount configuration/checkout, and full device appearance walkthrough. Font-size/welcome-layout work remains deliberately deferred.
+
+
+### Appearance-switch follow-up
+
+Fixed the screenshot preview override taking precedence over an explicit Settings choice. All appearance resolution now shares one source; Settings dismisses the preview override. Regression suite: 49 native tests, 210 API tests, checks and final build passed. Actual Settings menu selection of Pink applied immediately; terminating and reopening without a forced appearance preserved Pink on Home. This completes the previously pending menu/relaunch walkthrough. Font/layout changes remain deferred.
