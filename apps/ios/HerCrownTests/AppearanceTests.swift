@@ -3,6 +3,21 @@ import SwiftUI
 @testable import HerCrown
 
 @MainActor final class AppearanceTests: XCTestCase {
+    func testSettingsChoiceOverridesPreviewAndDoesNotRevertOnPreferenceRefresh() {
+        let palette = AppearancePalette(preview: "dark")
+        palette.selection = "light"
+        XCTAssertEqual(palette.resolvedSelection, "dark")
+        palette.choose("pink")
+        XCTAssertEqual(palette.resolvedSelection, "pink")
+        XCTAssertTrue(palette.pink)
+        palette.selection = "pink" // The saved preference arrives from the API.
+        XCTAssertEqual(palette.resolvedSelection, "pink")
+        palette.choose("light")
+        XCTAssertFalse(palette.pink)
+        palette.choose("system")
+        XCTAssertEqual(palette.resolvedSelection, "system")
+    }
+
     func testPinkUsesOwnersPlumAccentAndPreservesDark() {
         let old = AppearancePalette.shared.selection
         defer { AppearancePalette.shared.selection = old }

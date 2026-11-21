@@ -231,13 +231,7 @@ struct SettingsView: View {
     }
 
     private var scheme: ColorScheme {
-        #if DEBUG
-        if let appearance = UserDefaults.standard.string(forKey: "hcPreviewAppearance") {
-            if appearance == "dark" { return .dark }
-            if appearance == "light" || appearance == "pink" { return .light }
-        }
-        #endif
-        return switch app.preferences.appearance {
+        return switch AppearancePalette.shared.resolvedSelection {
         case "light", "pink": .light
         case "dark": .dark
         default: inheritedScheme

@@ -287,11 +287,7 @@ struct HerCrownApp: App {
     private struct OfferUnavailable: Error {}
 
     private var colorScheme: ColorScheme? {
-        #if DEBUG
-        let appearance = UserDefaults.standard.string(forKey: "hcPreviewAppearance") ?? app.preferences.appearance
-        #else
-        let appearance = app.preferences.appearance
-        #endif
+        let appearance = AppearancePalette.shared.resolvedSelection
         return switch appearance {
         case "light", "pink": .light
         case "dark": .dark

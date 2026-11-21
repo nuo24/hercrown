@@ -5,13 +5,29 @@ import Observation
 /// Design tokens: the final computed values of the reference mockup (reference-web/dist, light and dark), measured at
 /// iPhone width. Neutral palette; Baskerville for Scripture and editorial accents; the system sans for UI.
 @Observable final class AppearancePalette {
-    static let shared = AppearancePalette()
+    static let shared = AppearancePalette(preview: launchPreview)
     var selection = "light"
-    var pink: Bool {
+    private var preview: String?
+
+    init(preview: String? = nil) {
+        self.preview = preview.flatMap { ["light", "dark", "pink", "system"].contains($0) ? $0 : nil }
+    }
+
+    var resolvedSelection: String { preview ?? selection }
+    var pink: Bool { resolvedSelection == "pink" }
+
+    /// A deliberate Settings choice takes precedence over screenshot-only launch arguments.
+    func choose(_ appearance: String) {
+        preview = nil
+        selection = appearance
+    }
+
+    private static var launchPreview: String? {
         #if DEBUG
-        if let preview = UserDefaults.standard.string(forKey: "hcPreviewAppearance") { return preview == "pink" }
+        UserDefaults.standard.string(forKey: "hcPreviewAppearance")
+        #else
+        nil
         #endif
-        return selection == "pink"
     }
 }
 

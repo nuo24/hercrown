@@ -839,3 +839,10 @@ Live isolated guest test on “Her Crown Guest Policy Tests”: preload started 
 - Staging migration 0019 and Worker `6b11f02b-a93a-47b5-a2ee-518b80295f67` from clean API source `724e86f`; disposable guest verified all appearance readbacks, unchanged onboarding, real progress and event acceptance, then deleted. No production access.
 - Checks: API type/content check and 210 tests passed; final full Xcode run 48 tests passed (zero failures/skips), iPhone 17 Pro/iOS 26.2. Running UI inspected for medals, book picker, Pink Home/Discover/reader, and gift previews/reveal/free exit. Physical haptic strength and actual discounted checkout remain manual follow-ups.
 - Build remains 34, no archive/upload/release. Details: `docs/four-handoffs-update.md`.
+
+
+### November 21 — Simulator appearance switching
+
+The isolated Simulator had been left running with the screenshot launch argument `-hcPreviewAppearance dark`. The old preview override always won over an explicit Settings choice, so selecting Pink could save correctly while the screen stayed dark. Centralized preview resolution in `AppearancePalette`, made explicit appearance edits dismiss the preview override, and removed any stored preview setting on an explicit edit. App and Settings now use the same resolved preference. Added a regression test for Dark preview → Pink choice → saved preference refresh → Light/System choices. Font/layout behavior remains untouched.
+
+Verification: full native suite 49/49 passed including preview-precedence regression; API check and 210/210 tests passed. Final Debug build succeeded. Reopened the isolated Simulator without an appearance override, preserving its account/onboarding. No production changes or release.

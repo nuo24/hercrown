@@ -438,6 +438,12 @@ final class AppModel {
     /// Updates locally at once, then on the server. Never touches onboarding completion.
     func updatePreferences(_ patch: [String: Any], apply: (inout Preferences) -> Void) {
         apply(&preferences)
+        if patch["appearance"] != nil {
+            AppearancePalette.shared.choose(preferences.appearance)
+            #if DEBUG
+            UserDefaults.standard.removeObject(forKey: "hcPreviewAppearance")
+            #endif
+        }
         Self.cache(preferences)
         let translation = preferences.translation
         Task {
