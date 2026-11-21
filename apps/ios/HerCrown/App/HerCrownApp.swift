@@ -8,6 +8,7 @@ struct HerCrownApp: App {
     @State private var returnOffer: ReturnOffer?
     @State private var checkingOnNextOpen = true
     @State private var purchasingReturnOffer = false
+    @State private var showingGiftPreview = true
     @State private var returnOfferMessage: String?
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,6 +23,10 @@ struct HerCrownApp: App {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--preview-onboarding") {
                 OnboardingView().environment(app).task { await app.start() }
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-mystery-gift"), showingGiftPreview {
+                MysteryGiftView(terms: .init(original: "$39.99", firstYear: "$29.99", renewal: "$39.99", saving: "$10.00"), isPreview: true,
+                    onPurchase: { nil }, onRestore: { nil }, onClose: { showingGiftPreview = false })
+                    .environment(app).preferredColorScheme(colorScheme)
             } else if ProcessInfo.processInfo.arguments.contains("--preview-return-offer") {
                 ReturnOfferView(firstYear: "$19.99", renewal: "$29.99", onClaim: {}, onClose: {}, onRestore: {})
                     .preferredColorScheme(colorScheme)
@@ -56,6 +61,7 @@ struct HerCrownApp: App {
         }
             .environment(app)
             .preferredColorScheme(colorScheme)
+            .tint(Theme.text(colorScheme ?? .light))
             .task {
                 // Load her translation off the main thread, then sign in / sync.
                 let translation = app.preferences.translation
@@ -94,6 +100,22 @@ struct HerCrownApp: App {
                 .interactiveDismissDisabled()
                 .preferredColorScheme(colorScheme)
             }
+            .sheet(item: $app.mysteryGift) { offer in
+                MysteryGiftView(terms: offer.terms, onPurchase: { await purchaseMysteryGift(offer) }, onRestore: {
+                    let message = await app.restorePurchases()
+                    if app.membership.premium { app.mysteryGift = nil }
+                    return message
+                }, onClose: {
+                    app.mysteryGift = nil
+                    Task { await Analytics.shared.track("mystery_gift_dismissed") }
+                })
+                .presentationDetents([.large]).preferredColorScheme(colorScheme)
+            }
+            .onChange(of: app.me?.user.id) { _, _ in
+                app.mysteryGift = nil
+                MysteryGiftCoordinator.shared.reset()
+            }
+            .onChange(of: app.membership.premium) { _, premium in if premium { app.mysteryGift = nil } }
             .alert("Apple subscription found", isPresented: $app.showExistingAppleSubscription) {
                 Button("Restore Purchases") {
                     Task { returnOfferMessage = await app.restorePurchases() }
@@ -120,6 +142,39 @@ struct HerCrownApp: App {
                     Task { await Analytics.shared.flush() }
                 }
             }
+    }
+
+    private func purchaseMysteryGift(_ offer: MysteryGiftOffer) async -> String? {
+        guard app.me?.user.id == offer.userID, app.mysteryGift?.id == offer.id, !app.membership.premium,
+              scenePhase == .active else { return "This offer is no longer available." }
+        // Re-resolve immediately before purchase: eligibility and storefront pricing can change.
+        guard let fresh = await MysteryGiftCoordinator.resolve(userID: offer.userID), fresh.terms == offer.terms,
+              fresh.product.id == offer.product.id, app.me?.user.id == offer.userID,
+              app.mysteryGift?.id == offer.id, !app.membership.premium else {
+            return "This offer has changed or is no longer available. You can continue with free reading."
+        }
+        await Analytics.shared.track("purchase_started", ["product_id": .string(fresh.product.id)])
+        do {
+            switch try await fresh.product.purchase() {
+            case .success(.verified(let transaction)):
+                guard transaction.productID == fresh.product.id, app.me?.user.id == offer.userID else {
+                    return "Your account changed. Restore Purchases from the account you want to use."
+                }
+                let result = await app.verifyPurchases(transactionID: String(transaction.originalID))
+                await transaction.finish()
+                if app.membership.premium { app.mysteryGift = nil; return nil }
+                return result
+            case .pending:
+                return "Your purchase is pending Apple’s approval. You can keep reading for free."
+            case .userCancelled:
+                await Analytics.shared.track("purchase_abandoned")
+                return nil
+            default: return "We couldn’t verify this purchase. You can keep reading for free."
+            }
+        } catch {
+            await Analytics.shared.track("purchase_failed", ["product_id": .string(fresh.product.id)])
+            return "The purchase couldn’t be completed. You can keep reading for free."
+        }
     }
 
     private let returnOfferID = "trial_return_1999"
@@ -238,7 +293,7 @@ struct HerCrownApp: App {
         let appearance = app.preferences.appearance
         #endif
         return switch appearance {
-        case "light": .light
+        case "light", "pink": .light
         case "dark": .dark
         default: nil
         }

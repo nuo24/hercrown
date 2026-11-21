@@ -54,6 +54,7 @@ struct ChapterPicker: View {
         .padding(.horizontal, 22)
         .foregroundStyle(Theme.text(scheme))
         .background(Theme.canvas(scheme).ignoresSafeArea())
+        .task { await Analytics.shared.track("bible_book_picker_viewed") }
     }
 
     private var bookSearch: some View {
@@ -79,6 +80,7 @@ struct ChapterPicker: View {
                         selectedBook = book
                     } label: {
                         HStack(spacing: 12) {
+                            BibleBookImage(bookID: book.id).frame(width: 40, height: 40)
                             Text(book.name).font(.ui(14, weight: .medium))
                             Text("\(book.chapterCount) chapters").font(.ui(11))
                                 .foregroundStyle(Theme.muted(scheme))
@@ -295,7 +297,7 @@ struct ReflectionSheet: View {
                 .scrollContentBackground(.hidden)
                 .padding(10)
                 .frame(height: height)
-                .background(scheme == .dark ? Color(hex: 0x171719) : .white, in: RoundedRectangle(cornerRadius: 14))
+                .background(scheme == .dark ? Color(hex: 0x171719) : Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 14))
                 .overlay { RoundedRectangle(cornerRadius: 14).strokeBorder(Color.primary.opacity(0.24)).allowsHitTesting(false) }
                 .overlay(alignment: .topLeading) {
                     if note.isEmpty {

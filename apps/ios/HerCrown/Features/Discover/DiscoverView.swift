@@ -410,6 +410,7 @@ struct DiscoverView: View {
                     : nil
                 if let featured {
                     feature(featured)
+                        .background(Theme.pink(scheme) ? Theme.feature(scheme) : .clear, in: RoundedRectangle(cornerRadius: 16))
                         .id("featured-\(featured.ref)")
                         .opacity(fading.contains(featured.ref) || !featureVisible ? 0 : 1)
                         .transition(.opacity)

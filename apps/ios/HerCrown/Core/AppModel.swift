@@ -14,9 +14,12 @@ final class AppModel {
     var me: Me?
     /// The successfully uploaded crop, shared by every avatar while its versioned remote image loads.
     var avatarImageData: Data?
-    var preferences: Preferences = AppModel.cachedPreferences ?? .defaults
+    var preferences: Preferences = AppModel.cachedPreferences ?? .defaults {
+        didSet { AppearancePalette.shared.selection = preferences.appearance }
+    }
     var membership: Membership = .free
     var showExistingAppleSubscription = false
+    var mysteryGift: MysteryGiftOffer?
     private(set) var checkingPaywall = false
     var saved: Set<String> = Set(UserDefaults.standard.stringArray(forKey: "hc.saved") ?? [])
     private var bookmarksByAccount = UserDefaults.standard.dictionary(forKey: "hc.readerBookmarks") as? [String: [String]] ?? [:]
@@ -51,7 +54,10 @@ final class AppModel {
     let api: APIClient
     let bible = BibleStore.shared
 
-    init(api: APIClient = .shared) { self.api = api }
+    init(api: APIClient = .shared) {
+        self.api = api
+        AppearancePalette.shared.selection = preferences.appearance
+    }
 
     var displayName: String? { me?.profile.displayName }
 
@@ -308,6 +314,8 @@ final class AppModel {
         try await api.send("POST", path, json: [String: Any]())
         await Analytics.shared.track("account_deleted")
         await Analytics.shared.flush()
+        UserDefaults.standard.removeObject(forKey: "hc.medals.\(deletedAccount)")
+        UserDefaults.standard.removeObject(forKey: "hc.mysteryGiftSeen.\(deletedAccount)")
         bookmarksByAccount.removeValue(forKey: deletedAccount)
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil

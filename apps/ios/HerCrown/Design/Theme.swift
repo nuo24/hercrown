@@ -1,23 +1,39 @@
 import SwiftUI
 import CoreText
+import Observation
 
 /// Design tokens: the final computed values of the reference mockup (reference-web/dist, light and dark), measured at
 /// iPhone width. Neutral palette; Baskerville for Scripture and editorial accents; the system sans for UI.
+@Observable final class AppearancePalette {
+    static let shared = AppearancePalette()
+    var selection = "light"
+    var pink: Bool {
+        #if DEBUG
+        if let preview = UserDefaults.standard.string(forKey: "hcPreviewAppearance") { return preview == "pink" }
+        #endif
+        return selection == "pink"
+    }
+}
+
 enum Theme {
-    static func canvas(_ scheme: ColorScheme) -> Color { scheme == .dark ? .black : .white }
+    static func pink(_ scheme: ColorScheme) -> Bool { scheme == .light && AppearancePalette.shared.pink }
+    static func feature(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xF3DFE7) : supporting(scheme) }
+    static func onAccent(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xFFF9FB) : canvas(scheme) }
+
+    static func canvas(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xFBF1F4) : scheme == .dark ? .black : .white }
     enum Spacing { static let xs: CGFloat = 4, s: CGFloat = 8, m: CGFloat = 12, l: CGFloat = 16, xl: CGFloat = 20, gutter: CGFloat = 20, xxl: CGFloat = 32 }
     enum Radius { static let card: CGFloat = 16, group: CGFloat = 18, feature: CGFloat = 20, badge: CGFloat = 6, field: CGFloat = 8 }
 
     /// --text-primary: #111 / #f5f5f5
-    static func text(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x111111) }
+    static func text(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0x31222B) : scheme == .dark ? Color(hex: 0xF5F5F5) : Color(hex: 0x111111) }
     /// --text-muted: #717177 / #acacb2
-    static func muted(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0xB1B1B1) : Color(hex: 0x656565) }
+    static func muted(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0x654F5B) : scheme == .dark ? Color(hex: 0xB1B1B1) : Color(hex: 0x656565) }
     /// --surface-primary: #fff / #141416
-    static func surface(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0x131313) : .white }
+    static func surface(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x131313) : .white }
     /// --surface-secondary: #f2f2f4 / #1d1d20
-    static func supporting(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0x242424) : Color(hex: 0xF2F2F4) }
+    static func supporting(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xF3DFE7) : scheme == .dark ? Color(hex: 0x242424) : Color(hex: 0xF2F2F4) }
     /// --border-subtle: #e5e5e8 / #2e2e32
-    static func border(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0x303030) : Color(hex: 0xE5E5E5) }
+    static func border(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xE0C4CF) : scheme == .dark ? Color(hex: 0x303030) : Color(hex: 0xE5E5E5) }
     /// Streak accent (flame and count): #745634 / #e3be87
     static func streak(_ scheme: ColorScheme) -> Color { scheme == .dark ? Color(hex: 0xE3BE87) : Color(hex: 0x745634) }
     /// A read day in the streak week: #344a40

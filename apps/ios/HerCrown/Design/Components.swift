@@ -10,7 +10,7 @@ struct CapsuleButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         let primary = kind == .primary
         let fill: Color = primary ? Theme.text(scheme) : Theme.surface(scheme)
-        let fg: Color = primary ? (scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme)
+        let fg: Color = primary ? (Theme.pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme)
         configuration.label
             .font(.system(size: primary ? 14 : 13))
             .foregroundStyle(fg)

@@ -27,6 +27,18 @@ describe("reader preferences", () => {
     expect((await json("/me/preferences", "PATCH", { widgetRef: null })).widgetRef).toBeNull();
   });
 
+  it("persists Pink without changing reader preferences or onboarding", async () => {
+    await call("/me/preferences", "PATCH", { fontSize: "larger", translation: "bsb", widgetRef: "PSA.23.1" });
+    const before = (await json("/me")).preferences;
+    expect((await call("/me/preferences", "PATCH", { appearance: "pink" })).status).toBe(200);
+    const after = (await json("/me")).preferences;
+    expect(after).toEqual({ ...before, appearance: "pink" });
+    for (const appearance of ["dark", "light", "system", "pink"]) {
+      expect((await json("/me/preferences", "PATCH", { appearance })).appearance).toBe(appearance);
+    }
+    expect((await call("/me/preferences", "PATCH", { appearance: "purple" })).status).toBe(400);
+  });
+
   it("remembers where she left off, ignoring an older save from another device", async () => {
     const now = Date.now();
     expect((await json("/me/position", "PUT", { ref: "JHN.3.16", at: now })).position.ref).toBe("JHN.3.16");

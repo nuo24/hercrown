@@ -7,6 +7,8 @@ struct HomeView: View {
     @Environment(AppModel.self) private var app
     @Environment(\.colorScheme) private var scheme
     @State private var model = HomeModel()
+    @State private var medals = FaithMedalsModel()
+    @State private var showingMedals = false
     @State private var showingStreak = false
     @State private var showingSaved = false
     @State private var showingSearch = false
@@ -39,6 +41,9 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             AppGradient()
+            if showingMedals {
+                FaithMedalsView(model: medals) { showingMedals = false }
+            } else {
             ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -66,9 +71,10 @@ struct HomeView: View {
             }
             #endif
             }
+            }
         }
         // Reload once she's signed in (a brand-new guest signs in while Home is already on screen).
-        .task(id: "\(app.me?.user.id ?? "")|\(translation)|\(app.preferences.topics.joined(separator: ","))") { await model.load(translation: translation) }
+        .task(id: "\(app.me?.user.id ?? "")|\(translation)|\(app.preferences.topics.joined(separator: ","))") { await model.load(translation: translation); await medals.load(app: app) }
         .onChange(of: app.me?.user.id) { _, _ in
             notes = nil
             notesUnavailable = false
@@ -120,6 +126,7 @@ struct HomeView: View {
             guard model.loaded else { return }
             switch UserDefaults.standard.string(forKey: "hcOpenHome") {
             case "insights": if let verse = model.verse { studyRef = VerseRef(verse.ref) }
+            case "medals": showingMedals = true
             case "streak": showingStreak = true
             case "devotional": openDevotional = model.devotional
             case "plan": openPlan = model.todaysPlan
@@ -206,6 +213,7 @@ struct HomeView: View {
                Date().timeIntervalSince1970 * 1000 < trial.endsAt { trialNotice(trial) }
             if let verse = model.verse { verseOfTheDay(verse) }
             else if !model.loaded { ProgressView().frame(maxWidth: .infinity).padding(30) }
+            medalsEntry
             if let devotional = model.devotional {
                 editorialRow(devotional.title, kicker: "Today’s devotional", detail: devotional.label, art: "devotional-teacup") {
                     openDevotional = devotional
@@ -223,6 +231,25 @@ struct HomeView: View {
             season.id("season").padding(.top, 24)
             Button("Saved passages") { showingSaved = true }.font(.ui(13, weight: .medium)).frame(minHeight: 44)
         }
+    }
+
+    private var medalsEntry: some View {
+        Button { showingMedals = true } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    MedalImage(medal: FaithMedal.items(.fruit)[0]).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
+                    MedalImage(medal: FaithMedal.items(.fruit)[2]).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
+                }.frame(width: 74, height: 74)
+                VStack(alignment: .leading, spacing: 7) {
+                    Text("Your Faith Medals").font(.ui(11, weight: .medium))
+                    Text(medals.homeMedal.name).font(.serif(23)).tracking(-0.3)
+                    Text(medals.progress.map { "\(medals.homeMedal.counts($0).days) of \(medals.homeMedal.days) reading days · View medal" } ?? "View your collection")
+                        .font(.ui(10, weight: .medium)).foregroundStyle(Theme.muted(scheme))
+                }
+                Spacer(minLength: 0)
+                Image.glyph("arrow").frame(width: 14, height: 14)
+            }.frame(maxWidth: .infinity, minHeight: 96, alignment: .leading).contentShape(Rectangle())
+        }.buttonStyle(.plain).padding(.top, 12).padding(.bottom, 6)
     }
 
     private var bookmarks: some View {
@@ -408,6 +435,8 @@ struct HomeView: View {
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.vertical, 10)
+            .padding(.horizontal, Theme.pink(scheme) ? 14 : 0)
+            .background(Theme.pink(scheme) ? Theme.feature(scheme) : .clear, in: RoundedRectangle(cornerRadius: 16))
             Divider()
         }
     }

@@ -79,6 +79,7 @@ final class Billing: NSObject {
         guard configured, app?.me != nil, app?.membership.premium != true, !isPaywallBusy else { return }
         Superwall.shared.setInterfaceStyle(to: .light)
         Superwall.shared.preloadPaywalls(forPlacements: ["onboarding_complete"])
+        if let app { MysteryGiftCoordinator.shared.prepare(app: app) }
     }
 
     /// Prepare the standard campaign during reading, before she reaches a chapter boundary.
@@ -101,7 +102,7 @@ final class Billing: NSObject {
         }
         let style: InterfaceStyle?
         switch placement == "onboarding_complete" ? "light" : app?.preferences.appearance {
-        case "light": style = .light
+        case "light", "pink": style = .light
         case "dark": style = .dark
         default: style = nil
         }
@@ -141,7 +142,12 @@ final class Billing: NSObject {
                 switch result {
                 case .purchased, .restored: await self.syncPurchase()
                 case .declined:
-                    if let userID { await self.scheduleReturnOffer(for: userID) }
+                    if let userID {
+                        await self.scheduleReturnOffer(for: userID)
+                        if placement == "onboarding_complete", let app = self.app {
+                            await MysteryGiftCoordinator.shared.afterDecline(app: app, userID: userID)
+                        }
+                    }
                 }
                 onComplete?()
             }
@@ -222,6 +228,8 @@ final class Billing: NSObject {
 
     func logOut() {
         preparedGuestUserID = nil
+        MysteryGiftCoordinator.shared.reset()
+        app?.mysteryGift = nil
         // Retain the staging outcome across relaunches/account switches so a
         // tester can report the last attempt after leaving fresh onboarding.
         if configured { Superwall.shared.reset() }

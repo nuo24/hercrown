@@ -4,6 +4,7 @@ import StoreKit
 /// Four tabs in the design's order (The Bible, Community, Discover, Home) above the bottom navigation. The Bible is the default.
 struct RootView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.colorScheme) private var scheme
     @State private var tab: AppTab = Self.startTab
     @State private var showingSettings = false
     @State private var review = ReviewPrompter.shared
@@ -29,6 +30,7 @@ struct RootView: View {
             if complete { tab = .bible }
         }
         .environment(\.font, .ui(14))
+        .foregroundStyle(Theme.text(scheme))
         // Settings can switch accounts and replace the content underneath it.
         .fullScreenCover(isPresented: $showingSettings) { SettingsView().environment(app) }
         .sheet(isPresented: $feedbackInvitation, onDismiss: {

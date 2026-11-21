@@ -234,11 +234,11 @@ struct SettingsView: View {
         #if DEBUG
         if let appearance = UserDefaults.standard.string(forKey: "hcPreviewAppearance") {
             if appearance == "dark" { return .dark }
-            if appearance == "light" { return .light }
+            if appearance == "light" || appearance == "pink" { return .light }
         }
         #endif
         return switch app.preferences.appearance {
-        case "light": .light
+        case "light", "pink": .light
         case "dark": .dark
         default: inheritedScheme
         }
@@ -247,6 +247,7 @@ struct SettingsView: View {
     private var appearanceTitle: String {
         switch app.preferences.appearance {
         case "light": "Light"
+        case "pink": "Pink"
         case "dark": "Dark"
         default: "System"
         }
@@ -260,6 +261,7 @@ struct SettingsView: View {
             Text("System").tag("system")
             Text("Light").tag("light")
             Text("Dark").tag("dark")
+            Text("Pink").tag("pink")
         }
     }
 
