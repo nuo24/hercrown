@@ -828,3 +828,14 @@ Owner reported the guest paywall appeared but took about three seconds. Added el
 Live isolated guest test on “Her Crown Guest Policy Tests”: preload started before chapter completion; Psalm 117:1 → 117:2 → 118:1 displayed the actual Superwall main paywall. Measured request-to-presentation latency **827 ms**, including StoreKit preflight. Screenshot saved at `outputs/hercrown-2026-11-19/build34/Guest-Paywall-Preloaded.png`. Closed using the dismiss control and visually confirmed free reading at Psalm 118:1. No purchase attempted. This resolves the previously pending visible-presentation/dismissal check; it is one local measurement, not a network-wide performance guarantee.
 
 `npm run check && npm test` passed (209 API tests); final Xcode native tests passed (41). Clean local source commit `fd11102` in `/private/tmp/hercrown-build34-stage`. API unchanged, staging Worker remains `da2a4107-dd5c-40b8-8b7a-fbb74d3cb9a9`. Verified app installed back onto the original test Simulator while preserving its account and cooldown. No archive, TestFlight upload, production deployment or production data writes.
+
+
+### November 21 — four native design handoffs
+
+- Added Faith Medals Home entry, five collections, snapping sprite-art carousel with light selection haptics, grid, real account-scoped progress and qualified PNG sharing. Replaced prototype examples with 14–365-day reading/chapter goals and honest difficulty tiers.
+- Verified and imported all 66 canonical Bible-book illustrations; integrated 40-point aspect-fit artwork in the chapter picker.
+- Added persisted Pink appearance with owner’s `#31222B` accent and supplied semantic palette. Font scaling and welcome layout explicitly left unchanged. Migration 0019 preserves existing preferences/onboarding and account-deletion cascade.
+- Added two-step Mystery Gift fallback, gated by real StoreKit offer/eligibility/renewal terms, with preview purchase disabled and free exits. Existing disabled $19.99 campaigns untouched. Genuine discounted-product checkout is a release follow-up.
+- Staging migration 0019 and Worker `6b11f02b-a93a-47b5-a2ee-518b80295f67` from clean API source `724e86f`; disposable guest verified all appearance readbacks, unchanged onboarding, real progress and event acceptance, then deleted. No production access.
+- Checks: API type/content check and 210 tests passed; final full Xcode run 48 tests passed (zero failures/skips), iPhone 17 Pro/iOS 26.2. Running UI inspected for medals, book picker, Pink Home/Discover/reader, and gift previews/reveal/free exit. Physical haptic strength and actual discounted checkout remain manual follow-ups.
+- Build remains 34, no archive/upload/release. Details: `docs/four-handoffs-update.md`.

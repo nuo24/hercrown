@@ -14,8 +14,16 @@ Verified all 66 SHA-256 hashes and all English book names against the canonical 
 
 ## 3. Pink appearance
 
-Implemented semantic canvas/surface/feature/text/border roles and persisted Pink selection, with the owner’s plum accent. Home and Discover inspected in Simulator. API checks and all 210 tests passed, including preference persistence without resetting onboarding. Separately applied migration 0019 to a populated in-memory copy of the old preferences schema: every column retained and user-deletion cascade preserved. Remote migration/deployment pending. Native palette regression test running.
+Implemented semantic canvas/surface/feature/text/border roles and persisted Pink selection, with the owner’s plum accent. Home and Discover inspected in Simulator. API checks and all 210 tests passed, including preference persistence without resetting onboarding. Separately applied migration 0019 to a populated in-memory copy of the old preferences schema: every column retained and user-deletion cascade preserved. Migration 0019 applied to staging; staging Worker `6b11f02b-a93a-47b5-a2ee-518b80295f67`, clean API source `724e86f`. Disposable staging guest verified Pink/Light/Dark/System readback, unchanged onboarding, 66-book progress and new event acceptance, then was deleted. Native palette regression test passed. Pink also uses the palette for existing onboarding surfaces; no typography/layout change. Production migration/deployment pending.
 
 ## 4. Mystery Gift fallback
 
-Pending implementation and verification. Actual discounted product availability and first-year/renewal terms must resolve before a purchase is offered. No remote offer is enabled by this handoff.
+Implemented invitation/reveal using the four original cloud/book/envelope/flower assets, native free-reading exits, legal links, restore, and Apple purchase/server-verification integration. Normal flow only follows an actual declined standard onboarding campaign and a qualified StoreKit annual introductory offer. Eligible storefront price must be approximately 25% below the ordinary annual price (cent rounding allowed), renew at the ordinary annual price, use an upfront one-year introductory period in the same subscription group, and have no active entitlement. Eligibility/prices revalidated before purchase; reveal never purchases. Once-per-account/device invitation and account-change guards prevent repeated/misassigned offers. Existing disabled $19.99 return offers remain disabled.
+
+Pink invitation, reveal and free-reading exit tested through the running Simulator. Light/Dark reveal screenshots inspected. Preview is explicitly labeled and cannot buy or restore. No real purchase performed; actual App Store offer configuration/availability and checkout still require verification before release.
+
+## Final checks and boundaries
+
+`npm run check && npm test`: 210 API tests across 15 files passed. Full Xcode test run after final refinements: 48 passed, zero failures/skips. App build remains 34. No archive, TestFlight upload, production database writes/deploy or App Store release. Source staged separately on `codex/four-handoffs`; root’s pre-existing work remains intact. Screenshots: `outputs/hercrown-2026-11-21/handoffs/`.
+
+Manual follow-up before release: physical iPhone haptic strength, genuine StoreKit discount configuration/checkout, and full device appearance walkthrough. Font-size/welcome-layout work remains deliberately deferred.

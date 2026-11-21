@@ -44,8 +44,8 @@ struct OnboardingView: View {
     static let routines = ["2 minutes", "5 minutes", "10 minutes", "No time goal"]
     static let seasons = ["Single", "Dating", "Married", "Motherhood", "Separated or divorced", "Prefer not to say"]
     static let stepNames = ["welcome", "time", "demo", "name", "comparison", "season", "familiarity", "topics", "burden", "loved_ones", "rhythm", "prayer", "reminder", "ready"]
-    private let ink = Color(hex: 0x111111)
-    private let muted = Color(hex: 0x68686E)
+    private var ink: Color { Theme.text(.light) }
+    private var muted: Color { Theme.pink(.light) ? Theme.muted(.light) : Color(hex: 0x68686E) }
 
     init() {
         if let draft = OnboardingDraft.load() {
@@ -155,7 +155,7 @@ struct OnboardingView: View {
             }
         }
         .foregroundStyle(ink).buttonStyle(.plain)
-        .background(Color.white.ignoresSafeArea())
+        .background(Theme.canvas(.light).ignoresSafeArea())
         .task(id: "activity-\(step)-\(scenePhase)") {
             if scenePhase == .active { await OnboardingActivity.shared.update(step: step) }
         }
@@ -244,7 +244,7 @@ struct OnboardingView: View {
                     Button { if answers.heart.contains(value) { answers.heart.removeAll { $0 == value } } else if answers.heart.count < 3 { answers.heart.append(value) } } label: {
                         Text(value).font(.ui(13)).padding(.horizontal, 18).frame(minHeight: 44)
                             .foregroundStyle(answers.heart.contains(value) ? .white : ink)
-                            .background(answers.heart.contains(value) ? ink : Color.white, in: Capsule())
+                            .background(answers.heart.contains(value) ? ink : Theme.surface(.light), in: Capsule())
                             .overlay(Capsule().strokeBorder(Color(hex: 0xE4E4E7)))
                     }.disabled(answers.heart.count >= 3 && !answers.heart.contains(value))
                         .opacity(answers.heart.count >= 3 && !answers.heart.contains(value) ? 0.35 : 1)
@@ -370,7 +370,7 @@ struct OnboardingView: View {
                     }
                 }.multilineTextAlignment(.leading).frame(maxWidth: .infinity, alignment: .leading)
             }.padding(.horizontal, 16).frame(minHeight: 60)
-                .background(Color.white, in: RoundedRectangle(cornerRadius: 16))
+                .background(Theme.surface(.light), in: RoundedRectangle(cornerRadius: 16))
                 .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(selected ? ink : Color(hex: 0xE4E4E7), lineWidth: selected ? 1.5 : 1))
         }.accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -661,10 +661,10 @@ private extension View {
         let shape = RoundedRectangle(cornerRadius: radius ?? 999, style: .continuous)
         return self
             .background {
-                shape.fill(selected ? Color(hex: 0xEFF4F6) : .white)
+                shape.fill(Theme.pink(.light) ? (selected ? Theme.feature(.light) : Theme.surface(.light)) : (selected ? Color(hex: 0xEFF4F6) : .white))
                     .shadow(color: .black.opacity(0.08), radius: 3, y: 2)
             }
-            .overlay(shape.strokeBorder(selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7), lineWidth: 1))
+            .overlay(shape.strokeBorder(Theme.pink(.light) ? (selected ? Theme.text(.light) : Theme.border(.light)) : (selected ? Color(hex: 0x8D9BA0) : Color(hex: 0xE4E4E7)), lineWidth: 1))
     }
 }
 

@@ -105,7 +105,7 @@ struct FaithMedalsView: View {
             .contentMargins(.horizontal, (geometry.size.width - width) / 2, for: .scrollContent)
             .scrollTargetBehavior(.viewAligned).scrollPosition(id: $selection, anchor: .center)
             .scrollIndicators(.hidden)
-            .sensoryFeedback(.impact(weight: .light, intensity: 0.25), trigger: selection)
+            .sensoryFeedback(.impact(weight: .light, intensity: 0.25), trigger: selection) { old, new in old != nil && new != nil }
             .onChange(of: selection) { old, new in
                 if old != nil, let new { Task { await Analytics.shared.track("faith_medal_selected", ["medal": .string(new)]) } }
             }
