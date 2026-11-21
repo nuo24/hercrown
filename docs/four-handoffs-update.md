@@ -26,4 +26,6 @@ Pink invitation, reveal and free-reading exit tested through the running Simulat
 
 `npm run check && npm test`: 210 API tests across 15 files passed. Full Xcode test run after final refinements: 48 passed, zero failures/skips. App build remains 34. No archive, TestFlight upload, production database writes/deploy or App Store release. Source staged separately on `codex/four-handoffs`; root’s pre-existing work remains intact. Screenshots: `outputs/hercrown-2026-11-21/handoffs/`.
 
+Additional final screenshots inspected: medals in Dark/Pink and book picker in Dark, with transparent silhouettes intact. The final Settings screen was captured directly from Simulator; desktop window control became unavailable after the test-device restart, so the Settings menu switch/relaunch walkthrough remains manual. Backend preference readback already passed for all four choices.
+
 Manual follow-up before release: physical iPhone haptic strength, genuine StoreKit discount configuration/checkout, and full device appearance walkthrough. Font-size/welcome-layout work remains deliberately deferred.
