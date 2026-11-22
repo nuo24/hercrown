@@ -848,3 +848,12 @@ The isolated Simulator had been left running with the screenshot launch argument
 Verification: full native suite 49/49 passed including preview-precedence regression; API check and 210/210 tests passed. Final Debug build succeeded. Reopened the isolated Simulator without an appearance override, preserving its account/onboarding. No production changes or release.
 
 Visible follow-up: selected Pink from the actual Settings appearance menu; the screen immediately changed to Pink. Terminated and relaunched with no appearance override; Home remained Pink after account refresh. Left that Pink Home screen open in Device Hub.
+
+
+### November 21 evening — preserve whole words in Discover headings
+
+The featured title “A peace beyond understanding” split its final word in the narrow artwork/text layout. Added a shared measured heading component for featured and list titles: retain the scaled design font when words fit; otherwise reduce the heading font until its longest whitespace-delimited word fits the actual column. Use native word wrapping with hyphenation off and unconstrained vertical height. Keep the full title, existing artwork, metadata alignment and ordinary reading font unchanged. Tests cover narrow widths, normal/enlarged heading sizes and actual TextKit line boundaries. The broader welcome-screen font-size work remains paused at the owner’s request.
+
+Confirmed onboarding reminder implementation: Live Activity starts while onboarding is foregrounded (including welcome), updates setup progress and deep-links to the saved draft; completes/ends with onboarding. It is not a separate re-engagement push and a dismissed/expired activity is not automatically recreated. iOS Live Activities must be enabled; physical-device background/force-quit behavior still needs validation.
+
+Verification: all 52 native tests and all 210 API tests passed; API type/content check passed. Running Pink Discover inspected in Device Hub: “A peace / beyond / understanding” displays without a split word; list headings remain complete. Left corrected Discover open. No production deployment/release.

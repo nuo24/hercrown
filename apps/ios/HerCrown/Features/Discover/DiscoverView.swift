@@ -51,6 +51,8 @@ struct DiscoverView: View {
     @State private var searching = false
     @FocusState private var searchFocused: Bool
     @ScaledMetric(relativeTo: .title3) private var entryTitleWidth = 138.0
+    @ScaledMetric(relativeTo: .title) private var featureTitleSize = 34.0
+    @ScaledMetric(relativeTo: .title3) private var entryTitleSize = 22.0
     @ScaledMetric(relativeTo: .caption) private var referenceLineHeight = 16.0
 
     private enum DetailAction {
@@ -277,7 +279,8 @@ struct DiscoverView: View {
     private func feature(_ card: DiscoverFeed.Card) -> some View {
         HStack(spacing: 8) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(title(for: card)).font(.serif(34, relativeTo: .title)).tracking(-0.6)
+                WholeWordHeading(text: title(for: card), pointSize: featureTitleSize, tracking: -0.6, ink: Theme.text(scheme))
+                    .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 8) {
                     Text(card.label).font(.ui(12)).foregroundStyle(Theme.muted(scheme))
                         .lineLimit(1).minimumScaleFactor(0.7)
@@ -312,7 +315,7 @@ struct DiscoverView: View {
                 .accessibilityLabel("Read \(card.label)")
                 VStack(alignment: .leading, spacing: 0) {
                     Button { detail = card } label: {
-                        Text(title(for: card)).font(.serif(22, relativeTo: .title3)).tracking(-0.3)
+                        WholeWordHeading(text: title(for: card), pointSize: entryTitleSize, tracking: -0.3, ink: Theme.text(scheme))
                             .fixedSize(horizontal: false, vertical: true)
                             .frame(maxWidth: entryTitleWidth, alignment: .leading)
                             .contentShape(Rectangle())
