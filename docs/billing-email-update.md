@@ -50,3 +50,8 @@ Before sending, configure the sending domain/provider and Apple private-email-re
 - Guest and Apple account deletion after an older session; cancellation/mismatched Apple account must not delete anything.
 - Confirm the repaired production trial in both Superwall and Tinybird after owner recovery.
 - App Store version/build upload and review are still required for the native changes.
+
+
+### November 22 — production analytics readback confirmed
+
+Read-only recovery audit since November 19 at midnight Eastern: examined 1 verified initial purchase, missing 0, repaired 0, skipped 1 already present. Deployed Tinybird `revenue` endpoint, explicitly production and excluding sandbox, returns one annual trial on November 19, zero new paid subscriptions, conversions, renewals or refunds, and $0 price/proceeds. Raw aggregate also retains the known legacy staging copy; do not combine staging and production totals. No events replayed or production data modified.

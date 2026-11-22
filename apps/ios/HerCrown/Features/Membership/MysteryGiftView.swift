@@ -31,11 +31,10 @@ struct MysteryGiftView: View {
                         .frame(width: 44, height: 44)
                 }.accessibilityLabel("Continue with free reading").disabled(busy)
             }.padding(.horizontal, 22).padding(.top, 8)
-            if isPreview { Text("Local design preview · purchases disabled").font(.ui(10)).foregroundStyle(Theme.muted(scheme)).padding(.top, 8) }
             GeometryReader { geometry in
                 ScrollView {
                     VStack(spacing: 0) {
-                        hero.padding(.top, revealed ? 12 : 42)
+                        hero.padding(.top, revealed ? 0 : 42)
                         if revealed { reveal } else { invitation }
                         Spacer(minLength: 24)
                         footer
@@ -54,12 +53,23 @@ struct MysteryGiftView: View {
         } message: { Text(message ?? "") }
     }
     private var hero: some View {
-        ZStack {
-            Image("gift-cloud-bank").resizable().scaledToFit().frame(maxWidth: .infinity).opacity(0.75)
-            Image("gift-cosmos").resizable().scaledToFit().frame(width: 70, height: 80).rotationEffect(.degrees(-16)).offset(x: -80, y: 26)
-            Image(revealed ? "gift-open-book" : "gift-prayer-envelope").resizable().scaledToFit()
-                .frame(width: revealed ? 158 : 200, height: revealed ? 150 : 205).rotationEffect(.degrees(-7))
-        }.frame(height: revealed ? 150 : 220).accessibilityHidden(true)
+        GeometryReader { geometry in
+            ZStack(alignment: .topLeading) {
+                Image("gift-cloud-bank").resizable().scaledToFit()
+                    .frame(width: geometry.size.width * 1.2, height: revealed ? 140 : 210)
+                    .opacity(0.75).offset(x: -geometry.size.width * 0.1)
+                Image("gift-cosmos").resizable().scaledToFit()
+                    .frame(width: 70, height: revealed ? 78 : 80)
+                    .rotationEffect(.degrees(-16))
+                    .offset(x: geometry.size.width * 0.15, y: revealed ? 45 : 100)
+                Image(revealed ? "gift-open-book" : "gift-prayer-envelope").resizable().scaledToFit()
+                    .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
+                    .rotationEffect(.degrees(-7))
+                    .offset(x: (geometry.size.width - (revealed ? 158 : 200)) / 2)
+            }
+        }
+        .frame(height: revealed ? 150 : 220)
+        .accessibilityHidden(true)
     }
     private var invitation: some View {
         VStack(spacing: 12) {
@@ -105,10 +115,15 @@ struct MysteryGiftView: View {
                 }.buttonStyle(CapsuleButtonStyle())
             } else if terms != nil {
                 Button { perform(onPurchase) } label: {
-                    if busy { ProgressView() } else { Text(isPreview ? "Purchase disabled in preview" : "Continue with 25% off") }
+                    if busy { ProgressView() } else { Text("Continue with 25% off") }
                 }.buttonStyle(CapsuleButtonStyle()).disabled(busy || isPreview)
+                .accessibilityHint(isPreview ? "Design preview. Purchases are disabled." : "")
             }
             Button("Continue with free reading", action: onClose).font(.ui(12)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 44).disabled(busy)
+            if isPreview {
+                Text("Design preview · purchases disabled").font(.ui(9))
+                    .foregroundStyle(Theme.muted(scheme)).padding(.vertical, 4)
+            }
             if revealed {
                 HStack(spacing: 18) {
                     Button("Restore purchases") { perform(onRestore) }.disabled(busy || isPreview)

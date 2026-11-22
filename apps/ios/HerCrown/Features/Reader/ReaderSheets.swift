@@ -74,28 +74,38 @@ struct ChapterPicker: View {
 
     private var bookList: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                ForEach(books) { book in
-                    Button {
-                        selectedBook = book
-                    } label: {
-                        HStack(spacing: 12) {
-                            BibleBookImage(bookID: book.id).frame(width: 40, height: 40)
-                            Text(book.name).font(.ui(14, weight: .medium))
-                            Text("\(book.chapterCount) chapters").font(.ui(11))
-                                .foregroundStyle(Theme.muted(scheme))
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 9))
-                                .foregroundStyle(Theme.muted(scheme))
-                                .accessibilityHidden(true)
+            LazyVStack(alignment: .leading, spacing: 24) {
+                ForEach(["OT", "NT"], id: \.self) { testament in
+                    let sectionBooks = books.filter { $0.testament == testament }
+                    if !sectionBooks.isEmpty {
+                        Text(testament == "OT" ? "Old Testament" : "New Testament")
+                            .font(.serif(20))
+                            .accessibilityAddTraits(.isHeader)
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 15)], spacing: 24) {
+                            ForEach(sectionBooks) { book in
+                                Button {
+                                    selectedBook = book
+                                } label: {
+                                    VStack(spacing: 12) {
+                                        BibleBookImage(bookID: book.id)
+                                            .frame(maxWidth: .infinity)
+                                            .frame(height: 150)
+                                        Text(book.name)
+                                            .font(.serif(16))
+                                            .multilineTextAlignment(.center)
+                                            .lineLimit(2)
+                                            .frame(maxWidth: .infinity, minHeight: 40, alignment: .top)
+                                    }
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel(book.name)
+                                .accessibilityValue("\(book.chapterCount) chapters")
+                                .accessibilityHint("Choose a chapter")
+                            }
                         }
-                        .padding(.horizontal, 16)
-                        .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityElement(children: .combine)
-                    Divider()
                 }
                 if books.isEmpty {
                     Text("No books found.").font(.ui(14))
@@ -103,6 +113,7 @@ struct ChapterPicker: View {
                         .padding(.vertical, 16)
                 }
             }
+            .padding(.vertical, 12)
         }
         .scrollDismissesKeyboard(.interactively)
     }
