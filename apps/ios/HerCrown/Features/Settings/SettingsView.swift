@@ -15,6 +15,9 @@ struct SettingsView: View {
     @State private var showsTestSession = false
     @State private var changingTestSession = false
     @State private var testSessionError = false
+    #if DEBUG || HC_STAGING_TESTFLIGHT
+    @State private var showingGiftPreview = false
+    #endif
     #if HC_STAGING_TESTFLIGHT
     @State private var checkingYearlyTrial = false
     @State private var yearlyTrialReport = ""
@@ -45,6 +48,15 @@ struct SettingsView: View {
                                     }
                                     .buttonStyle(.plain)
                                     .disabled(changingTestSession)
+                                    #if DEBUG || HC_STAGING_TESTFLIGHT
+                                    divider
+                                    Button {
+                                        showingGiftPreview = true
+                                        Task { await Analytics.shared.track("mystery_gift_preview_viewed") }
+                                    } label: {
+                                        row("gift", "Preview decline offer", "Design preview only · purchases disabled")
+                                    }.buttonStyle(.plain)
+                                    #endif
                                     #if HC_STAGING_TESTFLIGHT
                                     divider
                                     Button {
@@ -167,6 +179,13 @@ struct SettingsView: View {
                 .clipped()
             }
             .toolbar(.hidden, for: .navigationBar)
+            #if DEBUG || HC_STAGING_TESTFLIGHT
+            .sheet(isPresented: $showingGiftPreview) {
+                MysteryGiftView(terms: .init(original: "$39.99", firstYear: "$29.99", renewal: "$39.99", saving: "$10.00"),
+                    isPreview: true, onPurchase: { nil }, onRestore: { nil }, onClose: { showingGiftPreview = false })
+                    .preferredColorScheme(scheme)
+            }
+            #endif
             #if DEBUG
             .navigationDestination(isPresented: $previewPage) {
                 switch UserDefaults.standard.string(forKey: "hcPreviewSettings") {

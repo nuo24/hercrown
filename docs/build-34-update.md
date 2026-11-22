@@ -1,6 +1,6 @@
-# Build 34 — local update under review
+# Build 34 — TestFlight staging candidate
 
-This is an unreleased update. Keep build 33 live until the UI and device checks are approved together. No production deployment or TestFlight upload has been performed for these changes.
+This is an unreleased update. Keep build 33 live until the UI and device checks are approved together. On November 22 the owner authorized a TestFlight upload for checking. Build 34 will use Release plus `HC_STAGING_TESTFLIGHT`, connecting to staging and exposing tester-only controls. Public App Store release and production deployment remain outside this task. Upload/processing evidence is recorded below when completed.
 
 ## Changes
 
@@ -51,3 +51,10 @@ The live trace confirmed an eligible guest crossing from Psalm 117 to 118 reques
 Owner confirmed that the chapter paywall appeared, but took about three seconds. Added eligible-guest background preloading during reading and removed the fixed 600 ms delay. Temporary detailed reading traces removed; retain debug-only preload/outcome/latency counters. A fresh guest on the isolated “Her Crown Guest Policy Tests” iPhone Simulator preloaded the campaign, completed Psalm 117 and displayed the real Superwall main paywall. Instrumented request-to-onPresent time, including the existing StoreKit check: **827 ms**. Closed the paywall without purchasing and visually verified free reading at Psalm 118:1. This confirms presentation and dismissal, resolving the earlier pending live check. This is one local measurement, not a guarantee across networks/devices.
 
 Proof image: `outputs/hercrown-2026-11-19/build34/Guest-Paywall-Preloaded.png`. API checks/tests passed (209); final native suite passed (41). Clean local source commit `fd11102` in `/private/tmp/hercrown-build34-stage`. Production and TestFlight unchanged.
+
+
+### November 22 — TestFlight preparation
+
+Includes all four handoffs and subsequent fixes: Faith Medals, original 66-book artwork, persisted Pink appearance, preview-precedence fix, whole-word Discover titles, Mystery Gift invitation/reveal and free exits. Added Settings → Sandbox testing → Preview decline offer so TestFlight testers can inspect the gift without a configured discount. The design preview is explicitly labeled and cannot purchase/restore. Genuine StoreKit-discount checkout remains a manual release check.
+
+Required API check/210 tests passed. Native tests with both DEBUG and HC_STAGING_TESTFLIGHT passed. Physical Live Activity behavior, haptic strength and actual discount availability/checkout still need device testing. Archive only from clean `codex/four-handoffs`; API key files stay outside the repo.

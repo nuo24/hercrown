@@ -107,6 +107,7 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   support_opened: {},
   guest_chapter_paywall_requested: {},
   bible_book_picker_viewed: {},
+  mystery_gift_preview_viewed: {},
   mystery_gift_viewed: {},
   mystery_gift_revealed: {},
   mystery_gift_dismissed: {},
