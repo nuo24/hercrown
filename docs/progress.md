@@ -857,3 +857,12 @@ The featured title “A peace beyond understanding” split its final word in th
 Confirmed onboarding reminder implementation: Live Activity starts while onboarding is foregrounded (including welcome), updates setup progress and deep-links to the saved draft; completes/ends with onboarding. It is not a separate re-engagement push and a dismissed/expired activity is not automatically recreated. iOS Live Activities must be enabled; physical-device background/force-quit behavior still needs validation.
 
 Verification: all 52 native tests and all 210 API tests passed; API type/content check passed. Running Pink Discover inspected in Device Hub: “A peace / beyond / understanding” displays without a split word; list headings remain complete. Left corrected Discover open. No production deployment/release.
+
+
+### November 22 — TestFlight 34 prepared, Apple sign-in pending
+
+Owner requested decline preview and a TestFlight build. Added test-only Settings → Sandbox testing → Preview decline offer with explicit design-preview label and purchases/restore disabled. Native tester entry/reveal visually verified. Added a separate staging Keychain service to protect live saved credentials when installing staging TestFlight over the public app. Full staging-configured native suite: 53 passed; API check/210 tests passed.
+
+Staging Worker `36e23e0f-a710-44ca-a230-1cba2f63cb41` from clean `373988f`. Final Release + HC_STAGING_TESTFLIGHT archive from clean `9a99717`, build 1.0 (34), `/private/tmp/hercrown-testflight34-20261122/HerCrown-Staging.xcarchive`; verified app/widget version, staging endpoint, isolated Keychain and Live Activities.
+
+Upload remains blocked: existing API key can access ASC but lacks cloud-distribution-signing permission; Xcode has no signed-in Apple account; alternate existing key authentication failed. Apple Accounts window opened; owner asked to sign in. No new TestFlight delivery, public release or production change yet. Genuine discount SKU remains READY_TO_SUBMIT (normal annual APPROVED), so actual discounted checkout is not signed off.
