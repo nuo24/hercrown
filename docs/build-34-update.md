@@ -66,3 +66,8 @@ Initial clean-source archive `373988f` succeeded, but export/upload stopped befo
 
 
 Final archive succeeded from clean source `9a99717` at `/private/tmp/hercrown-testflight34-20261122/HerCrown-Staging.xcarchive`. Verified app/widget build 34, staging API endpoint, separate staging Keychain service and Live Activity support in the signed app. Staging analytics deployment source `373988f`, Worker `36e23e0f-a710-44ca-a230-1cba2f63cb41`. Final upload script is prepared outside the repo; delivery awaits owner sign-in in Xcode Apple Accounts. Build 34 is NOT uploaded yet. Existing TestFlight latest remains 33 until delivery succeeds.
+
+
+### November 22 — corrected version uploaded
+
+Xcode account sign-in resolved signing. Apple rejected version 1.0 because its approved release train is closed. Marketing version corrected to **1.0.1 (34)**, archived from clean source `3580423` at `/private/tmp/hercrown-testflight34-20261122/HerCrown-1.0.1-Staging.xcarchive`. Verified matching app/widget versions, staging endpoint, isolated Keychain and Live Activity support. Export/upload succeeded at 4:49 PM Eastern. This supersedes the earlier upload-blocker notes. Apple processing and tester availability are being verified. API check and all 210 tests passed again. No public submission or production changes.

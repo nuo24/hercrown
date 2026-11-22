@@ -871,3 +871,8 @@ Upload remains blocked: existing API key can access ASC but lacks cloud-distribu
 ### November 22 — TestFlight version train correction
 
 Xcode Apple Account sign-in verified. Distribution signing succeeded, but Apple rejected the upload because approved version 1.0 is closed to new builds. Set app and widget marketing version to 1.0.1, retaining build 34 and staging configuration. Archive will be rebuilt from the clean committed source; no public release or production changes.
+
+
+### November 22 — TestFlight 34 upload accepted
+
+Xcode account sign-in and distribution signing succeeded. Apple rejected the initial 1.0 upload because that release train is closed. Rebuilt from clean source `3580423` as **1.0.1 (34)**, keeping staging endpoint, isolated staging Keychain, tester controls and Live Activities. Archive: `/private/tmp/hercrown-testflight34-20261122/HerCrown-1.0.1-Staging.xcarchive`. Apple upload succeeded November 22 at 4:49 PM Eastern; processing/tester distribution is being checked. API check and all 210 API tests passed again; the unchanged native feature code previously passed 53 tests. No production backend or public-release changes.
