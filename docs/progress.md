@@ -866,3 +866,8 @@ Owner requested decline preview and a TestFlight build. Added test-only Settings
 Staging Worker `36e23e0f-a710-44ca-a230-1cba2f63cb41` from clean `373988f`. Final Release + HC_STAGING_TESTFLIGHT archive from clean `9a99717`, build 1.0 (34), `/private/tmp/hercrown-testflight34-20261122/HerCrown-Staging.xcarchive`; verified app/widget version, staging endpoint, isolated Keychain and Live Activities.
 
 Upload remains blocked: existing API key can access ASC but lacks cloud-distribution-signing permission; Xcode has no signed-in Apple account; alternate existing key authentication failed. Apple Accounts window opened; owner asked to sign in. No new TestFlight delivery, public release or production change yet. Genuine discount SKU remains READY_TO_SUBMIT (normal annual APPROVED), so actual discounted checkout is not signed off.
+
+
+### November 22 — TestFlight version train correction
+
+Xcode Apple Account sign-in verified. Distribution signing succeeded, but Apple rejected the upload because approved version 1.0 is closed to new builds. Set app and widget marketing version to 1.0.1, retaining build 34 and staging configuration. Archive will be rebuilt from the clean committed source; no public release or production changes.
