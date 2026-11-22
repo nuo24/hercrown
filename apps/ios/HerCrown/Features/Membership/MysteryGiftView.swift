@@ -26,7 +26,7 @@ struct MysteryGiftView: View {
                 Text("Her Crown Plus").font(.ui(12, weight: .medium))
                 Spacer()
                 Button(action: onClose) {
-                    Image(systemName: "xmark").frame(width: 38, height: 38)
+                    Image(systemName: "xmark").font(.system(size: 12, weight: .semibold)).frame(width: 32, height: 32)
                         .background(Theme.surface(scheme), in: Circle()).overlay(Circle().stroke(Theme.border(scheme)))
                         .frame(width: 44, height: 44)
                 }.accessibilityLabel("Continue with free reading").disabled(busy)
@@ -39,7 +39,7 @@ struct MysteryGiftView: View {
                         Spacer(minLength: 24)
                         footer
                     }
-                    .padding(.horizontal, 22).padding(.bottom, 16)
+                    .padding(.horizontal, 22).padding(.bottom, revealed ? 16 : 4)
                     .frame(maxWidth: 430).frame(maxWidth: .infinity)
                     .frame(minHeight: geometry.size.height, alignment: .top)
                 }
@@ -73,9 +73,9 @@ struct MysteryGiftView: View {
     }
     private var invitation: some View {
         VStack(spacing: 12) {
-            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(38)).tracking(-0.7)
+            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(38, weight: .semibold)).tracking(-0.7)
             Text("Before you continue with free reading, we’d like to share a special offer with you.")
-                .font(.ui(14)).lineSpacing(4).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
+                .font(.ui(14, weight: .medium)).lineSpacing(4).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
         }.multilineTextAlignment(.center).padding(.top, 18)
     }
     private var reveal: some View {
@@ -120,16 +120,19 @@ struct MysteryGiftView: View {
                 .accessibilityHint(isPreview ? "Design preview. Purchases are disabled." : "")
             }
             Button("Continue with free reading", action: onClose).font(.ui(12)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 44).disabled(busy)
-            if isPreview {
-                Text("Design preview · purchases disabled").font(.ui(9))
-                    .foregroundStyle(Theme.muted(scheme)).padding(.vertical, 4)
-            }
             if revealed {
                 HStack(spacing: 18) {
                     Button("Restore purchases") { perform(onRestore) }.disabled(busy || isPreview)
                     Button("Terms") { legal = .terms }
                     Button("Privacy") { legal = .privacy }
                 }.font(.ui(10)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 44)
+            }
+        }
+        .overlay(alignment: .top) {
+            if isPreview {
+                Text("Design preview · purchases disabled").font(.ui(9))
+                    .foregroundStyle(Theme.muted(scheme)).offset(y: -20)
+                    .allowsHitTesting(false)
             }
         }
     }
