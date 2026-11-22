@@ -3,6 +3,11 @@ import XCTest
 
 final class AccountDeletionTests: XCTestCase {
     @MainActor
+    func testStagingKeychainCannotReplaceLiveLogin() {
+        XCTAssertEqual(Keychain.serviceName(isStaging: false), "com.hercrown.session")
+        XCTAssertNotEqual(Keychain.serviceName(isStaging: true), Keychain.serviceName(isStaging: false))
+    }
+
     func testOldGuestUsesGuestDeletionAndPreservesAccountOnFailure() async throws {
         try await checkDeletion(guest: true, path: "/api/auth/delete-anonymous-user", code: "temporary_failure")
     }

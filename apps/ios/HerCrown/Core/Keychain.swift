@@ -3,7 +3,12 @@ import Security
 
 /// The session token lives in the Keychain, never in UserDefaults.
 enum Keychain {
-    private static let service = "com.hercrown.session"
+    // TestFlight staging and the live app share a bundle ID but must never replace
+    // each other’s saved session token, onboarding draft or test-account backup.
+    private static let service = serviceName(isStaging: AppConfig.isStaging)
+    static func serviceName(isStaging: Bool) -> String {
+        isStaging ? "com.hercrown.session.staging" : "com.hercrown.session"
+    }
 
     static func read(_ account: String) -> String? {
         let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,

@@ -58,3 +58,8 @@ Proof image: `outputs/hercrown-2026-11-19/build34/Guest-Paywall-Preloaded.png`. 
 Includes all four handoffs and subsequent fixes: Faith Medals, original 66-book artwork, persisted Pink appearance, preview-precedence fix, whole-word Discover titles, Mystery Gift invitation/reveal and free exits. Added Settings → Sandbox testing → Preview decline offer so TestFlight testers can inspect the gift without a configured discount. The design preview is explicitly labeled and cannot purchase/restore. Genuine StoreKit-discount checkout remains a manual release check.
 
 Required API check/210 tests passed. Native tests with both DEBUG and HC_STAGING_TESTFLIGHT passed. Physical Live Activity behavior, haptic strength and actual discount availability/checkout still need device testing. Archive only from clean `codex/four-handoffs`; API key files stay outside the repo.
+
+
+TestFlight preflight caught a local session-storage collision: the staging and live bundle formerly used the same Keychain service. Staging now uses `com.hercrown.session.staging`, retaining `com.hercrown.session` unchanged for live installs. Staging never migrates/reads the live login. Added regression coverage; full staging-configured native suite passed (53 tests), API check/210 tests passed.
+
+Initial clean-source archive `373988f` succeeded, but export/upload stopped before delivery: API key lacked cloud-signing permission; account-based fallback found no Xcode Apple account. Alternate existing key could not authenticate. Owner was asked to sign in in Xcode → Apple Accounts. Final isolated-session archive and upload tracked below. No App Store release or production change.
