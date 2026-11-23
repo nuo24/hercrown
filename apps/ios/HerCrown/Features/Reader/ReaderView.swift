@@ -95,7 +95,7 @@ struct ReaderView: View {
             }
             visibleRef = ref.description
         }
-        .onChange(of: app.preferences.translation) { _, id in model.setTranslation(id) }
+        .onChange(of: app.readingTranslation) { _, _ in model.syncPreferredTranslation() }
         .task(id: model.chapter.map { "\($0.translation).\($0.book.id).\($0.number)" }) {
             await model.prepareNeighbours()
             if !Task.isCancelled, let chapter = model.chapter { chapterWindow?.extend(around: chapter) }
@@ -180,11 +180,11 @@ struct ReaderView: View {
             Menu {
                 Picker("Translation", selection: Binding(get: { model.translation }, set: { model.setTranslation($0) })) {
                     Section("English") {
-                        ForEach(BibleStore.translationIDs.filter { $0 != "rv1909" }, id: \.self) { id in
-                            Text((BibleStore.names[id] ?? id) + (BibleStore.online[id] != nil ? " · online" : "")).tag(id)
+                        ForEach((app.offline ? BibleStore.offlineIDs : BibleStore.translationIDs).filter { $0 != "rv1909" }, id: \.self) { id in
+                            Text(BibleStore.names[id] ?? id).tag(id)
                         }
                     }
-                    Section("Español") { Text("Reina-Valera 1909 · offline").tag("rv1909") }
+                    Section("Español") { Text("Reina-Valera 1909").tag("rv1909") }
                 }
             } label: {
                 HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV").font(.ui(16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }

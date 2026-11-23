@@ -134,6 +134,7 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   topics_updated: { count: "number" },
   tab_viewed: { tab: tabs },
   library_viewed: {},
+  translation_fallback: { translation: ["kjv"] },
   translation_changed: { translation: ["kjv", "bsb", "web", "asv", "ylt", "darby", "webster", "msb", "rv1909", "nkjv", "msg", "amp", "nlt"] },
   study_opened: { tool: ["explain", "deeper", "original", "related"] },
   verse_search_studied: {}, // Keep the event, strip the verse reference.

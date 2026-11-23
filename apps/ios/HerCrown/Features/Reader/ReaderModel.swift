@@ -24,7 +24,7 @@ final class ReaderModel {
 
     init(app: AppModel) {
         self.app = app
-        translation = BibleStore.names[app.preferences.translation] == nil ? "kjv" : app.preferences.translation
+        translation = app.readingTranslation
         #if DEBUG
         if let preview = UserDefaults.standard.string(forKey: "hcPreviewTranslation"), BibleStore.names[preview] != nil { translation = preview }
         #endif
@@ -53,7 +53,9 @@ final class ReaderModel {
                 guard !Task.isCancelled else { return }
                 loading = false
                 if let apiError = error as? APIError, apiError.status == 0 {
-                    failure = "You’re offline. Choose a bundled Bible to keep reading."
+                    // Show the real KJV under its own label; retain the preferred version for reconnection.
+                    app.offline = true
+                    syncPreferredTranslation()
                 } else {
                     failure = "We couldn’t load this translation right now. Try again, or choose a bundled Bible below."
                 }
@@ -74,10 +76,20 @@ final class ReaderModel {
         }
     }
 
-    func setTranslation(_ id: String) {
-        guard id != translation else { return }
+    func syncPreferredTranslation() {
+        let effective = app.readingTranslation
+        guard effective != translation else { return }
         let destination = currentRef ?? pending
-        translation = id
+        translation = effective
+        open(destination.book, destination.chapter, verse: destination.verse)
+        if app.offline, effective == "kjv", BibleStore.online[app.preferences.translation] != nil {
+            Task { await Analytics.shared.track("translation_fallback", ["translation": .string(effective)]) }
+        }
+    }
+    func setTranslation(_ id: String) {
+        guard id != translation || id != app.preferences.translation else { return }
+        let destination = currentRef ?? pending
+        translation = app.offline && BibleStore.online[id] != nil ? "kjv" : id
         open(destination.book, destination.chapter, verse: destination.verse)
         app.updatePreferences(["translation": id]) { $0.translation = id }
         Task { await Analytics.shared.track("translation_changed", ["translation": .string(id)]) }

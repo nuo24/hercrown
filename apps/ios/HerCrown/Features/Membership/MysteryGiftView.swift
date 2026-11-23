@@ -1,5 +1,6 @@
 import SwiftUI
 import StoreKit
+import UIKit
 
 struct MysteryGiftView: View {
     let terms: MysteryGiftTerms?
@@ -25,6 +26,7 @@ struct MysteryGiftView: View {
     @State private var paperSettled = 0.0
     @State private var invitationFade = 0.0
     @State private var offerInk = 0.0
+    @State private var offerSnapshot: UIImage?
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
@@ -55,14 +57,25 @@ struct MysteryGiftView: View {
             }
             .overlayPreferenceValue(GiftLetterBounds.self) { anchor in
                 GeometryReader { geometry in
+                    ZStack {
+                    Color.clear
                     if !revealed, paperInFlight, let anchor {
                         GiftUnfoldingSheet(source: geometry[anchor], target: geometry.size,
                             flight: paperFlight, unfolding: paperUnfold, settled: paperSettled, ink: offerInk) {
-                                page(isOffer: true)
+                                if let offerSnapshot {
+                                    Image(uiImage: offerSnapshot).resizable()
+                                } else {
+                                    page(isOffer: true)
+                                }
                             }
                             .transition(.identity)
                     }
-                }.allowsHitTesting(false)
+                    }
+                .onAppear { prepareOfferSnapshot(size: geometry.size) }
+                .onChange(of: geometry.size) { _, size in prepareOfferSnapshot(size: size) }
+                .onChange(of: scheme) { _, _ in prepareOfferSnapshot(size: geometry.size) }
+                }
+                .allowsHitTesting(false)
             }
 
         }
@@ -74,6 +87,16 @@ struct MysteryGiftView: View {
         .alert("Her Crown Plus", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
         } message: { Text(message ?? "") }
+    }
+    @MainActor private func prepareOfferSnapshot(size: CGSize) {
+        guard size.width > 0, size.height > 0, !opening else { return }
+        // Render once before the tap. Moving three image panels avoids relaying out three live ScrollViews each frame.
+        let renderer = ImageRenderer(content: page(isOffer: true)
+            .frame(width: size.width, height: size.height)
+            .foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
+            .environment(\.colorScheme, scheme))
+        renderer.scale = 3
+        offerSnapshot = renderer.uiImage
     }
     private func page(isOffer: Bool) -> some View {
         GeometryReader { geometry in
@@ -133,18 +156,41 @@ struct MysteryGiftView: View {
                 Text("Get Her Crown Plus for less with a one-time\ndiscount on your annual plan.")
                     .font(.ui(15)).lineSpacing(4).foregroundStyle(Theme.muted(scheme))
                 VStack(spacing: 12) {
-                    Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium))
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkle").font(.system(size: 10, weight: .medium))
+                            .foregroundStyle(Color(hex: scheme == .dark ? 0xD9BC8B : 0x927044))
+                        Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium)).tracking(0.3)
+                    }
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(terms.original).strikethrough().font(.ui(16)).foregroundStyle(Theme.muted(scheme))
-                        Text(terms.firstYear).font(.serif(39)).tracking(-1)
+                        Text(terms.original).strikethrough().font(.ui(16))
+                            .foregroundStyle(Color(hex: scheme == .dark ? 0xFF9CA5 : 0xA6424E))
+                            .lineLimit(1)
+                        Text(terms.firstYear).font(.serif(44, weight: .semibold)).tracking(-1.2)
+                            .foregroundStyle(LinearGradient(colors: scheme == .dark
+                                ? [Color(hex: 0xFFEEE0), Color(hex: 0xF1C3D5)]
+                                : [Color(hex: 0x31222B), Color(hex: 0x875169)],
+                                startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1)
                         Text("for the first year").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                     }
                     Divider()
-                    Text("You save \(terms.saving) on your first year.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    Text("You save \(terms.saving) on your first year.")
+                        .font(.ui(11, weight: .medium))
+                        .foregroundStyle(Color(hex: scheme == .dark ? 0xF1D9E4 : 0x674052))
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Color(hex: scheme == .dark ? 0xF1C3D5 : 0x875169).opacity(0.09), in: Capsule())
                     Text("Then \(terms.renewal)/year. Auto-renews until canceled. No free trial.")
                         .font(.ui(10)).foregroundStyle(Theme.muted(scheme))
-                }.padding(.horizontal, 18).padding(.vertical, 24).frame(maxWidth: .infinity, minHeight: 160).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme))).padding(.top, 6)
+                }.padding(.horizontal, 18).padding(.vertical, 24).frame(maxWidth: .infinity, minHeight: 160)
+                    .background(LinearGradient(colors: [Theme.surface(scheme),
+                        Color(hex: scheme == .dark ? 0x261B23 : 0xFBF2F5), Theme.surface(scheme)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(LinearGradient(colors: [
+                        Color(hex: scheme == .dark ? 0xA88A64 : 0xDAC5A7).opacity(0.65),
+                        Theme.border(scheme), Color(hex: scheme == .dark ? 0x795264 : 0xDBC4CE)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.8))
+                    .shadow(color: Color(hex: 0x674052).opacity(scheme == .dark ? 0.12 : 0.07), radius: 16, y: 6)
+                    .padding(.top, 6)
             } else {
                 Text("This offer isn’t available right now.").font(.serif(30))
                 Text("You can continue with free Bible reading.").font(.ui(14)).foregroundStyle(Theme.muted(scheme))
