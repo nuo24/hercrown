@@ -43,12 +43,20 @@ struct FaithMedal: Identifiable {
     let name: String
     let days: Int
     let chapters: Int
+    var completedBooks: Int? = nil
     var book: String? = nil
     var journey: String? = nil
     var requiredChapterRefs: [String] = []
     var id: String { "\(collection.rawValue)-\(index)" }
     var rarity: String { days >= 180 ? "Legendary" : days >= 90 ? "Exceptional" : days >= 30 ? "Rare" : "Uncommon" }
+    var targetCount: Int { completedBooks ?? chapters }
+    var reference: String {
+        collection == .armor ? "Ephesians 6:\([14, 14, 15, 16, 17, 17][index])" : collection.reference
+    }
     var requirement: String {
+        if let completedBooks {
+            return "Read on \(days) different days and finish \(completedBooks) complete Bible \(completedBooks == 1 ? "book" : "books")."
+        }
         if let journey {
             return "Read on \(days) different days and complete all \(chapters) chapters in the \(journey) reading journey."
         }
@@ -58,23 +66,31 @@ struct FaithMedal: Identifiable {
         }
         return "Read on \(days) different days and complete \(chapters) different Bible chapters."
     }
-    func counts(_ progress: MedalProgress) -> (days: Int, chapters: Int) {
+    func counts(_ progress: MedalProgress) -> (days: Int, units: Int) {
         let completed: Int
-        if journey != nil {
+        if completedBooks != nil {
+            let canon = Dictionary(uniqueKeysWithValues: BibleStore.shared.books.map { ($0.id, $0.chapterCount) })
+            completed = Set(progress.bible.books.compactMap { book -> String? in
+                guard let total = canon[book.id], total > 0, book.chapters == total,
+                      book.chaptersRead >= total else { return nil }
+                return book.id
+            }).count
+        } else if journey != nil {
             // Older API responses/caches have no chapter identities; never infer themed completion from totals.
             completed = Set(requiredChapterRefs).intersection(Set(progress.bible.completedChapterRefs ?? [])).count
         } else {
             completed = book.map { id in progress.bible.books.first { $0.id == id }?.chaptersRead ?? 0 } ?? progress.bible.chaptersRead
         }
-        return (min(days, max(0, progress.daysRead.total)), min(chapters, max(0, completed)))
+        return (min(days, max(0, progress.daysRead.total)), min(targetCount, max(0, completed)))
     }
     func progressLabel(_ progress: MedalProgress) -> String {
         let n = counts(progress)
-        return "\(n.days) of \(days) reading days · \(n.chapters) of \(chapters) \(journey == nil ? "chapters" : "journey chapters")"
+        let unit = completedBooks != nil ? "books" : journey == nil ? "chapters" : "journey chapters"
+        return "\(n.days) of \(days) reading days · \(n.units) of \(targetCount) \(unit)"
     }
     func fraction(_ progress: MedalProgress) -> Double {
         let n = counts(progress)
-        return min(Double(n.days) / Double(days), Double(n.chapters) / Double(chapters))
+        return min(Double(n.days) / Double(days), Double(n.units) / Double(targetCount))
     }
     func earned(_ progress: MedalProgress) -> Bool { fraction(progress) >= 1 }
     var artwork: String {
@@ -104,12 +120,13 @@ struct FaithMedal: Identifiable {
             result.append(.init(collection: group, index: index, name: name, days: days,
                 chapters: chapters.count, journey: title, requiredChapterRefs: chapters))
         }
-        journey(.armor, 0, "Belt of Truth", 21, "Truth", "JHN.8 JHN.14 JHN.16 JHN.17 EPH.4 2TI.2 2TI.3 JAS.1")
-        journey(.armor, 1, "Breastplate of Righteousness", 30, "Righteousness", "ROM.3 ROM.5 ROM.6 ROM.8 EPH.2 EPH.5 PHP.1 PHP.3 1JN.1 1JN.2")
-        journey(.armor, 2, "Shoes of Peace", 45, "Good News and Peace", "MAT.5 MAT.6 LUK.10 JHN.14 JHN.20 ROM.10 ROM.12 ROM.14 EPH.6 COL.3")
-        journey(.armor, 3, "Shield of Faith", 60, "Faith", "GEN.12 GEN.15 GEN.22 PSA.27 PSA.46 PSA.91 MRK.4 MRK.5 ROM.4 2CO.5 HEB.11 HEB.12")
-        journey(.armor, 4, "Helmet of Salvation", 90, "Salvation", "LUK.15 LUK.23 LUK.24 JHN.3 JHN.10 ACT.2 ACT.4 ROM.5 ROM.8 ROM.10 EPH.1 EPH.2 1TH.5 TIT.2 TIT.3")
-        journey(.armor, 5, "Sword of the Spirit", 180, "The Word", "PSA.1 PSA.19 PSA.119 MAT.4 MAT.13 LUK.4 LUK.8 JHN.1 JHN.15 JHN.17 ACT.17 2TI.2 2TI.3 2TI.4 HEB.4 JAS.1")
+        let armorNames = ["Belt of Truth", "Breastplate of Righteousness", "Shoes of Peace", "Shield of Faith", "Helmet of Salvation", "Sword of the Spirit"]
+        let armorDays = [21, 30, 45, 60, 90, 180]
+        let armorBooks = [1, 3, 5, 10, 20, 40]
+        for index in armorNames.indices {
+            result.append(.init(collection: .armor, index: index, name: armorNames[index], days: armorDays[index],
+                chapters: 0, completedBooks: armorBooks[index]))
+        }
         add(.psalms, ["Harp", "Lyre", "Shepherd’s Staff"], [30,90,180], [30,75,150], book: "PSA")
         add(.women, ["Ruth’s Wheat"], [30], [4], book: "RUT")
         result.append(.init(collection: .women, index: 1, name: "Esther’s Scepter", days: 60, chapters: 10, book: "EST"))
@@ -132,7 +149,11 @@ final class FaithMedalsModel {
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
     private struct Cache: Codable { let progress: MedalProgress; let dates: [String: Date]; var rulesVersion: Int? = nil }
     static func retainedDates(_ dates: [String: Date], rulesVersion: Int?) -> [String: Date] {
-        rulesVersion == 2 ? dates : dates.filter { !$0.key.hasPrefix("armor-") && !$0.key.hasPrefix("promises-") }
+        switch rulesVersion {
+        case 3: dates
+        case 2: dates.filter { !$0.key.hasPrefix("armor-") }
+        default: dates.filter { !$0.key.hasPrefix("armor-") && !$0.key.hasPrefix("promises-") }
+        }
     }
     var homeMedal: FaithMedal {
         let fruits = FaithMedal.items(.fruit)
@@ -155,7 +176,7 @@ final class FaithMedalsModel {
                 earnedDates[medal.id] = .now // First verified detection, not an invented historical award date.
                 await Analytics.shared.track("faith_medal_earned", ["medal": .string(medal.id)])
             }
-            defaults.set(try? JSONEncoder().encode(Cache(progress: fresh, dates: earnedDates, rulesVersion: 2)), forKey: "hc.medals.\(user)")
+            defaults.set(try? JSONEncoder().encode(Cache(progress: fresh, dates: earnedDates, rulesVersion: 3)), forKey: "hc.medals.\(user)")
         } catch {
             guard app.me?.user.id == user, account == user else { return }
             unavailable = true

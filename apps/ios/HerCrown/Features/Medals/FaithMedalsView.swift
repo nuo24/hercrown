@@ -59,7 +59,7 @@ struct FaithMedalsView: View {
             ScrollView {
                 VStack(spacing: 0) {
                     Text(selected.name).font(.serif(36)).tracking(-0.5).multilineTextAlignment(.center).padding(.top, 18)
-                    Text(group.reference).font(.ui(11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 7)
+                    Text(selected.reference).font(.ui(11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 7)
                     Text("\(selected.rarity) milestone").font(.ui(11, weight: .medium))
                         .padding(.horizontal, 14).padding(.vertical, 8)
                         .overlay(Capsule().stroke(Theme.border(scheme))).padding(.top, 12)

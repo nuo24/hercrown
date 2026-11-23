@@ -26,7 +26,7 @@ final class FaithMedalsTests: XCTestCase {
     func testCatalogHasUniqueIDsAndSustainedNonzeroRequirements() {
         XCTAssertEqual(FaithMedal.all.count, 24)
         XCTAssertEqual(Set(FaithMedal.all.map(\.id)).count, FaithMedal.all.count)
-        XCTAssertTrue(FaithMedal.all.allSatisfy { $0.days >= 14 && $0.chapters >= 4 })
+        XCTAssertTrue(FaithMedal.all.allSatisfy { $0.days >= 14 && $0.targetCount > 0 })
         XCTAssertEqual(FaithMedal.items(.fruit).last?.days, 365)
         XCTAssertTrue(FaithMedal.all.allSatisfy { !$0.earned(.empty) })
     }
@@ -38,7 +38,7 @@ final class FaithMedalsTests: XCTestCase {
         XCTAssertTrue(FaithMedal.items(.fruit)[2].earned(progress))
         for medal in FaithMedal.all where medal.journey != nil {
             XCTAssertFalse(medal.earned(progress), medal.id)
-            XCTAssertEqual(medal.counts(progress).chapters, 0)
+            XCTAssertEqual(medal.counts(progress).units, 0)
         }
     }
     func testEachJourneyRequiresItsOwnExactChaptersAndDays() {
@@ -49,7 +49,7 @@ final class FaithMedalsTests: XCTestCase {
             XCTAssertFalse(medal.earned(progress), medal.id)
             progress.bible.completedChapterRefs = medal.requiredChapterRefs + medal.requiredChapterRefs
             XCTAssertTrue(medal.earned(progress), medal.id)
-            XCTAssertEqual(medal.counts(progress).chapters, medal.chapters)
+            XCTAssertEqual(medal.counts(progress).units, medal.chapters)
             for other in FaithMedal.all where other.journey != nil && other.id != medal.id {
                 progress.daysRead.total = 1000
                 XCTAssertFalse(other.earned(progress), "\(medal.id) must not grant \(other.id)")
@@ -79,10 +79,46 @@ final class FaithMedalsTests: XCTestCase {
         XCTAssertNil(progress.bible.completedChapterRefs)
         XCTAssertFalse(FaithMedal.items(.armor)[1].earned(progress))
     }
+    func testArmorRequiresWholeDistinctCanonicalBooksAndReadingDays() {
+        let belt = FaithMedal.items(.armor)[0]
+        var progress = MedalProgress.empty
+        progress.daysRead.total = 365
+        progress.bible.chaptersRead = 1189
+        XCTAssertFalse(belt.earned(progress))
+        progress.bible.books = [.init(id: "RUT", chapters: 4, chaptersRead: 3),
+            .init(id: "unknown", chapters: 1, chaptersRead: 1), .init(id: "GEN", chapters: 0, chaptersRead: 50)]
+        XCTAssertEqual(belt.counts(progress).units, 0)
+        progress.bible.books = [.init(id: "RUT", chapters: 4, chaptersRead: 4)]
+        XCTAssertTrue(belt.earned(progress))
+        progress.daysRead.total = belt.days - 1
+        XCTAssertFalse(belt.earned(progress))
+        let breastplate = FaithMedal.items(.armor)[1]
+        progress.daysRead.total = 365
+        progress.bible.books += progress.bible.books + progress.bible.books
+        XCTAssertEqual(breastplate.counts(progress).units, 1)
+        XCTAssertFalse(breastplate.earned(progress))
+        progress.bible.books += [.init(id: "EST", chapters: 10, chaptersRead: 10), .init(id: "JUD", chapters: 1, chaptersRead: 1)]
+        XCTAssertTrue(breastplate.earned(progress))
+    }
+    func testArmorKeepsArtAndVersesWithoutMandatoryChapterJourneys() throws {
+        XCTAssertEqual(FaithMedal.items(.armor).compactMap(\.completedBooks), [1,3,5,10,20,40])
+        for medal in FaithMedal.items(.armor) {
+            XCTAssertNil(medal.journey)
+            XCTAssertTrue(medal.requiredChapterRefs.isEmpty)
+            XCTAssertFalse(medal.requirement.contains("journey"))
+            XCTAssertTrue(medal.progressLabel(.empty).contains("books"))
+            XCTAssertTrue(medal.reference.hasPrefix("Ephesians 6:"))
+            XCTAssertFalse(medal.artwork.isEmpty)
+            let number = try XCTUnwrap(Int(medal.reference.split(separator: ":").last!))
+            let ref = try XCTUnwrap(VerseRef("EPH.6.\(number)"))
+            XCTAssertFalse(try XCTUnwrap(BibleStore.shared.text("kjv", ref)).isEmpty)
+        }
+    }
     @MainActor func testRuleChangeRetainsUnchangedAwardDatesOnly() {
         let dates = ["fruit-0": Date(timeIntervalSince1970: 100), "armor-1": Date(), "promises-0": Date(), "women-0": Date()]
         let migrated = FaithMedalsModel.retainedDates(dates, rulesVersion: nil)
         XCTAssertEqual(Set(migrated.keys), ["fruit-0", "women-0"])
-        XCTAssertEqual(FaithMedalsModel.retainedDates(dates, rulesVersion: 2), dates)
+        XCTAssertEqual(Set(FaithMedalsModel.retainedDates(dates, rulesVersion: 2).keys), ["fruit-0", "promises-0", "women-0"])
+        XCTAssertEqual(FaithMedalsModel.retainedDates(dates, rulesVersion: 3), dates)
     }
 }
