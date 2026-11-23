@@ -2,6 +2,10 @@ import SwiftUI
 
 /// Approved original book art, keyed by canonical USFM identifier in every language.
 enum BibleBookArtwork {
+    static func opening(bookID: String, chapter: Int, verse: Int) -> String? {
+        guard chapter == 1, verse == 1 else { return nil }
+        return names[bookID]
+    }
     static let names: [String: String] = [
         "GEN": "bible-book-gen",
         "EXO": "bible-book-exo",

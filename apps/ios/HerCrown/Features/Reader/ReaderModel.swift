@@ -156,19 +156,13 @@ final class ReaderModel {
         }
     }
 
-    /// Contextual artwork (the mockup's readerArtwork): featured verses, else the chapter's first verse.
+    /// Each book opens with its approved illustration; featured verse art remains independent.
     func artwork(for verse: Verse, in pageChapter: Chapter? = nil) -> String? {
         guard let chapter = pageChapter ?? chapter else { return nil }
+        if let art = BibleBookArtwork.opening(bookID: chapter.book.id, chapter: chapter.number, verse: verse.number) { return art }
         let featured = ["PSA.23.1": "rest-stones", "PSA.119.105": "lantern", "PRO.31.25": "anchor", "MAT.11.28": "dove"]
         if let art = featured["\(chapter.book.id).\(chapter.number).\(verse.number)"] { return art }
-        guard verse.number == chapter.verses.first?.number else { return nil }
-        switch chapter.book.id {
-        case "GEN": return "seedling"
-        case "PSA": return "olive"
-        case "PRO": return "wisdom-pearl"
-        case "JHN": return "faith-hands"
-        default: return "open-book"
-        }
+        return nil
     }
 }
 

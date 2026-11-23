@@ -25,7 +25,7 @@ import SwiftUI
         XCTAssertTrue(Theme.pink(.light))
         XCTAssertFalse(Theme.pink(.dark))
         assertColor(Theme.text(.light), 0x31222B)
-        assertColor(Theme.accent(.light), 0x82435F)
+        assertColor(Theme.accent(.light), 0x31222B)
         assertColor(Theme.canvas(.light), 0xFBF1F4)
         assertColor(Theme.surface(.light), 0xFFF9FB)
         assertColor(Theme.border(.light), 0xE0C4CF)

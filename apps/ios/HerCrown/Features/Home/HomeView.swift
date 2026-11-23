@@ -448,8 +448,7 @@ struct HomeView: View {
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.vertical, 10)
-            .padding(.horizontal, Theme.pink(scheme) ? 14 : 0)
-            .background(Theme.pink(scheme) ? Theme.feature(scheme) : .clear, in: RoundedRectangle(cornerRadius: 16))
+            .background { Theme.verseSurface(scheme).padding(.horizontal, -22) }
             Divider()
         }
     }
