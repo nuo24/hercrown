@@ -1115,3 +1115,8 @@ Owner identified the same inset rounded pink-card issue on Discover. Removed the
 ### November 23 — restore original greyed medal icons
 
 Owner corrected the rendering: unearned medals must retain original fruit/armor/collection artwork in grayscale/faded form, not lock symbols. Shared MedalImage now always renders original art, saturation0/opacity0.5 while unearned and full colour/opacity when earned. Carousel, tiles and Home keep the existing !earned guard; cumulative progress, thresholds and sharing eligibility unchanged. Updated decision0024 clarification. API check/all220 tests passed; native build succeeded and running pink Simulator inspected: Love uses original grey strawberry, adjacent Joy original grey peach, no replacement lock. Capture comparisons/grey-medals.png. This correction and flat Discover fix are newer than uploaded40; no new TestFlight upload.
+
+
+### November 23 — internal TestFlight41
+
+Owner requested recent fixes in next build. Selected1.0.1(41), app/widget. Includes56f7a3d grey original unearned medal artwork (no lock symbols), cumulative progress unchanged,6887dc5 flat Discover pink section, plus previously approved native printed-letter offer/original styling/full-screen paper header. Existing paywall preloading retained; physical phone latency remains to be measured, not claimed fixed. API check/220 tests and native builds/Simulator captures passed for latest layout fixes; prior70 native logic tests passed. Internal-only staging export/isolated credentials, existing Team group only; no external/public release or production writes. Archive from clean commit.
