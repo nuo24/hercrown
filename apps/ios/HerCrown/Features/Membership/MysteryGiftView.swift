@@ -72,29 +72,29 @@ struct MysteryGiftView: View {
         .accessibilityHidden(true)
     }
     private var invitation: some View {
-        VStack(spacing: 12) {
-            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(38, weight: .semibold)).tracking(-0.7)
+        VStack(spacing: 10) {
+            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(32, weight: .semibold)).tracking(-0.7)
             Text("Before you continue with free reading, we’d like to share a special offer with you.")
-                .font(.ui(14, weight: .medium)).lineSpacing(4).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
-        }.multilineTextAlignment(.center).padding(.top, 18)
+                .font(.ui(13, weight: .medium)).lineSpacing(2).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
+        }.multilineTextAlignment(.center).padding(.top, 12)
     }
     private var reveal: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             Text("YOUR ONE-TIME OFFER").font(.ui(10, weight: .medium)).tracking(1.3).foregroundStyle(Theme.muted(scheme)).padding(.top, 14)
             if let terms {
-                (Text("25% off\n") + Text("your first year.").italic()).font(.serif(36)).tracking(-0.7)
+                (Text("25% off\n") + Text("your first year.").italic()).font(.serif(30)).tracking(-0.7)
                 Text("Get Her Crown Plus for less with a one-time discount on your annual plan.")
-                    .font(.ui(14)).lineSpacing(4).foregroundStyle(Theme.muted(scheme))
-                VStack(spacing: 12) {
+                    .font(.ui(13)).lineSpacing(2).foregroundStyle(Theme.muted(scheme))
+                VStack(spacing: 10) {
                     Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium))
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(terms.original).strikethrough().font(.ui(16)).foregroundStyle(Theme.muted(scheme))
-                        Text(terms.firstYear).font(.serif(39)).tracking(-1)
+                        Text(terms.firstYear).font(.serif(34)).tracking(-1)
                         Text("for the first year").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                     }
                     Divider()
                     Text("You save \(terms.saving) on your first year.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
-                }.padding(18).frame(maxWidth: .infinity).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+                }.padding(16).frame(maxWidth: .infinity).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme))).padding(.top, 6)
             } else {
                 Text("This offer isn’t available right now.").font(.serif(30))
