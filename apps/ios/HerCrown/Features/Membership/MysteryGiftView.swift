@@ -18,6 +18,11 @@ struct MysteryGiftView: View {
     }()
     @State private var opening = false
     @State private var flapProgress = 0.0
+    @State private var letterLift = 0.0
+    @State private var paperExpanded = false
+    @State private var paperSettled = false
+    @State private var offerInk = 0.0
+    @Namespace private var paperNamespace
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
@@ -39,9 +44,31 @@ struct MysteryGiftView: View {
             }.padding(.horizontal, 22).padding(.top, 8)
             ZStack {
                 if revealed {
-                    page(isOffer: true).transition(.opacity)
+                    page(isOffer: true)
                 } else {
-                    page(isOffer: false).transition(.opacity)
+                    page(isOffer: false)
+                        .opacity(paperExpanded ? 0 : 1)
+                        .allowsHitTesting(!opening)
+                    if paperExpanded {
+                        GeometryReader { geometry in
+                            ZStack {
+                                // The paper itself travels from the envelope to this exact surface.
+                                Theme.canvas(scheme)
+                                    .overlay {
+                                        GiftLetterPaper().opacity(paperSettled ? 0 : 1)
+                                    }
+                                    .overlay {
+                                        LinearGradient(colors: [.clear, .black.opacity(0.10), .white.opacity(0.22), .clear],
+                                            startPoint: .top, endPoint: .bottom)
+                                            .frame(height: 26).opacity(paperSettled ? 0 : 1)
+                                    }
+                                    .matchedGeometryEffect(id: "gift-offer-paper", in: paperNamespace)
+                                page(isOffer: true).opacity(offerInk)
+                                    .allowsHitTesting(false)
+                            }
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                        }.transition(.identity).zIndex(5)
+                    }
                 }
             }
 
@@ -84,7 +111,8 @@ struct MysteryGiftView: View {
                     if revealed {
                         Image("gift-open-book").resizable().scaledToFit()
                     } else {
-                        GiftEnvelopeIllustration(progress: flapProgress)
+                        GiftEnvelopeIllustration(progress: flapProgress, letterLift: letterLift,
+                                paperExpanded: paperExpanded, paperNamespace: paperNamespace)
                             .contentShape(Rectangle())
                             .onTapGesture(perform: revealOffer)
                     }
@@ -163,12 +191,24 @@ struct MysteryGiftView: View {
                 withAnimation(.easeOut(duration: 0.15)) { revealed = true }
             } else {
                 opening = true
-                // The contents are present beneath the flap throughout this movement.
-                withAnimation(.timingCurve(0.22, 0.65, 0.25, 1, duration: 0.95)) { flapProgress = 1 }
-                do { try await Task.sleep(for: .milliseconds(1400)) } catch { return }
+                withAnimation(.timingCurve(0.22, 0.65, 0.25, 1, duration: 0.62)) { flapProgress = 1 }
+                do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
                 guard !Task.isCancelled else { return }
-                // Two independently laid-out pages dissolve together; no blank frame or resizing hero.
-                withAnimation(.easeInOut(duration: 0.55)) { revealed = true }
+                withAnimation(.timingCurve(0.2, 0.7, 0.25, 1, duration: 0.38)) { letterLift = 1 }
+                do { try await Task.sleep(for: .milliseconds(400)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.timingCurve(0.3, 0.05, 0.2, 1, duration: 0.65)) { paperExpanded = true }
+                do { try await Task.sleep(for: .milliseconds(180)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.48)) { paperSettled = true }
+                do { try await Task.sleep(for: .milliseconds(250)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.3)) { offerInk = 1 }
+                do { try await Task.sleep(for: .milliseconds(340)) } catch { return }
+                guard !Task.isCancelled else { return }
+                // Replace the finished paper with the identical interactive offer, without a visual swap.
+                var transaction = Transaction(); transaction.disablesAnimations = true
+                withTransaction(transaction) { revealed = true }
             }
             if !isPreview { await Analytics.shared.track("mystery_gift_revealed") }
         }

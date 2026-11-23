@@ -1,22 +1,27 @@
 import SwiftUI
 
-/// One stationary envelope. Only its hinged flap moves; the front and bow never jump.
+/// A hinged envelope with a paper sheet that lifts out and becomes the offer surface.
 struct GiftEnvelopeIllustration: View, Animatable {
     var progress: Double
-    var animatableData: Double {
-        get { progress }
-        set { progress = newValue }
+    var letterLift: Double
+    let paperExpanded: Bool
+    let paperNamespace: Namespace.ID
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(progress, letterLift) }
+        set { progress = newValue.first; letterLift = newValue.second }
     }
     var body: some View {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height)
             ZStack(alignment: .topLeading) {
-                // Contents exist from the first frame, physically covered by the closed flap.
-                // They lift gently with the opening rather than fading into an empty pocket.
-                Image("gift-prayer-envelope").resizable().scaledToFit()
-                    .mask(EnvelopeLetter())
-                    .offset(y: size * 0.085 * (1 - progress))
-                    .zIndex(1)
+                // This same sheet lifts out and becomes the full-screen offer surface.
+                if !paperExpanded {
+                    GiftLetterPaper()
+                        .frame(width: size * 0.52, height: size * 0.34)
+                        .matchedGeometryEffect(id: "gift-offer-paper", in: paperNamespace)
+                        .offset(x: size * 0.225, y: size * (0.34 + 0.085 * (1 - progress) - 0.38 * letterLift))
+                        .zIndex(1)
+                }
                 EnvelopePaper()
                     .overlay {
                         EnvelopeFlap().fill(LinearGradient(
@@ -78,14 +83,12 @@ private struct EnvelopeFront: Shape {
         }
     }
 }
-private struct EnvelopeLetter: Shape {
-    func path(in rect: CGRect) -> Path {
-        Path { p in
-            p.move(to: CGPoint(x: rect.width * 0.225, y: rect.height * 0.342))
-            p.addLine(to: CGPoint(x: rect.width * 0.745, y: rect.height * 0.322))
-            p.addLine(to: CGPoint(x: rect.width * 0.745, y: rect.height * 0.63))
-            p.addLine(to: CGPoint(x: rect.width * 0.225, y: rect.height * 0.63))
-            p.closeSubpath()
-        }
+/// A real sheet of paper, retained as the offer background through matched geometry.
+struct GiftLetterPaper: View {
+    var body: some View {
+        EnvelopePaper()
+            .clipShape(RoundedRectangle(cornerRadius: 2))
+            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color(hex: 0xD8CDBA), lineWidth: 0.5))
+            .shadow(color: .black.opacity(0.09), radius: 2, y: 1)
     }
 }
