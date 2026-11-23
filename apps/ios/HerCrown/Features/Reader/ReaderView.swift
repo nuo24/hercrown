@@ -136,7 +136,7 @@ struct ReaderView: View {
         model.pendingGuestPaywall != nil && model.guestPaywallUserID != nil
             && model.guestPaywallUserID == app.me?.user.id
             && (model.guestPaywallQueuedAt.map { Date.now.timeIntervalSince($0) < 5 * 60 } ?? false)
-            && app.onboardingCompleted && app.phase == .ready && !app.offline
+            && app.onboardingCompleted && app.phase == .ready && app.mysteryGift == nil && !app.offline
             && scenePhase == .active && !app.checkingPaywall && !app.showExistingAppleSubscription
             && !showingChapters && !showingSaved && !showingBookmarks && studyRef == nil && reflectRef == nil
             && Billing.shared.configured && !Billing.shared.isPaywallBusy

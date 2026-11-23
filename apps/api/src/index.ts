@@ -1,3 +1,4 @@
+import { scheduleGift, giftStatus, claimGift } from "./gift-offers";
 import { getCommunity, voteCommunity, listSuggestions, saveSuggestion } from "./community";
 import { createPrayer } from "./prayer";
 import { recordOfferDecline, reserveReturnOffer, signTrialReturnOffer } from "./return-offers";
@@ -152,6 +153,12 @@ async function route(request: Request, env: Env, ctx: ExecutionContext, url: URL
       return listStudied(url, env, user);
     case "POST /me/opened":
       return recordOpened(request, env, user);
+    case "POST /me/gift-offer/decline":
+      return scheduleGift(env, user.id, tracker);
+    case "GET /me/gift-offer":
+      return giftStatus(env, user.id);
+    case "POST /me/gift-offer/claim":
+      return claimGift(env, user.id);
     case "GET /me/progress":
       return getProgress(url, env, user);
     case "GET /me/chapters":

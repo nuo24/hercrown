@@ -144,7 +144,7 @@ final class Billing: NSObject {
                 case .declined:
                     if let userID {
                         await self.scheduleReturnOffer(for: userID)
-                        if placement == "onboarding_complete", let app = self.app {
+                        if placement != "paywall_decline", placement != "transaction_abandon", let app = self.app {
                             await MysteryGiftCoordinator.shared.afterDecline(app: app, userID: userID)
                         }
                     }

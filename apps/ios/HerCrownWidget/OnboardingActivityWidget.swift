@@ -5,41 +5,33 @@ import WidgetKit
 struct OnboardingLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: OnboardingActivityAttributes.self) { context in
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Label("Her Crown", systemImage: "book.closed")
-                        .font(.system(size: 13, weight: .semibold))
-                    Spacer()
-                    Text("Continue setup").font(.system(size: 12, weight: .medium))
-                }
-                Text("Your little space for the Word.").font(.custom("Baskerville", size: 23))
-                Text("Pick up where you left off.").font(.system(size: 13)).foregroundStyle(.secondary)
-                ProgressView(value: Double(context.state.completedSteps), total: Double(context.state.totalSteps))
-                    .tint(.primary)
-                    .accessibilityLabel("Setup progress")
-                    .accessibilityValue("Step \(context.state.completedSteps + 1) of \(context.state.totalSteps)")
-            }
-            .padding(18)
-            .activityBackgroundTint(Color(white: 0.97))
-            .activitySystemActionForegroundColor(.black)
-            .foregroundStyle(.black)
-            .widgetURL(URL(string: "hercrown://onboarding"))
+            OnboardingActivityCard(completedSteps: context.state.completedSteps, totalSteps: context.state.totalSteps)
+                .activityBackgroundTint(Color(red: 1, green: 249 / 255, blue: 251 / 255))
+                .activitySystemActionForegroundColor(Color(red: 49 / 255, green: 34 / 255, blue: 43 / 255))
+                .widgetURL(URL(string: "hercrown://onboarding"))
         } dynamicIsland: { context in
             DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) { Image(systemName: "book.closed").accessibilityLabel("Her Crown") }
-                DynamicIslandExpandedRegion(.trailing) { Text("Continue setup").font(.caption) }
+                DynamicIslandExpandedRegion(.leading) {
+                    HStack(spacing: 6) {
+                        Image("her-crown-thorns").resizable().scaledToFit().frame(width: 24, height: 24)
+                        Text("Her Crown").font(.caption.weight(.semibold))
+                    }.accessibilityElement(children: .combine)
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    Label("Continue setup", systemImage: "arrow.right").font(.caption2)
+                }
                 DynamicIslandExpandedRegion(.bottom) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("A little space for the Word.").font(.headline)
-                        ProgressView(value: Double(context.state.completedSteps), total: Double(context.state.totalSteps))
+                        Text("A little space for the Word.").font(.system(size: 13, weight: .medium, design: .rounded))
+                        ProgressView(value: Double(context.state.completedSteps), total: Double(max(1, context.state.totalSteps)))
                     }
                 }
             } compactLeading: {
-                Image(systemName: "book.closed")
+                Image("her-crown-thorns").resizable().scaledToFit().frame(width: 20, height: 20).accessibilityLabel("Her Crown")
             } compactTrailing: {
                 Image(systemName: "arrow.right")
             } minimal: {
-                Image(systemName: "book.closed")
+                Image("her-crown-thorns").resizable().scaledToFit().accessibilityLabel("Her Crown")
             }
             .widgetURL(URL(string: "hercrown://onboarding"))
             .keylineTint(.white)

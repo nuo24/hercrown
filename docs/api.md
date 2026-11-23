@@ -142,3 +142,10 @@ NKJV, MSG, AMP and NLT are fetched on demand through the Worker with `API_BIBLE_
 Licensed daily content: Home, Discover, devotional passage quotations and library snippets resolve NKJV/MSG/AMP/NLT through API.Bible when selected. Canonical refs remain stable for notes/saves, while `label` reports the actual provider verse bridge (e.g. Psalm 23:1–3). Provider errors are surfaced rather than silently substituting KJV. Devotional commentary and public-domain study grounding are unchanged; licensed passage text is never supplied to the model. The iOS offline session uses bundled KJV when the saved selection requires the network.
 
 Discover supports `includeText=false` for its editorial catalog: all references and reflections return without fetching online translation chapters (`text` is empty, `nextOffset` is null). Fetch the selected passage separately before displaying Scripture. The default text-filled response remains compatible with existing builds.
+
+
+### Next-day gift (migration 0020; production activation pending)
+
+- `POST /me/gift-offer/decline`: authenticated main-paywall dismissal; records first server timestamp, excludes Plus. Returns `{scheduled:boolean}`.
+- `GET /me/gift-offer`: returns `{due:boolean}` after 24 hours if still unsubscribed and not previously claimed. Read-only.
+- `POST /me/gift-offer/claim`: atomic account-wide impression claim; returns `{available:boolean}`. Call only after fresh StoreKit eligibility and safe foreground presentation checks. No purchase or entitlement mutation.

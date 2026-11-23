@@ -27,8 +27,8 @@ SQL >
         person_id,
         countIf(event = 'paywall_viewed') > 0 AS has_paywall,
         countIf(event = 'paywall_declined') > 0 AS has_declined,
-        countIf(event = 'decline_offer_viewed') > 0 AS has_offer_view,
-        countIf(event = 'decline_offer_declined') > 0 AS has_offer_declined,
+        countIf(event IN ('decline_offer_viewed', 'mystery_gift_viewed')) > 0 AS has_offer_view,
+        countIf(event IN ('decline_offer_declined', 'mystery_gift_dismissed')) > 0 AS has_offer_declined,
         countIf(event = 'subscription_started'
                 AND JSONExtractString(props, 'product_id') = {{ String(offer_product, 'hercrown.plus.yearly.offer') }}) > 0 AS has_offer,
         countIf(event = 'trial_started') > 0 AS has_trial,

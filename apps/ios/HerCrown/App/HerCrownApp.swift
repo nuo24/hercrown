@@ -21,7 +21,18 @@ struct HerCrownApp: App {
     var body: some Scene {
         WindowGroup {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("--preview-onboarding") {
+            if ProcessInfo.processInfo.arguments.contains("--preview-onboarding-card") {
+                VStack(spacing: 20) {
+                    Text("Live Activity card · design preview").font(.system(size: 13)).foregroundStyle(.secondary)
+                    OnboardingActivityCard(completedSteps: 3, totalSteps: 15)
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .padding(.horizontal, 20)
+                    Text("Sample progress for layout review").font(.system(size: 11)).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(white: 0.93).ignoresSafeArea())
+                .preferredColorScheme(.light)
+            } else if ProcessInfo.processInfo.arguments.contains("--preview-onboarding") {
                 OnboardingView().environment(app).task { await app.start() }
             } else if ProcessInfo.processInfo.arguments.contains("--preview-mystery-gift"), showingGiftPreview {
                 MysteryGiftView(terms: .init(original: "$39.99", firstYear: "$29.99", renewal: "$39.99", saving: "$10.00"), isPreview: true,
@@ -77,7 +88,11 @@ struct HerCrownApp: App {
                 guard !Task.isCancelled, checkingOnNextOpen else { return }
                 if showColdLaunch { return }
                 checkingOnNextOpen = false
-                await checkReturnOffer()
+                await MysteryGiftCoordinator.shared.onNextOpen(app: app) {
+                    scenePhase == .active && app.phase == .ready && !showColdLaunch
+                        && returnOffer == nil && !app.showExistingAppleSubscription
+                }
+                if app.mysteryGift == nil { await checkReturnOffer() }
             }
             .task(id: app.membership) {
                 guard app.membership.premium, let trial = app.membership.subscription?.trial else { return }
@@ -100,7 +115,7 @@ struct HerCrownApp: App {
                 .interactiveDismissDisabled()
                 .preferredColorScheme(colorScheme)
             }
-            .sheet(item: $app.mysteryGift) { offer in
+            .fullScreenCover(item: $app.mysteryGift) { offer in
                 MysteryGiftView(terms: offer.terms, onPurchase: { await purchaseMysteryGift(offer) }, onRestore: {
                     let message = await app.restorePurchases()
                     if app.membership.premium { app.mysteryGift = nil }
@@ -109,7 +124,7 @@ struct HerCrownApp: App {
                     app.mysteryGift = nil
                     Task { await Analytics.shared.track("mystery_gift_dismissed") }
                 })
-                .presentationDetents([.large]).preferredColorScheme(colorScheme)
+                .preferredColorScheme(colorScheme)
             }
             .onChange(of: app.me?.user.id) { _, _ in
                 app.mysteryGift = nil

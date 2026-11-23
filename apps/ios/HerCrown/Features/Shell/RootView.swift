@@ -70,7 +70,7 @@ struct RootView: View {
     private var canOfferPrompt: Bool {
         app.onboardingCompleted && tab == .home && scenePhase == .active
             && !showingSettings && !feedbackInvitation && !showingFeedback
-            && !app.checkingPaywall && !app.showExistingAppleSubscription
+            && !app.checkingPaywall && app.mysteryGift == nil && !app.showExistingAppleSubscription
     }
 
     private var tabs: some View {

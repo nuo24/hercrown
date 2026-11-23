@@ -16,6 +16,8 @@ struct MysteryGiftView: View {
         false
         #endif
     }()
+    @State private var opening = false
+    @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
     @State private var legal: LegalPage?
@@ -23,7 +25,10 @@ struct MysteryGiftView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Her Crown Plus").font(.ui(12, weight: .medium))
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Her Crown Plus").font(.ui(12, weight: .medium))
+                    if isPreview { Text("Design preview · purchases disabled").font(.ui(8)).foregroundStyle(Theme.muted(scheme)) }
+                }
                 Spacer()
                 Button(action: onClose) {
                     Image(systemName: "xmark").font(.system(size: 12, weight: .semibold)).frame(width: 32, height: 32)
@@ -35,7 +40,11 @@ struct MysteryGiftView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         hero.padding(.top, revealed ? 0 : 42)
-                        if revealed { reveal } else { invitation }
+                        if revealed {
+                            reveal.transition(.opacity.combined(with: .offset(y: 14)))
+                        } else {
+                            invitation.transition(.opacity.combined(with: .offset(y: -10)))
+                        }
                         Spacer(minLength: 24)
                         footer
                     }
@@ -48,6 +57,7 @@ struct MysteryGiftView: View {
         .ignoresSafeArea(.container, edges: .bottom)
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme).ignoresSafeArea()).buttonStyle(.plain)
         .interactiveDismissDisabled(busy)
+        .onDisappear { revealTask?.cancel() }
         .sheet(item: $legal) { page in SafariView(url: page.url) }
         .alert("Her Crown Plus", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
             Button("OK", role: .cancel) {}
@@ -63,10 +73,18 @@ struct MysteryGiftView: View {
                     .frame(width: 70, height: revealed ? 78 : 80)
                     .rotationEffect(.degrees(-16))
                     .offset(x: geometry.size.width * 0.15, y: revealed ? 45 : 100)
-                Image(revealed ? "gift-open-book" : "gift-prayer-envelope").resizable().scaledToFit()
-                    .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
-                    .rotationEffect(.degrees(-7))
-                    .offset(x: (geometry.size.width - (revealed ? 158 : 200)) / 2)
+                Group {
+                    if revealed {
+                        Image("gift-open-book").resizable().scaledToFit()
+                            .transition(.opacity.combined(with: .scale(scale: 0.94)))
+                    } else {
+                        GiftEnvelopeIllustration(opening: opening)
+                            .transition(.opacity.combined(with: .offset(y: -12)))
+                    }
+                }
+                .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
+                .rotationEffect(.degrees(-7))
+                .offset(x: (geometry.size.width - (revealed ? 158 : 200)) / 2)
             }
         }
         .frame(height: revealed ? 150 : 220)
@@ -95,6 +113,8 @@ struct MysteryGiftView: View {
                     }
                     Divider()
                     Text("You save \(terms.saving) on your first year.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                    Text("Then \(terms.renewal)/year. Auto-renews until canceled. No free trial.")
+                        .font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                 }.padding(.horizontal, 18).padding(.vertical, 24).frame(maxWidth: .infinity, minHeight: 160).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme))).padding(.top, 6)
             } else {
@@ -105,15 +125,9 @@ struct MysteryGiftView: View {
     }
     private var footer: some View {
         VStack(spacing: 0) {
-            if revealed, let terms {
-                Text("\(terms.firstYear) for the first year, then \(terms.renewal) per year. No free trial with this offer. Payment is charged to your Apple Account when confirmed. Renews automatically unless canceled at least 24 hours before renewal. Manage or cancel in App Store account settings.")
-                    .font(.ui(10)).lineSpacing(3).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.bottom, 12)
-            }
             if !revealed {
-                Button("Reveal your offer") {
-                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { revealed = true }
-                    if !isPreview { Task { await Analytics.shared.track("mystery_gift_revealed") } }
-                }.buttonStyle(GiftOfferButtonStyle())
+                Button("Reveal your offer", action: revealOffer)
+                    .buttonStyle(GiftOfferButtonStyle()).disabled(opening)
             } else if terms != nil {
                 Button { perform(onPurchase) } label: {
                     if busy { ProgressView() } else { Text("Continue with 25% off") }
@@ -134,12 +148,19 @@ struct MysteryGiftView: View {
                 }.font(.ui(10)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 24)
             }
         }
-        .overlay(alignment: .top) {
-            if isPreview {
-                Text("Design preview · purchases disabled").font(.ui(9))
-                    .foregroundStyle(Theme.muted(scheme)).offset(y: -20)
-                    .allowsHitTesting(false)
+    }
+    private func revealOffer() {
+        guard !opening, !revealed else { return }
+        revealTask = Task { @MainActor in
+            if reduceMotion {
+                withAnimation(.easeOut(duration: 0.15)) { revealed = true }
+            } else {
+                withAnimation(.easeInOut(duration: 0.6)) { opening = true }
+                do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeInOut(duration: 0.45)) { revealed = true }
             }
+            if !isPreview { await Analytics.shared.track("mystery_gift_revealed") }
         }
     }
     private func perform(_ action: @escaping () async -> String?) {

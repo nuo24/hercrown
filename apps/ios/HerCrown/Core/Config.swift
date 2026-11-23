@@ -12,6 +12,9 @@ enum AppConfig {
     static let apiBaseURL = URL(string: "https://bible-scroll-api.bible-scroll-api.workers.dev")!
     #endif
 
+    // Staging first; enable production only after the approved product/campaign checkout checks.
+    static let mysteryGiftsEnabled = isStaging
+
     /// Sent as `X-Build`: purchases and events from non-App Store builds are marked sandbox in analytics.
     static var buildChannel: String {
         #if DEBUG

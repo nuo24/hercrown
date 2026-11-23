@@ -316,6 +316,7 @@ final class AppModel {
         await Analytics.shared.flush()
         UserDefaults.standard.removeObject(forKey: "hc.medals.\(deletedAccount)")
         UserDefaults.standard.removeObject(forKey: "hc.mysteryGiftSeen.\(deletedAccount)")
+        UserDefaults.standard.removeObject(forKey: "hc.mysteryGiftPending.\(deletedAccount)")
         bookmarksByAccount.removeValue(forKey: deletedAccount)
         UserDefaults.standard.set(bookmarksByAccount, forKey: "hc.readerBookmarks")
         api.token = nil

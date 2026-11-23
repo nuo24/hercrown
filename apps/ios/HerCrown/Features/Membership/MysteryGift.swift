@@ -1,5 +1,6 @@
 import Foundation
 import StoreKit
+import UIKit
 
 /// No assumptions about USD, free trials or a remote paywall's displayed price.
 enum GiftOfferRules {
@@ -32,19 +33,48 @@ struct MysteryGiftOffer: Identifiable {
     private var showing = false
     func reset() { loading?.cancel(); loading = nil; preparedUser = nil; showing = false }
     func prepare(app: AppModel) {
-        guard let user = app.me?.user.id, !app.membership.premium, preparedUser != user else { return }
+        guard AppConfig.mysteryGiftsEnabled, let user = app.me?.user.id,
+              !app.membership.premium, preparedUser != user else { return }
         loading?.cancel(); preparedUser = user
         loading = Task { await Self.resolve(userID: user) }
     }
     func afterDecline(app: AppModel, userID: String) async {
-        guard !showing, app.me?.user.id == userID, !app.membership.premium,
-              app.mysteryGift == nil, !UserDefaults.standard.bool(forKey: "hc.mysteryGiftSeen.\(userID)") else { return }
+        guard AppConfig.mysteryGiftsEnabled, app.me?.user.id == userID, !app.membership.premium else { return }
+        UserDefaults.standard.set(true, forKey: "hc.mysteryGiftPending.\(userID)")
+        await syncPending(app: app, userID: userID)
+        // Scheduling never presents an offer in the same session.
+    }
+    private func syncPending(app: AppModel, userID: String) async {
+        let key = "hc.mysteryGiftPending.\(userID)"
+        guard UserDefaults.standard.bool(forKey: key), app.me?.user.id == userID else { return }
+        do {
+            try await app.api.send("POST", "/me/gift-offer/decline", json: [String: String]())
+            UserDefaults.standard.removeObject(forKey: key)
+        } catch { /* Retry at the next foreground session for this same account. */ }
+    }
+    private static var presentationIsClear: Bool {
+        let window = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows).first { $0.isKeyWindow }
+        guard let controller = window?.rootViewController else { return false }
+        return controller.presentedViewController == nil
+    }
+    func onNextOpen(app: AppModel, canPresent: @escaping @MainActor () -> Bool) async {
+        guard AppConfig.mysteryGiftsEnabled, !showing, let userID = app.me?.user.id,
+              app.onboardingCompleted, !app.membership.premium, app.mysteryGift == nil, Self.presentationIsClear, canPresent() else { return }
         showing = true
         defer { showing = false }
-        prepare(app: app)
-        guard let offer = await loading?.value, !Task.isCancelled, app.me?.user.id == userID,
-              !app.membership.premium, !Billing.shared.isPaywallBusy else { return }
-        UserDefaults.standard.set(true, forKey: "hc.mysteryGiftSeen.\(userID)")
+        await syncPending(app: app, userID: userID)
+        struct Status: Decodable { let due: Bool }
+        guard let status: Status = try? await app.api.get("/me/gift-offer"), status.due,
+              !Task.isCancelled, app.me?.user.id == userID, canPresent() else { return }
+        // Re-resolve current StoreKit eligibility and price; do not use yesterday's preload.
+        guard let offer = await Self.resolve(userID: userID), !Task.isCancelled,
+              app.me?.user.id == userID, !app.membership.premium,
+              !Billing.shared.isPaywallBusy, app.mysteryGift == nil, Self.presentationIsClear, canPresent() else { return }
+        struct Claim: Decodable { let available: Bool }
+        guard let response = try? await app.api.send("POST", "/me/gift-offer/claim", json: [String: String]()),
+              let claim = try? JSONDecoder().decode(Claim.self, from: response.0), claim.available, !Task.isCancelled, app.me?.user.id == userID,
+              !app.membership.premium, Self.presentationIsClear, canPresent() else { return }
         app.mysteryGift = offer
         await Analytics.shared.track("mystery_gift_viewed")
     }

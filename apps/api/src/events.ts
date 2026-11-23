@@ -37,6 +37,7 @@ export type ServerEvent =
   | "billing_issue" | "subscription_expired" | "refunded"
   | "restore_completed" | "restore_failed"
   | "account_linked"
+  | "mystery_gift_scheduled"
   | "email_preference_updated"
   | "passage_read" | "passage_saved" | "plan_started" | "plan_step_completed"
   | "trial_reminder_sent"
