@@ -22,8 +22,8 @@ struct MedalImage: View {
     var body: some View {
         Group {
             if locked {
-                Image(systemName: "lock.seal")
-                    .resizable().scaledToFit().padding(22)
+                Image(systemName: "lock.fill")
+                    .resizable().scaledToFit().scaleEffect(0.5)
                     .foregroundStyle(.secondary.opacity(0.45))
             } else if let image = MedalArtwork.image(medal) {
                 Image(uiImage: image).resizable().scaledToFit()
