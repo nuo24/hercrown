@@ -1110,3 +1110,8 @@ Final read-only verification saved /private/tmp/hercrown-testflight40-final-2026
 ### November 23 — remove rounded Discover feature card
 
 Owner identified the same inset rounded pink-card issue on Discover. Removed the feature's rounded shape and darker #F3DFE7 fill. Use Home's subtle #F8EBF0 flat full-width section wash, spanning from the filter edge through the14pt feed gap to the existing lower divider. Retained original heading/whole-word layout, illustration, reference/completion and Begin reading behavior. API check/all220 tests passed; native build succeeded and actual pink Simulator page inspected with Numbers6:26. Capture comparisons/discover-flat.png. No new TestFlight upload; build40 predates this correction.
+
+
+### November 23 — restore original greyed medal icons
+
+Owner corrected the rendering: unearned medals must retain original fruit/armor/collection artwork in grayscale/faded form, not lock symbols. Shared MedalImage now always renders original art, saturation0/opacity0.5 while unearned and full colour/opacity when earned. Carousel, tiles and Home keep the existing !earned guard; cumulative progress, thresholds and sharing eligibility unchanged. Updated decision0024 clarification. API check/all220 tests passed; native build succeeded and running pink Simulator inspected: Love uses original grey strawberry, adjacent Joy original grey peach, no replacement lock. Capture comparisons/grey-medals.png. This correction and flat Discover fix are newer than uploaded40; no new TestFlight upload.

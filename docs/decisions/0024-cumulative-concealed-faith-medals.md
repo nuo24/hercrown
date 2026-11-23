@@ -11,3 +11,7 @@ Progress is visible for every goal. The original artwork stays completely concea
 The progress endpoint returns medalRulesVersion 5 with cumulative medalStages. Native code ignores legacy sequential stage counters and falls back to lifetime totals; chapter identities remain required for themed milestones. Version 4 local caches/award detection dates are discarded, then recalculated from verified progress. No historical award date is invented.
 
 No onboarding, goal thresholds, payments or production data changes are part of this correction.
+
+## Owner clarification: locked artwork remains visible
+
+On November23 the owner clarified that “not revealed” means original artwork stays visible in grayscale/faded form, then becomes full-colour when the goal is earned. Lock-symbol substitution was incorrect and is removed. This supersedes the placeholder/concealment rendering above; cumulative progress and full earning thresholds remain unchanged. Applies to carousel, collection tiles and Home.
