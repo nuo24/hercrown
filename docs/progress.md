@@ -1097,3 +1097,11 @@ Owner requested the off-white letter material across the entire gift screen, inc
 ### November 23 — approved internal TestFlight40 retry
 
 Owner explicitly approved internal TestFlight push after reviewing continuous off-white background. Apple latest remains39; canceled40 never arrived. Rebuild1.0.1(40) from latest corrected source through18c526d, replacing the superseded archive in a new archive directory. Includes cumulative concealed medals, original gift styling, printed paper continuity and full-screen matching paper/header. API check/220 tests and70 native tests passed on relevant changes; final background rebuilt and Simulator inspected. Internal-only staging export, isolated credentials and Team group only. No external/public release or production writes.
+
+
+Final build40 archive/upload succeeded from clean source6fcd755. Archive /private/tmp/hercrown-testflight40-final-20261123/HerCrown-1.0.1-Staging.xcarchive. App/widget1.0.1(40), staging endpoint/isolated Keychain, internal-only export and exclusion of DEBUG animation preview flag verified. Apple upload accepted November23 at approximately3:59PM Eastern; processing pending. Includes final matching header/paper, printed offer animation and cumulative concealed medals. No external/public distribution or production writes.
+
+
+Build40 verified VALID and INTERNAL_ONLY: Apple ID122b0ebb-f606-41a7-a9cb-0c6d615a8ec2, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Team group28cc9cba-c547-49ca-bb95-2cfeb20b6ac4 already receives it through hasAccessToAllBuilds=true; membership read back true. Explicit assignment was unnecessary (Apple rejected re-adding an internal-only build to that already-associated internal group). Testing notes submitted. Archive source6fcd755 and staging backend9c75fad/3b991e26-b77f-4ff0-beea-e71f1a8a4b33. No external review/public release/production changes.
+
+Final read-only verification saved /private/tmp/hercrown-testflight40-final-20261123/verified.json: internal IN_BETA_TESTING, auto-notify true, Team membership true, external Beta membership false,3558-character en-US testing notes read back exactly. Apple returned a transient500 during an earlier redundant detail read; fresh parallel reads succeeded and confirmed readiness.
