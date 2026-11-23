@@ -19,10 +19,12 @@ struct MysteryGiftView: View {
     @State private var opening = false
     @State private var flapProgress = 0.0
     @State private var letterLift = 0.0
-    @State private var paperExpanded = false
-    @State private var paperSettled = false
+    @State private var paperInFlight = false
+    @State private var paperFlight = 0.0
+    @State private var paperUnfold = 0.0
+    @State private var paperSettled = 0.0
+    @State private var invitationFade = 0.0
     @State private var offerInk = 0.0
-    @Namespace private var paperNamespace
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
@@ -47,29 +49,20 @@ struct MysteryGiftView: View {
                     page(isOffer: true)
                 } else {
                     page(isOffer: false)
-                        .opacity(paperExpanded ? 0 : 1)
+                        .opacity(1 - invitationFade)
                         .allowsHitTesting(!opening)
-                    if paperExpanded {
-                        GeometryReader { geometry in
-                            ZStack {
-                                // The paper itself travels from the envelope to this exact surface.
-                                Theme.canvas(scheme)
-                                    .overlay {
-                                        GiftLetterPaper().opacity(paperSettled ? 0 : 1)
-                                    }
-                                    .overlay {
-                                        LinearGradient(colors: [.clear, .black.opacity(0.10), .white.opacity(0.22), .clear],
-                                            startPoint: .top, endPoint: .bottom)
-                                            .frame(height: 26).opacity(paperSettled ? 0 : 1)
-                                    }
-                                    .matchedGeometryEffect(id: "gift-offer-paper", in: paperNamespace)
-                                page(isOffer: true).opacity(offerInk)
-                                    .allowsHitTesting(false)
-                            }
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                        }.transition(.identity).zIndex(5)
-                    }
                 }
+            }
+            .overlayPreferenceValue(GiftLetterBounds.self) { anchor in
+                GeometryReader { geometry in
+                    if !revealed, paperInFlight, let anchor {
+                        GiftUnfoldingSheet(source: geometry[anchor], target: geometry.size,
+                            flight: paperFlight, unfolding: paperUnfold, settled: paperSettled, ink: offerInk) {
+                                page(isOffer: true)
+                            }
+                            .transition(.identity)
+                    }
+                }.allowsHitTesting(false)
             }
 
         }
@@ -86,7 +79,7 @@ struct MysteryGiftView: View {
         GeometryReader { geometry in
             ScrollView {
                 VStack(spacing: 0) {
-                    hero(revealed: isOffer).padding(.top, isOffer ? 0 : 42)
+                    hero(revealed: isOffer, foldedAspect: geometry.size.height / (geometry.size.width * 3)).padding(.top, isOffer ? 0 : 42)
                     if isOffer { reveal } else { invitation }
                     Spacer(minLength: 24)
                     footer(revealed: isOffer)
@@ -97,7 +90,7 @@ struct MysteryGiftView: View {
             }
         }
     }
-    private func hero(revealed: Bool) -> some View {
+    private func hero(revealed: Bool, foldedAspect: Double) -> some View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
                 Image("gift-cloud-bank").resizable().scaledToFit()
@@ -112,7 +105,7 @@ struct MysteryGiftView: View {
                         Image("gift-open-book").resizable().scaledToFit()
                     } else {
                         GiftEnvelopeIllustration(progress: flapProgress, letterLift: letterLift,
-                                paperExpanded: paperExpanded, paperNamespace: paperNamespace)
+                                paperInFlight: paperInFlight, foldedAspect: foldedAspect)
                             .contentShape(Rectangle())
                             .onTapGesture(perform: revealOffer)
                     }
@@ -191,20 +184,26 @@ struct MysteryGiftView: View {
                 withAnimation(.easeOut(duration: 0.15)) { revealed = true }
             } else {
                 opening = true
-                withAnimation(.timingCurve(0.22, 0.65, 0.25, 1, duration: 0.62)) { flapProgress = 1 }
-                do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
+                withAnimation(.timingCurve(0.22, 0.65, 0.25, 1, duration: 0.56)) { flapProgress = 1 }
+                do { try await Task.sleep(for: .milliseconds(580)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.timingCurve(0.2, 0.7, 0.25, 1, duration: 0.38)) { letterLift = 1 }
-                do { try await Task.sleep(for: .milliseconds(400)) } catch { return }
+                withAnimation(.timingCurve(0.2, 0.7, 0.25, 1, duration: 0.3)) { letterLift = 1 }
+                do { try await Task.sleep(for: .milliseconds(320)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.timingCurve(0.3, 0.05, 0.2, 1, duration: 0.65)) { paperExpanded = true }
-                do { try await Task.sleep(for: .milliseconds(180)) } catch { return }
+                // Hand off the same folded-size sheet at its measured position, with no fade or resizing.
+                paperInFlight = true
+                do { try await Task.sleep(for: .milliseconds(20)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.48)) { paperSettled = true }
-                do { try await Task.sleep(for: .milliseconds(250)) } catch { return }
+                withAnimation(.timingCurve(0.25, 0.1, 0.2, 1, duration: 0.45)) {
+                    paperFlight = 1; invitationFade = 1
+                }
+                do { try await Task.sleep(for: .milliseconds(280)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.3)) { offerInk = 1 }
-                do { try await Task.sleep(for: .milliseconds(340)) } catch { return }
+                withAnimation(.timingCurve(0.3, 0.05, 0.2, 1, duration: 0.68)) { paperUnfold = 1 }
+                do { try await Task.sleep(for: .milliseconds(480)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.32)) { paperSettled = 1; offerInk = 1 }
+                do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
                 guard !Task.isCancelled else { return }
                 // Replace the finished paper with the identical interactive offer, without a visual swap.
                 var transaction = Transaction(); transaction.disablesAnimations = true

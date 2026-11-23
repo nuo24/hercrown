@@ -4,8 +4,8 @@ import SwiftUI
 struct GiftEnvelopeIllustration: View, Animatable {
     var progress: Double
     var letterLift: Double
-    let paperExpanded: Bool
-    let paperNamespace: Namespace.ID
+    let paperInFlight: Bool
+    let foldedAspect: Double
     var animatableData: AnimatablePair<Double, Double> {
         get { AnimatablePair(progress, letterLift) }
         set { progress = newValue.first; letterLift = newValue.second }
@@ -15,13 +15,12 @@ struct GiftEnvelopeIllustration: View, Animatable {
             let size = min(geometry.size.width, geometry.size.height)
             ZStack(alignment: .topLeading) {
                 // This same sheet lifts out and becomes the full-screen offer surface.
-                if !paperExpanded {
-                    GiftLetterPaper()
-                        .frame(width: size * 0.52, height: size * 0.34)
-                        .matchedGeometryEffect(id: "gift-offer-paper", in: paperNamespace)
-                        .offset(x: size * 0.225, y: size * (0.34 + 0.085 * (1 - progress) - 0.38 * letterLift))
-                        .zIndex(1)
-                }
+                GiftLetterPaper()
+                    .frame(width: size * 0.52, height: size * 0.52 * foldedAspect)
+                    .anchorPreference(key: GiftLetterBounds.self, value: .bounds) { $0 }
+                    .opacity(paperInFlight ? 0 : 1)
+                    .offset(x: size * 0.225, y: size * (0.34 + 0.085 * (1 - progress) - 0.38 * letterLift))
+                    .zIndex(1)
                 EnvelopePaper()
                     .overlay {
                         EnvelopeFlap().fill(LinearGradient(
@@ -83,12 +82,90 @@ private struct EnvelopeFront: Shape {
         }
     }
 }
-/// A real sheet of paper, retained as the offer background through matched geometry.
+/// One folded panel has the same material and proportions as the sheet it opens into.
 struct GiftLetterPaper: View {
     var body: some View {
-        EnvelopePaper()
-            .clipShape(RoundedRectangle(cornerRadius: 2))
-            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color(hex: 0xD8CDBA), lineWidth: 0.5))
+        GiftPaperMaterial(settled: 0)
+            .clipShape(RoundedRectangle(cornerRadius: 1.5))
+            .overlay(RoundedRectangle(cornerRadius: 1.5).stroke(Color(hex: 0xD8CDBA), lineWidth: 0.5))
             .shadow(color: .black.opacity(0.09), radius: 2, y: 1)
+    }
+}
+
+struct GiftLetterBounds: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? { nil }
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = nextValue() ?? value
+    }
+}
+
+/// Tile a clean paper patch at fixed scale. Grain never stretches when a fold opens.
+private struct GiftPaperMaterial: View {
+    var settled: Double
+    @Environment(\.colorScheme) private var scheme
+    var body: some View {
+        Theme.canvas(scheme)
+            .overlay(Color(hex: 0xF4ECDD).opacity(1 - settled))
+            .overlay {
+                Rectangle().fill(ImagePaint(image: Image("gift-prayer-envelope"),
+                    sourceRect: CGRect(x: 0.36, y: 0.36, width: 0.26, height: 0.12), scale: 0.32))
+                    .opacity(0.55 * (1 - settled))
+            }
+    }
+}
+
+/// Three rigid panels, joined at real hinges; only the camera scale changes during flight.
+struct GiftUnfoldingSheet<Content: View>: View, Animatable {
+    let source: CGRect
+    let target: CGSize
+    var flight: Double
+    var unfolding: Double
+    var settled: Double
+    var ink: Double
+    @ViewBuilder let content: () -> Content
+    var animatableData: AnimatablePair<AnimatablePair<Double, Double>, AnimatablePair<Double, Double>> {
+        get { .init(.init(flight, unfolding), .init(settled, ink)) }
+        set { flight = newValue.first.first; unfolding = newValue.first.second
+            settled = newValue.second.first; ink = newValue.second.second }
+    }
+    var body: some View {
+        let panelHeight = target.height / 3
+        let top = min(1, max(0, unfolding / 0.85))
+        let bottom = min(1, max(0, (unfolding - 0.12) / 0.88))
+        let angle = 7.0 * Double.pi / 180
+        let sourceWidth = source.width / (cos(angle) + panelHeight / target.width * sin(angle))
+        let scale = sourceWidth / target.width + (1 - sourceWidth / target.width) * flight
+        ZStack(alignment: .top) {
+            panel(1).offset(y: panelHeight)
+            panel(2)
+                .overlay(Color.black.opacity(0.10 * sin(.pi * bottom)))
+                .shadow(color: .black.opacity(0.12 * (1 - bottom)), radius: 5, y: -2)
+                .rotation3DEffect(.degrees(180 * (1 - bottom)), axis: (x: 1, y: 0, z: 0), anchor: .top, perspective: 0.18)
+                .offset(y: 2 * panelHeight)
+            panel(0)
+                .overlay(Color.black.opacity(0.12 * sin(.pi * top)))
+                .shadow(color: .black.opacity(0.14 * (1 - top)), radius: 5, y: 2)
+                .rotation3DEffect(.degrees(-180 * (1 - top)), axis: (x: 1, y: 0, z: 0), anchor: .bottom, perspective: 0.18)
+        }
+        .frame(width: target.width, height: target.height, alignment: .top)
+        .rotationEffect(.degrees(-7 * (1 - flight)))
+        .scaleEffect(scale)
+        .position(x: source.midX + (target.width / 2 - source.midX) * flight,
+                  y: source.midY + (target.height / 2 - source.midY) * flight)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+    private func panel(_ index: Int) -> some View {
+        ZStack(alignment: .top) {
+            GiftPaperMaterial(settled: settled)
+            content().frame(width: target.width, height: target.height)
+                .offset(y: -Double(index) * target.height / 3)
+                .opacity(ink)
+        }
+        .frame(width: target.width, height: target.height / 3, alignment: .top)
+        .clipped()
+        .overlay(alignment: index == 0 ? .bottom : .top) {
+            Rectangle().fill(Color.black.opacity(0.07 * (1 - settled))).frame(height: 0.5)
+        }
     }
 }

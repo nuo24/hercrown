@@ -10,7 +10,7 @@ Authenticated endpoints record the dismissal, read availability, and atomically 
 
 ## Motion and copy
 
-Use the original paper/ribbon artwork with a layered, hinged closed flap. Reveal opens the flap, lifts the already-present paper out of the envelope, and expands that same sheet into the offer surface with matched geometry. A subtle crease settles away as the offer appears; the sequence takes roughly two seconds. Ignore repeated taps while opening; cancel unfinished work on dismissal. Reduce Motion uses a brief fade. Revealing never purchases. Keep free reading and close exits.
+Use the original paper/ribbon artwork with a layered, hinged closed flap. Reveal opens the flap, lifts the already-present paper out of the envelope, and moves that same folded sheet forward with uniform scale and perspective, then opens three rigid panels about their hinges into the offer surface. Fixed-scale tiled paper grain avoids stretching; fold shading settles away as the offer appears. The sequence takes roughly two seconds. Simulator review exports must preserve captured frame timing (`-fps_mode passthrough`), with close-frame review and normal-speed playback. Ignore repeated taps while opening; cancel unfinished work on dismissal. Reduce Motion uses a brief fade. Revealing never purchases. Keep free reading and close exits.
 
 Remove the long renewal paragraph above the purchase CTA as requested. Retain a concise renewal/auto-renewal/no-trial note in the price card and the Terms/Privacy links. Prices in the labelled design preview are fixtures with purchase/restore disabled; the real offer uses current StoreKit terms.
 
