@@ -168,28 +168,33 @@ struct HerCrownApp: App {
               app.mysteryGift?.id == offer.id, !app.membership.premium else {
             return "This offer has changed or is no longer available. You can continue with free reading."
         }
-        await Analytics.shared.track("purchase_started", ["product_id": .string(fresh.product.id)])
-        do {
-            switch try await fresh.product.purchase() {
-            case .success(.verified(let transaction)):
-                guard transaction.productID == fresh.product.id, app.me?.user.id == offer.userID else {
-                    return "Your account changed. Restore Purchases from the account you want to use."
-                }
-                let result = await app.verifyPurchases(transactionID: String(transaction.originalID))
-                await transaction.finish()
-                if app.membership.premium { app.mysteryGift = nil; return nil }
-                return result
-            case .pending:
-                return "Your purchase is pending Apple’s approval. You can keep reading for free."
-            case .userCancelled:
-                await Analytics.shared.track("purchase_abandoned")
-                return nil
-            default: return "We couldn’t verify this purchase. You can keep reading for free."
+        // Superwall handles StoreKit and transaction completion; its delegate records client events once.
+        switch await Billing.shared.purchaseGift(fresh.product) {
+        case .purchased:
+            guard app.me?.user.id == offer.userID else {
+                return "Your account changed. Restore Purchases from the account you want to use."
             }
-        } catch {
-            await Analytics.shared.track("purchase_failed", ["product_id": .string(fresh.product.id)])
+            var purchasedTransaction: StoreKit.Transaction?
+            for await entitlement in StoreKit.Transaction.currentEntitlements {
+                if case .verified(let transaction) = entitlement, transaction.productID == fresh.product.id {
+                    purchasedTransaction = transaction
+                    break
+                }
+            }
+            guard let transaction = purchasedTransaction, app.me?.user.id == offer.userID else {
+                return "We couldn’t verify this purchase yet. Try Restore Purchases in Settings."
+            }
+            let result = await app.verifyPurchases(transactionID: String(transaction.originalID))
+            if app.membership.premium { app.mysteryGift = nil; return nil }
+            return result
+        case .pending:
+            return "Your purchase is pending Apple’s approval. You can keep reading for free."
+        case .cancelled:
+            return nil
+        case .failed:
             return "The purchase couldn’t be completed. You can keep reading for free."
         }
+
     }
 
     private let returnOfferID = "trial_return_1999"

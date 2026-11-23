@@ -265,6 +265,13 @@ final class Billing: NSObject {
     }
     #endif
 
+    /// Native gift UI uses the same purchase pipeline as hosted paywalls, including Superwall reporting.
+    /// Server verification still decides whether this app account receives Plus.
+    func purchaseGift(_ product: StoreKit.Product) async -> PurchaseResult {
+        guard configured, !isPaywallBusy else { return .cancelled }
+        return await Superwall.shared.purchase(product)
+    }
+
     /// After a purchase or restore: the server verifies the transaction with Apple and grants Plus, then the app refreshes.
     /// If she just started a free trial, offer the trial-ending reminder (docs/trial-reminder.md).
     func syncPurchase() async {
