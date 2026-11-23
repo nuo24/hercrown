@@ -11,37 +11,45 @@ struct GiftEnvelopeIllustration: View, Animatable {
         GeometryReader { geometry in
             let size = min(geometry.size.width, geometry.size.height)
             ZStack(alignment: .topLeading) {
-                // The letter is revealed behind the opening flap, never swapped with a second envelope.
+                // Contents exist from the first frame, physically covered by the closed flap.
+                // They lift gently with the opening rather than fading into an empty pocket.
                 Image("gift-prayer-envelope").resizable().scaledToFit()
                     .mask(EnvelopeLetter())
-                    .opacity(min(1, max(0, (progress - 0.5) * 3)))
-                EnvelopeFlap()
-                    .fill(LinearGradient(colors: [Color(hex: 0xF7F0E3), Color(hex: 0xE7DBC7)], startPoint: .top, endPoint: .bottom))
-                    .overlay(EnvelopeFlap().stroke(Color(hex: 0xD6C9B5), lineWidth: 0.6))
+                    .offset(y: size * 0.085 * (1 - progress))
+                    .zIndex(1)
+                EnvelopePaper()
                     .overlay {
-                        Canvas { context, canvas in
-                            // Subtle paper fibres, stable throughout the hinge movement.
-                            for i in 0..<450 {
-                                let x = Double((i * 73) % 449) / 449 * canvas.width
-                                let y = Double((i * 131) % 443) / 443 * canvas.height
-                                var fibre = Path()
-                                fibre.move(to: CGPoint(x: x, y: y))
-                                fibre.addLine(to: CGPoint(x: x + 1.5, y: y + 0.3))
-                                context.stroke(fibre, with: .color(.brown.opacity(0.08)), lineWidth: 0.4)
-                            }
-                        }.clipShape(EnvelopeFlap())
+                        EnvelopeFlap().fill(LinearGradient(
+                            colors: [.white.opacity(0.12), .brown.opacity(0.07 + 0.12 * sin(.pi * progress))],
+                            startPoint: .top, endPoint: .bottom))
                     }
-                    .shadow(color: .black.opacity(0.10), radius: 1.2, y: 1)
+                    .clipShape(EnvelopeFlap())
+                    .overlay(EnvelopeFlap().stroke(Color(hex: 0xCFC1AC).opacity(0.65), lineWidth: 0.5))
+                    .shadow(color: .black.opacity(0.06 + 0.12 * sin(.pi * progress)), radius: 0.8 + 2 * sin(.pi * progress), y: 0.8)
                     .frame(width: size * 0.74, height: size * 0.34)
                     .rotation3DEffect(.degrees(-180 * progress), axis: (x: 1, y: 0, z: 0), anchor: .top, perspective: 0.22)
                     .offset(x: size * 0.11, y: size * 0.415)
+                    .zIndex(progress < 0.5 ? 2 : 0)
                 Image("gift-prayer-envelope").resizable().scaledToFit()
                     .mask(EnvelopeFront())
+                    .zIndex(3)
             }
+            .scaleEffect(1 + 0.035 * progress, anchor: .center)
             .frame(width: size, height: size)
             .frame(width: geometry.size.width, height: geometry.size.height)
         }
         .accessibilityHidden(true)
+    }
+}
+
+/// Use the original letter's paper grain for both sides of the flap, not a flat substitute.
+private struct EnvelopePaper: View {
+    var body: some View {
+        GeometryReader { geometry in
+            Image("gift-prayer-envelope").resizable()
+                .frame(width: geometry.size.width / 0.38, height: geometry.size.height / 0.17)
+                .offset(x: -geometry.size.width * 0.27 / 0.38, y: -geometry.size.height * 0.38 / 0.17)
+        }.clipped()
     }
 }
 

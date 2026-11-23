@@ -18,7 +18,6 @@ struct MysteryGiftView: View {
     }()
     @State private var opening = false
     @State private var flapProgress = 0.0
-    @State private var pageOpacity = 1.0
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
@@ -38,25 +37,15 @@ struct MysteryGiftView: View {
                         .frame(width: 44, height: 44)
                 }.accessibilityLabel("Continue with free reading").disabled(busy)
             }.padding(.horizontal, 22).padding(.top, 8)
-            GeometryReader { geometry in
-                ScrollView {
-                    VStack(spacing: 0) {
-                        hero.padding(.top, revealed ? 0 : 42)
-                        if revealed {
-                            reveal.transition(.opacity.combined(with: .offset(y: 14)))
-                        } else {
-                            invitation.transition(.opacity.combined(with: .offset(y: -10)))
-                        }
-                        Spacer(minLength: 24)
-                        footer
-                    }
-                    .padding(.horizontal, 22).padding(.bottom, revealed ? 14 : 12)
-                    .frame(maxWidth: 430).frame(maxWidth: .infinity)
-                    .frame(minHeight: geometry.size.height, alignment: .top)
+            ZStack {
+                if revealed {
+                    page(isOffer: true).transition(.opacity)
+                } else {
+                    page(isOffer: false).transition(.opacity)
                 }
             }
+
         }
-        .opacity(pageOpacity)
         .ignoresSafeArea(.container, edges: .bottom)
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme).ignoresSafeArea()).buttonStyle(.plain)
         .interactiveDismissDisabled(busy)
@@ -66,7 +55,22 @@ struct MysteryGiftView: View {
             Button("OK", role: .cancel) {}
         } message: { Text(message ?? "") }
     }
-    private var hero: some View {
+    private func page(isOffer: Bool) -> some View {
+        GeometryReader { geometry in
+            ScrollView {
+                VStack(spacing: 0) {
+                    hero(revealed: isOffer).padding(.top, isOffer ? 0 : 42)
+                    if isOffer { reveal } else { invitation }
+                    Spacer(minLength: 24)
+                    footer(revealed: isOffer)
+                }
+                .padding(.horizontal, 22).padding(.bottom, isOffer ? 14 : 12)
+                .frame(maxWidth: 430).frame(maxWidth: .infinity)
+                .frame(minHeight: geometry.size.height, alignment: .top)
+            }
+        }
+    }
+    private func hero(revealed: Bool) -> some View {
         GeometryReader { geometry in
             ZStack(alignment: .topLeading) {
                 Image("gift-cloud-bank").resizable().scaledToFit()
@@ -79,12 +83,10 @@ struct MysteryGiftView: View {
                 Group {
                     if revealed {
                         Image("gift-open-book").resizable().scaledToFit()
-                            .transition(.opacity.combined(with: .scale(scale: 0.94)))
                     } else {
                         GiftEnvelopeIllustration(progress: flapProgress)
                             .contentShape(Rectangle())
                             .onTapGesture(perform: revealOffer)
-                            .transition(.opacity.combined(with: .offset(y: -12)))
                     }
                 }
                 .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
@@ -128,7 +130,7 @@ struct MysteryGiftView: View {
             }
         }.multilineTextAlignment(.center)
     }
-    private var footer: some View {
+    private func footer(revealed: Bool) -> some View {
         VStack(spacing: 0) {
             if !revealed {
                 Button("Reveal your offer", action: revealOffer)
@@ -161,19 +163,12 @@ struct MysteryGiftView: View {
                 withAnimation(.easeOut(duration: 0.15)) { revealed = true }
             } else {
                 opening = true
-                // Open fully, then let the open envelope rest before changing pages.
-                withAnimation(.easeInOut(duration: 1.0)) { flapProgress = 1 }
-                do { try await Task.sleep(for: .milliseconds(1750)) } catch { return }
+                // The contents are present beneath the flap throughout this movement.
+                withAnimation(.timingCurve(0.22, 0.65, 0.25, 1, duration: 0.95)) { flapProgress = 1 }
+                do { try await Task.sleep(for: .milliseconds(1400)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.22)) { pageOpacity = 0 }
-                do { try await Task.sleep(for: .milliseconds(240)) } catch { return }
-                guard !Task.isCancelled else { return }
-                // Swap the entire page while invisible. Never animate its layout constraints.
-                var transaction = Transaction(); transaction.disablesAnimations = true
-                withTransaction(transaction) { revealed = true }
-                do { try await Task.sleep(for: .milliseconds(30)) } catch { return }
-                guard !Task.isCancelled else { return }
-                withAnimation(.easeIn(duration: 0.35)) { pageOpacity = 1 }
+                // Two independently laid-out pages dissolve together; no blank frame or resizing hero.
+                withAnimation(.easeInOut(duration: 0.55)) { revealed = true }
             }
             if !isPreview { await Analytics.shared.track("mystery_gift_revealed") }
         }
