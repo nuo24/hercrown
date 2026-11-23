@@ -128,7 +128,7 @@ struct ChapterPicker: View {
                             .frame(maxWidth: .infinity, minHeight: 48)
                             .background(Theme.supporting(scheme), in: RoundedRectangle(cornerRadius: 10))
                             .overlay {
-                                if selected { RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.text(scheme)) }
+                                if selected { RoundedRectangle(cornerRadius: 10).strokeBorder(Theme.accent(scheme)) }
                             }
                     }
                     .buttonStyle(.plain)

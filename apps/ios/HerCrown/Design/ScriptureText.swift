@@ -107,3 +107,42 @@ extension View {
         modifier(SheetControlInset(back: back, done: done))
     }
 }
+
+
+/// Home uses the full card width before gently reducing long passages. Never truncates Scripture.
+@MainActor enum HomeVerseTypography {
+    static func pointSize(text: String, width: CGFloat, preferred: CGFloat, accessibility: Bool) -> CGFloat {
+        guard width > 0, !accessibility else { return preferred }
+        let floor = preferred * (22.0 / 28.0)
+        let targetHeight = 180 * (preferred / 28)
+        var size = preferred
+        while size > floor {
+            let font = UIFont(name: "Baskerville", size: size) ?? .systemFont(ofSize: size)
+            let paragraph = NSMutableParagraphStyle(); paragraph.lineSpacing = 1
+            let height = (text as NSString).boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude),
+                options: [.usesLineFragmentOrigin, .usesFontLeading],
+                attributes: [.font: font, .kern: -0.4, .paragraphStyle: paragraph], context: nil).height
+            if height <= targetHeight { break }
+            size = max(floor, size - 0.5)
+        }
+        return size
+    }
+}
+
+struct HomeVerseText: View {
+    let text: String
+    let reference: String
+    let translation: String
+    @ScaledMetric(relativeTo: .title2) private var preferred: CGFloat = 28
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @State private var width: CGFloat = 300
+    var body: some View {
+        ScriptureText(text: text, reference: reference, translation: translation)
+            .font(.custom("Baskerville", fixedSize: HomeVerseTypography.pointSize(text: text, width: width,
+                preferred: preferred, accessibility: dynamicTypeSize.isAccessibilitySize)))
+            .tracking(-0.4).lineSpacing(1)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width = $0 }
+    }
+}

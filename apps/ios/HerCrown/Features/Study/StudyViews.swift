@@ -29,7 +29,7 @@ struct AIStudyView: View {
             .padding(.bottom, 44)
         }
         .background(Theme.canvas(scheme))
-        .tint(Theme.text(scheme)).foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
+        .tint(Theme.accent(scheme)).foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

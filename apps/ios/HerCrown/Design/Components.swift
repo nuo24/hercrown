@@ -9,15 +9,15 @@ struct CapsuleButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         let primary = kind == .primary
-        let fill: Color = primary ? Theme.text(scheme) : Theme.surface(scheme)
-        let fg: Color = primary ? (Theme.pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.text(scheme)
+        let fill: Color = primary ? Theme.accent(scheme) : Theme.surface(scheme)
+        let fg: Color = primary ? (Theme.pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9)) : Theme.accent(scheme)
         configuration.label
             .font(.system(size: primary ? 14 : 13))
             .foregroundStyle(fg)
             .frame(maxWidth: .infinity, minHeight: primary ? 48 : 40)
             .padding(.horizontal, primary ? 20 : 6)
             .background(Capsule().fill(fill))
-            .overlay(Capsule().strokeBorder(primary ? .clear : Theme.text(scheme), lineWidth: 1))
+            .overlay(Capsule().strokeBorder(primary ? .clear : Theme.accent(scheme), lineWidth: 1))
             .shadow(color: .black.opacity(primary ? 0.07 : 0.03), radius: 1, y: 1)
             .opacity(configuration.isPressed ? 0.82 : 1)
             .scaleEffect(configuration.isPressed ? 0.985 : 1)
@@ -37,7 +37,7 @@ struct IconButton: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 17, weight: .regular))
-                .foregroundStyle(Theme.text(scheme))
+                .foregroundStyle(Theme.accent(scheme))
                 .frame(width: 44, height: 44)
                 .iconSurface(Circle())
         }
@@ -141,7 +141,7 @@ struct PageIconButton: View {
             Image.glyph(glyph)
                 .frame(width: 21, height: 21)
                 .frame(width: 44, height: 44)
-                .foregroundStyle(Theme.text(scheme))
+                .foregroundStyle(Theme.accent(scheme))
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

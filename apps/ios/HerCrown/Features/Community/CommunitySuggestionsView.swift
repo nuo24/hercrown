@@ -42,7 +42,7 @@ struct CommunitySuggestionsView: View {
             }.padding(22)
         }.background(Theme.canvas(scheme)).foregroundStyle(Theme.text(scheme))
             .navigationTitle("Suggest a cause").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.tint(Theme.text(scheme)) } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.tint(Theme.accent(scheme)) } }
             .task { await load() }
             .sheet(item: $editing, onDismiss: { Task { await load() } }) { suggestion in NavigationStack { CauseSuggestionEditor(suggestion: suggestion) } }
     }
@@ -76,7 +76,7 @@ private struct CauseSuggestionEditor: View {
                     textField("Name", key: "name", text: $suggestion.name, max: 90)
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Type").font(.ui(13, weight: .medium))
-                        Picker("Type", selection: $suggestion.type) { ForEach(["Charity", "Local church", "Community project"], id: \.self) { Text($0).tag($0) } }.tint(Theme.text(scheme))
+                        Picker("Type", selection: $suggestion.type) { ForEach(["Charity", "Local church", "Community project"], id: \.self) { Text($0).tag($0) } }.tint(Theme.accent(scheme))
                     }
                     textField("City (optional)", key: "city", text: $suggestion.city, max: 90)
                     textField("Website (optional)", key: "website", text: $suggestion.website, max: 500)
@@ -94,7 +94,7 @@ private struct CauseSuggestionEditor: View {
                 }
             }.padding(22)
         }.background(Theme.canvas(scheme)).foregroundStyle(Theme.text(scheme)).navigationTitle("Suggest a cause").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.tint(Theme.text(scheme)) } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { dismiss() }.tint(Theme.accent(scheme)) } }
     }
     private func textField(_ title: String, key: String, text: Binding<String>, max: Int) -> some View {
         VStack(alignment: .leading, spacing: 8) {

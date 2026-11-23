@@ -100,7 +100,7 @@ struct SettingsView: View {
                                 VStack(alignment: .leading, spacing: 0) {
                                     formRow("bell", nil) {
                                         Toggle(isOn: Binding(get: { app.preferences.remindersEnabled }, set: setReminders)) { Text("Daily reminder").font(.system(size: 12, weight: .medium)) }
-                                            .tint(Theme.text(scheme)).frame(minHeight: 44)
+                                            .tint(Theme.accent(scheme)).frame(minHeight: 44)
                                         if app.preferences.remindersEnabled {
                                             DatePicker("Reminder time", selection: $reminderTime, displayedComponents: .hourAndMinute)
                                                 .font(.system(size: 12, weight: .medium))
@@ -133,7 +133,7 @@ struct SettingsView: View {
                                     Toggle(isOn: Binding(get: { app.preferences.wordsOfJesusInRed }, set: { v in app.updatePreferences(["wordsOfJesusInRed": v]) { $0.wordsOfJesusInRed = v } })) {
                                         Text("Words of Jesus in red").font(.system(size: 12, weight: .medium))
                                     }
-                                    .tint(Theme.text(scheme)).frame(minHeight: 44)
+                                    .tint(Theme.accent(scheme)).frame(minHeight: 44)
                                 }
                             }
                             sectionTitle("Here for you")
@@ -494,7 +494,7 @@ struct AccountView: View {
                             }
                         }))
                         .font(.ui(15))
-                        .tint(Theme.text(scheme))
+                        .tint(Theme.accent(scheme))
                         .disabled(!emailPreferenceLoaded)
                         Text("Receive Her Crown news and reading encouragement. Optional; turn off anytime.")
                             .font(.ui(12)).foregroundStyle(Theme.muted(scheme))
@@ -876,7 +876,7 @@ struct SubscriptionView: View {
                     Text("Manage subscription").font(.ui(15, weight: .semibold))
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .foregroundStyle(Theme.canvas(scheme))
-                        .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+                        .background(Theme.accent(scheme), in: RoundedRectangle(cornerRadius: 8))
                 }.buttonStyle(.plain).padding(.top, 6)
             }
             .font(.ui(14))

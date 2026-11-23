@@ -72,7 +72,7 @@ struct HerCrownApp: App {
         }
             .environment(app)
             .preferredColorScheme(colorScheme)
-            .tint(Theme.text(colorScheme ?? .light))
+            .tint(Theme.accent(colorScheme ?? .light))
             .task {
                 // Load her translation off the main thread, then sign in / sync.
                 let translation = app.preferences.translation

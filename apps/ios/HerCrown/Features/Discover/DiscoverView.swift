@@ -266,7 +266,7 @@ struct DiscoverView: View {
         return Button { complete(card) } label: {
             Image(systemName: checked ? "checkmark.circle.fill" : "checkmark.circle")
                 .font(.system(size: size, weight: .regular))
-                .foregroundStyle(Theme.text(scheme))
+                .foregroundStyle(Theme.accent(scheme))
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
         }
@@ -295,6 +295,7 @@ struct DiscoverView: View {
                         .frame(minHeight: 44)
                     }
                     .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent(scheme))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -367,9 +368,9 @@ struct DiscoverView: View {
                             Text((f.id == "plan" ? "Plan" : f.title).uppercased())
                                 .font(.ui(10, weight: .medium)).tracking(0.45)
                                 .padding(.horizontal, 6).frame(minHeight: 44)
-                                .foregroundStyle(selected ? Theme.text(scheme) : Theme.muted(scheme))
+                                .foregroundStyle(selected ? Theme.accent(scheme) : Theme.muted(scheme))
                                 .overlay(alignment: .bottom) {
-                                    if selected { Rectangle().fill(Theme.text(scheme)).frame(height: 1) }
+                                    if selected { Rectangle().fill(Theme.accent(scheme)).frame(height: 1) }
                                 }
                         }
                         .buttonStyle(.plain)
@@ -498,14 +499,14 @@ private struct DiscoverCard: View {
                     HStack(spacing: 8) { Text("Read & reflect"); Image(systemName: "chevron.right").font(.system(size: 11, weight: .semibold)) }
                         .font(.system(size: 14)).padding(.horizontal, 20).frame(height: 48)
                         .foregroundStyle(scheme == .dark ? Color(hex: 0x080809) : Color(hex: 0xF7F7F9))
-                        .background(Capsule().fill(Theme.text(scheme)))
+                        .background(Capsule().fill(Theme.accent(scheme)))
                         .shadow(color: .black.opacity(0.07), radius: 1, y: 1)
                 }
                 .buttonStyle(.plain)
                 .padding(.top, 20)
                 HStack(spacing: 13) {
                     Button { app.toggleSave(card.ref) } label: {
-                        Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart").foregroundStyle(app.isSaved(card.ref) ? Theme.text(scheme) : Theme.muted(scheme)).frame(width: 44, height: 44)
+                        Image(systemName: app.isSaved(card.ref) ? "heart.fill" : "heart").foregroundStyle(app.isSaved(card.ref) ? Theme.accent(scheme) : Theme.muted(scheme)).frame(width: 44, height: 44)
                     }
                     .accessibilityLabel(app.isSaved(card.ref) ? "Remove from saved" : "Save verse")
                     Button(action: onNote) { Image(systemName: "message").foregroundStyle(Theme.muted(scheme)).frame(width: 44, height: 44) }.accessibilityLabel("Write a note")

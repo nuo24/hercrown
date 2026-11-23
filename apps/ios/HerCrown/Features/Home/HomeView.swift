@@ -50,7 +50,9 @@ struct HomeView: View {
                     header
                     identity
                     collections
-                    Divider()
+                    Rectangle().fill(Theme.border(scheme)).frame(height: 1)
+                        .padding(.horizontal, 22)
+                        .padding(.bottom, 12)
                     VStack(alignment: .leading, spacing: 0) {
                         switch collection {
                         case .library: library
@@ -193,7 +195,7 @@ struct HomeView: View {
                         .padding(.horizontal, 13)
                         .frame(minHeight: 35)
                         .foregroundStyle(selected ? Theme.canvas(scheme) : Theme.muted(scheme))
-                        .background(selected ? Theme.text(scheme) : .clear, in: Capsule())
+                        .background(selected ? Theme.accent(scheme) : .clear, in: Capsule())
                         .frame(minHeight: 44)
                         .contentShape(Rectangle())
                 }
@@ -234,22 +236,27 @@ struct HomeView: View {
     }
 
     private var medalsEntry: some View {
-        Button { showingMedals = true } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    MedalImage(medal: FaithMedal.items(.fruit)[0]).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
-                    MedalImage(medal: FaithMedal.items(.fruit)[2]).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
-                }.frame(width: 74, height: 74)
-                VStack(alignment: .leading, spacing: 7) {
-                    Text("Your Faith Medals").font(.ui(11, weight: .medium))
-                    Text(medals.homeMedal.name).font(.serif(23)).tracking(-0.3)
-                    Text(medals.progress.map { "\(medals.homeMedal.counts($0).days) of \(medals.homeMedal.days) reading days · View medal" } ?? "View your collection")
-                        .font(.ui(10, weight: .medium)).foregroundStyle(Theme.muted(scheme))
-                }
-                Spacer(minLength: 0)
-                Image.glyph("arrow").frame(width: 14, height: 14)
-            }.frame(maxWidth: .infinity, minHeight: 96, alignment: .leading).contentShape(Rectangle())
-        }.buttonStyle(.plain).padding(.top, 12).padding(.bottom, 6)
+        VStack(spacing: 0) {
+            Button { showingMedals = true } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        MedalImage(medal: FaithMedal.items(.fruit)[0]).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
+                        MedalImage(medal: FaithMedal.items(.fruit)[2]).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
+                    }.frame(width: 74, height: 74)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Your Faith Medals").font(.ui(11, weight: .medium))
+                        Text(medals.homeMedal.name).font(.serif(23)).tracking(-0.3)
+                        HStack(spacing: 5) {
+                            Text(medals.progress.map { "\(medals.homeMedal.counts($0).days) of \(medals.homeMedal.days) reading days · View medal" } ?? "View your collection")
+                                .font(.ui(10, weight: .medium)).foregroundStyle(Theme.muted(scheme))
+                            Image.glyph("arrow").frame(width: 11, height: 11).foregroundStyle(Theme.accent(scheme))
+                        }
+                    }
+                    Spacer(minLength: 0)
+                }.frame(maxWidth: .infinity, minHeight: 96, alignment: .leading).contentShape(Rectangle())
+            }.buttonStyle(.plain).padding(.top, 12).padding(.bottom, 12)
+            Rectangle().fill(Theme.border(scheme)).frame(height: 1)
+        }
     }
 
     private var bookmarks: some View {
@@ -414,10 +421,10 @@ struct HomeView: View {
                         .frame(width: 44, height: 44)
                     }
                     .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent(scheme))
                     .accessibilityLabel(app.isSaved(verse.ref) ? "Remove from saved" : "Save verse")
                 }
-                ScriptureText(text: verse.text ?? "", reference: verse.ref, translation: verse.translation).font(.serif(28, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
-                    .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 265, alignment: .leading)
+                HomeVerseText(text: verse.text ?? "", reference: verse.ref, translation: verse.translation)
                 HStack(spacing: 4) {
                     Text("\(verse.label.uppercased()) · \(BibleStore.offline[verse.translation] ?? verse.translation.uppercased())")
                         .font(.ui(10)).tracking(0.45).foregroundStyle(Theme.muted(scheme))
@@ -430,7 +437,9 @@ struct HomeView: View {
                         .frame(minHeight: 44)
                     }
                     .buttonStyle(.plain)
+                    .foregroundStyle(Theme.accent(scheme))
                     VerseShareButton(text: verse.text ?? "", reference: verse.label, translation: verse.translation)
+                        .foregroundStyle(Theme.accent(scheme))
                 }
             }
             .foregroundStyle(Theme.text(scheme))
@@ -509,7 +518,7 @@ struct HomeView: View {
             .font(.ui(14, weight: .semibold))
             .foregroundStyle(Theme.canvas(scheme))
             .frame(maxWidth: .infinity, minHeight: 48)
-            .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+            .background(Theme.accent(scheme), in: RoundedRectangle(cornerRadius: 8))
             .buttonStyle(.plain)
             .disabled(selectedVerse == nil)
             .opacity(selectedVerse == nil ? 0.5 : 1)

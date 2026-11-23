@@ -66,7 +66,7 @@ struct CommunityView: View {
                         .font(.ui(13)).lineSpacing(5).foregroundStyle(Theme.muted(scheme)).padding(.bottom, 9)
                     Button { showingSuggestions = true } label: {
                         Label("Suggest a local cause", systemImage: "arrow.right").labelStyle(TrailingIcon()).font(.ui(13)).frame(minHeight: 44)
-                    }.padding(.bottom, 22)
+                    }.foregroundStyle(Theme.accent(scheme)).padding(.bottom, 22)
                     Divider()
                     if let round = state.round {
                         HStack(alignment: .firstTextBaseline) {
@@ -110,7 +110,7 @@ struct CommunityView: View {
                         Text("Their work").font(.ui(14, weight: .medium))
                         Text(cause.support).font(.ui(14)).lineSpacing(6).foregroundStyle(Theme.muted(scheme))
                         if let website = cause.website, let url = URL(string: website), url.scheme == "https" {
-                            Link("Visit official website", destination: url).font(.ui(13, weight: .medium)).tint(Theme.text(scheme))
+                            Link("Visit official website", destination: url).font(.ui(13, weight: .medium)).tint(Theme.accent(scheme))
                         }
                         Text(cause.id == "mercy-multiplied" ? "Representative stock photo, not Mercy Multiplied staff or participants. No endorsement implied." : "Organization program photo, shared with permission confirmed by the owner. No endorsement implied.").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         Text("A vote never authorizes a payment.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
@@ -119,7 +119,7 @@ struct CommunityView: View {
                         if state?.round?.preview == true { Text("Preview cause profile · representative stock photograph").font(.ui(10)).foregroundStyle(Theme.muted(scheme)) }
                     }.padding(22)
                 }.background(Theme.canvas(scheme)).foregroundStyle(Theme.text(scheme))
-                    .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { story = nil }.tint(Theme.text(scheme)) } }
+                    .toolbar { ToolbarItem(placement: .topBarTrailing) { Button("Done") { story = nil }.tint(Theme.accent(scheme)) } }
             }
         }
         .confirmationDialog(state?.vote == nil ? "Vote for \(candidate?.name ?? "this cause")?" : "Move your vote to \(candidate?.name ?? "this cause")?", isPresented: Binding(get: { candidate != nil }, set: { if !$0 { candidate = nil } }), titleVisibility: .visible, presenting: candidate) { cause in
@@ -136,6 +136,7 @@ struct CommunityView: View {
                 Button { candidate = cause } label: {
                     HStack(spacing: 5) { if selected { Image(systemName: "checkmark") }; Text(selected ? "Voted" : "Vote") }
                         .font(.ui(11, weight: .medium)).padding(.horizontal, 14).frame(minHeight: 44)
+                        .foregroundStyle(Theme.accent(scheme))
                         .background(.regularMaterial, in: Capsule()).overlay(Capsule().strokeBorder(.white.opacity(0.5)))
                 }.contentShape(Capsule()).padding(9).disabled(sending).accessibilityLabel(selected ? "Your vote for \(cause.name)" : "Vote for \(cause.name)")
             }

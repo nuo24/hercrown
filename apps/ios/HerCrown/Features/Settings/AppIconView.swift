@@ -49,7 +49,7 @@ struct AppIconView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
                     .frame(width: 104, height: 104)
                     .overlay {
-                        if selected { RoundedRectangle(cornerRadius: 24).strokeBorder(Theme.text(scheme), lineWidth: 2) }
+                        if selected { RoundedRectangle(cornerRadius: 24).strokeBorder(Theme.accent(scheme), lineWidth: 2) }
                     }
                     .overlay(alignment: .bottomTrailing) {
                         if selected {
@@ -57,7 +57,7 @@ struct AppIconView: View {
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(Theme.canvas(scheme))
                                 .frame(width: 20, height: 20)
-                                .background(Theme.text(scheme), in: Circle())
+                                .background(Theme.accent(scheme), in: Circle())
                                 .padding(2)
                                 .background(Theme.canvas(scheme), in: Circle())
                                 .offset(x: 4, y: 4)

@@ -273,7 +273,7 @@ private struct GiftOfferButtonStyle: ButtonStyle {
             .font(.ui(13, weight: .medium))
             .foregroundStyle(Theme.pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x131313) : .white)
             .frame(maxWidth: .infinity, minHeight: 46)
-            .background(Theme.text(scheme), in: Capsule())
+            .background(Theme.accent(scheme), in: Capsule())
             .opacity(configuration.isPressed ? 0.82 : 1)
     }
 }

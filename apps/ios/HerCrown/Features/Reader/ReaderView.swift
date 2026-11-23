@@ -53,7 +53,7 @@ struct ReaderView: View {
                         }
                     }
                     .foregroundStyle(Theme.text(scheme))
-                    .tint(Theme.text(scheme))
+                    .tint(Theme.accent(scheme))
                     .padding(32)
                 }
             }
@@ -208,7 +208,7 @@ struct ReaderView: View {
             }
             .accessibilityLabel("Chapter, \(model.chapter?.label ?? "")")
         }
-        .foregroundStyle(Theme.text(scheme))
+        .foregroundStyle(Theme.accent(scheme))
         .padding(.horizontal, 12)
         .padding(.top, 12)
     }
@@ -342,7 +342,7 @@ struct VersePage: View {
                                  reference: reference,
                                  translation: chapter.translation, copyright: chapter.copyright)
             }
-            .foregroundStyle(Theme.text(scheme))
+            .foregroundStyle(Theme.accent(scheme))
             .padding(.trailing, 12)
             .padding(.bottom, 62)
 
@@ -457,7 +457,7 @@ private struct ReaderBookmarks: View {
                                     .font(.system(size: 16, weight: .semibold))
                                     .frame(maxWidth: .infinity, minHeight: 50)
                                     .foregroundStyle(scheme == .dark ? .black : .white)
-                                    .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 12))
+                                    .background(Theme.accent(scheme), in: RoundedRectangle(cornerRadius: 12))
                             }
                             .buttonStyle(.plain)
                         }

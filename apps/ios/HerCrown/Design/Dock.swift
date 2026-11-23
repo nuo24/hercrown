@@ -27,7 +27,7 @@ struct Dock: View {
                         Text(tab.title).font(.ui(11, weight: .medium)).lineLimit(1).minimumScaleFactor(0.8)
                     }
                     .frame(maxWidth: .infinity, minHeight: 48)
-                    .foregroundStyle(Theme.text(scheme))
+                    .foregroundStyle(active ? Theme.accent(scheme) : Theme.text(scheme))
                     .opacity(active ? 1 : scheme == .dark ? 0.48 : 0.58)
                     .contentShape(Rectangle())
                 }

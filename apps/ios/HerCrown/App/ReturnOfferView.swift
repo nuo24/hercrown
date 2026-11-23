@@ -113,7 +113,7 @@ struct ReturnOfferView: View {
                     .font(.ui(15, weight: .medium))
                     .foregroundStyle(Theme.canvas(scheme))
                     .frame(maxWidth: .infinity, minHeight: 48)
-                    .background(Theme.text(scheme), in: RoundedRectangle(cornerRadius: 8))
+                    .background(Theme.accent(scheme), in: RoundedRectangle(cornerRadius: 8))
                 }
 
                 Text("\(firstYear) for your first year, then \(renewal)/year. Apple charges your account at confirmation. Renews automatically until canceled. Manage or cancel in Apple Settings.")

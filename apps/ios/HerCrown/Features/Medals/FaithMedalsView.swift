@@ -74,7 +74,7 @@ struct FaithMedalsView: View {
                     Text(selected.requirement).font(.ui(13)).lineSpacing(4).multilineTextAlignment(.center)
                         .foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 285).padding(.top, 9)
                     if model.progress != nil {
-                        ProgressView(value: selected.fraction(progress)).tint(Theme.text(scheme)).frame(width: 160).padding(.top, 16)
+                        ProgressView(value: selected.fraction(progress)).tint(Theme.accent(scheme)).frame(width: 160).padding(.top, 16)
                         Text(selected.progressLabel(progress))
                             .font(.ui(11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 7)
                     }
@@ -126,7 +126,7 @@ struct FaithMedalsView: View {
                 }
             }.padding(.top, 8)
         }
-        .font(.ui(12, weight: .medium)).tint(Theme.text(scheme))
+        .font(.ui(12, weight: .medium)).tint(Theme.accent(scheme))
         .padding(.horizontal, 26)
         .onChange(of: showingJourney) { _, expanded in
             if expanded { Task { await Analytics.shared.track("faith_medal_journey_viewed", ["medal": .string(selected.id)]) } }
