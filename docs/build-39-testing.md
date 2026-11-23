@@ -23,3 +23,5 @@ Uses staging and an isolated staging sign-in. App Store account/progress will no
 8. Preview decline offer in Sandbox testing is labelled and disables purchases. Actual gift requires main-paywall dismissal, reopening at least 24 hours later, no Plus and introductory eligibility. U.S. terms begin Nov 24: $29.99 first year then $39.99/year, no trial. Gift stays hidden unless Apple returns matching terms. Then verify sandbox purchase/cancel/restore and Plus access.
 
 Check physical haptics and notification opening when backgrounded/closed. Report build, iPhone model, appearance, steps and screenshot/video; never passwords or verification codes.
+
+Apple verified: processing VALID; audience INTERNAL_ONLY; existing Team group IN_BETA_TESTING; external Beta group not assigned. Build ID: 8dec1205-c5f8-4a13-9f58-9c66c1368de8.
