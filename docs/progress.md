@@ -1092,3 +1092,8 @@ Build40 upload remains canceled: queried Apple twice after interruption, no buil
 ### November 23 — full-screen matching offer paper
 
 Owner requested the off-white letter material across the entire gift screen, including Her Crown Plus header, X button and top/status safe area. Use one root GiftPaperMaterial ignoring safe areas; removed independent offer-body background and contrasting close-button fill. Invitation/revealed pages share the same continuous material, with existing card styling retained. API check/all220 tests passed, native build succeeded and running Simulator capture directly inspected (hercrown-paper-fullscreen.png). Prior70 native logic tests remain passed; layout-only correction verified visually. Preview refreshed; distribution remains paused, no new TestFlight upload.
+
+
+### November 23 — approved internal TestFlight40 retry
+
+Owner explicitly approved internal TestFlight push after reviewing continuous off-white background. Apple latest remains39; canceled40 never arrived. Rebuild1.0.1(40) from latest corrected source through18c526d, replacing the superseded archive in a new archive directory. Includes cumulative concealed medals, original gift styling, printed paper continuity and full-screen matching paper/header. API check/220 tests and70 native tests passed on relevant changes; final background rebuilt and Simulator inspected. Internal-only staging export, isolated credentials and Team group only. No external/public release or production writes.

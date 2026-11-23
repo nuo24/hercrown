@@ -1,5 +1,3 @@
-DISTRIBUTION PAUSED: upload interrupted before Apple accepted build40. Existing archive does not include subsequent paper-animation/original-style corrections and must be replaced before upload.
-
 Her Crown 1.0.1 (40) — INTERNAL-ONLY STAGING TEST BUILD
 
 Uses staging and an isolated staging sign-in. App Store account/progress will not appear here. Not a public release or an external Beta build.
@@ -18,7 +16,9 @@ Uses staging and an isolated staging sign-in. App Store account/progress will no
 
 7. Delete only a disposable STAGING guest/Apple-linked account. Apple-linked deletion may require renewed sign-in and another confirmation. Ordinary Settings edits must not reset onboarding.
 
-8. Preview decline offer in Sandbox testing is labelled and disables purchases. Actual gift requires main-paywall dismissal, reopening at least 24 hours later, no Plus and introductory eligibility. U.S. terms begin Nov 24: $29.99 first year then $39.99/year, no trial. Gift stays hidden unless Apple returns matching terms. Then verify sandbox purchase/cancel/restore and Plus access.
+8. Updated gift UI: original plain pricing card/typography and artwork restored. Header, status safe area and body use one continuous off-white paper background. The printed offer letter lifts from the envelope and unfolds into the same interactive offer page; no blank sheet or mirrored text. Check both animation and Reduced Motion.
+
+Preview decline offer in Sandbox testing is labelled and disables purchases. Actual gift requires main-paywall dismissal, reopening at least 24 hours later, no Plus and introductory eligibility. U.S. terms begin Nov 24: $29.99 first year then $39.99/year, no trial. Gift stays hidden unless Apple returns matching terms. Then verify sandbox purchase/cancel/restore and Plus access.
 
 Check physical haptics and notification opening when backgrounded/closed. Report build, iPhone model, appearance, steps and screenshot/video; never passwords or verification codes.
 
