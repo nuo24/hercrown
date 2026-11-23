@@ -69,7 +69,7 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
   const [read, opened, chapters, extra] = await Promise.all([
     readingDays(env, user.id),
     env.DB.prepare("SELECT local_day FROM app_open_days WHERE user_id = ?1").bind(user.id).all<{ local_day: string }>(),
-    env.DB.prepare("SELECT book_id, count(*) AS n FROM chapter_completions WHERE user_id = ?1 GROUP BY book_id").bind(user.id).all<{ book_id: string; n: number }>(),
+    env.DB.prepare("SELECT book_id, chapter, local_day FROM chapter_completions WHERE user_id = ?1 ORDER BY book_id, chapter").bind(user.id).all<{ book_id: string; chapter: number; local_day: string }>(),
     env.DB.prepare(
       `SELECT (SELECT count(*) FROM devotional_reads WHERE user_id = ?1) AS devotionals,
               (SELECT count(DISTINCT ref) FROM study_history WHERE user_id = ?1) AS studied`,
@@ -77,8 +77,9 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
   ]);
   // Opening the app to read counts as opening it, even if the "opened" ping was lost.
   const openedDays = [...new Set([...opened.results.map((r) => r.local_day), ...read])];
-  const perBook = new Map(chapters.results.map((r) => [r.book_id, r.n]));
-  const chaptersRead = chapters.results.reduce((s, r) => s + r.n, 0);
+  const perBook = new Map<string, number>();
+  for (const row of chapters.results) perBook.set(row.book_id, (perBook.get(row.book_id) ?? 0) + 1);
+  const chaptersRead = chapters.results.length;
   const readSummary = streakSummary(read, today);
   const openSummary = streakSummary(openedDays, today);
   const year = today.slice(0, 4);
@@ -86,6 +87,8 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
   return Response.json({
     today,
     bible: {
+      // Exact, account-scoped identities let themed medals count only their assigned reading.
+      completedChapterRefs: chapters.results.filter((r) => r.local_day <= today).map((r) => `${r.book_id}.${r.chapter}`),
       chaptersRead, totalChapters: TOTAL_CHAPTERS, percent: Math.round((chaptersRead / TOTAL_CHAPTERS) * 1000) / 10,
       books: BOOKS.map(([id, name, testament, total]) => ({ id, name, testament, chapters: total, chaptersRead: perBook.get(id) ?? 0 })),
     },

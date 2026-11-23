@@ -39,6 +39,7 @@ struct FaithMedalsView: View {
     @State private var selection: String?
     @State private var shareFile: URL?
     @State private var sharing = false
+    @State private var showingJourney = false
     private var items: [FaithMedal] { FaithMedal.items(group) }
     private var selected: FaithMedal { items.first { $0.id == selection } ?? items[0] }
     private var progress: MedalProgress { model.progress ?? .empty }
@@ -68,10 +69,10 @@ struct FaithMedalsView: View {
                         .foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 285).padding(.top, 9)
                     if model.progress != nil {
                         ProgressView(value: selected.fraction(progress)).tint(Theme.text(scheme)).frame(width: 160).padding(.top, 16)
-                        let counts = selected.counts(progress)
-                        Text("\(counts.days) of \(selected.days) days · \(counts.chapters) of \(selected.chapters) chapters")
+                        Text(selected.progressLabel(progress))
                             .font(.ui(11)).foregroundStyle(Theme.muted(scheme)).padding(.top, 7)
                     }
+                    if selected.journey != nil { journeyReading.padding(.top, 14) }
                     if model.unavailable {
                         Text(model.progress == nil ? "Connect to load your reading progress." : "Showing your last synced progress.")
                             .font(.ui(12)).foregroundStyle(Theme.muted(scheme)).padding(.top, 12)
@@ -84,11 +85,47 @@ struct FaithMedalsView: View {
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme)).buttonStyle(.plain)
         .task {
             selection = model.homeMedal.id
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("--preview-medal-armor") {
+                group = .armor; selection = FaithMedal.items(.armor)[1].id
+            }
+            #endif
             await Analytics.shared.track("faith_medals_viewed")
             await model.load(app: app)
         }
         .onChange(of: app.me?.user.id) { _, _ in Task { await model.load(app: app) } }
         .sheet(isPresented: $sharing) { if let shareFile { MedalShareSheet(file: shareFile) } }
+    }
+    private var journeyReading: some View {
+        DisclosureGroup("Required reading", isExpanded: $showingJourney) {
+            VStack(spacing: 0) {
+                ForEach(selected.requiredChapterRefs, id: \.self) { chapter in
+                    if let ref = VerseRef(chapter + ".1") {
+                        let name = BibleStore.shared.books.first { $0.id == ref.book }?.displayName ?? ref.book
+                        let done = (progress.bible.completedChapterRefs ?? []).contains(chapter)
+                        Button {
+                            let medal = selected.id
+                            onBack()
+                            app.openInReader(ref)
+                            Task { await Analytics.shared.track("faith_medal_reading_opened", ["medal": .string(medal)]) }
+                        } label: {
+                            HStack {
+                                Image(systemName: done ? "checkmark.circle.fill" : "circle")
+                                Text("\(name) \(ref.chapter)")
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                            }.font(.ui(12)).frame(minHeight: 44).contentShape(Rectangle())
+                        }.accessibilityLabel("\(name) \(ref.chapter), \(done ? "completed" : "not completed"). Open chapter")
+                    }
+                }
+            }.padding(.top, 8)
+        }
+        .font(.ui(12, weight: .medium)).tint(Theme.text(scheme))
+        .padding(.horizontal, 26)
+        .onChange(of: showingJourney) { _, expanded in
+            if expanded { Task { await Analytics.shared.track("faith_medal_journey_viewed", ["medal": .string(selected.id)]) } }
+        }
+        .onChange(of: selection) { _, _ in showingJourney = false }
     }
     private var carousel: some View {
         GeometryReader { geometry in

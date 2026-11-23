@@ -113,6 +113,8 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   mystery_gift_revealed: {},
   mystery_gift_dismissed: {},
   faith_medals_viewed: {},
+  faith_medal_reading_opened: { medal: /^[a-z]+-[0-8]$/ },
+  faith_medal_journey_viewed: { medal: /^[a-z]+-[0-8]$/ },
   faith_medal_selected: { medal: /^[a-z]+-[0-8]$/ },
   faith_medal_earned: { medal: /^[a-z]+-[0-8]$/ },
   faith_medal_shared: { medal: /^[a-z]+-[0-8]$/ },

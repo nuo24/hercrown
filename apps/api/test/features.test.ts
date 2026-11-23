@@ -109,13 +109,19 @@ describe("Bible progress", () => {
     await call("/me/chapters/PSA/23/complete", "POST", { localDay: day });
     const p = await json(`/me/progress?today=${day}`);
     expect(p.bible).toMatchObject({ chaptersRead: 2, totalChapters: 1189, percent: 0.2 });
+    expect(p.bible.completedChapterRefs).toEqual(["JHN.3", "PSA.23"]);
+    const other = await signInGuest();
+    const isolated = await (await api(`/me/progress?today=${day}`, { token: other.token })).json<any>();
+    expect(isolated.bible.completedChapterRefs).toEqual([]);
     expect(p.bible.books.find((b: any) => b.id === "JHN")).toEqual({ id: "JHN", name: "John", testament: "NT", chapters: 21, chaptersRead: 1 });
     expect(p).toMatchObject({ daysOpened: { total: 1, current: 1 }, daysRead: { total: 1, current: 1 }, daysThisYear: 1, weeksInARow: 1, devotionalsRead: 0 });
     expect((await json(`/me/streak?today=${day}`)).streak.readToday).toBe(true); // finishing a chapter is reading
 
     expect((await json("/me/chapters?book=JHN")).completed).toEqual([{ chapter: 3, localDay: day }]);
     expect((await call("/me/chapters/JHN/3/complete", "DELETE")).status).toBe(204);
-    expect((await json(`/me/progress?today=${day}`)).bible.chaptersRead).toBe(1);
+    const afterUnmark = await json(`/me/progress?today=${day}`);
+    expect(afterUnmark.bible.chaptersRead).toBe(1);
+    expect(afterUnmark.bible.completedChapterRefs).toEqual(["PSA.23"]);
 
     expect((await call("/me/chapters/JHN/22/complete", "POST", { localDay: day })).status).toBe(400);
     expect((await call("/me/opened", "POST", { localDay: "2999-01-01" })).status).toBe(400);

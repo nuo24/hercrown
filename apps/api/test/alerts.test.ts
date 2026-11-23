@@ -17,7 +17,8 @@ describe("health alerts", () => {
   });
 
   it("flags error spikes, AI spend and unmatched purchases, emailing each once per hour", async () => {
-    const now = Date.now();
+    // Keep both calls in one hour even when the suite runs at xx:59.
+    const now = Math.floor(Date.now() / 3_600_000) * 3_600_000 + 5 * 60_000;
     await env.DB.batch([
       env.DB.prepare("INSERT INTO usage_ledger (id, user_id, feature, units, cost_micros, created_at) VALUES ('a1', 'u', 'study_explain', 1, 2500000, ?1)").bind(now - 60_000),
       env.DB.prepare("INSERT INTO unmatched_store_events (id, app_user_id, original_transaction_id, type, payload, received_at) VALUES ('w1', 'ghost', 'otx', 'initial_purchase', '{}', ?1)").bind(now - 60_000),

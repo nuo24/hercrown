@@ -149,3 +149,5 @@ Discover supports `includeText=false` for its editorial catalog: all references 
 - `POST /me/gift-offer/decline`: authenticated main-paywall dismissal; records first server timestamp, excludes Plus. Returns `{scheduled:boolean}`.
 - `GET /me/gift-offer`: returns `{due:boolean}` after 24 hours if still unsubscribed and not previously claimed. Read-only.
 - `POST /me/gift-offer/claim`: atomic account-wide impression claim; returns `{available:boolean}`. Call only after fresh StoreKit eligibility and safe foreground presentation checks. No purchase or entitlement mutation.
+
+Faith Medal progress: `GET /me/progress` includes `bible.completedChapterRefs` (`["JHN.3", "PSA.23", ...]`), canonical identities of the authenticated user’s completed chapters through the requested local day. Existing totals/book fields are unchanged. Thematic medal clients match exact chapter lists rather than infer completion from totals.
