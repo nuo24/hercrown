@@ -253,8 +253,8 @@ struct HomeView: View {
                         }
                     }
                     Spacer(minLength: 0)
-                }.frame(maxWidth: .infinity, minHeight: 96, alignment: .leading).contentShape(Rectangle())
-            }.buttonStyle(.plain).padding(.top, 12).padding(.bottom, 12)
+                }.frame(maxWidth: .infinity, minHeight: 74, alignment: .leading).contentShape(Rectangle())
+            }.buttonStyle(.plain).padding(.top, 24).padding(.bottom, 13)
             Rectangle().fill(Theme.border(scheme)).frame(height: 1)
         }
     }
@@ -368,22 +368,24 @@ struct HomeView: View {
 
     @ViewBuilder private func editorialRow(_ title: String, kicker: String, detail: String, art: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 Image.illustration(art).resizable().scaledToFit().frame(width: 72, height: 88).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 7) {
                     Text(title).font(.serif(24, relativeTo: .title2)).tracking(-0.35)
+                    Spacer(minLength: 0)
                     Text(kicker.uppercased()).font(.ui(9, weight: .medium)).tracking(0.55).foregroundStyle(Theme.muted(scheme))
                     Text(detail).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
-                }
+                }.frame(minHeight: 88, alignment: .topLeading)
                 Spacer(minLength: 4)
-                Image.glyph("arrow").frame(width: 15, height: 15)
+                Image.glyph("arrow").frame(width: 15, height: 15).frame(minHeight: 88)
             }
             .multilineTextAlignment(.leading)
-            .frame(maxWidth: .infinity, minHeight: 102, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        Divider()
+        .padding(.vertical, 20)
+        Rectangle().fill(Theme.border(scheme).opacity(0.65)).frame(height: 0.5)
     }
 
     // MARK: Trial notice (docs/trial-reminder.md: from 2 days before the trial converts)
@@ -424,7 +426,9 @@ struct HomeView: View {
                     .foregroundStyle(Theme.accent(scheme))
                     .accessibilityLabel(app.isSaved(verse.ref) ? "Remove from saved" : "Save verse")
                 }
-                HomeVerseText(text: verse.text ?? "", reference: verse.ref, translation: verse.translation)
+                ScriptureText(text: verse.text ?? "", reference: verse.ref, translation: verse.translation)
+                    .font(.serif(28, relativeTo: .title2)).tracking(-0.4).lineSpacing(1)
+                    .fixedSize(horizontal: false, vertical: true).frame(maxWidth: 265, alignment: .leading)
                 HStack(spacing: 4) {
                     Text("\(verse.label.uppercased()) · \(BibleStore.offline[verse.translation] ?? verse.translation.uppercased())")
                         .font(.ui(10)).tracking(0.45).foregroundStyle(Theme.muted(scheme))

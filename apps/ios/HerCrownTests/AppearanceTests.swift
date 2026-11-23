@@ -36,18 +36,6 @@ import SwiftUI
         assertColor(Theme.text(.light), 0x111111)
         assertColor(Theme.accent(.light), 0x111111)
     }
-    func testHomeVerseUsesWidthBeforeModestReductionAndPreservesAccessibility() {
-        let short = "The LORD is my shepherd; I shall not want."
-        XCTAssertEqual(HomeVerseTypography.pointSize(text: short, width: 330, preferred: 28, accessibility: false), 28)
-        let long = String(repeating: "A longer passage needs room to remain readable. ", count: 10)
-        let narrow = HomeVerseTypography.pointSize(text: long, width: 265, preferred: 28, accessibility: false)
-        let wide = HomeVerseTypography.pointSize(text: long, width: 330, preferred: 28, accessibility: false)
-        XCTAssertGreaterThanOrEqual(wide, narrow)
-        XCTAssertGreaterThanOrEqual(wide, 22)
-        XCTAssertLessThan(wide, 28)
-        XCTAssertEqual(HomeVerseTypography.pointSize(text: long, width: 330, preferred: 48, accessibility: true), 48)
-        XCTAssertEqual(HomeVerseTypography.pointSize(text: long, width: 0, preferred: 28, accessibility: false), 28)
-    }
     private func assertColor(_ color: Color, _ hex: UInt32, file: StaticString = #filePath, line: UInt = #line) {
         var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
