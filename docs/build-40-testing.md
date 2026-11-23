@@ -1,3 +1,5 @@
+DISTRIBUTION PAUSED: upload interrupted before Apple accepted build40. Existing archive does not include subsequent paper-animation/original-style corrections and must be replaced before upload.
+
 Her Crown 1.0.1 (40) — INTERNAL-ONLY STAGING TEST BUILD
 
 Uses staging and an isolated staging sign-in. App Store account/progress will not appear here. Not a public release or an external Beta build.

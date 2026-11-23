@@ -25,7 +25,6 @@ struct MysteryGiftView: View {
     @State private var paperUnfold = 0.0
     @State private var paperSettled = 0.0
     @State private var invitationFade = 0.0
-    @State private var offerInk = 0.0
     @State private var offerSnapshot: UIImage?
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
@@ -61,7 +60,7 @@ struct MysteryGiftView: View {
                     Color.clear
                     if !revealed, paperInFlight, let anchor {
                         GiftUnfoldingSheet(source: geometry[anchor], target: geometry.size,
-                            flight: paperFlight, unfolding: paperUnfold, settled: paperSettled, ink: offerInk) {
+                            flight: paperFlight, unfolding: paperUnfold, settled: paperSettled) {
                                 if let offerSnapshot {
                                     Image(uiImage: offerSnapshot).resizable()
                                 } else {
@@ -74,6 +73,14 @@ struct MysteryGiftView: View {
                 .onAppear { prepareOfferSnapshot(size: geometry.size) }
                 .onChange(of: geometry.size) { _, size in prepareOfferSnapshot(size: size) }
                 .onChange(of: scheme) { _, _ in prepareOfferSnapshot(size: geometry.size) }
+                #if DEBUG
+                .task {
+                    if isPreview, ProcessInfo.processInfo.arguments.contains("--preview-mystery-gift-animate") {
+                        try? await Task.sleep(for: .milliseconds(1000))
+                        revealOffer()
+                    }
+                }
+                #endif
                 }
                 .allowsHitTesting(false)
             }
@@ -90,55 +97,63 @@ struct MysteryGiftView: View {
     }
     @MainActor private func prepareOfferSnapshot(size: CGSize) {
         guard size.width > 0, size.height > 0, !opening else { return }
-        // Render once before the tap. Moving three image panels avoids relaying out three live ScrollViews each frame.
-        let renderer = ImageRenderer(content: page(isOffer: true)
+        offerSnapshot = renderOfferSnapshot(size: size)
+    }
+    @MainActor func renderOfferSnapshot(size: CGSize) -> UIImage? {
+        // Render once before the tap, from the same concrete layout as the interactive offer.
+        let renderer = ImageRenderer(content: pageContents(isOffer: true, size: size)
+            .background(GiftPaperMaterial())
             .frame(width: size.width, height: size.height)
             .foregroundStyle(Theme.text(scheme)).buttonStyle(.plain)
             .environment(\.colorScheme, scheme))
         renderer.scale = 3
-        offerSnapshot = renderer.uiImage
+        return renderer.uiImage
     }
     private func page(isOffer: Bool) -> some View {
         GeometryReader { geometry in
             ScrollView {
-                VStack(spacing: 0) {
-                    hero(revealed: isOffer, foldedAspect: geometry.size.height / (geometry.size.width * 3)).padding(.top, isOffer ? 0 : 42)
-                    if isOffer { reveal } else { invitation }
-                    Spacer(minLength: 24)
-                    footer(revealed: isOffer)
-                }
-                .padding(.horizontal, 22).padding(.bottom, isOffer ? 14 : 12)
-                .frame(maxWidth: 430).frame(maxWidth: .infinity)
-                .frame(minHeight: geometry.size.height, alignment: .top)
+                pageContents(isOffer: isOffer, size: geometry.size)
             }
+            .background { if isOffer { GiftPaperMaterial() } }
         }
     }
-    private func hero(revealed: Bool, foldedAspect: Double) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                Image("gift-cloud-bank").resizable().scaledToFit()
-                    .frame(width: geometry.size.width * 1.2, height: revealed ? 140 : 210)
-                    .opacity(0.75).offset(x: -geometry.size.width * 0.1)
-                Image("gift-cosmos").resizable().scaledToFit()
-                    .frame(width: 70, height: revealed ? 78 : 80)
-                    .rotationEffect(.degrees(-16))
-                    .offset(x: geometry.size.width * 0.15, y: revealed ? 45 : 100)
-                Group {
-                    if revealed {
-                        Image("gift-open-book").resizable().scaledToFit()
-                    } else {
-                        GiftEnvelopeIllustration(progress: flapProgress, letterLift: letterLift,
-                                paperInFlight: paperInFlight, foldedAspect: foldedAspect)
-                            .contentShape(Rectangle())
-                            .onTapGesture(perform: revealOffer)
-                    }
-                }
-                .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
-                .rotationEffect(.degrees(-7))
-                .offset(x: (geometry.size.width - (revealed ? 158 : 200)) / 2)
-            }
+    // The moving paper and the interactive page render this exact same layout.
+    // ImageRenderer must receive concrete dimensions, not a ScrollView/GeometryReader snapshot.
+    private func pageContents(isOffer: Bool, size: CGSize) -> some View {
+        VStack(spacing: 0) {
+            hero(revealed: isOffer, foldedAspect: size.height / (size.width * 3),
+                 width: min(430, size.width) - 44).padding(.top, isOffer ? 0 : 42)
+            if isOffer { reveal } else { invitation }
+            Spacer(minLength: 24)
+            footer(revealed: isOffer)
         }
-        .frame(height: revealed ? 150 : 220)
+        .padding(.horizontal, 22).padding(.bottom, isOffer ? 14 : 12)
+        .frame(maxWidth: 430).frame(maxWidth: .infinity)
+        .frame(minHeight: size.height, alignment: .top)
+    }
+    private func hero(revealed: Bool, foldedAspect: Double, width: CGFloat) -> some View {
+        ZStack(alignment: .topLeading) {
+            Image("gift-cloud-bank").resizable().scaledToFit()
+                .frame(width: width * 1.2, height: revealed ? 140 : 210)
+                .opacity(0.75).offset(x: -width * 0.1)
+            Image("gift-cosmos").resizable().scaledToFit()
+                .frame(width: 70, height: revealed ? 78 : 80)
+                .rotationEffect(.degrees(-16))
+                .offset(x: width * 0.15, y: revealed ? 45 : 100)
+            Group {
+                if revealed {
+                    Image("gift-open-book").resizable().scaledToFit()
+                } else {
+                    GiftEnvelopeIllustration(progress: flapProgress, letterLift: letterLift,
+                        paperInFlight: paperInFlight, foldedAspect: foldedAspect, offerSnapshot: offerSnapshot)
+                        .contentShape(Rectangle()).onTapGesture(perform: revealOffer)
+                }
+            }
+            .frame(width: revealed ? 158 : 200, height: revealed ? 140 : 205)
+            .rotationEffect(.degrees(-7))
+            .offset(x: (width - (revealed ? 158 : 200)) / 2)
+        }
+        .frame(width: width, height: revealed ? 150 : 220, alignment: .topLeading)
         .accessibilityHidden(true)
     }
     private var invitation: some View {
@@ -152,44 +167,23 @@ struct MysteryGiftView: View {
         VStack(spacing: 12) {
             Text("YOUR ONE-TIME OFFER").font(.ui(10, weight: .medium)).tracking(1.3).foregroundStyle(Theme.muted(scheme)).padding(.top, 14)
             if let terms {
-                (Text("25% off\n").font(.serif(36, weight: .semibold)) + Text("your first year.").font(.serif(36, italic: true))).tracking(-0.7)
+                (Text("25% off\n").font(.serif(36)) + Text("your first year.").font(.serif(36, italic: true))).tracking(-0.7)
                 Text("Get Her Crown Plus for less with a one-time\ndiscount on your annual plan.")
                     .font(.ui(15)).lineSpacing(4).foregroundStyle(Theme.muted(scheme))
                 VStack(spacing: 12) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "sparkle").font(.system(size: 10, weight: .medium))
-                            .foregroundStyle(Color(hex: scheme == .dark ? 0xD9BC8B : 0x927044))
-                        Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium)).tracking(0.3)
-                    }
+                    Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium))
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(terms.original).strikethrough().font(.ui(16))
-                            .foregroundStyle(Color(hex: scheme == .dark ? 0xFF9CA5 : 0xA6424E))
-                            .lineLimit(1)
-                        Text(terms.firstYear).font(.serif(44, weight: .semibold)).tracking(-1.2)
-                            .foregroundStyle(LinearGradient(colors: scheme == .dark
-                                ? [Color(hex: 0xFFEEE0), Color(hex: 0xF1C3D5)]
-                                : [Color(hex: 0x31222B), Color(hex: 0x875169)],
-                                startPoint: .topLeading, endPoint: .bottomTrailing))
+                        Text(terms.original).strikethrough().font(.ui(16)).foregroundStyle(Theme.muted(scheme))
+                        Text(terms.firstYear).font(.serif(39)).tracking(-1)
                             .lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1)
                         Text("for the first year").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                     }
                     Divider()
                     Text("You save \(terms.saving) on your first year.")
-                        .font(.ui(11, weight: .medium))
-                        .foregroundStyle(Color(hex: scheme == .dark ? 0xF1D9E4 : 0x674052))
-                        .padding(.horizontal, 12).padding(.vertical, 6)
-                        .background(Color(hex: scheme == .dark ? 0xF1C3D5 : 0x875169).opacity(0.09), in: Capsule())
-                    Text("Then \(terms.renewal)/year. Auto-renews until canceled. No free trial.")
-                        .font(.ui(10)).foregroundStyle(Theme.muted(scheme))
-                }.padding(.horizontal, 18).padding(.vertical, 24).frame(maxWidth: .infinity, minHeight: 160)
-                    .background(LinearGradient(colors: [Theme.surface(scheme),
-                        Color(hex: scheme == .dark ? 0x261B23 : 0xFBF2F5), Theme.surface(scheme)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 18))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(LinearGradient(colors: [
-                        Color(hex: scheme == .dark ? 0xA88A64 : 0xDAC5A7).opacity(0.65),
-                        Theme.border(scheme), Color(hex: scheme == .dark ? 0x795264 : 0xDBC4CE)],
-                        startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 0.8))
-                    .shadow(color: Color(hex: 0x674052).opacity(scheme == .dark ? 0.12 : 0.07), radius: 16, y: 6)
+                        .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
+                }.padding(.horizontal, 18).padding(.vertical, 20).frame(maxWidth: .infinity)
+                    .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme), lineWidth: 1))
                     .padding(.top, 6)
             } else {
                 Text("This offer isn’t available right now.").font(.serif(30))
@@ -202,7 +196,10 @@ struct MysteryGiftView: View {
             if !revealed {
                 Button("Reveal your offer", action: revealOffer)
                     .buttonStyle(GiftOfferButtonStyle()).disabled(opening)
-            } else if terms != nil {
+            } else if let terms {
+                Text("Then \(terms.renewal)/year. Auto-renews until canceled. No free trial.")
+                    .font(.ui(9)).foregroundStyle(Theme.muted(scheme))
+                    .multilineTextAlignment(.center).padding(.bottom, 8)
                 Button { perform(onPurchase) } label: {
                     if busy { ProgressView() } else { Text("Continue with 25% off") }
                 }.buttonStyle(GiftOfferButtonStyle()).disabled(busy || isPreview)
@@ -248,7 +245,7 @@ struct MysteryGiftView: View {
                 withAnimation(.timingCurve(0.3, 0.05, 0.2, 1, duration: 0.68)) { paperUnfold = 1 }
                 do { try await Task.sleep(for: .milliseconds(480)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.easeOut(duration: 0.32)) { paperSettled = 1; offerInk = 1 }
+                withAnimation(.easeOut(duration: 0.32)) { paperSettled = 1 }
                 do { try await Task.sleep(for: .milliseconds(350)) } catch { return }
                 guard !Task.isCancelled else { return }
                 // Replace the finished paper with the identical interactive offer, without a visual swap.

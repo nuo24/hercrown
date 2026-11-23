@@ -1077,3 +1077,13 @@ Cumulative medal verification: API type/content checks and all220 API tests pass
 ### November 23 — internal TestFlight40
 
 Owner requested next build after cumulative medal fix. Apple latest build39 verified; selected1.0.1(40) for app/widget. Includes cumulative concurrent progress and concealed unearned artwork throughaf931b3. Required checks passed220 API/69 native, final rebuilt Simulator inspected; staging backend source9c75fad/Worker3b991e26-b77f-4ff0-beea-e71f1a8a4b33 verified with disposable guests. Retain staging API/isolated Keychain and internal-only export, existing Team group only. No external Beta submission/public release/production writes. Clean source commit below is the archive source.
+
+
+Build40 upload interrupted at owner's request before finishing export/upload. Apple build40 query returned no records immediately afterward; no Team assignment or release performed. Archive72dab9e is superseded for distribution. Owner requires envelope letter to carry offer content and remain the final paper background, with no independent page swap. Work resumed on that correction before another push.
+
+
+### November 23 — restore original offer styling and continuous printed paper
+
+Owner clarified: match original handoff styling, with excitement from the paper reveal. Removed later sparkle/gradient/shadow/savings-pill decoration; restored plain pricing card and regular original type, retained book/cloud/flower assets, verified29.99 first-year/39.99 renewal terms and purchase-disabled preview. Shared concrete pageContents now powers both snapshot panels and final interactive page; no GeometryReader/ScrollView snapshot wrapper. Folded letter carries the printed middle panel, texture persists as final page background, no delayed ink fade; hide reverse-side ink and place folded wings behind center until facing viewer, preventing mirrored upside-down text. Reduced Motion preserved. Added actual-offer snapshot regression (ink in all3 panels). Required API check/all220 tests and all70 native tests passed. Simulator service failed during a recording, restarted without resetting data; subsequent final recording inspected frame by frame. Review artifact outputs/hercrown-2026-11-22/comparisons/original-offer-paper-review.html contains original/native comparison and real native video.
+
+Build40 upload remains canceled: queried Apple twice after interruption, no build40 record. No Team assignment/external submission/public release/production change. Existing72dab9e archive lacks these corrections and must not be uploaded. Hold distribution until this corrected preview is reviewed.
