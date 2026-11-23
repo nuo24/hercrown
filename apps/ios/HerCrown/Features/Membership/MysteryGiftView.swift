@@ -39,12 +39,13 @@ struct MysteryGiftView: View {
                         Spacer(minLength: 24)
                         footer
                     }
-                    .padding(.horizontal, 22).padding(.bottom, revealed ? 16 : 4)
+                    .padding(.horizontal, 22).padding(.bottom, revealed ? 14 : 12)
                     .frame(maxWidth: 430).frame(maxWidth: .infinity)
                     .frame(minHeight: geometry.size.height, alignment: .top)
                 }
             }
         }
+        .ignoresSafeArea(.container, edges: .bottom)
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme).ignoresSafeArea()).buttonStyle(.plain)
         .interactiveDismissDisabled(busy)
         .sheet(item: $legal) { page in SafariView(url: page.url) }
@@ -72,29 +73,29 @@ struct MysteryGiftView: View {
         .accessibilityHidden(true)
     }
     private var invitation: some View {
-        VStack(spacing: 10) {
-            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(32, weight: .semibold)).tracking(-0.7)
+        VStack(spacing: 12) {
+            (Text("We have a gift\n") + Text("for you.").italic()).font(.serif(38)).tracking(-0.7)
             Text("Before you continue with free reading, we’d like to share a special offer with you.")
-                .font(.ui(13, weight: .medium)).lineSpacing(2).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
-        }.multilineTextAlignment(.center).padding(.top, 12)
+                .font(.ui(14, weight: .medium)).lineSpacing(4).foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 290)
+        }.multilineTextAlignment(.center).padding(.top, 18)
     }
     private var reveal: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 12) {
             Text("YOUR ONE-TIME OFFER").font(.ui(10, weight: .medium)).tracking(1.3).foregroundStyle(Theme.muted(scheme)).padding(.top, 14)
             if let terms {
-                (Text("25% off\n") + Text("your first year.").italic()).font(.serif(30)).tracking(-0.7)
-                Text("Get Her Crown Plus for less with a one-time discount on your annual plan.")
-                    .font(.ui(13)).lineSpacing(2).foregroundStyle(Theme.muted(scheme))
-                VStack(spacing: 10) {
+                (Text("25% off\n").font(.serif(36, weight: .semibold)) + Text("your first year.").font(.serif(36, italic: true))).tracking(-0.7)
+                Text("Get Her Crown Plus for less with a one-time\ndiscount on your annual plan.")
+                    .font(.ui(15)).lineSpacing(4).foregroundStyle(Theme.muted(scheme))
+                VStack(spacing: 12) {
                     Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium))
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
                         Text(terms.original).strikethrough().font(.ui(16)).foregroundStyle(Theme.muted(scheme))
-                        Text(terms.firstYear).font(.serif(34)).tracking(-1)
+                        Text(terms.firstYear).font(.serif(39)).tracking(-1)
                         Text("for the first year").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                     }
                     Divider()
                     Text("You save \(terms.saving) on your first year.").font(.ui(11)).foregroundStyle(Theme.muted(scheme))
-                }.padding(16).frame(maxWidth: .infinity).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
+                }.padding(.horizontal, 18).padding(.vertical, 24).frame(maxWidth: .infinity, minHeight: 160).background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme))).padding(.top, 6)
             } else {
                 Text("This offer isn’t available right now.").font(.serif(30))
@@ -112,20 +113,25 @@ struct MysteryGiftView: View {
                 Button("Reveal your offer") {
                     withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { revealed = true }
                     if !isPreview { Task { await Analytics.shared.track("mystery_gift_revealed") } }
-                }.buttonStyle(CapsuleButtonStyle())
+                }.buttonStyle(GiftOfferButtonStyle())
             } else if terms != nil {
                 Button { perform(onPurchase) } label: {
                     if busy { ProgressView() } else { Text("Continue with 25% off") }
-                }.buttonStyle(CapsuleButtonStyle()).disabled(busy || isPreview)
+                }.buttonStyle(GiftOfferButtonStyle()).disabled(busy || isPreview)
                 .accessibilityHint(isPreview ? "Design preview. Purchases are disabled." : "")
             }
-            Button("Continue with free reading", action: onClose).font(.ui(12)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 44).disabled(busy)
+            Button(action: onClose) {
+                Text("Continue with free reading").font(.ui(12))
+                    .offset(y: revealed ? 0 : -4)
+                    .frame(maxWidth: .infinity, minHeight: revealed ? 34 : 44)
+                    .contentShape(Rectangle())
+            }.foregroundStyle(Theme.muted(scheme)).disabled(busy)
             if revealed {
                 HStack(spacing: 18) {
                     Button("Restore purchases") { perform(onRestore) }.disabled(busy || isPreview)
                     Button("Terms") { legal = .terms }
                     Button("Privacy") { legal = .privacy }
-                }.font(.ui(10)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 44)
+                }.font(.ui(10)).foregroundStyle(Theme.muted(scheme)).frame(minHeight: 24)
             }
         }
         .overlay(alignment: .top) {
@@ -140,5 +146,18 @@ struct MysteryGiftView: View {
         guard !busy, !isPreview else { return }
         busy = true
         Task { message = await action(); busy = false }
+    }
+}
+
+/// Reference footer: 46-point primary, followed by free reading and optional legal links.
+private struct GiftOfferButtonStyle: ButtonStyle {
+    @Environment(\.colorScheme) private var scheme
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.ui(13, weight: .medium))
+            .foregroundStyle(Theme.pink(scheme) ? Color(hex: 0xFFF9FB) : scheme == .dark ? Color(hex: 0x131313) : .white)
+            .frame(maxWidth: .infinity, minHeight: 46)
+            .background(Theme.text(scheme), in: Capsule())
+            .opacity(configuration.isPressed ? 0.82 : 1)
     }
 }

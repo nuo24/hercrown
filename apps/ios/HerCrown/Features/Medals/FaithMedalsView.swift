@@ -96,7 +96,7 @@ struct FaithMedalsView: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(items) { medal in
-                        MedalImage(medal: medal, locked: !medal.earned(progress))
+                        MedalImage(medal: medal, locked: medal.fraction(progress) <= 0)
                             .frame(width: width, height: 250).id(medal.id)
                             .accessibilityElement().accessibilityLabel("\(medal.name), \(state(medal))")
                     }
@@ -138,7 +138,7 @@ struct FaithMedalsView: View {
                 ForEach(items) { medal in
                     Button { selection = medal.id } label: {
                         VStack(spacing: 3) {
-                            MedalImage(medal: medal, locked: !medal.earned(progress)).frame(height: 80)
+                            MedalImage(medal: medal, locked: medal.fraction(progress) <= 0).frame(height: 80)
                             Text(medal.name).font(.ui(11, weight: .medium))
                             Text(state(medal)).font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         }

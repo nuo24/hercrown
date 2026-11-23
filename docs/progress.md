@@ -900,3 +900,12 @@ Analytics read-only at approximately 6:53 PM Eastern: Apple Trends for Her Crown
 
 
 November 22 offer proportion review: clarified comparison left is supplied reference and right is an actual saved native capture, not an interactive purchase flow. Reduced invitation heading 38→32 while retaining semibold; body 14→13 medium, line spacing 4→2; reveal heading 36→30 and price 39→34; tighter 10-point group spacing and 16-point card padding. Retained smaller close button and lower invitation CTA. Native build passed, invitation→reveal visually verified, comparison captures regenerated. API check and 210 tests passed. No TestFlight upload, Superwall activation or production changes.
+
+
+### November 22 — measured offer footers and medal state color
+
+Measured original reference phone interior at 376×830 design points: invitation primary ends 56 points above bottom; reveal primary ends 72 points above bottom; primary height 46. Replaced shared 48-point button style locally with 46-point offer style and set footer components/padding explicitly. Native iPhone Simulator captures measured exactly 56 and 72 points (3× pixels converted to points). Retained restored invitation sizes and regular-weight heading. Reveal now bolds only 25% off, uses 15-point body with explicit break after one-time, and has a taller 160-point minimum offer card. Both pages visually inspected; screenshots refreshed. API check/210 tests passed; native build passed.
+
+Medal carousel and collection now fade only medals with zero progress, rather than every unearned medal. In-progress medals render with original saturation/opacity; qualification/share guards remain unchanged. Current Simulator account shows zero reading days/chapters and correctly remains locked. Simulator scrolling/dragging failed with noWindowsAvailable, so actual in-progress visual state is not yet signed off.
+
+Owner proposed closed-envelope opening animation followed by a smooth reveal, and delaying gift delivery until a later app open after main-paywall dismissal. Recommendation discussed: next foreground session at least 24 hours after dismissal, once per account, recheck subscription/eligibility first, keep free exit; canceling StoreKit purchase sheet alone is not a decline. Timing/animation are proposals, not implemented or activated. Superwall parity, actual discount product approval/configuration and sandbox checkout remain next-release requirements. No production changes or upload.
