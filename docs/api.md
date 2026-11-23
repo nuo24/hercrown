@@ -151,3 +151,7 @@ Discover supports `includeText=false` for its editorial catalog: all references 
 - `POST /me/gift-offer/claim`: atomic account-wide impression claim; returns `{available:boolean}`. Call only after fresh StoreKit eligibility and safe foreground presentation checks. No purchase or entitlement mutation.
 
 Faith Medal progress: `GET /me/progress` includes `bible.completedChapterRefs` (`["JHN.3", "PSA.23", ...]`), canonical identities of the authenticated user’s completed chapters through the requested local day. Existing totals/book fields are unchanged. Thematic medal clients match exact chapter lists rather than infer completion from totals.
+
+### Sequential Faith Medal counters
+
+`GET /me/progress` also returns `medalStages`: ordered per-medal records with `id`, stage-local `days`, `units`, `earned` and `completedChapterRefs` (the matched journey refs only). Collections advance independently; later goals are zero until the previous goal is earned, and start on the next reading day without carryover. Armor units are fully completed books whose chapters were read during that stage. Chapter-end rereads on later days count in later stages; ordinary verse-reading events do not count as chapter completions. The lifetime Bible/streak fields are unchanged.
