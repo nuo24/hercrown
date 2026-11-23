@@ -241,8 +241,8 @@ struct HomeView: View {
             Button { showingMedals = true } label: {
                 HStack(spacing: 14) {
                     ZStack {
-                        MedalImage(medal: FaithMedal.items(.fruit)[0]).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
-                        MedalImage(medal: FaithMedal.items(.fruit)[2]).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
+                        MedalImage(medal: FaithMedal.items(.fruit)[0], locked: !FaithMedal.items(.fruit)[0].earned(medals.progress ?? .empty)).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
+                        MedalImage(medal: FaithMedal.items(.fruit)[2], locked: !FaithMedal.items(.fruit)[2].earned(medals.progress ?? .empty)).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
                     }.frame(width: 74, height: 74)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Your Faith Medals").font(.ui(11, weight: .medium))

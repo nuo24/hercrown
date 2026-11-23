@@ -3,7 +3,7 @@
 import { badRequest, readJson } from "./http";
 import type { SessionUser } from "./profile";
 import { readingDays, resolveToday } from "./reading";
-import { sequentialMedals } from "./medals";
+import { cumulativeMedals } from "./medals";
 import { BOOKS } from "./refs";
 import { dayOrdinal, isValidDay, localDayIn, streakSummary } from "./streak";
 
@@ -97,7 +97,8 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
   const now = dayOrdinal(today);
   return Response.json({
     today,
-    medalStages: sequentialMedals(read, chapterReads, today),
+    medalRulesVersion: 5,
+    medalStages: cumulativeMedals(read, chapterReads, today),
     bible: {
       // Exact, account-scoped identities let themed medals count only their assigned reading.
       completedChapterRefs: chapters.results.filter((r) => r.local_day <= today).map((r) => `${r.book_id}.${r.chapter}`),

@@ -21,11 +21,14 @@ struct MedalImage: View {
     var locked = false
     var body: some View {
         Group {
-            if let image = MedalArtwork.image(medal) {
+            if locked {
+                Image(systemName: "lock.seal")
+                    .resizable().scaledToFit().padding(22)
+                    .foregroundStyle(.secondary.opacity(0.45))
+            } else if let image = MedalArtwork.image(medal) {
                 Image(uiImage: image).resizable().scaledToFit()
             }
         }
-        .saturation(locked ? 0 : 1).opacity(locked ? 0.5 : 1)
         .accessibilityHidden(true)
     }
 }
@@ -46,8 +49,8 @@ struct FaithMedalsView: View {
     private func state(_ medal: FaithMedal) -> String {
         guard model.progress != nil else { return "Not synced" }
         if medal.earned(progress) { return "Collected" }
-        guard medal.isAvailable(progress) else { return "Locked" }
-        return medal.index > 0 || medal.counts(progress).days > 0 ? "In progress" : "Ready to begin"
+        let counts = medal.counts(progress)
+        return counts.days > 0 || counts.units > 0 ? "In progress" : "Ready to begin"
     }
     var body: some View {
         VStack(spacing: 0) {
@@ -67,10 +70,6 @@ struct FaithMedalsView: View {
                         .overlay(Capsule().stroke(Theme.border(scheme))).padding(.top, 12)
                     carousel
                     Text(state(selected)).font(.ui(13, weight: .medium))
-                    if selected.index > 0 && state(selected) == "Locked" {
-                        Text("Complete \(items[selected.index - 1].name) first. This goal starts fresh on your next reading day.")
-                            .font(.ui(11)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.top, 8)
-                    }
                     Text(selected.requirement).font(.ui(13)).lineSpacing(4).multilineTextAlignment(.center)
                         .foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 285).padding(.top, 9)
                     if model.progress != nil {
@@ -139,7 +138,7 @@ struct FaithMedalsView: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(items) { medal in
-                        MedalImage(medal: medal, locked: !medal.isAvailable(progress))
+                        MedalImage(medal: medal, locked: !medal.earned(progress))
                             .frame(width: width, height: 250).id(medal.id)
                             .accessibilityElement().accessibilityLabel("\(medal.name), \(state(medal))")
                     }
@@ -181,7 +180,7 @@ struct FaithMedalsView: View {
                 ForEach(items) { medal in
                     Button { selection = medal.id } label: {
                         VStack(spacing: 3) {
-                            MedalImage(medal: medal, locked: !medal.isAvailable(progress)).frame(height: 80)
+                            MedalImage(medal: medal, locked: !medal.earned(progress)).frame(height: 80)
                             Text(medal.name).font(.ui(11, weight: .medium))
                             Text(state(medal)).font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         }

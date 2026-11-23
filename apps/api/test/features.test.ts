@@ -111,7 +111,7 @@ describe("Bible progress", () => {
     expect(p.bible).toMatchObject({ chaptersRead: 2, totalChapters: 1189, percent: 0.2 });
     expect(p.bible.completedChapterRefs).toEqual(["JHN.3", "PSA.23"]);
     expect(p.medalStages.find((s:any) => s.id === "fruit-0")).toMatchObject({days:1,units:2,earned:false});
-    expect(p.medalStages.filter((s:any) => !s.id.endsWith("-0")).every((s:any) => s.days === 0 && s.units === 0)).toBe(true);
+    expect(p.medalStages.filter((s:any) => !s.id.endsWith("-0")).every((s:any) => s.days === 1)).toBe(true);
     const other = await signInGuest();
     const isolated = await (await api(`/me/progress?today=${day}`, { token: other.token })).json<any>();
     expect(isolated.bible.completedChapterRefs).toEqual([]);
@@ -131,7 +131,7 @@ describe("Bible progress", () => {
     expect((await call("/me/opened", "POST", { localDay: "2999-01-01" })).status).toBe(400);
   });
 
-  it("counts daily rereads in fresh stages and preserves them when a guest links an account", async () => {
+  it("counts daily rereads cumulatively and preserves them when a guest links an account", async () => {
     const dates = Array.from({length:14},(_,i) => `2026-01-${String(i+1).padStart(2,"0")}`);
     await env.DB.batch(dates.map((d,i) => env.DB.prepare(
       "INSERT INTO reading_events (id,user_id,local_day,time_zone,occurred_at,created_at) VALUES (?1,?2,?3,'UTC',1,1)"
@@ -143,7 +143,7 @@ describe("Bible progress", () => {
     await call("/me/chapters/GEN/1/complete", "POST", {localDay:"2026-01-15",timeZone:"UTC"});
     const p = await json("/me/progress?today=2026-01-15");
     expect(p.medalStages.find((s:any) => s.id === "fruit-0").earned).toBe(true);
-    expect(p.medalStages.find((s:any) => s.id === "fruit-1")).toMatchObject({days:1,units:1,earned:false});
+    expect(p.medalStages.find((s:any) => s.id === "fruit-1")).toMatchObject({days:15,units:14,earned:false});
     const target = await signInGuest();
     await moveUserData(env,userId,target.userId);
     const linked = await json("/me/progress?today=2026-01-15","GET",undefined,target.token);
