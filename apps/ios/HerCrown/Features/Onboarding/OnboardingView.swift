@@ -14,6 +14,8 @@ struct OnboardingView: View {
     @State private var prayerRevealing = false
     @State private var revealed = 0
     @State private var settled = false
+    @State private var entranceTask: Task<Void, Never>?
+    @State private var finishRevealRequested = false
     @State private var artVisible = false
     @State private var prayerTitleFinished = false
     @State private var prayerTitleRevealed = 0
@@ -101,7 +103,9 @@ struct OnboardingView: View {
     }
 
     var body: some View {
-        Group {
+        let displayedStep = step
+        let displayedRequest = requestVersion
+        return Group {
             if step == 0 { welcome }
             else {
                 VStack(spacing: 0) {
@@ -156,6 +160,12 @@ struct OnboardingView: View {
         }
         .foregroundStyle(ink).buttonStyle(.plain)
         .background(Theme.canvas(.light).ignoresSafeArea())
+        .contentShape(Rectangle())
+        .simultaneousGesture(TapGesture().onEnded { finishReveal(expectedStep: displayedStep, expectedRequest: displayedRequest) })
+        .accessibilityAction(named: "Show full text") { finishReveal(expectedStep: displayedStep, expectedRequest: displayedRequest) }
+        .onChange(of: loadingPrayer) { _, _ in settleSkippedPrayerIfReady() }
+        .onChange(of: preparedVersion) { _, _ in settleSkippedPrayerIfReady() }
+        .onChange(of: prayerError) { _, _ in settleSkippedPrayerIfReady() }
         .task(id: "activity-\(step)-\(scenePhase)") {
             if scenePhase == .active { await OnboardingActivity.shared.update(step: step) }
         }
@@ -164,7 +174,12 @@ struct OnboardingView: View {
         .onChange(of: reminders) { _, _ in saveDraft() }
         .onChange(of: reminderTime) { _, _ in saveDraft() }
         .environment(\.colorScheme, .light).preferredColorScheme(.light)
-        .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") { await enterPage() }
+        .task(id: "\(step)-\(scenePhase)-\(reduceMotion)-\(requestVersion)") {
+            // Own only the visual entrance task. Skipping it must not cancel prayer preparation.
+            let task = Task { await enterPage() }
+            entranceTask = task
+            await withTaskCancellationHandler { await task.value } onCancel: { task.cancel() }
+        }
         .task(id: "paywall-\(step)-\(app.me?.user.id ?? "")") {
             if step == 13 { Billing.shared.prepareOnboardingPaywall() }
         }
@@ -184,7 +199,7 @@ struct OnboardingView: View {
     private var welcome: some View {
         GeometryReader { g in
             ZStack(alignment: .top) {
-                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion).ignoresSafeArea()
+                OnboardingCollage(size: CGSize(width: g.size.width * 1.04, height: (g.size.height + g.safeAreaInsets.top + g.safeAreaInsets.bottom) * 0.96), animate: !reduceMotion && !finishRevealRequested).ignoresSafeArea()
                 VStack(spacing: 0) {
                     Spacer().frame(height: g.size.height * 0.30)
                     animatedText(title).font(.serif(g.size.width < 380 ? 39 : 44)).tracking(-1.2).multilineTextAlignment(.center).minimumScaleFactor(0.8)
@@ -303,9 +318,9 @@ struct OnboardingView: View {
             if loadingPrayer { ProgressView("Preparing your prayer…").font(.ui(14)).frame(maxWidth: .infinity).padding(.vertical, 30) }
             else if prayerError {
                 Text(prayerErrorMessage.isEmpty ? "We couldn’t prepare your personal prayer right now." : prayerErrorMessage).font(.ui(14)).foregroundStyle(muted)
-                Button("Try again") { settled = false; requestVersion += 1 }.buttonStyle(CapsuleButtonStyle())
+                Button("Try again") { finishRevealRequested = false; settled = false; requestVersion += 1 }.buttonStyle(CapsuleButtonStyle())
                 Button("Use a simple prayer") {
-                    simplePrayerRequested = true; settled = false; prayerRevealing = false; requestVersion += 1
+                    simplePrayerRequested = true; finishRevealRequested = false; settled = false; prayerRevealing = false; requestVersion += 1
                 }.buttonStyle(CapsuleButtonStyle(kind: .secondary))
             } else {
                 Text(settled || reduceMotion ? prayer : prayerRevealing ? String(prayer.prefix(revealed)) : "")
@@ -396,6 +411,7 @@ struct OnboardingView: View {
         else { answers.season.removeAll { $0 == "Prefer not to say" }; if answers.season.contains(value) { answers.season.removeAll { $0 == value } } else { answers.season.append(value) } }
     }
     private func next(skipping: Bool = false) {
+        entranceTask?.cancel(); finishRevealRequested = false
         textFocused = false
         if skipping {
             switch step { case 3: answers.name = ""; case 4: answers.comparison = ""; case 5: answers.season = []; case 6: answers.familiarity = ""; case 7: answers.heart = []; case 8: answers.burden = ""; case 9: answers.lovedOnes = ""; case 10: answers.pace = ""; default: break }
@@ -406,7 +422,7 @@ struct OnboardingView: View {
         settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false
         if step < 13 { step += 1 }
     }
-    private func goBack() { textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false; step = max(0, step - 1) }
+    private func goBack() { entranceTask?.cancel(); finishRevealRequested = false; textFocused = false; acknowledgement = ""; settled = false; artVisible = false; prayerTitleFinished = false; prayerTitleRevealed = 0; prayerRevealing = false; revealed = 0; bridge = false; introOpacity = 1; welcomeCopyVisible = false; step = max(0, step - 1) }
 
     private func saveDraft() {
         OnboardingDraft(step: step, answers: answers, reminders: reminders, reminderTime: reminderTime).save()
@@ -425,7 +441,39 @@ struct OnboardingView: View {
         default: ""
         }
     }
+    /// A tap completes the current page's visual reveal without answering a question or advancing a step.
+    /// Capturing the displayed step prevents a Continue/Back tap also skipping the newly navigated page.
+    private func finishReveal(expectedStep: Int, expectedRequest: Int) {
+        guard step == expectedStep, requestVersion == expectedRequest, !settled, !finishRevealRequested, !finishing else { return }
+        finishRevealRequested = true
+        entranceTask?.cancel() // Cancels sleeps and future haptic pulses before revealing the complete text.
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            showingAcknowledgement = false; acknowledgement = ""; acknowledgementOpacity = 1
+            artVisible = true; introOpacity = 1; welcomeCopyVisible = true
+            prayerTitleFinished = true; prayerTitleRevealed = title.count
+            if step == 1 { bridge = true }
+            if step == 11 {
+                prayerRevealing = true
+                settleSkippedPrayerIfReady()
+            } else {
+                revealed = title.count
+                settled = true
+            }
+        }
+        Task { await Analytics.shared.track("onboarding_animation_skipped", ["step": .string(Self.stepNames[expectedStep]), "index": .number(Double(expectedStep))]) }
+    }
+
+    private func settleSkippedPrayerIfReady() {
+        guard step == 11, finishRevealRequested, !settled, !loadingPrayer,
+              prayerError || (preparedAnswers == prayerPreparation?.answers && preparedVersion == requestVersion) else { return }
+        // Never reveal stale prayer text or let a visual skip bypass an unfinished request.
+        prayerTitleFinished = true; prayerRevealing = true; revealed = prayer.count; settled = true
+    }
+
     private func type(_ text: String, prayer: Bool = false) async throws {
+        try Task.checkCancellation()
         revealed = 0
         if reduceMotion || scenePhase != .active { revealed = text.count; return }
         let feedback = UIImpactFeedbackGenerator(style: .light)
@@ -452,6 +500,7 @@ struct OnboardingView: View {
     }
     private func enterPage() async {
         guard scenePhase == .active, !settled else { return }
+        if finishRevealRequested { settleSkippedPrayerIfReady(); return }
         let enteredStep = step
         Task { await Analytics.shared.track("onboarding_step", ["step": .string(Self.stepNames[enteredStep]), "index": .number(Double(enteredStep))]) }
         // Navigation stays available while typing. An interrupted reveal must never strand the footer.

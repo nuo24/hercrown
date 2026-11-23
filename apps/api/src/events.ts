@@ -71,6 +71,7 @@ export const CLIENT_EVENTS: Record<string, Record<string, PropRule>> = {
   tutorial_step: { index: "number", entrypoint: ["onboarding", "settings"] },
   tutorial_finished: { skipped: "boolean", entrypoint: ["onboarding", "settings"] },
   onboarding_step: { step: ["welcome", "time", "demo", "name", "comparison", "season", "intention", "familiarity", "topics", "burden", "loved_ones", "rhythm", "prayer", "reminder", "ready"], index: "number" },
+  onboarding_animation_skipped: { step: ["welcome", "time", "demo", "name", "comparison", "season", "intention", "familiarity", "topics", "burden", "loved_ones", "rhythm", "prayer", "reminder", "ready"], index: "number" },
   paywall_requested: { placement },
   paywall_viewed: PAYWALL,
   paywall_closed: {},
