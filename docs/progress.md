@@ -1120,3 +1120,9 @@ Owner corrected the rendering: unearned medals must retain original fruit/armor/
 ### November 23 — internal TestFlight41
 
 Owner requested recent fixes in next build. Selected1.0.1(41), app/widget. Includes56f7a3d grey original unearned medal artwork (no lock symbols), cumulative progress unchanged,6887dc5 flat Discover pink section, plus previously approved native printed-letter offer/original styling/full-screen paper header. Existing paywall preloading retained; physical phone latency remains to be measured, not claimed fixed. API check/220 tests and native builds/Simulator captures passed for latest layout fixes; prior70 native logic tests passed. Internal-only staging export/isolated credentials, existing Team group only; no external/public release or production writes. Archive from clean commit.
+
+
+Build41 archive/upload succeeded from clean sourcef9c2206. Archive /private/tmp/hercrown-testflight41-20261123/HerCrown-1.0.1-Staging.xcarchive. App/widget1.0.1(41), staging endpoint/Keychain isolation, internal-only export and exclusion of DEBUG preview automation verified. Apple accepted upload November23 at approximately5:04PM Eastern; upload IDdcaad65a-dbd4-4761-a7c5-ce039d80e073 processing with no errors/warnings. Team distribution verification pending; no external/public release/production changes.
+
+
+Build41 verified ready: Apple IDdcaad65a-dbd4-4761-a7c5-ce039d80e073, processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership read back true; external Beta membership false.3849-character testing notes saved/read back exactly. Final /private/tmp/hercrown-testflight41-20261123/verified.json. Clean archive sourcef9c2206. No external Beta review/public release/production write.
