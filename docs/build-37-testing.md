@@ -21,3 +21,5 @@ Uses staging and an isolated staging sign-in. App Store account data will not ap
 7. Settings > Sandbox testing > Preview decline offer is a labelled native-animation preview with purchases disabled. Real gift requires dismissal of the main paywall, reopening at least 24 hours later, no Plus and introductory eligibility. U.S. terms start November 24: $29.99 first year, then $39.99/year, no trial. Actual gift stays hidden unless Apple returns matching terms. Then verify sandbox purchase/cancel/restore and Plus access.
 
 Report build, iPhone model, appearance, steps and screenshot/video. Never include passwords or verification codes.
+
+Later Pink #31222B, flat daily-verse background and original book-opening artwork corrections are not in this already-archived build; they require the next build.

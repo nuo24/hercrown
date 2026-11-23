@@ -53,6 +53,7 @@ struct HomeView: View {
                     Rectangle().fill(Theme.border(scheme)).frame(height: 1)
                         .padding(.horizontal, 22)
                         .padding(.bottom, 12)
+                        .background(collection == .library ? Theme.verseSurface(scheme) : .clear)
                     VStack(alignment: .leading, spacing: 0) {
                         switch collection {
                         case .library: library
@@ -448,9 +449,9 @@ struct HomeView: View {
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.vertical, 10)
-            .background { Theme.verseSurface(scheme).padding(.horizontal, -22) }
             Divider()
         }
+        .background { Theme.verseSurface(scheme).padding(.horizontal, -22) }
     }
 
     // MARK: Verse search (.search-card)

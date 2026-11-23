@@ -2,7 +2,7 @@
 
 November 23, 2026. Owner confirmed partner's intended Pink interactive accent is #31222B, overriding the subsequent handoff-matching #82435F request in 0021. Theme.accent now returns #31222B for Pink. The semantic interactive-control mapping remains in place; ordinary text, Light/Dark behavior and destructive semantics stay unchanged.
 
-Remove Home's rounded daily-verse card and 14pt inset. Preserve original verse typography/column and separators, with a very subtle #F8EBF0 flat wash extended to the screen edges behind the section. No corner radius, card stroke, elevation or shadow. Existing measured medal/editorial rhythm is preserved.
+Remove Home's rounded daily-verse card and 14pt inset. Preserve original verse typography/column and separators, with a very subtle #F8EBF0 flat wash extended to the screen edges behind the section. No corner radius, card stroke, elevation or shadow. Existing measured medal/editorial rhythm is preserved. Owner subsequently clarified that the wash must run continuously from the Library divider to the lower verse divider, including the 12pt spacer after the Library line and the lower rule’s background; no intervening canvas-colored strip. Apply the spacer wash only to Library, not Bookmarks or Notes.
 
 The reader previously used generic illustrations at the first verse of every chapter. Use the supplied canonical BibleBookArtwork mapping at chapter 1, verse 1 of each of the 66 books instead. Ezra 1:1 uses bible-book-ezr (original quill artwork). These book-specific icons do not repeat at chapter 2 or verse 2. Independently approved featured-verse illustrations (such as Psalm 23:1) remain. Scripture is unchanged.
 
