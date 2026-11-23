@@ -3,6 +3,7 @@
 import { badRequest, readJson } from "./http";
 import type { SessionUser } from "./profile";
 import { readingDays, resolveToday } from "./reading";
+import { sequentialMedals } from "./medals";
 import { BOOKS } from "./refs";
 import { dayOrdinal, isValidDay, localDayIn, streakSummary } from "./streak";
 
@@ -66,7 +67,7 @@ export function weeksInARow(days: string[], today: string): number {
 /** GET /me/progress?today=YYYY-MM-DD */
 export async function getProgress(url: URL, env: Env, user: SessionUser) {
   const today = await resolveToday(env, user.id, url.searchParams.get("today"));
-  const [read, opened, chapters, extra] = await Promise.all([
+  const [read, opened, chapters, extra, repeated] = await Promise.all([
     readingDays(env, user.id),
     env.DB.prepare("SELECT local_day FROM app_open_days WHERE user_id = ?1").bind(user.id).all<{ local_day: string }>(),
     env.DB.prepare("SELECT book_id, chapter, local_day FROM chapter_completions WHERE user_id = ?1 ORDER BY book_id, chapter").bind(user.id).all<{ book_id: string; chapter: number; local_day: string }>(),
@@ -74,7 +75,17 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
       `SELECT (SELECT count(*) FROM devotional_reads WHERE user_id = ?1) AS devotionals,
               (SELECT count(DISTINCT ref) FROM study_history WHERE user_id = ?1) AS studied`,
     ).bind(user.id).first<{ devotionals: number; studied: number }>(),
+    // Only chapter-end events emitted by completeChapter qualify, never ordinary verse reading.
+    env.DB.prepare("SELECT id, ref, local_day FROM reading_events WHERE user_id = ?1 AND id LIKE 'chapter-%'")
+      .bind(user.id).all<{id:string; ref:string; local_day:string}>(),
   ]);
+  const marked = new Set(chapters.results.map(c => `${c.book_id}.${c.chapter}`));
+  const chapterReads = [...chapters.results];
+  for (const e of repeated.results) {
+    const match = /^([A-Z0-9]+)\.(\d+)\.1$/.exec(e.ref ?? "");
+    if (!match || !e.id.endsWith(`-${match[1]}-${Number(match[2])}-${e.local_day}`) || !marked.has(`${match[1]}.${Number(match[2])}`)) continue;
+    chapterReads.push({book_id:match[1],chapter:Number(match[2]),local_day:e.local_day});
+  }
   // Opening the app to read counts as opening it, even if the "opened" ping was lost.
   const openedDays = [...new Set([...opened.results.map((r) => r.local_day), ...read])];
   const perBook = new Map<string, number>();
@@ -86,6 +97,7 @@ export async function getProgress(url: URL, env: Env, user: SessionUser) {
   const now = dayOrdinal(today);
   return Response.json({
     today,
+    medalStages: sequentialMedals(read, chapterReads, today),
     bible: {
       // Exact, account-scoped identities let themed medals count only their assigned reading.
       completedChapterRefs: chapters.results.filter((r) => r.local_day <= today).map((r) => `${r.book_id}.${r.chapter}`),

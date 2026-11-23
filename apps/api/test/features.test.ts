@@ -110,9 +110,12 @@ describe("Bible progress", () => {
     const p = await json(`/me/progress?today=${day}`);
     expect(p.bible).toMatchObject({ chaptersRead: 2, totalChapters: 1189, percent: 0.2 });
     expect(p.bible.completedChapterRefs).toEqual(["JHN.3", "PSA.23"]);
+    expect(p.medalStages.find((s:any) => s.id === "fruit-0")).toMatchObject({days:1,units:2,earned:false});
+    expect(p.medalStages.filter((s:any) => !s.id.endsWith("-0")).every((s:any) => s.days === 0 && s.units === 0)).toBe(true);
     const other = await signInGuest();
     const isolated = await (await api(`/me/progress?today=${day}`, { token: other.token })).json<any>();
     expect(isolated.bible.completedChapterRefs).toEqual([]);
+    expect(isolated.medalStages.every((s:any) => s.days === 0 && s.units === 0)).toBe(true);
     expect(p.bible.books.find((b: any) => b.id === "JHN")).toEqual({ id: "JHN", name: "John", testament: "NT", chapters: 21, chaptersRead: 1 });
     expect(p).toMatchObject({ daysOpened: { total: 1, current: 1 }, daysRead: { total: 1, current: 1 }, daysThisYear: 1, weeksInARow: 1, devotionalsRead: 0 });
     expect((await json(`/me/streak?today=${day}`)).streak.readToday).toBe(true); // finishing a chapter is reading
@@ -121,10 +124,30 @@ describe("Bible progress", () => {
     expect((await call("/me/chapters/JHN/3/complete", "DELETE")).status).toBe(204);
     const afterUnmark = await json(`/me/progress?today=${day}`);
     expect(afterUnmark.bible.chaptersRead).toBe(1);
+    expect(afterUnmark.medalStages.find((s:any) => s.id === "fruit-0").units).toBe(1);
     expect(afterUnmark.bible.completedChapterRefs).toEqual(["PSA.23"]);
 
     expect((await call("/me/chapters/JHN/22/complete", "POST", { localDay: day })).status).toBe(400);
     expect((await call("/me/opened", "POST", { localDay: "2999-01-01" })).status).toBe(400);
+  });
+
+  it("counts daily rereads in fresh stages and preserves them when a guest links an account", async () => {
+    const dates = Array.from({length:14},(_,i) => `2026-01-${String(i+1).padStart(2,"0")}`);
+    await env.DB.batch(dates.map((d,i) => env.DB.prepare(
+      "INSERT INTO reading_events (id,user_id,local_day,time_zone,occurred_at,created_at) VALUES (?1,?2,?3,'UTC',1,1)"
+    ).bind(`stage-day-${userId}-${i}`,userId,d)));
+    await env.DB.batch(Array.from({length:14},(_,i) => env.DB.prepare(
+      "INSERT INTO chapter_completions (user_id,book_id,chapter,local_day,completed_at) VALUES (?1,'GEN',?2,'2026-01-01',1)"
+    ).bind(userId,i+1)));
+    await call("/me/chapters/GEN/1/complete", "POST", {localDay:"2026-01-15",timeZone:"UTC"});
+    await call("/me/chapters/GEN/1/complete", "POST", {localDay:"2026-01-15",timeZone:"UTC"});
+    const p = await json("/me/progress?today=2026-01-15");
+    expect(p.medalStages.find((s:any) => s.id === "fruit-0").earned).toBe(true);
+    expect(p.medalStages.find((s:any) => s.id === "fruit-1")).toMatchObject({days:1,units:1,earned:false});
+    const target = await signInGuest();
+    await moveUserData(env,userId,target.userId);
+    const linked = await json("/me/progress?today=2026-01-15","GET",undefined,target.token);
+    expect(linked.medalStages).toEqual(p.medalStages);
   });
 
   it("counts weeks in a row (Monday to Sunday)", () => {

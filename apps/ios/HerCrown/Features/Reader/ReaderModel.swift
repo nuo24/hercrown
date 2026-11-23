@@ -128,14 +128,21 @@ final class ReaderModel {
             }
         }
         let key = "\(chapter.book.id).\(chapter.number)"
-        if verse == chapter.verses.last?.number, !completed.contains(key) {
+        let reportKey = "\(app.me?.user.id ?? "guest")|\(today)|\(key)"
+        if verse == chapter.verses.last?.number, reportedChapterDays.insert(reportKey).inserted {
             completed.insert(key)
             Task {
-                _ = try? await app.api.send("POST", "/me/chapters/\(chapter.book.id)/\(chapter.number)/complete",
-                                            json: ["localDay": today, "timeZone": TimeZone.current.identifier])
+                do {
+                    _ = try await app.api.send("POST", "/me/chapters/\(chapter.book.id)/\(chapter.number)/complete",
+                                              json: ["localDay": today, "timeZone": TimeZone.current.identifier])
+                } catch { reportedChapterDays.remove(reportKey) }
+
             }
         }
     }
+
+    // Per-day chapter-end reporting supports fresh rereading in later medal stages.
+    private var reportedChapterDays = Set<String>()
 
     private var positionTask: Task<Void, Never>?
     private func savePosition() {

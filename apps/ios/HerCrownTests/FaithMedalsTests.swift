@@ -35,7 +35,7 @@ final class FaithMedalsTests: XCTestCase {
         var progress = MedalProgress.empty
         progress.daysRead.total = 365
         progress.bible.chaptersRead = 1189
-        XCTAssertTrue(FaithMedal.items(.fruit)[2].earned(progress))
+        XCTAssertFalse(FaithMedal.items(.fruit)[2].earned(progress))
         for medal in FaithMedal.all where medal.journey != nil {
             XCTAssertFalse(medal.earned(progress), medal.id)
             XCTAssertEqual(medal.counts(progress).units, 0)
@@ -44,6 +44,7 @@ final class FaithMedalsTests: XCTestCase {
     func testEachJourneyRequiresItsOwnExactChaptersAndDays() {
         for medal in FaithMedal.all where medal.journey != nil {
             var progress = MedalProgress.empty
+            if medal.index > 0 { continue } // Legacy totals must not unlock later stages.
             progress.daysRead.total = medal.days
             progress.bible.completedChapterRefs = Array(medal.requiredChapterRefs.dropLast())
             XCTAssertFalse(medal.earned(progress), medal.id)
@@ -95,10 +96,10 @@ final class FaithMedalsTests: XCTestCase {
         let breastplate = FaithMedal.items(.armor)[1]
         progress.daysRead.total = 365
         progress.bible.books += progress.bible.books + progress.bible.books
-        XCTAssertEqual(breastplate.counts(progress).units, 1)
+        XCTAssertEqual(breastplate.counts(progress).units, 0)
         XCTAssertFalse(breastplate.earned(progress))
         progress.bible.books += [.init(id: "EST", chapters: 10, chaptersRead: 10), .init(id: "JUD", chapters: 1, chaptersRead: 1)]
-        XCTAssertTrue(breastplate.earned(progress))
+        XCTAssertFalse(breastplate.earned(progress))
     }
     func testArmorKeepsArtAndVersesWithoutMandatoryChapterJourneys() throws {
         XCTAssertEqual(FaithMedal.items(.armor).compactMap(\.completedBooks), [1,3,5,10,20,40])
@@ -116,9 +117,24 @@ final class FaithMedalsTests: XCTestCase {
     }
     @MainActor func testRuleChangeRetainsUnchangedAwardDatesOnly() {
         let dates = ["fruit-0": Date(timeIntervalSince1970: 100), "armor-1": Date(), "promises-0": Date(), "women-0": Date()]
-        let migrated = FaithMedalsModel.retainedDates(dates, rulesVersion: nil)
-        XCTAssertEqual(Set(migrated.keys), ["fruit-0", "women-0"])
-        XCTAssertEqual(Set(FaithMedalsModel.retainedDates(dates, rulesVersion: 2).keys), ["fruit-0", "promises-0", "women-0"])
-        XCTAssertEqual(FaithMedalsModel.retainedDates(dates, rulesVersion: 3), dates)
+        for version in [nil, 2, 3] as [Int?] {
+            XCTAssertTrue(FaithMedalsModel.retainedDates(dates, rulesVersion: version).isEmpty)
+        }
+        XCTAssertEqual(FaithMedalsModel.retainedDates(dates, rulesVersion: 4), dates)
+    }
+    func testSequentialStageCountsDoNotUseLifetimeTotals() {
+        var progress = MedalProgress(daysRead: .init(total: 1000), bible: .init(chaptersRead: 1189, books: []))
+        progress.medalStages = [.init(id: "fruit-0", days: 14, units: 14, completedChapterRefs: [], earned: true),
+                                .init(id: "fruit-1", days: 1, units: 1, completedChapterRefs: ["PSA.1"], earned: false)]
+        let fruits = FaithMedal.items(.fruit)
+        XCTAssertTrue(fruits[0].earned(progress))
+        XCTAssertTrue(fruits[1].isAvailable(progress))
+        XCTAssertEqual(fruits[1].counts(progress).days, 1)
+        XCTAssertEqual(fruits[1].counts(progress).units, 1)
+        XCTAssertFalse(fruits[2].isAvailable(progress))
+        XCTAssertEqual(fruits[2].fraction(progress), 0)
+        XCTAssertEqual(fruits.filter { !$0.earned(progress) && $0.isAvailable(progress) }.count, 1)
+        XCTAssertEqual(fruits[1].completedRefs(progress), ["PSA.1"])
+        XCTAssertTrue(fruits[2].completedRefs(progress).isEmpty)
     }
 }

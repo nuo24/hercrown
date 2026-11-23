@@ -45,7 +45,9 @@ struct FaithMedalsView: View {
     private var progress: MedalProgress { model.progress ?? .empty }
     private func state(_ medal: FaithMedal) -> String {
         guard model.progress != nil else { return "Not synced" }
-        return medal.earned(progress) ? "Collected" : medal.fraction(progress) > 0 ? "In progress" : "Locked"
+        if medal.earned(progress) { return "Collected" }
+        guard medal.isAvailable(progress) else { return "Locked" }
+        return medal.index > 0 || medal.counts(progress).days > 0 ? "In progress" : "Ready to begin"
     }
     var body: some View {
         VStack(spacing: 0) {
@@ -65,6 +67,10 @@ struct FaithMedalsView: View {
                         .overlay(Capsule().stroke(Theme.border(scheme))).padding(.top, 12)
                     carousel
                     Text(state(selected)).font(.ui(13, weight: .medium))
+                    if selected.index > 0 && state(selected) == "Locked" {
+                        Text("Complete \(items[selected.index - 1].name) first. This goal starts fresh on your next reading day.")
+                            .font(.ui(11)).foregroundStyle(Theme.muted(scheme)).multilineTextAlignment(.center).padding(.top, 8)
+                    }
                     Text(selected.requirement).font(.ui(13)).lineSpacing(4).multilineTextAlignment(.center)
                         .foregroundStyle(Theme.muted(scheme)).frame(maxWidth: 285).padding(.top, 9)
                     if model.progress != nil {
@@ -102,7 +108,7 @@ struct FaithMedalsView: View {
                 ForEach(selected.requiredChapterRefs, id: \.self) { chapter in
                     if let ref = VerseRef(chapter + ".1") {
                         let name = BibleStore.shared.books.first { $0.id == ref.book }?.displayName ?? ref.book
-                        let done = (progress.bible.completedChapterRefs ?? []).contains(chapter)
+                        let done = selected.completedRefs(progress).contains(chapter)
                         Button {
                             let medal = selected.id
                             onBack()
@@ -133,7 +139,7 @@ struct FaithMedalsView: View {
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 0) {
                     ForEach(items) { medal in
-                        MedalImage(medal: medal, locked: medal.fraction(progress) <= 0)
+                        MedalImage(medal: medal, locked: !medal.isAvailable(progress))
                             .frame(width: width, height: 250).id(medal.id)
                             .accessibilityElement().accessibilityLabel("\(medal.name), \(state(medal))")
                     }
@@ -175,7 +181,7 @@ struct FaithMedalsView: View {
                 ForEach(items) { medal in
                     Button { selection = medal.id } label: {
                         VStack(spacing: 3) {
-                            MedalImage(medal: medal, locked: medal.fraction(progress) <= 0).frame(height: 80)
+                            MedalImage(medal: medal, locked: !medal.isAvailable(progress)).frame(height: 80)
                             Text(medal.name).font(.ui(11, weight: .medium))
                             Text(state(medal)).font(.ui(10)).foregroundStyle(Theme.muted(scheme))
                         }

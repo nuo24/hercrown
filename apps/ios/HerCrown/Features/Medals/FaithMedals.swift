@@ -10,6 +10,8 @@ struct MedalProgress: Codable, Equatable {
         var books: [Book]
         var completedChapterRefs: [String]? = nil
     }
+    struct Stage: Codable, Equatable { let id: String; let days: Int; let units: Int; let completedChapterRefs: [String]; let earned: Bool }
+    var medalStages: [Stage]? = nil
     var daysRead: Days
     var bible: Bible
     static let empty = Self(daysRead: .init(total: 0), bible: .init(chaptersRead: 0, books: []))
@@ -67,6 +69,11 @@ struct FaithMedal: Identifiable {
         return "Read on \(days) different days and complete \(chapters) different Bible chapters."
     }
     func counts(_ progress: MedalProgress) -> (days: Int, units: Int) {
+        if let stages = progress.medalStages {
+            guard let stage = stages.first(where: { $0.id == id }) else { return (0, 0) }
+            return (min(days, max(0, stage.days)), min(targetCount, max(0, stage.units)))
+        }
+        guard index == 0 else { return (0, 0) }
         let completed: Int
         if completedBooks != nil {
             let canon = Dictionary(uniqueKeysWithValues: BibleStore.shared.books.map { ($0.id, $0.chapterCount) })
@@ -82,6 +89,13 @@ struct FaithMedal: Identifiable {
             completed = book.map { id in progress.bible.books.first { $0.id == id }?.chaptersRead ?? 0 } ?? progress.bible.chaptersRead
         }
         return (min(days, max(0, progress.daysRead.total)), min(targetCount, max(0, completed)))
+    }
+    func isAvailable(_ progress: MedalProgress) -> Bool {
+        Self.items(collection).filter { $0.index < index }.allSatisfy { $0.earned(progress) }
+    }
+    func completedRefs(_ progress: MedalProgress) -> [String] {
+        if let stages = progress.medalStages { return stages.first { $0.id == id }?.completedChapterRefs ?? [] }
+        return index == 0 ? progress.bible.completedChapterRefs ?? [] : []
     }
     func progressLabel(_ progress: MedalProgress) -> String {
         let n = counts(progress)
@@ -149,11 +163,8 @@ final class FaithMedalsModel {
     init(defaults: UserDefaults = .standard) { self.defaults = defaults }
     private struct Cache: Codable { let progress: MedalProgress; let dates: [String: Date]; var rulesVersion: Int? = nil }
     static func retainedDates(_ dates: [String: Date], rulesVersion: Int?) -> [String: Date] {
-        switch rulesVersion {
-        case 3: dates
-        case 2: dates.filter { !$0.key.hasPrefix("armor-") }
-        default: dates.filter { !$0.key.hasPrefix("armor-") && !$0.key.hasPrefix("promises-") }
-        }
+        guard rulesVersion == 4 else { return [:] }
+        return dates
     }
     var homeMedal: FaithMedal {
         let fruits = FaithMedal.items(.fruit)
@@ -176,7 +187,7 @@ final class FaithMedalsModel {
                 earnedDates[medal.id] = .now // First verified detection, not an invented historical award date.
                 await Analytics.shared.track("faith_medal_earned", ["medal": .string(medal.id)])
             }
-            defaults.set(try? JSONEncoder().encode(Cache(progress: fresh, dates: earnedDates, rulesVersion: 3)), forKey: "hc.medals.\(user)")
+            defaults.set(try? JSONEncoder().encode(Cache(progress: fresh, dates: earnedDates, rulesVersion: 4)), forKey: "hc.medals.\(user)")
         } catch {
             guard app.me?.user.id == user, account == user else { return }
             unavailable = true
