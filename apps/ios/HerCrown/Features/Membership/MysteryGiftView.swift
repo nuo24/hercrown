@@ -41,7 +41,7 @@ struct MysteryGiftView: View {
                 Spacer()
                 Button(action: onClose) {
                     Image(systemName: "xmark").font(.system(size: 12, weight: .semibold)).frame(width: 32, height: 32)
-                        .background(Theme.surface(scheme), in: Circle()).overlay(Circle().stroke(Theme.border(scheme)))
+                        .overlay(Circle().stroke(Theme.border(scheme)))
                         .frame(width: 44, height: 44)
                 }.accessibilityLabel("Continue with free reading").disabled(busy)
             }.padding(.horizontal, 22).padding(.top, 8)
@@ -87,7 +87,7 @@ struct MysteryGiftView: View {
 
         }
         .ignoresSafeArea(.container, edges: .bottom)
-        .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme).ignoresSafeArea()).buttonStyle(.plain)
+        .foregroundStyle(Theme.text(scheme)).background { GiftPaperMaterial().ignoresSafeArea() }.buttonStyle(.plain)
         .interactiveDismissDisabled(busy)
         .onDisappear { revealTask?.cancel() }
         .sheet(item: $legal) { page in SafariView(url: page.url) }
@@ -114,7 +114,6 @@ struct MysteryGiftView: View {
             ScrollView {
                 pageContents(isOffer: isOffer, size: geometry.size)
             }
-            .background { if isOffer { GiftPaperMaterial() } }
         }
     }
     // The moving paper and the interactive page render this exact same layout.
