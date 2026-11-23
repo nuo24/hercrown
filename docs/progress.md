@@ -1105,3 +1105,8 @@ Final build40 archive/upload succeeded from clean source6fcd755. Archive /privat
 Build40 verified VALID and INTERNAL_ONLY: Apple ID122b0ebb-f606-41a7-a9cb-0c6d615a8ec2, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Team group28cc9cba-c547-49ca-bb95-2cfeb20b6ac4 already receives it through hasAccessToAllBuilds=true; membership read back true. Explicit assignment was unnecessary (Apple rejected re-adding an internal-only build to that already-associated internal group). Testing notes submitted. Archive source6fcd755 and staging backend9c75fad/3b991e26-b77f-4ff0-beea-e71f1a8a4b33. No external review/public release/production changes.
 
 Final read-only verification saved /private/tmp/hercrown-testflight40-final-20261123/verified.json: internal IN_BETA_TESTING, auto-notify true, Team membership true, external Beta membership false,3558-character en-US testing notes read back exactly. Apple returned a transient500 during an earlier redundant detail read; fresh parallel reads succeeded and confirmed readiness.
+
+
+### November 23 — remove rounded Discover feature card
+
+Owner identified the same inset rounded pink-card issue on Discover. Removed the feature's rounded shape and darker #F3DFE7 fill. Use Home's subtle #F8EBF0 flat full-width section wash, spanning from the filter edge through the14pt feed gap to the existing lower divider. Retained original heading/whole-word layout, illustration, reference/completion and Begin reading behavior. API check/all220 tests passed; native build succeeded and actual pink Simulator page inspected with Numbers6:26. Capture comparisons/discover-flat.png. No new TestFlight upload; build40 predates this correction.

@@ -414,7 +414,8 @@ struct DiscoverView: View {
                     : nil
                 if let featured {
                     feature(featured)
-                        .background(Theme.pink(scheme) ? Theme.feature(scheme) : .clear, in: RoundedRectangle(cornerRadius: 16))
+                        // Match Home: a flat section wash, including the 14-point gap before its divider.
+                        .background { Theme.verseSurface(scheme).padding(.horizontal, -22).padding(.bottom, -14) }
                         .id("featured-\(featured.ref)")
                         .opacity(fading.contains(featured.ref) || !featureVisible ? 0 : 1)
                         .transition(.opacity)
