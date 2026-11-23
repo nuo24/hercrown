@@ -17,6 +17,8 @@ struct MysteryGiftView: View {
         #endif
     }()
     @State private var opening = false
+    @State private var flapProgress = 0.0
+    @State private var pageOpacity = 1.0
     @State private var revealTask: Task<Void, Never>?
     @State private var busy = false
     @State private var message: String?
@@ -54,6 +56,7 @@ struct MysteryGiftView: View {
                 }
             }
         }
+        .opacity(pageOpacity)
         .ignoresSafeArea(.container, edges: .bottom)
         .foregroundStyle(Theme.text(scheme)).background(Theme.canvas(scheme).ignoresSafeArea()).buttonStyle(.plain)
         .interactiveDismissDisabled(busy)
@@ -78,7 +81,9 @@ struct MysteryGiftView: View {
                         Image("gift-open-book").resizable().scaledToFit()
                             .transition(.opacity.combined(with: .scale(scale: 0.94)))
                     } else {
-                        GiftEnvelopeIllustration(opening: opening)
+                        GiftEnvelopeIllustration(progress: flapProgress)
+                            .contentShape(Rectangle())
+                            .onTapGesture(perform: revealOffer)
                             .transition(.opacity.combined(with: .offset(y: -12)))
                     }
                 }
@@ -155,10 +160,20 @@ struct MysteryGiftView: View {
             if reduceMotion {
                 withAnimation(.easeOut(duration: 0.15)) { revealed = true }
             } else {
-                withAnimation(.easeInOut(duration: 0.6)) { opening = true }
-                do { try await Task.sleep(for: .milliseconds(650)) } catch { return }
+                opening = true
+                // Open fully, then let the open envelope rest before changing pages.
+                withAnimation(.easeInOut(duration: 1.0)) { flapProgress = 1 }
+                do { try await Task.sleep(for: .milliseconds(1750)) } catch { return }
                 guard !Task.isCancelled else { return }
-                withAnimation(.easeInOut(duration: 0.45)) { revealed = true }
+                withAnimation(.easeOut(duration: 0.22)) { pageOpacity = 0 }
+                do { try await Task.sleep(for: .milliseconds(240)) } catch { return }
+                guard !Task.isCancelled else { return }
+                // Swap the entire page while invisible. Never animate its layout constraints.
+                var transaction = Transaction(); transaction.disablesAnimations = true
+                withTransaction(transaction) { revealed = true }
+                do { try await Task.sleep(for: .milliseconds(30)) } catch { return }
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeIn(duration: 0.35)) { pageOpacity = 1 }
             }
             if !isPreview { await Analytics.shared.track("mystery_gift_revealed") }
         }

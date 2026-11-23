@@ -919,3 +919,8 @@ Redesigned the onboarding Live Activity with original wreath/book artwork, small
 
 
 Staging rollout verified November 22, 2026 at approximately 7:52 PM Eastern: clean source commit `f0a9d23`; migration 0020 applied; Worker version `1b51aea7-99d4-4440-9c81-fcceb3e5cec3`. Disposable staging guest verified first-only scheduling, same-day suppression, next-day availability after backdating only that test row, one-time claim and no-repeat; guest deleted afterward. Initial Python client request was rejected with 403; accepted client header resolved access. Production untouched. Final native reminder capture measures approximately 156 points tall on iPhone 17 Pro and was visually inspected; before/after and envelope-animation recording added to the comparison page.
+
+
+### November 22 — correct envelope opening after owner review
+
+Owner rejected the first animation as a visual glitch. Replaced full-envelope opacity swapping and whole-hero movement with one stationary envelope front/ribbon and a continuously animated hinged flap. Letter appears behind the flap; the open pose rests for 750 ms after the 1-second opening. The invitation fades out before swapping layout without animation, then the offer fades in, avoiding animated constraint changes. Both the envelope and primary CTA trigger the same guarded sequence; Reduce Motion retains a short fade. Onboarding design unchanged. Native build passed and closed/open/final offer states visually inspected in Simulator. Updated actual recording in comparison page and dedicated animation preview. Required API check and all 214 tests passed. No deployment, upload or activation.
