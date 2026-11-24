@@ -24,6 +24,8 @@ Date: November 24, 2026. Result: **hold public submission for the privacy correc
 
 ### 1. Explicit permission for personal-context AI prayer
 
+Owner clarification after this audit: first-run AI permission already existed. The audit did not observe the complete first-run experience, so the missing-permission conclusion must be treated as unverified pending that comparison, not a confirmed regression. No additional permission screen or AI-flow change is authorized in the manifest-only correction below.
+
 Source: `apps/ios/HerCrown/Features/Onboarding/OnboardingView.swift`, footnote and prayerPreparation/preparePrayer; `PersonalPrayer.swift`, prayerInput.
 
 Build 45's only local disclosure says optional answers are sent to a prayer provider. It does not name OpenRouter/DeepSeek, and reaching step 10 starts the request automatically. The payload includes normalized first name, life season, familiarity, selected needs and optional burden/loved-one text. Skipping optional free text does not constitute a separate permission choice for the other personal context. The non-AI simple prayer is offered after generation fails, rather than as an equal choice before transmission.
@@ -33,6 +35,8 @@ Apple guideline 5.1.2(i) requires clear disclosure and explicit permission befor
 Reference: https://developer.apple.com/app-store/review/guidelines/#data-use-and-sharing
 
 ### 2. App and widget required-reason privacy manifests
+
+Subsequent scoped correction: added separate Her Crown and widget PrivacyInfo.xcprivacy files for app-only/shared-group UserDefaults reasons. This changes packaging metadata only, not settings access, storage, UI or consent. The already-uploaded build 45 remains immutable; the correction must be included in a subsequent build. Verification details are in docs/progress.md.
 
 The archived app contains SuperwallKit's PrivacyInfo.xcprivacy with a file-timestamp declaration. No Her Crown app or widget PrivacyInfo.xcprivacy was found in the source or archive. Her Crown uses UserDefaults.standard and shared App Group defaults; the widget uses shared defaults too. A dependency manifest does not describe the app's own UserDefaults use.
 
