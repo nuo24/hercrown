@@ -1163,3 +1163,8 @@ Build43 verified ready: Apple build IDa0fc6208-8bdd-444d-b066-9e0bc68b4626, buil
 ### November 23 — neutral offer price box and red old price
 
 Owner requested offer pricing area match the surrounding off-white paper rather than pink. Removed Theme.surface fill so root paper material continues through the box; changed its outline to neutral paper-edge colour. Struck original price now red (#A6424E light, #FF9CA5 dark); first-year price typography/colour unchanged. Shared printed-paper snapshot uses same live layout, so both animated and final box match. API check/all220 tests and5 targeted native gift/paper/pricing tests passed. Actual pink-appearance Simulator inspected: price box shows continuous paper material, original39.99 red/struck, first-year29.99 unchanged. Capture comparisons/offer-neutral-price.png. No pricing, eligibility, purchase, release or production changes; newer than43.
+
+
+### November 23 — internal TestFlight44
+
+Owner approved TestFlight push for50c6134: offer price box inherits off-white paper, neutral outline, original price red/struck, first-year price unchanged. Selected1.0.1(44) app/widget after confirming Apple's latest43. Latest API check/all220 tests and5 targeted native gift/paper/pricing tests passed; actual pink Simulator inspected. Prior four-column books/matching dividers/compact Home/uniform pink/medal fixes retained. Internal-only staging export/isolated credentials, Team only; no external/public release/production writes. Archive from clean commit.
