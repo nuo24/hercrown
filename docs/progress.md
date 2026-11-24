@@ -1168,3 +1168,9 @@ Owner requested offer pricing area match the surrounding off-white paper rather 
 ### November 23 — internal TestFlight44
 
 Owner approved TestFlight push for50c6134: offer price box inherits off-white paper, neutral outline, original price red/struck, first-year price unchanged. Selected1.0.1(44) app/widget after confirming Apple's latest43. Latest API check/all220 tests and5 targeted native gift/paper/pricing tests passed; actual pink Simulator inspected. Prior four-column books/matching dividers/compact Home/uniform pink/medal fixes retained. Internal-only staging export/isolated credentials, Team only; no external/public release/production writes. Archive from clean commit.
+
+
+Build44 archive/upload succeeded from clean source5e4d5f7. Archive /private/tmp/hercrown-testflight44-20261123/HerCrown-1.0.1-Staging.xcarchive; app/widget1.0.1(44), staging endpoint/Keychain isolation, internal-only export and DEBUG preview exclusion verified. Apple accepted upload November23 at approximately11:33PM Eastern. Upload IDd78a0767-ffe2-4e16-8df0-45cafc052686 processing with no errors/warnings. No external/public release/production writes.
+
+
+Build44 verified ready: Apple build IDd78a0767-ffe2-4e16-8df0-45cafc052686, processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership true; external Beta membership false.3173-character en-US testing notes saved/read back exactly. Final /private/tmp/hercrown-testflight44-20261123/verified.json. Clean archive source5e4d5f7. No external/public release/production writes.
