@@ -1136,3 +1136,9 @@ Owner provided comparison photos: editorial titles/kickers were separated by fle
 ### November 23 — internal TestFlight42
 
 Owner requested next build for99a56e5: compact Home copy/consistent102pt rows, colourful Home entry fruit, grey unearned art inside Faith Medals, single#FBF1F4 canvas on Home/Discover without darker sections. Selected1.0.1(42) for app/widget after confirming Apple's latest41. Latest API check/all220 tests and native build/actual Simulator inspection passed; prior70 native logic tests passed. Retain approved decline animation/style and preloading; phone latency not re-measured. Internal-only staging export/isolated credentials, Team only, no external/public release/production writes. Archive from clean commit.
+
+
+Build42 archive/upload succeeded from clean sourcebad69ca. Archive /private/tmp/hercrown-testflight42-20261123/HerCrown-1.0.1-Staging.xcarchive; app/widget1.0.1(42), staging endpoint/Keychain isolation, internal-only export and DEBUG preview exclusion verified. Apple accepted upload November23 at approximately8:35PM Eastern. Upload ID22c2128b-d8f8-4091-9501-683c96447a92 processing with no errors/warnings. No external/public release/production writes.
+
+
+Build42 verified ready: Apple ID22c2128b-d8f8-4091-9501-683c96447a92, processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership true; external Beta membership false.3807-character en-US testing notes saved/read back exactly. Verified readback /private/tmp/hercrown-testflight42-20261123/verified.json. Clean archive sourcebad69ca. No external/public release/production change.
