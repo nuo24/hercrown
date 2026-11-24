@@ -50,7 +50,7 @@ struct HomeView: View {
                     header
                     identity
                     collections
-                    Rectangle().fill(Theme.border(scheme)).frame(height: 1)
+                    sectionDivider
                         .padding(.horizontal, 22)
                         .padding(.bottom, 12)
                     VStack(alignment: .leading, spacing: 0) {
@@ -235,6 +235,10 @@ struct HomeView: View {
         }
     }
 
+    private var sectionDivider: some View {
+        Rectangle().fill(Theme.border(scheme)).frame(height: 1)
+    }
+
     private var medalsEntry: some View {
         VStack(spacing: 0) {
             Button { showingMedals = true } label: {
@@ -255,7 +259,7 @@ struct HomeView: View {
                     Spacer(minLength: 0)
                 }.frame(maxWidth: .infinity, minHeight: 102, alignment: .leading).contentShape(Rectangle())
             }.buttonStyle(.plain)
-            Rectangle().fill(Theme.border(scheme)).frame(height: 1)
+            sectionDivider
         }
     }
 
@@ -314,7 +318,7 @@ struct HomeView: View {
                         }
                         .padding(.bottom, 24)
                         .buttonStyle(.plain)
-                        Divider().padding(.bottom, 24)
+                        sectionDivider.padding(.bottom, 24)
                     }
                 }
             } else { ProgressView().frame(maxWidth: .infinity).padding(30) }
@@ -383,7 +387,7 @@ struct HomeView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        Rectangle().fill(Theme.border(scheme).opacity(0.65)).frame(height: 0.5)
+        sectionDivider
     }
 
     // MARK: Trial notice (docs/trial-reminder.md: from 2 days before the trial converts)
@@ -446,7 +450,7 @@ struct HomeView: View {
             }
             .foregroundStyle(Theme.text(scheme))
             .padding(.vertical, 10)
-            Divider()
+            sectionDivider
         }
     }
 

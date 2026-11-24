@@ -8,6 +8,7 @@ struct WholeWordHeading: UIViewRepresentable {
     let pointSize: CGFloat
     var tracking: CGFloat = 0
     var ink: Color
+    var alignment: NSTextAlignment = .left
 
     func makeUIView(context: Context) -> UILabel {
         let label = UILabel()
@@ -38,6 +39,7 @@ struct WholeWordHeading: UIViewRepresentable {
         let paragraph = NSMutableParagraphStyle()
         paragraph.lineBreakMode = .byWordWrapping
         paragraph.hyphenationFactor = 0
+        paragraph.alignment = alignment
         label.attributedText = NSAttributedString(string: text, attributes: [
             .font: font, .kern: tracking, .foregroundColor: UIColor(ink), .paragraphStyle: paragraph,
         ])

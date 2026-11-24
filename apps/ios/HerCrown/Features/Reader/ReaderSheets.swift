@@ -8,6 +8,7 @@ struct ChapterPicker: View {
     @Environment(\.colorScheme) private var scheme
     @State private var query = ""
     @State private var selectedBook: BibleBook?
+    @ScaledMetric(relativeTo: .caption) private var bookLabelSize = 12.0
 
     private var books: [BibleBook] {
         let all = BibleStore.shared.books(for: current?.translation ?? "kjv")
@@ -81,20 +82,18 @@ struct ChapterPicker: View {
                         Text(testament == "OT" ? "Old Testament" : "New Testament")
                             .font(.serif(20))
                             .accessibilityAddTraits(.isHeader)
-                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 15)], spacing: 24) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 4), spacing: 18) {
                             ForEach(sectionBooks) { book in
                                 Button {
                                     selectedBook = book
                                 } label: {
-                                    VStack(spacing: 12) {
+                                    VStack(spacing: 8) {
                                         BibleBookImage(bookID: book.id)
                                             .frame(maxWidth: .infinity)
-                                            .frame(height: 150)
-                                        Text(book.name)
-                                            .font(.serif(16))
-                                            .multilineTextAlignment(.center)
-                                            .lineLimit(2)
-                                            .frame(maxWidth: .infinity, minHeight: 40, alignment: .top)
+                                            .frame(height: 80)
+                                        WholeWordHeading(text: book.name, pointSize: bookLabelSize,
+                                            ink: Theme.text(scheme), alignment: .center)
+                                            .frame(maxWidth: .infinity, minHeight: 34, alignment: .top)
                                     }
                                     .contentShape(Rectangle())
                                 }

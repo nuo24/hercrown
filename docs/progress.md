@@ -1142,3 +1142,8 @@ Build42 archive/upload succeeded from clean sourcebad69ca. Archive /private/tmp/
 
 
 Build42 verified ready: Apple ID22c2128b-d8f8-4091-9501-683c96447a92, processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership true; external Beta membership false.3807-character en-US testing notes saved/read back exactly. Verified readback /private/tmp/hercrown-testflight42-20261123/verified.json. Clean archive sourcebad69ca. No external/public release/production change.
+
+
+### November 23 — four book columns and matching Home rules
+
+Owner requested four books per row and equal Home border colours. ChapterPicker now uses4 equal flexible columns with80pt original artwork and compact centred whole-word labels; shared heading alignment defaults to left for existing callers, center only for book labels. Search/order/testament grouping/chapter selection unchanged. Home now shares one1pt Theme.border rule for Library/verse/medals/editorial/notes separators, removing mixed system grey/65%-opacity0.5pt lines. API check/all220 tests and all70 native tests passed. Actual pink Simulator grid inspected:4 books per row, centred complete names including Deuteronomy/Chronicles. Home capture inspected; pixel check confirmed all4 visible horizontal rules RGB224/196/207 (#E0C4CF), each3px at3x (1pt). Captures comparisons/four-book-grid.png and home-matching-dividers.png. No TestFlight upload or production changes; newer than42.
