@@ -58,7 +58,9 @@ This is the consolidated release candidate following internal builds 34–44, no
 
 ## Production rollout: owner-run only
 
-Do not submit for public review until the owner completes the backend rollout and physical-device checks. AGENTS.md forbids agent production data changes and deployments. The latest known owner deployment is fa89f54 / 9b0767cd-1d25-456e-a499-6ecb80b3512a with migration 0017; changes 0018–0020 and subsequent backend logic are staging-verified, not production-verified.
+Completed by the owner on November 24 from clean source `63008e87978b37a2117e59a3bc31394d88b7b54e`: migrations 0018–0020 and all six free-edition imports succeeded; Cloudflare version `0e63a432-989e-4d36-9115-4e0e3ebd0862`. Independent read-only health/privacy/terms/support/credits checks returned HTTP 200; health reports production. Do not rerun the completed rollout. Production-connected physical-device checks remain outstanding; public health does not verify account, purchase, restore or gift behavior.
+
+Do not submit for public review until physical-device checks complete. AGENTS.md forbids agent production data changes and deployments. The prior owner deployment was fa89f54 / 9b0767cd-1d25-456e-a499-6ecb80b3512a with migration 0017. The commands below are the completed rollout record, not a request to rerun them.
 
 From this clean checkout, in apps/api, the owner runs:
 
