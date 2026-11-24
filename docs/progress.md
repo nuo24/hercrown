@@ -1131,3 +1131,8 @@ Build41 verified ready: Apple IDdcaad65a-dbd4-4761-a7c5-ce039d80e073, processing
 ### November 23 — restore compact Home and uniform pink
 
 Owner provided comparison photos: editorial titles/kickers were separated by flexible Spacer plus88pt text frame and20pt external padding. Restored original centred102pt minimum rows with fixed7pt copy gaps; Faith Medals entry now uses102pt minimum without uneven24/13pt padding. Home navigation fruits always full colour; actual unearned Faith Medals artwork still grey/faded. Removed all Home/Discover darker verse/feature fills and unused verseSurface token, leaving canvas#FBF1F4. No Scripture font/content or medal progress/eligibility changes. API check/all220 tests passed, native build succeeded; actual pink Home (Ecclesiastes4:9, matching supplied example) and grey Faith Medals inspected. Discover fully loaded capture also inspected: one canvas tone through feature and list. Newer than TestFlight41, no upload/deployment.
+
+
+### November 23 — internal TestFlight42
+
+Owner requested next build for99a56e5: compact Home copy/consistent102pt rows, colourful Home entry fruit, grey unearned art inside Faith Medals, single#FBF1F4 canvas on Home/Discover without darker sections. Selected1.0.1(42) for app/widget after confirming Apple's latest41. Latest API check/all220 tests and native build/actual Simulator inspection passed; prior70 native logic tests passed. Retain approved decline animation/style and preloading; phone latency not re-measured. Internal-only staging export/isolated credentials, Team only, no external/public release/production writes. Archive from clean commit.
