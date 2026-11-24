@@ -1152,3 +1152,9 @@ Owner requested four books per row and equal Home border colours. ChapterPicker 
 ### November 23 — internal TestFlight43
 
 Owner approved next internal build for6656f06: four-column book gallery with original artwork/whole-word centred labels, and matching1pt Theme.border Home separators. Selected1.0.1(43) app/widget after verifying Apple's latest42. API check/all220 tests and all70 native tests passed; actual Simulator grid/Home inspected and visible divider pixels confirmed#E0C4CF. Internal-only staging export/isolated credentials, Team only; no external/public release or production writes. Testing notes shortened to meet Apple's4000-character limit before clean archive.
+
+
+Build43 archive/upload succeeded from clean sourcea21d70c. Archive /private/tmp/hercrown-testflight43-20261123/HerCrown-1.0.1-Staging-Final.xcarchive; app/widget1.0.1(43), staging endpoint/Keychain isolation, internal-only export and DEBUG preview exclusion verified. Apple accepted upload November23 at approximately10:42PM Eastern. Upload IDa0fc6208-8bdd-444d-b066-9e0bc68b4626 processing with no errors/warnings. No external/public release/production writes.
+
+
+Build43 verified ready: Apple build IDa0fc6208-8bdd-444d-b066-9e0bc68b4626, build processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership true; external Beta membership false.2880-character en-US testing notes saved/read back exactly. Final /private/tmp/hercrown-testflight43-20261123/verified.json. Clean archive sourcea21d70c. Upload-resource status lagged behind the authoritative ready build/beta status. No external/public release/production write.
