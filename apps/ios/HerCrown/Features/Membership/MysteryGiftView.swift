@@ -172,7 +172,8 @@ struct MysteryGiftView: View {
                 VStack(spacing: 12) {
                     Text("Her Crown Plus · Annual").font(.ui(12, weight: .medium))
                     HStack(alignment: .firstTextBaseline, spacing: 10) {
-                        Text(terms.original).strikethrough().font(.ui(16)).foregroundStyle(Theme.muted(scheme))
+                        Text(terms.original).strikethrough().font(.ui(16))
+                            .foregroundStyle(Color(hex: scheme == .dark ? 0xFF9CA5 : 0xA6424E))
                         Text(terms.firstYear).font(.serif(39)).tracking(-1)
                             .lineLimit(1).minimumScaleFactor(0.8).layoutPriority(1)
                         Text("for the first year").font(.ui(10)).foregroundStyle(Theme.muted(scheme))
@@ -181,8 +182,8 @@ struct MysteryGiftView: View {
                     Text("You save \(terms.saving) on your first year.")
                         .font(.ui(11)).foregroundStyle(Theme.muted(scheme))
                 }.padding(.horizontal, 18).padding(.vertical, 20).frame(maxWidth: .infinity)
-                    .background(Theme.surface(scheme), in: RoundedRectangle(cornerRadius: 18))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(Theme.border(scheme), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(
+                        Color(hex: scheme == .dark ? 0x3A3332 : 0xDDD6CB), lineWidth: 1))
                     .padding(.top, 6)
             } else {
                 Text("This offer isn’t available right now.").font(.serif(30))

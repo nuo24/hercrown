@@ -1158,3 +1158,8 @@ Build43 archive/upload succeeded from clean sourcea21d70c. Archive /private/tmp/
 
 
 Build43 verified ready: Apple build IDa0fc6208-8bdd-444d-b066-9e0bc68b4626, build processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership true; external Beta membership false.2880-character en-US testing notes saved/read back exactly. Final /private/tmp/hercrown-testflight43-20261123/verified.json. Clean archive sourcea21d70c. Upload-resource status lagged behind the authoritative ready build/beta status. No external/public release/production write.
+
+
+### November 23 — neutral offer price box and red old price
+
+Owner requested offer pricing area match the surrounding off-white paper rather than pink. Removed Theme.surface fill so root paper material continues through the box; changed its outline to neutral paper-edge colour. Struck original price now red (#A6424E light, #FF9CA5 dark); first-year price typography/colour unchanged. Shared printed-paper snapshot uses same live layout, so both animated and final box match. API check/all220 tests and5 targeted native gift/paper/pricing tests passed. Actual pink-appearance Simulator inspected: price box shows continuous paper material, original39.99 red/struck, first-year29.99 unchanged. Capture comparisons/offer-neutral-price.png. No pricing, eligibility, purchase, release or production changes; newer than43.
