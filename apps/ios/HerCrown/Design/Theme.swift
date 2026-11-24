@@ -35,7 +35,6 @@ enum Theme {
     static func pink(_ scheme: ColorScheme) -> Bool { scheme == .light && AppearancePalette.shared.pink }
     static func feature(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xF3DFE7) : supporting(scheme) }
     static func accent(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0x31222B) : text(scheme) }
-    static func verseSurface(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xF8EBF0) : .clear }
     static func onAccent(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xFFF9FB) : canvas(scheme) }
 
     static func canvas(_ scheme: ColorScheme) -> Color { pink(scheme) ? Color(hex: 0xFBF1F4) : scheme == .dark ? .black : .white }

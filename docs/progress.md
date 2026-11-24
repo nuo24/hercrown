@@ -1126,3 +1126,8 @@ Build41 archive/upload succeeded from clean sourcef9c2206. Archive /private/tmp/
 
 
 Build41 verified ready: Apple IDdcaad65a-dbd4-4761-a7c5-ce039d80e073, processing VALID, audience INTERNAL_ONLY, internal IN_BETA_TESTING, external NOT_APPLICABLE, autoNotifyEnabled true. Existing Team membership read back true; external Beta membership false.3849-character testing notes saved/read back exactly. Final /private/tmp/hercrown-testflight41-20261123/verified.json. Clean archive sourcef9c2206. No external Beta review/public release/production write.
+
+
+### November 23 — restore compact Home and uniform pink
+
+Owner provided comparison photos: editorial titles/kickers were separated by flexible Spacer plus88pt text frame and20pt external padding. Restored original centred102pt minimum rows with fixed7pt copy gaps; Faith Medals entry now uses102pt minimum without uneven24/13pt padding. Home navigation fruits always full colour; actual unearned Faith Medals artwork still grey/faded. Removed all Home/Discover darker verse/feature fills and unused verseSurface token, leaving canvas#FBF1F4. No Scripture font/content or medal progress/eligibility changes. API check/all220 tests passed, native build succeeded; actual pink Home (Ecclesiastes4:9, matching supplied example) and grey Faith Medals inspected. Discover fully loaded capture also inspected: one canvas tone through feature and list. Newer than TestFlight41, no upload/deployment.

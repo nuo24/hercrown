@@ -53,7 +53,6 @@ struct HomeView: View {
                     Rectangle().fill(Theme.border(scheme)).frame(height: 1)
                         .padding(.horizontal, 22)
                         .padding(.bottom, 12)
-                        .background(collection == .library ? Theme.verseSurface(scheme) : .clear)
                     VStack(alignment: .leading, spacing: 0) {
                         switch collection {
                         case .library: library
@@ -241,8 +240,8 @@ struct HomeView: View {
             Button { showingMedals = true } label: {
                 HStack(spacing: 14) {
                     ZStack {
-                        MedalImage(medal: FaithMedal.items(.fruit)[0], locked: !FaithMedal.items(.fruit)[0].earned(medals.progress ?? .empty)).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
-                        MedalImage(medal: FaithMedal.items(.fruit)[2], locked: !FaithMedal.items(.fruit)[2].earned(medals.progress ?? .empty)).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
+                        MedalImage(medal: FaithMedal.items(.fruit)[0]).frame(width: 68, height: 68).rotationEffect(.degrees(-17)).offset(x: -6, y: -3)
+                        MedalImage(medal: FaithMedal.items(.fruit)[2]).frame(width: 68, height: 68).rotationEffect(.degrees(17)).offset(x: 5, y: 4)
                     }.frame(width: 74, height: 74)
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Your Faith Medals").font(.ui(11, weight: .medium))
@@ -254,8 +253,8 @@ struct HomeView: View {
                         }
                     }
                     Spacer(minLength: 0)
-                }.frame(maxWidth: .infinity, minHeight: 74, alignment: .leading).contentShape(Rectangle())
-            }.buttonStyle(.plain).padding(.top, 24).padding(.bottom, 13)
+                }.frame(maxWidth: .infinity, minHeight: 102, alignment: .leading).contentShape(Rectangle())
+            }.buttonStyle(.plain)
             Rectangle().fill(Theme.border(scheme)).frame(height: 1)
         }
     }
@@ -369,23 +368,21 @@ struct HomeView: View {
 
     @ViewBuilder private func editorialRow(_ title: String, kicker: String, detail: String, art: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(alignment: .top, spacing: 16) {
+            HStack(spacing: 16) {
                 Image.illustration(art).resizable().scaledToFit().frame(width: 72, height: 88).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 7) {
                     Text(title).font(.serif(24, relativeTo: .title2)).tracking(-0.35)
-                    Spacer(minLength: 0)
                     Text(kicker.uppercased()).font(.ui(9, weight: .medium)).tracking(0.55).foregroundStyle(Theme.muted(scheme))
                     Text(detail).font(.ui(11)).foregroundStyle(Theme.muted(scheme))
-                }.frame(minHeight: 88, alignment: .topLeading)
+                }
                 Spacer(minLength: 4)
-                Image.glyph("arrow").frame(width: 15, height: 15).frame(minHeight: 88)
+                Image.glyph("arrow").frame(width: 15, height: 15)
             }
             .multilineTextAlignment(.leading)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 102, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .padding(.vertical, 20)
         Rectangle().fill(Theme.border(scheme).opacity(0.65)).frame(height: 0.5)
     }
 
@@ -451,7 +448,6 @@ struct HomeView: View {
             .padding(.vertical, 10)
             Divider()
         }
-        .background { Theme.verseSurface(scheme).padding(.horizontal, -22) }
     }
 
     // MARK: Verse search (.search-card)
