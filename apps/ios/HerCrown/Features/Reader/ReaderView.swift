@@ -187,7 +187,7 @@ struct ReaderView: View {
                     Section("Español") { Text("Reina-Valera 1909").tag("rv1909") }
                 }
             } label: {
-                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV").font(.ui(16)); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
+                HStack(spacing: 4) { Text(BibleStore.offline[model.translation] ?? BibleStore.online[model.translation] ?? "KJV").font(.ui(16)).lineLimit(1).fixedSize(horizontal: true, vertical: false); Image(systemName: "chevron.down").font(.system(size: 11, weight: .semibold)) }
                     .padding(.horizontal, 10).frame(height: 44)
             }
             .padding(.leading, 2)
@@ -208,6 +208,8 @@ struct ReaderView: View {
             }
             .accessibilityLabel("Chapter, \(model.chapter?.label ?? "")")
         }
+        // Custom chrome must not inherit system button padding or automatic backgrounds.
+        .buttonStyle(.plain)
         .foregroundStyle(Theme.accent(scheme))
         .padding(.horizontal, 12)
         .padding(.top, 12)

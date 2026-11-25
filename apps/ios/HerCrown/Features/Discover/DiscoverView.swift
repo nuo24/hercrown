@@ -123,6 +123,7 @@ struct DiscoverView: View {
                             Image(systemName: "ellipsis").font(.system(size: 20))
                                 .foregroundStyle(Theme.text(scheme)).frame(width: 44, height: 44)
                         }
+                        .buttonStyle(.plain)
                         .accessibilityLabel("Discover options")
                     }
                     .padding(.horizontal, 22)
@@ -348,6 +349,7 @@ struct DiscoverView: View {
             } label: {
                 Image(systemName: "ellipsis").font(.system(size: 20)).frame(width: 44, height: 44)
             }
+            .buttonStyle(.plain)
             .accessibilityLabel("Actions for \(card.label)")
         }
         .foregroundStyle(Theme.text(scheme))
